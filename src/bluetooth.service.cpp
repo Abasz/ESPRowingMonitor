@@ -46,15 +46,12 @@ void BluetoothService::setBattery(unsigned char batteryLevel) const
 void BluetoothService::notifyDragFactor(unsigned char distance, unsigned char dragFactor) const
 {
 
-    auto deviceInfoService = NimBLEDevice::getServer()->getServiceByUUID(DEVICE_INFO_SVC_UUID);
+    auto dragFactorCharacteristic = NimBLEDevice::getServer()
+                                        ->getServiceByUUID(CYCLING_SPEED_CADENCE_SVC_UUID)
+                                        ->getCharacteristic(DRAG_FACTOR_UUID);
 
-    deviceInfoService
-        ->getCharacteristic(SOFTWARE_NUMBER_SVC_UUID)
-        ->setValue(to_string(distance));
-
-    deviceInfoService
-        ->getCharacteristic(SERIAL_NUMBER_SVC_UUID)
-        ->setValue(to_string(dragFactor));
+    dragFactorCharacteristic->setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
+    dragFactorCharacteristic->notify();
 }
 
 void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const
@@ -135,6 +132,8 @@ void BluetoothService::setupServices() const
         ->setValue(&FEATURES_FLAG[1], 1);
 
     cscService->createCharacteristic(SC_CONTROL_POINT_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
+
+    cscService->createCharacteristic(DRAG_FACTOR_UUID, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     deviceInfoService
         ->createCharacteristic(MANUFACTURER_NAME_SVC_UUID, NIMBLE_PROPERTY::READ)

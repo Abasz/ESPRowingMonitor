@@ -9,6 +9,7 @@ class BluetoothService
     unsigned short const SC_CONTROL_POINT_UUID = 0x2A55;
     unsigned short const CSC_FEATURE_UUID = 0x2A5C;
     unsigned short const SENSOR_LOCATION_UUID = 0x2A5D;
+    std::string DRAG_FACTOR_UUID = "ce06003143e511e4916c0800200c9a66";
 
     unsigned short const BATTERY_SVC_UUID = 0x180F;
     unsigned short const BATTERY_LEVEL_UUID = 0x2A19;
