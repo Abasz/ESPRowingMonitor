@@ -44,6 +44,15 @@
 		"regex": "cpp",
 		"utility": "cpp",
 		"typeinfo": "cpp",
-		"iostream": "cpp"
+		"iostream": "cpp",
+		"atomic": "cpp",
+		"list": "cpp",
+		"iterator": "cpp",
+		"map": "cpp",
+		"memory_resource": "cpp",
+		"optional": "cpp",
+		"random": "cpp",
+		"string": "cpp",
+		"string_view": "cpp"
 	}
 }

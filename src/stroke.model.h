@@ -1,5 +1,7 @@
 namespace StrokeModel
 {
+    static unsigned char const DRAG_COEFFICIENTS_ARRAY_LENGTH = 5U;
+
     struct CscData
     {
         unsigned long lastRevTime;
@@ -7,6 +9,6 @@ namespace StrokeModel
         unsigned long lastStrokeTime;
         unsigned short strokeCount;
         unsigned int deltaTime;
-        double dragFactor;
+        std::array<double, DRAG_COEFFICIENTS_ARRAY_LENGTH> dragCoefficients;
     };
 }

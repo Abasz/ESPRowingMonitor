@@ -8,6 +8,7 @@ StrokeController strokeController;
 
 IRAM_ATTR void rotationInterrupt()
 {
+    // execution time: 1-5
     strokeController.processRotation(micros());
 }
 
@@ -27,43 +28,49 @@ void setup()
 
 auto lastStrokeCount = 0U;
 // execution time
-// - not connected 10 microsec
-// - connected microsec 1100-1500 microsec
+// - not connected 30 microsec
+// - connected 1  1800-2350
+// - connected 2 microsec 4000-4400
 void loop()
 {
+    // for (auto deltaTime : testDeltaRotations)
+    // {
+    //     delay(deltaTime / 1000);
+    //     rotationInterrupt();
     // auto start = micros();
-
-    auto lastRevTime = strokeController.getLastRevTime();
+    strokeController.readCscData();
 
     // execution time
     // - not connected 20-30 microsec
-    // - connected 1200-1700 microsec
+    // - connected 1900-2200 microsec
     // auto start = micros();
-    if (lastRevTime != strokeController.getLastRevReadTime())
+    if (strokeController.getLastRevTime() != strokeController.getLastRevReadTime())
     {
-        auto data = strokeController.getCscData();
-
-        if (data.strokeCount > lastStrokeCount)
+        if (strokeController.getStrokeCount() > lastStrokeCount)
         {
+
             Serial.print("dragFactor: ");
-            Serial.println(data.dragFactor);
-            bleController.notifyDragFactor(static_cast<unsigned char>(data.dragFactor));
-            lastStrokeCount = data.strokeCount;
+            Serial.println(strokeController.getDragCoefficient() * 1e6);
+            // execution time
+            // - not connected: 73
+            // - connected: 2000-2600
+            // auto start = micros();
+            bleController.notifyDragFactor(static_cast<unsigned char>(strokeController.getDragCoefficient() * 1e6));
+            lastStrokeCount = strokeController.getStrokeCount();
+            // auto stop = micros();
+            // Serial.print("notifyDragFactor: ");
+            // Serial.println(stop - start);
         }
-        // Serial.print("deltaTime: ");
-        Serial.println(data.deltaTime);
-        // Serial.print("deltaTimeDiff: ");
-        // Serial.println(data.deltaTimeDiff);
 
         // execution time
         // - not connected: 5 microsec
-        // - connected: 1200-1700 microsec
+        // - connected: 1800-2100 microsec
         // auto start = micros();
         bleController.notifyCsc(
-            data.lastRevTime,
-            data.revCount,
-            data.lastStrokeTime,
-            data.strokeCount);
+            strokeController.getLastRevTime(),
+            strokeController.getRevCount(),
+            strokeController.getLastStrokeTime(),
+            strokeController.getStrokeCount());
         // auto stop = micros();
         // Serial.print("notifyCsc: ");
         // Serial.println(stop - start);
@@ -76,4 +83,5 @@ void loop()
     // auto stop = micros();
     // Serial.print("Main loop: ");
     // Serial.println(stop - start);
+    // }
 }

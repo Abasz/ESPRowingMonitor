@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <numeric>
 
 #include <Arduino.h>
 
@@ -9,14 +10,6 @@ using std::any_of;
 using std::minmax;
 
 using StrokeModel::CscData;
-
-// c(2.8) * (distance / time)^3 = P
-
-// driveLinearDistance = Math.pow((dragFactor(1) / rowerSettings.magicConstant(2.8)), 1.0 / 3.0) * ((totalNumberOfImpulses - flankDetector.noImpulsesToBeginFlank()) - drivePhaseStartAngularDisplacement) * (2.0 * Math.PI) / rowerSettings.numOfImpulsesPerRevolution(1)
-
-// driveLinearDistance = Math.pow((dragFactor(1) / rowerSettings.magicConstant(2.8)), 1.0 / 3.0) * ((totalNumberOfImpulses - drivePhaseStartAngularDisplacement"impulses") *  (2.0 * Math.PI) / rowerSettings.numOfImpulsesPerRevolution(1)
-// *angularVelocity = (2.0 * Math.PI) / deltaTime
-// currentDragFactor = -1 * rowerSettings.flywheelInertia(0.0802) * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryPhaseLength
 
 StrokeService::StrokeService()
 {
@@ -69,7 +62,7 @@ bool StrokeService::isFlywheelPowered()
     return true;
 }
 
-CscData StrokeService::getCscData() const
+CscData StrokeService::getData() const
 {
     // execution time: 8-9 microsec
     // auto start = micros();
@@ -80,23 +73,13 @@ CscData StrokeService::getCscData() const
         .lastStrokeTime = lastStrokeTime,
         .strokeCount = strokeCount,
         .deltaTime = cleanDeltaTimes[0],
-        .dragFactor = dragFactor * 1.0e+6};
+        .dragCoefficients = dragCoefficients};
     attachRotationInterrupt();
     // auto stop = micros();
 
     // Serial.print("getCscData: ");
     // Serial.println(stop - start);
     return data;
-}
-
-unsigned long StrokeService::getLastRevTime() const
-{
-    // execution time: 8-10 microsec
-    detachRotationInterrupt();
-    auto time = lastRevTime;
-    attachRotationInterrupt();
-
-    return time;
 }
 
 void StrokeService::processRotation(unsigned long now)
@@ -125,7 +108,7 @@ void StrokeService::processRotation(unsigned long now)
 
     previousRawRevTime = now;
 
-    // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cylcePhase to "Stpped"
+    // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
     if (cyclePhase == CyclePhase::Recovery && currentDeltaTime > ROTATION_DEBOUNCE_TIME_MAX * 1000)
     {
         cyclePhase = CyclePhase::Stopped;
@@ -142,18 +125,16 @@ void StrokeService::processRotation(unsigned long now)
 
     if (cyclePhase == CyclePhase::Stopped)
     {
-        // We are currently in the "Stopped" phase, as power was not applied for a long period of time or the device just started. Since rotation was detected we check if cleanDeltaTimes array is filled (i.e. whether we have suficient data for determining the next phase) and whether power is being applied to the flywheel
+        // We are currently in the "Stopped" phase, as power was not applied for a long period of time or the device just started. Since rotation was detected we check if cleanDeltaTimes array is filled (i.e. whether we have sufficient data for determining the next phase) and whether power is being applied to the flywheel
         if (
             any_of(cleanDeltaTimes.begin(), cleanDeltaTimes.end(), [](unsigned long cleanDeltaTime)
                    { return cleanDeltaTime == 0; }) ||
             isFlywheelUnpowered())
             return;
 
-        // Since we detected power, setting to "Drive" phase and adding new rotation
+        // Since we detected power, setting to "Drive" phase and increasing rotation count and registering rotation time
         cyclePhase = CyclePhase::Drive;
         drivePhaseStartTime = now - cleanDeltaTimes[0];
-
-        // TODO: determin if we add new rotation here, or we allow fall thoruhg this if statement and add the new rotation below (consequence of this wuold be that an unnecessary "Drive" phase isFlywheelUnpowered() check is done below)
         lastRevTime = now;
         revCount++;
 
@@ -198,15 +179,27 @@ void StrokeService::processRotation(unsigned long now)
             auto recoveryEndAngularVelocity = 2 * PI / cleanDeltaTimes[DELTA_TIME_ARRAY_LENGTH - 1];
             if (recoveryStartAngularVelocity > recoveryEndAngularVelocity && recoveryPhaseDuration < MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
             {
-                dragFactor = -1 * 0.0802 * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryPhaseDuration;
-                // Serial.print("dragFactor: ");
-                // Serial.println(dragFactor * 10e6);
-                // Serial.print("recoveryStartAngularVelocity: ");
-                // Serial.println(2 * PI / recoveryStartAngularVelocity);
-                // Serial.print("recoveryEndAngularVelocity: ");
-                // Serial.println(2 * PI / recoveryEndAngularVelocity);
-                // Serial.print("recoveryPhaseDuration: ");
-                // Serial.println(recoveryPhaseDuration);
+                auto dragCoefficient = -1 * 0.0802 * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryPhaseDuration;
+
+                if (dragCoefficient < UPPER_DRAG_FACTOR_THRESHOLD &&
+                    dragCoefficient > LOWER_DRAG_FACTOR_THRESHOLD)
+                {
+
+                    auto newDragCoefficient = any_of(dragCoefficients.cbegin(),
+                                                     dragCoefficients.cend(),
+                                                     [](double item)
+                                                     { return item == 0; })
+                                                  ? dragCoefficient
+                                                  : std::accumulate(dragCoefficients.cbegin(), dragCoefficients.cend(), dragCoefficient) / (dragCoefficients.size() + 1);
+
+                    char i = dragCoefficients.size() - 1;
+                    while (i > 0)
+                    {
+                        dragCoefficients[i] = dragCoefficients[i - 1];
+                        i--;
+                    }
+                    dragCoefficients[0] = newDragCoefficient;
+                }
             }
 
             cyclePhase = CyclePhase::Drive;
@@ -219,3 +212,11 @@ void StrokeService::processRotation(unsigned long now)
         return;
     }
 }
+
+// c(2.8) * (distance / time)^3 = P
+
+// driveLinearDistance = Math.pow((dragFactor(1) / rowerSettings.magicConstant(2.8)), 1.0 / 3.0) * ((totalNumberOfImpulses - flankDetector.noImpulsesToBeginFlank()) - drivePhaseStartAngularDisplacement) * (2.0 * Math.PI) / rowerSettings.numOfImpulsesPerRevolution(1)
+
+// driveLinearDistance = Math.pow((dragFactor(1) / rowerSettings.magicConstant(2.8)), 1.0 / 3.0) * ((totalNumberOfImpulses - drivePhaseStartAngularDisplacement"impulses") *  (2.0 * Math.PI) / rowerSettings.numOfImpulsesPerRevolution(1)
+// *angularVelocity = (2.0 * Math.PI) / deltaTime
+// currentDragFactor = -1 * rowerSettings.flywheelInertia(0.0802) * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryPhaseLength

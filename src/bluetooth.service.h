@@ -2,14 +2,15 @@
 
 class BluetoothService
 {
-    std::array<uint8_t, 2> const FEATURES_FLAG = {{0b11, 0b0}};
+    std::array<uint8_t, 2> const FEATURES_FLAG{0b11, 0b0};
 
     unsigned short const CYCLING_SPEED_CADENCE_SVC_UUID = 0x1816;
     unsigned short const CSC_MEASUREMENT_UUID = 0x2A5B;
     unsigned short const SC_CONTROL_POINT_UUID = 0x2A55;
     unsigned short const CSC_FEATURE_UUID = 0x2A5C;
     unsigned short const SENSOR_LOCATION_UUID = 0x2A5D;
-    std::string DRAG_FACTOR_UUID = "ce06003143e511e4916c0800200c9a66";
+    std::string DRAG_FACTOR_UUID = "CE060031-43E5-11E4-916C-0800200C9A66";
+    std::string DRAG_FACTOR_SVC_UUID = "CE060030-43E5-11E4-916C-0800200C9A66";
 
     unsigned short const BATTERY_SVC_UUID = 0x180F;
     unsigned short const BATTERY_LEVEL_UUID = 0x2A19;
@@ -23,9 +24,6 @@ class BluetoothService
     unsigned short const NOTIFICATION_DESCRIPTOR_UUID = 0x2902;
 
     unsigned short const BLE_APPEARANCE_CYCLING_SPEED_CADENCE = 1157;
-
-    // TODO: Descide how dragfactor and distance setting should be reported? Using PM5 UUID or implementing custom one
-    // PM5 General Status Characteristic UUID `ce06003143e511e4916c0800200c9a66` that includes dragFactor
 
     void setupServices() const;
     void setupAdvertisment() const;

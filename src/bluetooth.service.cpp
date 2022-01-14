@@ -3,6 +3,7 @@
 
 #include "bluetooth.service.h"
 
+using std::array;
 using std::to_string;
 
 BluetoothService::BluetoothService()
@@ -46,12 +47,14 @@ void BluetoothService::setBattery(unsigned char batteryLevel) const
 void BluetoothService::notifyDragFactor(unsigned char distance, unsigned char dragFactor) const
 {
 
-    auto dragFactorCharacteristic = NimBLEDevice::getServer()
-                                        ->getServiceByUUID(CYCLING_SPEED_CADENCE_SVC_UUID)
-                                        ->getCharacteristic(DRAG_FACTOR_UUID);
-
-    dragFactorCharacteristic->setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
-    dragFactorCharacteristic->notify();
+    auto dragFactorCharacteristic = *NimBLEDevice::getServer()
+                                         ->getServiceByUUID(CYCLING_SPEED_CADENCE_SVC_UUID)
+                                         ->getCharacteristic(DRAG_FACTOR_UUID);
+    if (dragFactorCharacteristic.getSubscribedCount() > 0)
+    {
+        dragFactorCharacteristic.setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
+        dragFactorCharacteristic.notify();
+    }
 }
 
 void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const
@@ -72,7 +75,7 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
 
         // execution time: 0-1 microsec
         // auto start = micros();
-        std::array<uint8_t, 11> temp = {
+        array<uint8_t, 11> temp = {
             FEATURES_FLAG[0],
 
             static_cast<unsigned char>(revCount),

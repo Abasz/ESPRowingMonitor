@@ -12,9 +12,13 @@ enum class CyclePhase
 class StrokeService
 {
     static unsigned char const ROTATION_DEBOUNCE_TIME_MIN = 10;
-    static unsigned short const ROTATION_DEBOUNCE_TIME_MAX = 350;
+    static unsigned short const ROTATION_DEBOUNCE_TIME_MAX = 300;
     static unsigned char const STROKE_DEBOUNCE_TIME = 200;
+
     static unsigned short const MAX_DRAG_FACTOR_RECOVERY_PERIOD = 6000;
+    static double constexpr LOWER_DRAG_FACTOR_THRESHOLD = 75 / 1e6;
+    static double constexpr UPPER_DRAG_FACTOR_THRESHOLD = 185 / 1e6;
+
     static unsigned char const FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD = 1;
     static unsigned char const DELTA_TIME_ARRAY_LENGTH = 2;
 
@@ -22,7 +26,6 @@ class StrokeService
     volatile unsigned long lastStrokeTime = 0;
     volatile unsigned int revCount = 0;
     volatile unsigned short strokeCount = 0;
-    volatile double dragFactor = 0.0;
     volatile double recoveryStartAngularVelocity = 0.0;
 
     volatile unsigned long drivePhaseStartTime = 0;
@@ -33,7 +36,8 @@ class StrokeService
     volatile unsigned long previousRawRevTime = 0;
 
     volatile CyclePhase cyclePhase = CyclePhase::Stopped;
-    std::array<volatile unsigned long, DELTA_TIME_ARRAY_LENGTH> cleanDeltaTimes{{0UL}};
+    std::array<volatile unsigned long, DELTA_TIME_ARRAY_LENGTH> cleanDeltaTimes{};
+    std::array<double, StrokeModel::DRAG_COEFFICIENTS_ARRAY_LENGTH> dragCoefficients{};
 
     bool isFlywheelUnpowered();
     bool isFlywheelPowered();
@@ -41,9 +45,6 @@ class StrokeService
 public:
     StrokeService();
 
-    StrokeModel::CscData getCscData() const;
-    unsigned long getLastRevReadTime() const;
-    void setLastRevReadTime();
-    unsigned long getLastRevTime() const;
+    StrokeModel::CscData getData() const;
     void processRotation(unsigned long now);
 };
