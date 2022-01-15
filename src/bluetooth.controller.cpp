@@ -6,6 +6,11 @@ BluetoothController::BluetoothController() : bluetoothService(BluetoothService()
 {
 }
 
+bool BluetoothController::isDeviceConnected() const
+{
+    return bluetoothService.isDeviceConnected();
+}
+
 void BluetoothController::begin() const
 {
     bluetoothService.setup();

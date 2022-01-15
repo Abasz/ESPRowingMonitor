@@ -10,6 +10,11 @@ BluetoothService::BluetoothService()
 {
 }
 
+bool BluetoothService::isDeviceConnected() const
+{
+    return (*NimBLEDevice::getServer()).getConnectedCount() > 0;
+}
+
 void BluetoothService::setup() const
 {
     Serial.println("Initializing BLE device");
