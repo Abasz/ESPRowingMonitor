@@ -15,6 +15,33 @@ bool BluetoothService::isDeviceConnected() const
     return (*NimBLEDevice::getServer()).getConnectedCount() > 0;
 }
 
+void BluetoothService::checkConnectedDevices()
+{
+    if (isDeviceConnected())
+    {
+        digitalWrite(GPIO_NUM_2, HIGH);
+        return;
+    }
+
+    auto now = millis();
+
+    if (now - lastLedCheckTime >= 1000)
+    {
+        lastLedCheckTime = now;
+
+        if (ledState == LOW)
+        {
+            ledState = HIGH;
+        }
+        else
+        {
+            ledState = LOW;
+        }
+
+        digitalWrite(GPIO_NUM_2, ledState);
+    }
+}
+
 void BluetoothService::setup() const
 {
     Serial.println("Initializing BLE device");

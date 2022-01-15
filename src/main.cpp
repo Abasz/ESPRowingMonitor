@@ -95,6 +95,7 @@ void loop()
     // Serial.print("Main loop: ");
     // Serial.println(stop - start);
     // }
+    bleController.checkConnectedDevices();
 
     if (now - strokeController.getLastRevTime() > DEEP_SLEEP_TIMEOUT)
     {

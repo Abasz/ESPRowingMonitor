@@ -11,6 +11,11 @@ bool BluetoothController::isDeviceConnected() const
     return bluetoothService.isDeviceConnected();
 }
 
+void BluetoothController::checkConnectedDevices()
+{
+    bluetoothService.checkConnectedDevices();
+}
+
 void BluetoothController::begin() const
 {
     bluetoothService.setup();

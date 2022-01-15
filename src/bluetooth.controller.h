@@ -2,7 +2,7 @@
 
 class BluetoothController
 {
-    BluetoothService const bluetoothService;
+    BluetoothService bluetoothService;
 
 public:
     BluetoothController();
@@ -11,4 +11,5 @@ public:
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
     void notifyDragFactor(unsigned char dragFactor) const;
     bool isDeviceConnected() const;
+    void checkConnectedDevices();
 };

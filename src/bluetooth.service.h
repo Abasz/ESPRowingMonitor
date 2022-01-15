@@ -25,6 +25,9 @@ class BluetoothService
 
     unsigned short const BLE_APPEARANCE_CYCLING_SPEED_CADENCE = 1157;
 
+    unsigned long lastLedCheckTime = 0UL;
+    char ledState = HIGH;
+
     void setupServices() const;
     void setupAdvertisment() const;
 
@@ -38,4 +41,5 @@ public:
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
     void notifyDragFactor(unsigned char distance, unsigned char dragFactor) const;
     bool isDeviceConnected() const;
+    void checkConnectedDevices();
 };
