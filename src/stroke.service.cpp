@@ -186,7 +186,7 @@ void StrokeService::processRotation(unsigned long now)
             auto recoveryEndAngularVelocity = 2 * PI / cleanDeltaTimes[DELTA_TIME_ARRAY_LENGTH - 1];
             if (recoveryStartAngularVelocity > recoveryEndAngularVelocity && recoveryPhaseDuration < MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
             {
-                auto dragCoefficient = -1 * 0.0802 * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryPhaseDuration;
+                auto dragCoefficient = -1 * FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryPhaseDuration;
 
                 if (dragCoefficient < UPPER_DRAG_FACTOR_THRESHOLD &&
                     dragCoefficient > LOWER_DRAG_FACTOR_THRESHOLD)

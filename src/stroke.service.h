@@ -20,6 +20,7 @@ class StrokeService
     static unsigned short const MAX_DRAG_FACTOR_RECOVERY_PERIOD = 6000;
     static double constexpr LOWER_DRAG_FACTOR_THRESHOLD = 75 / 1e6;
     static double constexpr UPPER_DRAG_FACTOR_THRESHOLD = 185 / 1e6;
+    static double constexpr FLYWHEEL_INERTIA = 0.0802;
 
     static byte const FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD = 1;
     static byte const DELTA_TIME_ARRAY_LENGTH = 2;
