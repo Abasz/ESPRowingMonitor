@@ -1,3 +1,5 @@
+#pragma once
+
 #include "bluetooth.service.h"
 
 class BluetoothController

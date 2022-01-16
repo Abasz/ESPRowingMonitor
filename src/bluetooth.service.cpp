@@ -1,6 +1,8 @@
 #include <Arduino.h>
+
 #include "NimBLEDevice.h"
 
+#include "globals.h"
 #include "bluetooth.service.h"
 
 using std::array;
@@ -19,34 +21,20 @@ void BluetoothService::checkConnectedDevices()
 {
     if (isDeviceConnected())
     {
-        digitalWrite(GPIO_NUM_2, HIGH);
-        return;
+        ledState = HIGH;
     }
-
-    auto now = millis();
-
-    if (now - lastLedCheckTime >= 1000)
+    else
     {
-        lastLedCheckTime = now;
-
-        if (ledState == LOW)
-        {
-            ledState = HIGH;
-        }
-        else
-        {
-            ledState = LOW;
-        }
-
-        digitalWrite(GPIO_NUM_2, ledState);
+        ledState = !ledState;
     }
+
+    digitalWrite(GPIO_NUM_2, ledState);
 }
 
 void BluetoothService::setup() const
 {
     setupBleDevice();
-    setupServices();
-    setupAdvertisment();
+    setupConnectionIndicatorLed();
 }
 
 void BluetoothService::startBLEServer() const
@@ -145,6 +133,9 @@ void BluetoothService::setupBleDevice() const
     Serial.println("Setting up Server");
 
     NimBLEDevice::createServer();
+
+    setupServices();
+    setupAdvertisment();
 }
 
 void BluetoothService::setupServices() const
@@ -201,4 +192,13 @@ void BluetoothService::setupAdvertisment() const
     auto pAdvertising = NimBLEDevice::getAdvertising();
     pAdvertising->setAppearance(BLE_APPEARANCE_CYCLING_SPEED_CADENCE);
     pAdvertising->addServiceUUID(CYCLING_SPEED_CADENCE_SVC_UUID);
+}
+
+void BluetoothService::setupConnectionIndicatorLed() const
+{
+    pinMode(GPIO_NUM_2, OUTPUT);
+
+    timerAttachInterrupt(ledTimer, connectionLedIndicatorInterrupt, true);
+    timerAlarmWrite(ledTimer, 1000000, true);
+    timerAlarmEnable(ledTimer);
 }

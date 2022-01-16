@@ -1,3 +1,5 @@
+#pragma once
+
 #include <array>
 
 class BluetoothService
@@ -25,12 +27,14 @@ class BluetoothService
 
     unsigned short const BLE_APPEARANCE_CYCLING_SPEED_CADENCE = 1157;
 
-    unsigned long lastLedCheckTime = 0UL;
-    char ledState = HIGH;
+    hw_timer_t *ledTimer = timerBegin(0, 80, true);
+
+    volatile byte ledState = HIGH;
 
     void setupBleDevice() const;
     void setupServices() const;
     void setupAdvertisment() const;
+    void setupConnectionIndicatorLed() const;
 
 public:
     BluetoothService();

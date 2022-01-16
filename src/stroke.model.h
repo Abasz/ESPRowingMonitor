@@ -1,3 +1,5 @@
+#pragma once
+
 namespace StrokeModel
 {
     static byte const DRAG_COEFFICIENTS_ARRAY_LENGTH = 5U;

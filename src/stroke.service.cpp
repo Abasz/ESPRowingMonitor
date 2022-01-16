@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#include "utils.h"
+#include "globals.h"
 #include "stroke.service.h"
 
 using std::any_of;

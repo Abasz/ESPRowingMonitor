@@ -1,18 +1,6 @@
 #include <Arduino.h>
 
-#include "bluetooth.controller.h"
-#include "stroke.controller.h"
-
-constexpr unsigned int DEEP_SLEEP_TIMEOUT = 4 * 60 * 1000;
-
-BluetoothController bleController;
-StrokeController strokeController;
-
-IRAM_ATTR void rotationInterrupt()
-{
-    // execution time: 1-5
-    strokeController.processRotation(micros());
-}
+#include "globals.h"
 
 void setup()
 {
@@ -20,6 +8,7 @@ void setup()
 
     bleController.begin();
     strokeController.begin();
+    powerManagerController.begin();
 
     bleController.setBattery(34);
     bleController.notifyCsc(0, 0, 0, 0);
@@ -33,7 +22,7 @@ auto lastStrokeCount = 0U;
 void loop()
 {
     strokeController.readCscData();
-    auto now = millis();
+    powerManagerController.checkSleep(strokeController.getLastRevTime(), bleController.isDeviceConnected());
 
     // for (auto deltaTime : testDeltaRotations)
     // {
@@ -85,11 +74,4 @@ void loop()
     // Serial.print("Main loop: ");
     // Serial.println(stop - start);
     // }
-    bleController.checkConnectedDevices();
-
-    if (now - strokeController.getLastRevTime() > DEEP_SLEEP_TIMEOUT)
-    {
-        Serial.println("Going to sleep mode");
-        esp_deep_sleep_start();
-    }
 }

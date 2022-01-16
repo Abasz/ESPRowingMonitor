@@ -1,3 +1,5 @@
+#pragma once
+
 #include "stroke.service.h"
 
 class StrokeController

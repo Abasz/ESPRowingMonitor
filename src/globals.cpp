@@ -1,15 +1,30 @@
 #include <Arduino.h>
 
-IRAM_ATTR void rotationInterrupt();
+#include "globals.h"
+
+BluetoothController bleController;
+StrokeController strokeController;
+PowerManagerController powerManagerController;
+
+IRAM_ATTR void rotationInterrupt()
+{
+    // execution time: 1-5
+    strokeController.processRotation(micros());
+}
+
+IRAM_ATTR void connectionLedIndicatorInterrupt()
+{
+    bleController.checkConnectedDevices();
+}
 
 void attachRotationInterrupt()
 {
-    attachInterrupt(digitalPinToInterrupt(GPIO_NUM_5), rotationInterrupt, RISING);
+    attachInterrupt(digitalPinToInterrupt(GPIO_NUM_33), rotationInterrupt, RISING);
 }
 
 void detachRotationInterrupt()
 {
-    detachInterrupt(digitalPinToInterrupt(GPIO_NUM_5));
+    detachInterrupt(digitalPinToInterrupt(GPIO_NUM_33));
 }
 
 // void DEBUG_PrintDeltaTimesData()
