@@ -18,16 +18,6 @@ void setup()
 {
     Serial.begin(115200);
 
-    pinMode(GPIO_NUM_33, INPUT_PULLUP);
-    pinMode(GPIO_NUM_2, OUTPUT);
-
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_33, ESP_EXT1_WAKEUP_ALL_LOW);
-    gpio_hold_en(GPIO_NUM_33);
-    gpio_deep_sleep_hold_en();
-
-    Serial.println("Attach interrupt");
-    attachInterrupt(digitalPinToInterrupt(GPIO_NUM_33), rotationInterrupt, RISING);
-
     bleController.begin();
     strokeController.begin();
 
@@ -66,7 +56,7 @@ void loop()
             // - not connected: 73
             // - connected: 2000-2600
             // auto start = micros();
-            bleController.notifyDragFactor(static_cast<unsigned char>(strokeController.getDragCoefficient() * 1e6));
+            bleController.notifyDragFactor(static_cast<byte>(strokeController.getDragCoefficient() * 1e6));
             lastStrokeCount = strokeController.getStrokeCount();
             // auto stop = micros();
             // Serial.print("notifyDragFactor: ");

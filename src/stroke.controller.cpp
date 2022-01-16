@@ -13,6 +13,7 @@ StrokeController::StrokeController() : strokeService(StrokeService())
 
 void StrokeController::begin() const
 {
+    strokeService.setup();
     Serial.println("Setting up stroke monitor controller");
 }
 

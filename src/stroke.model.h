@@ -1,6 +1,6 @@
 namespace StrokeModel
 {
-    static unsigned char const DRAG_COEFFICIENTS_ARRAY_LENGTH = 5U;
+    static byte const DRAG_COEFFICIENTS_ARRAY_LENGTH = 5U;
 
     struct CscData
     {

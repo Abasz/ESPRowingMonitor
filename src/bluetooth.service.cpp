@@ -44,15 +44,7 @@ void BluetoothService::checkConnectedDevices()
 
 void BluetoothService::setup() const
 {
-    Serial.println("Initializing BLE device");
-
-    NimBLEDevice::init("CSC-Sensor");
-    NimBLEDevice::setPower(ESP_PWR_LVL_N8);
-
-    Serial.println("Setting up Server");
-
-    NimBLEDevice::createServer();
-
+    setupBleDevice();
     setupServices();
     setupAdvertisment();
 }
@@ -68,7 +60,7 @@ void BluetoothService::stopServer() const
     NimBLEDevice::getAdvertising()->stop();
 }
 
-void BluetoothService::setBattery(unsigned char batteryLevel) const
+void BluetoothService::setBattery(byte batteryLevel) const
 {
     NimBLEDevice::getServer()
         ->getServiceByUUID(BATTERY_SVC_UUID)
@@ -76,7 +68,7 @@ void BluetoothService::setBattery(unsigned char batteryLevel) const
         ->setValue(batteryLevel);
 }
 
-void BluetoothService::notifyDragFactor(unsigned char distance, unsigned char dragFactor) const
+void BluetoothService::notifyDragFactor(byte distance, byte dragFactor) const
 {
 
     auto dragFactorCharacteristic = *NimBLEDevice::getServer()
@@ -110,18 +102,18 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
         array<uint8_t, 11> temp = {
             FEATURES_FLAG[0],
 
-            static_cast<unsigned char>(revCount),
-            static_cast<unsigned char>(revCount >> 8),
-            static_cast<unsigned char>(revCount >> 16),
-            static_cast<unsigned char>(revCount >> 24),
+            static_cast<byte>(revCount),
+            static_cast<byte>(revCount >> 8),
+            static_cast<byte>(revCount >> 16),
+            static_cast<byte>(revCount >> 24),
 
-            static_cast<unsigned char>(revTime),
-            static_cast<unsigned char>(revTime >> 8),
+            static_cast<byte>(revTime),
+            static_cast<byte>(revTime >> 8),
 
-            static_cast<unsigned char>(strokeCount),
-            static_cast<unsigned char>(strokeCount >> 8),
-            static_cast<unsigned char>(strokeTime),
-            static_cast<unsigned char>(strokeTime >> 8)};
+            static_cast<byte>(strokeCount),
+            static_cast<byte>(strokeCount >> 8),
+            static_cast<byte>(strokeTime),
+            static_cast<byte>(strokeTime >> 8)};
 
         // auto stop = micros();
         // Serial.print("data calc: ");
@@ -141,6 +133,18 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
         // Serial.print("notify: ");
         // Serial.println(stop - start);
     }
+}
+
+void BluetoothService::setupBleDevice() const
+{
+    Serial.println("Initializing BLE device");
+
+    NimBLEDevice::init("CSC-Sensor");
+    NimBLEDevice::setPower(ESP_PWR_LVL_N8);
+
+    Serial.println("Setting up Server");
+
+    NimBLEDevice::createServer();
 }
 
 void BluetoothService::setupServices() const

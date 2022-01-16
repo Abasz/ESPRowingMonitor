@@ -22,7 +22,7 @@ void BluetoothController::begin() const
     bluetoothService.startBLEServer();
 }
 
-void BluetoothController::setBattery(unsigned char batteryLevel) const
+void BluetoothController::setBattery(byte batteryLevel) const
 {
     bluetoothService.setBattery(batteryLevel);
 }
@@ -32,8 +32,8 @@ void BluetoothController::notifyCsc(unsigned long lastRevTime, unsigned int revC
     bluetoothService.notifyCsc(lastRevTime, revCount, lastStrokeTime, strokeCount);
 }
 
-void BluetoothController::notifyDragFactor(unsigned char dragFactor) const
+void BluetoothController::notifyDragFactor(byte dragFactor) const
 {
     auto distance = pow(dragFactor / 2.8, 1.0 / 3.0) * (2.0 * PI) * 10;
-    bluetoothService.notifyDragFactor(static_cast<unsigned char>(distance), dragFactor);
+    bluetoothService.notifyDragFactor(static_cast<byte>(distance), dragFactor);
 }

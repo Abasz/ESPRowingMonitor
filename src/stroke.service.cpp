@@ -17,8 +17,8 @@ StrokeService::StrokeService()
 
 bool StrokeService::isFlywheelUnpowered()
 {
-    unsigned char numberOfAccelerations = 0;
-    unsigned char i = cleanDeltaTimes.size() - 1;
+    byte numberOfAccelerations = 0;
+    byte i = cleanDeltaTimes.size() - 1;
     while (i > 0)
     {
         if (cleanDeltaTimes[i] >= cleanDeltaTimes[i - 1])
@@ -41,8 +41,8 @@ bool StrokeService::isFlywheelUnpowered()
 
 bool StrokeService::isFlywheelPowered()
 {
-    unsigned char numberOfDecelerations = 0;
-    unsigned char i = cleanDeltaTimes.size() - 1;
+    byte numberOfDecelerations = 0;
+    byte i = cleanDeltaTimes.size() - 1;
     while (i > 0)
     {
         if (cleanDeltaTimes[i] < cleanDeltaTimes[i - 1])
@@ -60,6 +60,13 @@ bool StrokeService::isFlywheelPowered()
     }
 
     return true;
+}
+
+void StrokeService::setup() const
+{
+    pinMode(GPIO_NUM_33, INPUT_PULLUP);
+    Serial.println("Attach interrupt");
+    attachRotationInterrupt();
 }
 
 CscData StrokeService::getData() const

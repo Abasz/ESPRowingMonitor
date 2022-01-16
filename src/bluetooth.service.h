@@ -28,6 +28,7 @@ class BluetoothService
     unsigned long lastLedCheckTime = 0UL;
     char ledState = HIGH;
 
+    void setupBleDevice() const;
     void setupServices() const;
     void setupAdvertisment() const;
 
@@ -37,9 +38,9 @@ public:
     void setup() const;
     void startBLEServer() const;
     void stopServer() const;
-    void setBattery(unsigned char batteryLevel) const;
+    void setBattery(byte batteryLevel) const;
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
-    void notifyDragFactor(unsigned char distance, unsigned char dragFactor) const;
+    void notifyDragFactor(byte distance, byte dragFactor) const;
     bool isDeviceConnected() const;
     void checkConnectedDevices();
 };

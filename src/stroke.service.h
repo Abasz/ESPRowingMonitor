@@ -11,16 +11,16 @@ enum class CyclePhase
 
 class StrokeService
 {
-    static unsigned char const ROTATION_DEBOUNCE_TIME_MIN = 10;
+    static byte const ROTATION_DEBOUNCE_TIME_MIN = 10;
     static unsigned short const ROTATION_DEBOUNCE_TIME_MAX = 300;
-    static unsigned char const STROKE_DEBOUNCE_TIME = 200;
+    static byte const STROKE_DEBOUNCE_TIME = 200;
 
     static unsigned short const MAX_DRAG_FACTOR_RECOVERY_PERIOD = 6000;
     static double constexpr LOWER_DRAG_FACTOR_THRESHOLD = 75 / 1e6;
     static double constexpr UPPER_DRAG_FACTOR_THRESHOLD = 185 / 1e6;
 
-    static unsigned char const FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD = 1;
-    static unsigned char const DELTA_TIME_ARRAY_LENGTH = 2;
+    static byte const FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD = 1;
+    static byte const DELTA_TIME_ARRAY_LENGTH = 2;
 
     volatile unsigned long lastRevTime = 0;
     volatile unsigned long lastStrokeTime = 0;
@@ -45,6 +45,7 @@ class StrokeService
 public:
     StrokeService();
 
+    void setup() const;
     StrokeModel::CscData getData() const;
     void processRotation(unsigned long now);
 };
