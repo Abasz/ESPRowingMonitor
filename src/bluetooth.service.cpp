@@ -12,14 +12,16 @@ BluetoothService::BluetoothService()
 {
 }
 
-bool BluetoothService::isDeviceConnected() const
+bool BluetoothService::isAnyDeviceConnected() const
 {
-    return (*NimBLEDevice::getServer()).getConnectedCount() > 0;
+    return NimBLEDevice::getServer()->getConnectedCount() > 0;
 }
 
 void BluetoothService::checkConnectedDevices()
 {
-    if (isDeviceConnected())
+    // execution time: 1-5 micro sec
+    // auto start = micros();
+    if (isAnyDeviceConnected())
     {
         ledState = HIGH;
     }
@@ -29,9 +31,12 @@ void BluetoothService::checkConnectedDevices()
     }
 
     digitalWrite(GPIO_NUM_2, ledState);
+    // auto end = micros();
+    // Serial.print("led: ");
+    // Serial.println(end - start);
 }
 
-void BluetoothService::setup() const
+void BluetoothService::setup()
 {
     setupBleDevice();
     setupConnectionIndicatorLed();
@@ -50,34 +55,23 @@ void BluetoothService::stopServer() const
 
 void BluetoothService::notifyBattery(byte batteryLevel) const
 {
-    auto batteryCharacteristic = NimBLEDevice::getServer()
-        ->getServiceByUUID(BATTERY_SVC_UUID)
-                                     ->getCharacteristic(BATTERY_LEVEL_UUID);
-
-    batteryCharacteristic->setValue(batteryLevel);
-    batteryCharacteristic->notify();
+    batteryLevelCharacteristic->setValue(batteryLevel);
+    batteryLevelCharacteristic->notify();
 }
 
 void BluetoothService::notifyDragFactor(byte distance, byte dragFactor) const
 {
 
-    auto dragFactorCharacteristic = *NimBLEDevice::getServer()
-                                         ->getServiceByUUID(CYCLING_SPEED_CADENCE_SVC_UUID)
-                                         ->getCharacteristic(DRAG_FACTOR_UUID);
-    if (dragFactorCharacteristic.getSubscribedCount() > 0)
+    if (dragFactorCharacteristic->getSubscribedCount() > 0)
     {
-        dragFactorCharacteristic.setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
-        dragFactorCharacteristic.notify();
+        dragFactorCharacteristic->setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
+        dragFactorCharacteristic->notify();
     }
 }
 
 void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const
 {
-    auto cscCharacteristic = *NimBLEDevice::getServer()
-                                  ->getServiceByUUID(CYCLING_SPEED_CADENCE_SVC_UUID)
-                                  ->getCharacteristic(CSC_MEASUREMENT_UUID);
-
-    if (cscCharacteristic.getSubscribedCount() > 0)
+    if (cscMeasurementCharacteristic->getSubscribedCount() > 0)
     {
         // execution time: 11-16 microsec
         // auto start = micros();
@@ -111,21 +105,21 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
 
         // execution time: 28-35 microsec
         // auto start = micros();
-        cscCharacteristic.setValue(temp);
+        cscMeasurementCharacteristic->setValue(temp);
         // auto stop = micros();
         // Serial.print("set value: ");
         // Serial.println(stop - start);
 
         // execution time: 1000-1600 microsec
         // start = micros();
-        cscCharacteristic.notify();
+        cscMeasurementCharacteristic->notify();
         // stop = micros();
         // Serial.print("notify: ");
         // Serial.println(stop - start);
     }
 }
 
-void BluetoothService::setupBleDevice() const
+void BluetoothService::setupBleDevice()
 {
     Serial.println("Initializing BLE device");
 
@@ -140,7 +134,7 @@ void BluetoothService::setupBleDevice() const
     setupAdvertisment();
 }
 
-void BluetoothService::setupServices() const
+void BluetoothService::setupServices()
 {
     Serial.println("Setting up BLE Services");
     auto server = NimBLEDevice::getServer();
@@ -151,9 +145,11 @@ void BluetoothService::setupServices() const
     // Create a BLE Characteristic
     Serial.println("Setting up BLE Characteristics");
 
-    batteryService->createCharacteristic(BATTERY_LEVEL_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+    batteryLevelCharacteristic = batteryService->createCharacteristic(BATTERY_LEVEL_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
-    cscService->createCharacteristic(CSC_MEASUREMENT_UUID, NIMBLE_PROPERTY::NOTIFY);
+    cscMeasurementCharacteristic = cscService->createCharacteristic(CSC_MEASUREMENT_UUID, NIMBLE_PROPERTY::NOTIFY);
+
+    dragFactorCharacteristic = cscService->createCharacteristic(DRAG_FACTOR_UUID, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     cscService
         ->createCharacteristic(CSC_FEATURE_UUID, NIMBLE_PROPERTY::READ)
@@ -164,8 +160,6 @@ void BluetoothService::setupServices() const
         ->setValue(&FEATURES_FLAG[1], 1);
 
     cscService->createCharacteristic(SC_CONTROL_POINT_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
-
-    cscService->createCharacteristic(DRAG_FACTOR_UUID, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     deviceInfoService
         ->createCharacteristic(MANUFACTURER_NAME_SVC_UUID, NIMBLE_PROPERTY::READ)

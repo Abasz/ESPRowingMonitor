@@ -6,9 +6,9 @@ BluetoothController::BluetoothController() : bluetoothService(BluetoothService()
 {
 }
 
-bool BluetoothController::isDeviceConnected() const
+bool BluetoothController::isAnyDeviceConnected() const
 {
-    return bluetoothService.isDeviceConnected();
+    return bluetoothService.isAnyDeviceConnected();
 }
 
 void BluetoothController::checkConnectedDevices()
@@ -16,7 +16,7 @@ void BluetoothController::checkConnectedDevices()
     bluetoothService.checkConnectedDevices();
 }
 
-void BluetoothController::begin() const
+void BluetoothController::begin()
 {
     bluetoothService.setup();
     bluetoothService.startBLEServer();

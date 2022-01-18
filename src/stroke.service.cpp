@@ -64,7 +64,7 @@ bool StrokeService::isFlywheelPowered()
 
 void StrokeService::setup() const
 {
-    pinMode(GPIO_NUM_33, INPUT_PULLUP);
+    pinMode(GPIO_NUM_26, INPUT_PULLUP);
     Serial.println("Attach interrupt");
     attachRotationInterrupt();
 }

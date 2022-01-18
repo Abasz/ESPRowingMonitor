@@ -3,6 +3,7 @@
 class PowerManagerController
 {
     static unsigned long const DEEP_SLEEP_TIMEOUT = 4 * 60 * 1000 * 1000;
+
     static byte const VOLTAGE_DIVIDER_RATIO = 2;
     static double constexpr BATTERY_VOLTAGE_MIN = 3.3 / VOLTAGE_DIVIDER_RATIO;
     static double constexpr BATTERY_VOLTAGE_MAX = 4.2 / VOLTAGE_DIVIDER_RATIO;

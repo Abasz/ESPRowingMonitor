@@ -24,12 +24,12 @@ IRAM_ATTR void batteryMeasurementInterrupt()
 
 void attachRotationInterrupt()
 {
-    attachInterrupt(digitalPinToInterrupt(GPIO_NUM_33), rotationInterrupt, RISING);
+    attachInterrupt(digitalPinToInterrupt(GPIO_NUM_26), rotationInterrupt, RISING);
 }
 
 void detachRotationInterrupt()
 {
-    detachInterrupt(digitalPinToInterrupt(GPIO_NUM_33));
+    detachInterrupt(digitalPinToInterrupt(GPIO_NUM_26));
 }
 
 // void DEBUG_PrintDeltaTimesData()

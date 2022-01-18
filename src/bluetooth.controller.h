@@ -9,10 +9,10 @@ class BluetoothController
 public:
     BluetoothController();
 
-    void begin() const;
+    void begin();
     void notifyBattery(byte batteryLevel) const;
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
     void notifyDragFactor(byte dragFactor) const;
-    bool isDeviceConnected() const;
+    bool isAnyDeviceConnected() const;
     void checkConnectedDevices();
 };

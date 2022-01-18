@@ -9,8 +9,8 @@ PowerManagerController::PowerManagerController()
 
 void PowerManagerController::begin()
 {
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_33, ESP_EXT1_WAKEUP_ALL_LOW);
-    gpio_hold_en(GPIO_NUM_33);
+    esp_sleep_enable_ext1_wakeup(GPIO_SEL_26, ESP_EXT1_WAKEUP_ALL_LOW);
+    gpio_hold_en(GPIO_NUM_26);
     gpio_deep_sleep_hold_en();
 
     setupBatteryMeasurement();

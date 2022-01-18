@@ -23,7 +23,7 @@ byte lastBatteryLevel = 0;
 void loop()
 {
     strokeController.readCscData();
-    powerManagerController.checkSleep(strokeController.getLastRevTime(), bleController.isDeviceConnected());
+    // powerManagerController.checkSleep(strokeController.getLastRevTime(), bleController.isDeviceConnected());
 
     // for (auto deltaTime : testDeltaRotations)
     // {

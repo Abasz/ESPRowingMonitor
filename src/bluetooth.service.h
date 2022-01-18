@@ -2,6 +2,8 @@
 
 #include <array>
 
+#include "NimBLEDevice.h"
+
 class BluetoothService
 {
     std::array<uint8_t, 2> const FEATURES_FLAG{0b11, 0b0};
@@ -28,23 +30,26 @@ class BluetoothService
     unsigned short const BLE_APPEARANCE_CYCLING_SPEED_CADENCE = 1157;
 
     hw_timer_t *ledTimer = timerBegin(0, 80, true);
-
     volatile byte ledState = HIGH;
 
-    void setupBleDevice() const;
-    void setupServices() const;
+    NimBLECharacteristic *batteryLevelCharacteristic;
+    NimBLECharacteristic *cscMeasurementCharacteristic;
+    NimBLECharacteristic *dragFactorCharacteristic;
+
+    void setupBleDevice();
+    void setupServices();
     void setupAdvertisment() const;
     void setupConnectionIndicatorLed() const;
 
 public:
     BluetoothService();
 
-    void setup() const;
+    void setup();
     void startBLEServer() const;
     void stopServer() const;
     void notifyBattery(byte batteryLevel) const;
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
     void notifyDragFactor(byte distance, byte dragFactor) const;
-    bool isDeviceConnected() const;
+    bool isAnyDeviceConnected() const;
     void checkConnectedDevices();
 };
