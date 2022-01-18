@@ -6,7 +6,9 @@
 
 class BluetoothService
 {
-    std::array<uint8_t, 2> const FEATURES_FLAG{0b11, 0b0};
+    static unsigned long const LED_BLINK_FREQUENCY = 1 * 1000 * 1000;
+
+    inline static std::array<uint8_t, 2> const FEATURES_FLAG{0b11, 0b0};
 
     unsigned short const CYCLING_SPEED_CADENCE_SVC_UUID = 0x1816;
     unsigned short const CSC_MEASUREMENT_UUID = 0x2A5B;
@@ -25,11 +27,9 @@ class BluetoothService
     unsigned short const SOFTWARE_NUMBER_SVC_UUID = 0x2A28;
     unsigned short const MANUFACTURER_NAME_SVC_UUID = 0x2A29;
 
-    unsigned short const NOTIFICATION_DESCRIPTOR_UUID = 0x2902;
-
     unsigned short const BLE_APPEARANCE_CYCLING_SPEED_CADENCE = 1157;
 
-    hw_timer_t *ledTimer = timerBegin(0, 80, true);
+    hw_timer_t *const ledTimer = timerBegin(0, 80, true);
     volatile byte ledState = HIGH;
 
     NimBLECharacteristic *batteryLevelCharacteristic;

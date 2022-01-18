@@ -56,6 +56,6 @@ void PowerManagerController::setupBatteryMeasurement()
     }
 
     timerAttachInterrupt(batteryMeasurementTimer, batteryMeasurementInterrupt, true);
-    timerAlarmWrite(batteryMeasurementTimer, 1000000 * 10, true);
+    timerAlarmWrite(batteryMeasurementTimer, BATTERY_LEVEL_MEASUREMENT_FREQUENCY, true);
     timerAlarmEnable(batteryMeasurementTimer);
 }

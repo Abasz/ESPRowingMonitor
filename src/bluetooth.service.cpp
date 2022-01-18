@@ -195,6 +195,6 @@ void BluetoothService::setupConnectionIndicatorLed() const
     pinMode(GPIO_NUM_2, OUTPUT);
 
     timerAttachInterrupt(ledTimer, connectionLedIndicatorInterrupt, true);
-    timerAlarmWrite(ledTimer, 1000000, true);
+    timerAlarmWrite(ledTimer, LED_BLINK_FREQUENCY, true);
     timerAlarmEnable(ledTimer);
 }
