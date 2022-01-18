@@ -13,6 +13,7 @@ class PowerManagerController
     hw_timer_t *const batteryMeasurementTimer = timerBegin(1, 80, true);
 
     void setupBatteryMeasurement();
+    void setupDeepSleep() const;
 
 public:
     PowerManagerController();

@@ -9,10 +9,8 @@ PowerManagerController::PowerManagerController()
 
 void PowerManagerController::begin()
 {
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_26, ESP_EXT1_WAKEUP_ALL_LOW);
-    gpio_hold_en(GPIO_NUM_26);
-    gpio_deep_sleep_hold_en();
-
+    Serial.println("Setting up power manager controller");
+    setupDeepSleep();
     setupBatteryMeasurement();
 }
 
@@ -55,7 +53,16 @@ void PowerManagerController::setupBatteryMeasurement()
         delay(100);
     }
 
+    Serial.println("Attache battery measurement timer interrupt");
     timerAttachInterrupt(batteryMeasurementTimer, batteryMeasurementInterrupt, true);
     timerAlarmWrite(batteryMeasurementTimer, BATTERY_LEVEL_MEASUREMENT_FREQUENCY, true);
     timerAlarmEnable(batteryMeasurementTimer);
+}
+
+void PowerManagerController::setupDeepSleep() const
+{
+    Serial.println("Configure deep sleep mode");
+    esp_sleep_enable_ext1_wakeup(GPIO_SEL_26, ESP_EXT1_WAKEUP_ALL_LOW);
+    gpio_hold_en(GPIO_NUM_26);
+    gpio_deep_sleep_hold_en();
 }
