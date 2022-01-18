@@ -10,11 +10,12 @@ void setup()
     strokeController.begin();
     powerManagerController.begin();
 
-    bleController.setBattery(34);
+    bleController.notifyBattery(powerManagerController.getBatteryLevel());
     bleController.notifyCsc(0, 0, 0, 0);
 }
 
 auto lastStrokeCount = 0U;
+byte lastBatteryLevel = 0;
 // execution time
 // - not connected 30 microsec
 // - connected 1  1800-2350
@@ -69,6 +70,13 @@ void loop()
         // auto stop = micros();
         // Serial.print("Main loop if statement: ");
         // Serial.println(stop - start);
+    }
+    auto battLevel = powerManagerController.getBatteryLevel();
+    if (battLevel != lastBatteryLevel)
+    {
+        Serial.println(battLevel);
+        bleController.notifyBattery(battLevel);
+        lastBatteryLevel = battLevel;
     }
     // auto stop = micros();
     // Serial.print("Main loop: ");

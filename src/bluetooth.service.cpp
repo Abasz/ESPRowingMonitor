@@ -48,12 +48,14 @@ void BluetoothService::stopServer() const
     NimBLEDevice::getAdvertising()->stop();
 }
 
-void BluetoothService::setBattery(byte batteryLevel) const
+void BluetoothService::notifyBattery(byte batteryLevel) const
 {
-    NimBLEDevice::getServer()
+    auto batteryCharacteristic = NimBLEDevice::getServer()
         ->getServiceByUUID(BATTERY_SVC_UUID)
-        ->getCharacteristic(BATTERY_LEVEL_UUID)
-        ->setValue(batteryLevel);
+                                     ->getCharacteristic(BATTERY_LEVEL_UUID);
+
+    batteryCharacteristic->setValue(batteryLevel);
+    batteryCharacteristic->notify();
 }
 
 void BluetoothService::notifyDragFactor(byte distance, byte dragFactor) const

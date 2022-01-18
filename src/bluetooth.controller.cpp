@@ -22,9 +22,9 @@ void BluetoothController::begin() const
     bluetoothService.startBLEServer();
 }
 
-void BluetoothController::setBattery(byte batteryLevel) const
+void BluetoothController::notifyBattery(byte batteryLevel) const
 {
-    bluetoothService.setBattery(batteryLevel);
+    bluetoothService.notifyBattery(batteryLevel);
 }
 
 void BluetoothController::notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const

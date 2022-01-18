@@ -12,6 +12,7 @@ extern PowerManagerController powerManagerController;
 
 IRAM_ATTR void rotationInterrupt();
 IRAM_ATTR void connectionLedIndicatorInterrupt();
+IRAM_ATTR void batteryMeasurementInterrupt();
 
 void attachRotationInterrupt();
 void detachRotationInterrupt();

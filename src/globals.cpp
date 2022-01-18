@@ -17,6 +17,11 @@ IRAM_ATTR void connectionLedIndicatorInterrupt()
     bleController.checkConnectedDevices();
 }
 
+IRAM_ATTR void batteryMeasurementInterrupt()
+{
+    powerManagerController.measureBattery();
+}
+
 void attachRotationInterrupt()
 {
     attachInterrupt(digitalPinToInterrupt(GPIO_NUM_33), rotationInterrupt, RISING);
