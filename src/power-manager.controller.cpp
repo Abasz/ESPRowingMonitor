@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include "ArduinoLog.h"
+
 #include "globals.h"
 #include "power-manager.controller.h"
 
@@ -9,7 +11,7 @@ PowerManagerController::PowerManagerController()
 
 void PowerManagerController::begin()
 {
-    Serial.println("Setting up power manager controller");
+    Log.infoln("Setting up power manager controller");
     setupDeepSleep();
     setupBatteryMeasurement();
 }
@@ -18,7 +20,7 @@ void PowerManagerController::checkSleep(unsigned long lastRevTime, bool isDevice
 {
     if (!isDeviceConnected && micros() - lastRevTime > DEEP_SLEEP_TIMEOUT)
     {
-        Serial.println("Going to sleep mode");
+        Log.infoln("Going to sleep mode");
         esp_deep_sleep_start();
     }
 }
@@ -43,17 +45,17 @@ void PowerManagerController::measureBattery()
 
 void PowerManagerController::setupBatteryMeasurement()
 {
+    Log.traceln("Attache battery measurement timer interrupt");
+
     pinMode(GPIO_NUM_4, INPUT);
 
     delay(500);
-    auto sum = 0U;
-    for (auto i = 0; i < 10; i++)
+    for (byte i = 0; i < 10; i++)
     {
         measureBattery();
         delay(100);
     }
 
-    Serial.println("Attache battery measurement timer interrupt");
     timerAttachInterrupt(batteryMeasurementTimer, batteryMeasurementInterrupt, true);
     timerAlarmWrite(batteryMeasurementTimer, BATTERY_LEVEL_MEASUREMENT_FREQUENCY, true);
     timerAlarmEnable(batteryMeasurementTimer);
@@ -61,7 +63,7 @@ void PowerManagerController::setupBatteryMeasurement()
 
 void PowerManagerController::setupDeepSleep() const
 {
-    Serial.println("Configure deep sleep mode");
+    Log.traceln("Configure deep sleep mode");
     esp_sleep_enable_ext1_wakeup(GPIO_SEL_26, ESP_EXT1_WAKEUP_ALL_LOW);
     gpio_hold_en(GPIO_NUM_26);
     gpio_deep_sleep_hold_en();

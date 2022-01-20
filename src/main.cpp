@@ -1,10 +1,18 @@
 #include <Arduino.h>
 
+#include "ArduinoLog.h"
+
 #include "globals.h"
 
 void setup()
 {
     Serial.begin(115200);
+    while (!Serial && !Serial.available())
+    {
+    }
+
+    Log.begin(static_cast<int>(ArduinoLog::Log_level_trace), &Serial, false);
+    Log.setPrefix(printPrefix);
 
     bleController.begin();
     strokeController.begin();
@@ -39,9 +47,7 @@ void loop()
     {
         if (strokeController.getStrokeCount() > lastStrokeCount)
         {
-
-            Serial.print("dragFactor: ");
-            Serial.println(strokeController.getDragCoefficient() * 1e6);
+            Log.infoln("dragFactor: %d", lround(strokeController.getDragCoefficient() * 1e6));
             // execution time
             // - not connected: 73
             // - connected: 2000-2600
@@ -74,7 +80,7 @@ void loop()
     auto battLevel = powerManagerController.getBatteryLevel();
     if (battLevel != lastBatteryLevel)
     {
-        Serial.println(battLevel);
+        Log.infoln("batteryLevel: %d", battLevel);
         bleController.notifyBattery(battLevel);
         lastBatteryLevel = battLevel;
     }

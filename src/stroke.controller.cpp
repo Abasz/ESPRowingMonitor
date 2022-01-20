@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include "ArduinoLog.h"
+
 #include "stroke.controller.h"
 
 using std::array;
@@ -13,7 +15,7 @@ StrokeController::StrokeController() : strokeService(StrokeService())
 
 void StrokeController::begin() const
 {
-    Serial.println("Setting up stroke monitor controller");
+    Log.infoln("Setting up stroke monitor controller");
     strokeService.setup();
 }
 
@@ -22,8 +24,7 @@ void StrokeController::readCscData()
     cscData = strokeService.getData();
     if (cscData.lastRevTime != lastRevReadTime)
     {
-        // Serial.print("deltaTime: ");
-        Serial.println(cscData.deltaTime);
+        Log.infoln("deltaTime: %u", cscData.deltaTime);
         // Serial.print("deltaTimeDiff: ");
         // Serial.println(data.deltaTimeDiff);
     }

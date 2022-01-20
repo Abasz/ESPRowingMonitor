@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
 #include "globals.h"
@@ -45,7 +46,7 @@ void BluetoothService::setup()
 void BluetoothService::startBLEServer() const
 {
     NimBLEDevice::getAdvertising()->start();
-    Serial.println("Waiting a client connection to notify...");
+    Log.traceln("Waiting a client connection to notify...");
 }
 
 void BluetoothService::stopServer() const
@@ -121,12 +122,12 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
 
 void BluetoothService::setupBleDevice()
 {
-    Serial.println("Initializing BLE device");
+    Log.traceln("Initializing BLE device");
 
     NimBLEDevice::init("CSC-Sensor");
     NimBLEDevice::setPower(ESP_PWR_LVL_N8);
 
-    Serial.println("Setting up Server");
+    Log.traceln("Setting up Server");
 
     NimBLEDevice::createServer();
 
@@ -136,14 +137,14 @@ void BluetoothService::setupBleDevice()
 
 void BluetoothService::setupServices()
 {
-    Serial.println("Setting up BLE Services");
+    Log.traceln("Setting up BLE Services");
     auto server = NimBLEDevice::getServer();
     auto batteryService = server->createService(BATTERY_SVC_UUID);
     auto cscService = server->createService(CYCLING_SPEED_CADENCE_SVC_UUID);
     auto deviceInfoService = server->createService(DEVICE_INFO_SVC_UUID);
 
     // Create a BLE Characteristic
-    Serial.println("Setting up BLE Characteristics");
+    Log.traceln("Setting up BLE Characteristics");
 
     batteryLevelCharacteristic = batteryService->createCharacteristic(BATTERY_LEVEL_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
@@ -174,7 +175,7 @@ void BluetoothService::setupServices()
         ->createCharacteristic(SOFTWARE_NUMBER_SVC_UUID, NIMBLE_PROPERTY::READ)
         ->setValue("0.1.0");
 
-    Serial.println("Starting BLE Service");
+    Log.traceln("Starting BLE Service");
 
     // Start the service
     batteryService->start();
@@ -194,7 +195,7 @@ void BluetoothService::setupConnectionIndicatorLed() const
 {
     pinMode(GPIO_NUM_2, OUTPUT);
 
-    Serial.println("Attach connection led timer interrupt");
+    Log.traceln("Attach connection led timer interrupt");
     timerAttachInterrupt(ledTimer, connectionLedIndicatorInterrupt, true);
     timerAlarmWrite(ledTimer, LED_BLINK_FREQUENCY, true);
     timerAlarmEnable(ledTimer);

@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include "ArduinoLog.h"
+
 #include "bluetooth.controller.h"
 
 BluetoothController::BluetoothController() : bluetoothService(BluetoothService())
@@ -18,6 +20,7 @@ void BluetoothController::checkConnectedDevices()
 
 void BluetoothController::begin()
 {
+    Log.infoln("Setting up BLE Controller");
     bluetoothService.setup();
     bluetoothService.startBLEServer();
 }

@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#include "ArduinoLog.h"
+
 #include "globals.h"
 #include "stroke.service.h"
 
@@ -65,7 +67,7 @@ bool StrokeService::isFlywheelPowered()
 void StrokeService::setup() const
 {
     pinMode(GPIO_NUM_26, INPUT_PULLUP);
-    Serial.println("Attach interrupt");
+    Log.traceln("Attach interrupt");
     attachRotationInterrupt();
 }
 

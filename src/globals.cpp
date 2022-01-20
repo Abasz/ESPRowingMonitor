@@ -32,6 +32,61 @@ void detachRotationInterrupt()
     detachInterrupt(digitalPinToInterrupt(GPIO_NUM_26));
 }
 
+void printPrefix(Print *_logOutput, int logLevel)
+{
+    printTimestamp(_logOutput);
+    printLogLevel(_logOutput, logLevel);
+}
+
+void printTimestamp(Print *_logOutput)
+{
+
+    // Total time
+    unsigned long const msecs = micros();
+    unsigned long const secs = msecs / MSECS_PER_SEC;
+
+    // Time in components
+    unsigned long const microSeconds = msecs % MSECS_PER_SEC;
+    unsigned long const seconds = secs % SECS_PER_MIN;
+    unsigned long const minutes = (secs / SECS_PER_MIN) % SECS_PER_MIN;
+    unsigned long const hours = (secs % SECS_PER_DAY) / SECS_PER_HOUR;
+
+    // Time as string
+    char timestamp[20];
+    sprintf(timestamp, "%02d:%02d:%02d.%06d ", hours, minutes, seconds, microSeconds);
+    _logOutput->print(timestamp);
+}
+
+void printLogLevel(Print *_logOutput, int logLevel)
+{
+    /// Show log description based on log level
+    switch (logLevel)
+    {
+    default:
+    case 0:
+        _logOutput->print("SILENT - ");
+        break;
+    case 1:
+        _logOutput->print("FATAL - ");
+        break;
+    case 2:
+        _logOutput->print("ERROR - ");
+        break;
+    case 3:
+        _logOutput->print("WARNING - ");
+        break;
+    case 4:
+        _logOutput->print("INFO - ");
+        break;
+    case 5:
+        _logOutput->print("TRACE - ");
+        break;
+    case 6:
+        _logOutput->print("VERBOSE - ");
+        break;
+    }
+}
+
 // void DEBUG_PrintDeltaTimesData()
 // {
 //     for (auto i : [])
