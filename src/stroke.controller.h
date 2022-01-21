@@ -4,7 +4,7 @@
 
 class StrokeController
 {
-    StrokeService strokeService;
+    StrokeService &strokeService;
 
     unsigned long lastRevReadTime = 0;
 
@@ -17,10 +17,10 @@ class StrokeController
         {}};
 
 public:
-    StrokeController();
+    StrokeController(StrokeService &_strokeService);
 
     void begin() const;
-    void readCscData();
+    void update();
     unsigned long getLastRevReadTime() const;
     void setLastRevReadTime();
     unsigned long getLastRevTime() const;
@@ -29,5 +29,4 @@ public:
     unsigned short getStrokeCount() const;
     unsigned int getDeltaTime() const;
     double getDragCoefficient() const;
-    void processRotation(unsigned long now);
 };

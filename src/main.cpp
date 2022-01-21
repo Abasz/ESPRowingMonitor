@@ -30,8 +30,8 @@ byte lastBatteryLevel = 0;
 // - connected 2 microsec 4000-4400
 void loop()
 {
-    strokeController.readCscData();
-    powerManagerController.checkSleep(strokeController.getLastRevTime(), bleController.isAnyDeviceConnected());
+    strokeController.update();
+    powerManagerController.update(strokeController.getLastRevTime(), bleController.isAnyDeviceConnected());
 
     // for (auto deltaTime : testDeltaRotations)
     // {

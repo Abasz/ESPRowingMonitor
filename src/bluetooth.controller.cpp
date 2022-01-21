@@ -4,18 +4,13 @@
 
 #include "bluetooth.controller.h"
 
-BluetoothController::BluetoothController() : bluetoothService(BluetoothService())
+BluetoothController::BluetoothController(BluetoothService &_bluetoothService) : bluetoothService(_bluetoothService)
 {
 }
 
 bool BluetoothController::isAnyDeviceConnected() const
 {
     return bluetoothService.isAnyDeviceConnected();
-}
-
-void BluetoothController::checkConnectedDevices()
-{
-    bluetoothService.checkConnectedDevices();
 }
 
 void BluetoothController::begin()

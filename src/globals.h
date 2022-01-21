@@ -12,7 +12,9 @@ static unsigned long const SECS_PER_MIN = 60;
 static unsigned long const SECS_PER_HOUR = 3600;
 static unsigned long const SECS_PER_DAY = 86400;
 
+extern BluetoothService bleService;
 extern BluetoothController bleController;
+extern StrokeService strokeService;
 extern StrokeController strokeController;
 extern PowerManagerController powerManagerController;
 

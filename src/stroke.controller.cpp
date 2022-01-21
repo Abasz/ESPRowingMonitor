@@ -9,7 +9,7 @@
 using std::array;
 using std::partial_sort_copy;
 
-StrokeController::StrokeController() : strokeService(StrokeService())
+StrokeController::StrokeController(StrokeService &_strokeService) : strokeService(_strokeService)
 {
 }
 
@@ -19,7 +19,7 @@ void StrokeController::begin() const
     strokeService.setup();
 }
 
-void StrokeController::readCscData()
+void StrokeController::update()
 {
     cscData = strokeService.getData();
     if (cscData.lastRevTime != lastRevReadTime)
@@ -72,9 +72,4 @@ unsigned long StrokeController::getLastRevReadTime() const
 void StrokeController::setLastRevReadTime()
 {
     lastRevReadTime = cscData.lastRevTime;
-}
-
-void StrokeController::processRotation(unsigned long now = 0)
-{
-    strokeService.processRotation(now);
 }

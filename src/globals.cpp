@@ -2,24 +2,28 @@
 
 #include "globals.h"
 
-BluetoothController bleController;
-StrokeController strokeController;
-PowerManagerController powerManagerController;
+BluetoothService bleService;
+StrokeService strokeService;
+PowerManagerService powerManagerService;
+
+BluetoothController bleController(bleService);
+StrokeController strokeController(strokeService);
+PowerManagerController powerManagerController(powerManagerService);
 
 IRAM_ATTR void rotationInterrupt()
 {
     // execution time: 1-5
-    strokeController.processRotation(micros());
+    strokeService.processRotation(micros());
 }
 
 IRAM_ATTR void connectionLedIndicatorInterrupt()
 {
-    bleController.checkConnectedDevices();
+    bleService.checkConnectedDevices();
 }
 
 IRAM_ATTR void batteryMeasurementInterrupt()
 {
-    powerManagerController.measureBattery();
+    powerManagerService.measureBattery();
 }
 
 void attachRotationInterrupt()
