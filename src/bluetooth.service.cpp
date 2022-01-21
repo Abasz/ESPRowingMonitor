@@ -57,12 +57,14 @@ void BluetoothService::stopServer() const
 void BluetoothService::notifyBattery(byte batteryLevel) const
 {
     batteryLevelCharacteristic->setValue(batteryLevel);
-    batteryLevelCharacteristic->notify();
+    if (batteryLevelCharacteristic->getSubscribedCount() > 0)
+    {
+        batteryLevelCharacteristic->notify();
+    }
 }
 
 void BluetoothService::notifyDragFactor(byte distance, byte dragFactor) const
 {
-
     if (dragFactorCharacteristic->getSubscribedCount() > 0)
     {
         dragFactorCharacteristic->setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
