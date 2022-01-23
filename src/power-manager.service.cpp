@@ -34,7 +34,17 @@ void PowerManagerService::measureBattery()
     // auto start = micros();
     // execution time: 90 micro sec
     auto measurement = analogRead(GPIO_NUM_4);
-    auto newBatteryLevel = (((measurement * 3.3) / 4095) - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100;
+    auto newBatteryLevel = ((measurement * 3.3 / 4095) - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100;
+
+    if (newBatteryLevel > 100.0)
+    {
+        newBatteryLevel = 100;
+    }
+
+    if (newBatteryLevel < 0)
+    {
+        newBatteryLevel = 0;
+    }
 
     batteryLevel = batteryLevel == 0 ? lround(newBatteryLevel) : lround((newBatteryLevel + batteryLevel) / 2);
     //     auto stop = micros();
@@ -63,7 +73,6 @@ void PowerManagerService::setupBatteryMeasurement()
 void PowerManagerService::setupDeepSleep() const
 {
     Log.traceln("Configure deep sleep mode");
-    esp_sleep_enable_ext1_wakeup(GPIO_SEL_26, ESP_EXT1_WAKEUP_ALL_LOW);
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_26, LOW);
     gpio_hold_en(GPIO_NUM_26);
-    gpio_deep_sleep_hold_en();
 }
