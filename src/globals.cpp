@@ -68,22 +68,22 @@ void printLogLevel(Print *_logOutput, int logLevel)
     {
     default:
     case 0:
-        _logOutput->print("SILENT - ");
+        _logOutput->print(" SILENT - ");
         break;
     case 1:
-        _logOutput->print("FATAL - ");
+        _logOutput->print("  FATAL - ");
         break;
     case 2:
-        _logOutput->print("ERROR - ");
+        _logOutput->print("  ERROR - ");
         break;
     case 3:
         _logOutput->print("WARNING - ");
         break;
     case 4:
-        _logOutput->print("INFO - ");
+        _logOutput->print("   INFO - ");
         break;
     case 5:
-        _logOutput->print("TRACE - ");
+        _logOutput->print("  TRACE - ");
         break;
     case 6:
         _logOutput->print("VERBOSE - ");

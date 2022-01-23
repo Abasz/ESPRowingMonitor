@@ -52,7 +52,7 @@ void loop()
             // - not connected: 73
             // - connected: 2000-2600
             // auto start = micros();
-            bleController.notifyDragFactor(static_cast<byte>(strokeController.getDragCoefficient() * 1e6));
+            bleController.notifyDragFactor(lround(strokeController.getDragCoefficient() * 1e6));
             lastStrokeCount = strokeController.getStrokeCount();
             // auto stop = micros();
             // Serial.print("notifyDragFactor: ");

@@ -13,8 +13,8 @@ enum class CyclePhase
 
 class StrokeService
 {
-    static byte const ROTATION_DEBOUNCE_TIME_MIN = 10;
-    static unsigned short const ROTATION_DEBOUNCE_TIME_MAX = 300;
+    static byte const ROTATION_DEBOUNCE_TIME_MIN = 15;
+    static unsigned short const ROTATION_DEBOUNCE_TIME_MAX = 200;
     static byte const STROKE_DEBOUNCE_TIME = 200;
 
     static unsigned short const MAX_DRAG_FACTOR_RECOVERY_PERIOD = 6000;
