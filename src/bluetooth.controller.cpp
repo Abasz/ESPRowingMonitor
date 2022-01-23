@@ -7,12 +7,21 @@ BluetoothController::BluetoothController(BluetoothService &_bluetoothService) : 
 {
 }
 
-void BluetoothController::update()
+void BluetoothController::update(byte batteryLevel)
 {
     auto now = millis();
     if (now - lastConnectedDeviceCheckTime > Settings::ledBlinkFrequency)
     {
-        bluetoothService.updateLed();
+        auto ledColor = CRGB::Blue;
+        if (batteryLevel < 30)
+        {
+            ledColor = CRGB::Red;
+        }
+        if (batteryLevel > 80)
+        {
+            ledColor = CRGB::Green;
+        }
+        bluetoothService.updateLed(ledColor);
         lastConnectedDeviceCheckTime = now;
     }
 }

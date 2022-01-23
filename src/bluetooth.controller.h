@@ -12,7 +12,7 @@ public:
     BluetoothController(BluetoothService &_bluetoothService);
 
     void begin();
-    void update();
+    void update(byte batteryLevel);
     void notifyBattery(byte batteryLevel) const;
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
     void notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const;

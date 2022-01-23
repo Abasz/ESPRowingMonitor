@@ -3,6 +3,7 @@
 #include <array>
 
 #include "NimBLEDevice.h"
+#include "FastLED.h"
 
 class BluetoothService
 {
@@ -38,7 +39,8 @@ class BluetoothService
     static unsigned short const bleAppearanceCyclingSpeedCadence = 1157;
     static unsigned short const bleAppearanceCyclingPower = 1156;
 
-    byte ledState = HIGH;
+    CRGB::HTMLColorCode ledColor = CRGB::Black;
+    inline static CRGB leds[1];
 
     NimBLECharacteristic *batteryLevelCharacteristic;
     NimBLECharacteristic *cscMeasurementCharacteristic;
@@ -63,5 +65,5 @@ public:
     void notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const;
     void notifyDragFactor(unsigned short distance, byte dragFactor) const;
     bool isAnyDeviceConnected() const;
-    void updateLed();
+    void updateLed(CRGB::HTMLColorCode newLedColor);
 };

@@ -16,20 +16,21 @@ bool BluetoothService::isAnyDeviceConnected() const
     return NimBLEDevice::getServer()->getConnectedCount() > 0;
 }
 
-void BluetoothService::updateLed()
+void BluetoothService::updateLed(CRGB::HTMLColorCode newLedColor)
 {
     // execution time: 1-5 micro sec
     // auto start = micros();
     if (isAnyDeviceConnected())
     {
-        ledState = HIGH;
+        ledColor = newLedColor;
     }
     else
     {
-        ledState = !ledState;
+        ledColor = ledColor == CRGB::Black ? newLedColor : CRGB::Black;
     }
+    leds[0] = ledColor;
+    FastLED.show();
 
-    digitalWrite(GPIO_NUM_2, ledState);
     // auto end = micros();
     // Serial.print("led: ");
     // Serial.println(end - start);
@@ -281,5 +282,5 @@ void BluetoothService::setupAdvertisement() const
 
 void BluetoothService::setupConnectionIndicatorLed() const
 {
-    pinMode(GPIO_NUM_2, OUTPUT);
+    FastLED.addLeds<WS2812, GPIO_NUM_5>(leds, 1);
 }

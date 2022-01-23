@@ -5,6 +5,7 @@
 #include <Arduino.h>
 
 #include "ArduinoLog.h"
+#include "FastLED.h"
 
 #include "power-manager.service.h"
 #include "settings.h"
@@ -69,7 +70,7 @@ byte PowerManagerService::measureBattery()
 
 void PowerManagerService::setupBatteryMeasurement()
 {
-    pinMode(GPIO_NUM_4, INPUT);
+    pinMode(GPIO_NUM_34, INPUT);
 
     delay(500);
     for (byte i = 0; i < Settings::initialBatteryLevelMeasurementCount; i++)
