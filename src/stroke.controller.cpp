@@ -59,7 +59,7 @@ double StrokeController::getDragCoefficient() const
 {
     array<double, StrokeModel::DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
 
-    partial_sort_copy(cscData.dragCoefficients.cbegin(), cscData.dragCoefficients.end(), sortedArray.begin(), sortedArray.end());
+    partial_sort_copy(cscData.dragCoefficients.cbegin(), cscData.dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
 
     return sortedArray[sortedArray.size() / 2];
 }

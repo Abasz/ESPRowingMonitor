@@ -72,7 +72,38 @@ void PowerManagerService::setupBatteryMeasurement()
 
 void PowerManagerService::setupDeepSleep() const
 {
+    printWakeupReason();
     Log.traceln("Configure deep sleep mode");
     esp_sleep_enable_ext0_wakeup(GPIO_NUM_26, LOW);
     gpio_hold_en(GPIO_NUM_26);
+}
+
+void PowerManagerService::printWakeupReason() const
+{
+    auto wakeup_reason = esp_sleep_get_wakeup_cause();
+
+    switch (wakeup_reason)
+    {
+    case ESP_SLEEP_WAKEUP_UNDEFINED:
+        Log.infoln("Wakeup caused by resetting or powering up the device");
+        break;
+    case ESP_SLEEP_WAKEUP_EXT0:
+        Log.infoln("Wakeup caused by external signal using RTC_IO");
+        break;
+    case ESP_SLEEP_WAKEUP_EXT1:
+        Log.infoln("Wakeup caused by external signal using RTC_CNTL");
+        break;
+    case ESP_SLEEP_WAKEUP_TIMER:
+        Log.infoln("Wakeup caused by timer");
+        break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD:
+        Log.infoln("Wakeup caused by touchpad");
+        break;
+    case ESP_SLEEP_WAKEUP_ULP:
+        Log.infoln("Wakeup caused by ULP program");
+        break;
+    default:
+        Log.infoln("Wakeup was not caused by deep sleep: %d", wakeup_reason);
+        break;
+    }
 }

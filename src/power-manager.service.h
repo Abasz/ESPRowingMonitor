@@ -14,6 +14,7 @@ class PowerManagerService
 
     void setupBatteryMeasurement();
     void setupDeepSleep() const;
+    void printWakeupReason() const;
 
 public:
     PowerManagerService();

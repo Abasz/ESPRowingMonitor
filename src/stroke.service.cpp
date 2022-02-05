@@ -136,7 +136,7 @@ void StrokeService::processRotation(unsigned long now)
     {
         // We are currently in the "Stopped" phase, as power was not applied for a long period of time or the device just started. Since rotation was detected we check if cleanDeltaTimes array is filled (i.e. whether we have sufficient data for determining the next phase) and whether power is being applied to the flywheel
         if (
-            any_of(cleanDeltaTimes.begin(), cleanDeltaTimes.end(), [](unsigned long cleanDeltaTime)
+            any_of(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend(), [](unsigned long cleanDeltaTime)
                    { return cleanDeltaTime == 0; }) ||
             isFlywheelUnpowered())
             return;
