@@ -63,7 +63,7 @@ void BluetoothService::notifyBattery(byte batteryLevel) const
     }
 }
 
-void BluetoothService::notifyDragFactor(byte distance, byte dragFactor) const
+void BluetoothService::notifyDragFactor(unsigned short distance, byte dragFactor) const
 {
     if (dragFactorCharacteristic->getSubscribedCount() > 0)
     {

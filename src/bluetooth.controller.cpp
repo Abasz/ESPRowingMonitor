@@ -33,5 +33,5 @@ void BluetoothController::notifyCsc(unsigned long lastRevTime, unsigned int revC
 void BluetoothController::notifyDragFactor(byte dragFactor) const
 {
     auto distance = pow(dragFactor / 2.8, 1.0 / 3.0) * (2.0 * PI) * 10;
-    bluetoothService.notifyDragFactor(static_cast<byte>(distance), dragFactor);
+    bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
 }

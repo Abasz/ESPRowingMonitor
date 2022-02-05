@@ -49,7 +49,7 @@ public:
     void stopServer() const;
     void notifyBattery(byte batteryLevel) const;
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
-    void notifyDragFactor(byte distance, byte dragFactor) const;
+    void notifyDragFactor(unsigned short distance, byte dragFactor) const;
     bool isAnyDeviceConnected() const;
     void checkConnectedDevices();
 };
