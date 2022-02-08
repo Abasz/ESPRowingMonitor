@@ -1,13 +1,8 @@
-#include <array>
-
 #include <Arduino.h>
 
 #include "ArduinoLog.h"
 
 #include "stroke.controller.h"
-
-using std::array;
-using std::partial_sort_copy;
 
 StrokeController::StrokeController(StrokeService &_strokeService) : strokeService(_strokeService)
 {
@@ -22,7 +17,7 @@ void StrokeController::begin() const
 void StrokeController::update()
 {
     cscData = strokeService.getData();
-    if (cscData.lastRevTime != lastRevReadTime)
+    if (cscData.revCount != previousRevCount)
     {
         Log.infoln("deltaTime: %u", cscData.deltaTime);
         // Serial.print("deltaTimeDiff: ");
@@ -55,21 +50,27 @@ unsigned int StrokeController::getDeltaTime() const
     return cscData.deltaTime;
 }
 
-double StrokeController::getDragCoefficient() const
+double StrokeController::getDriveDuration() const
 {
-    array<double, StrokeModel::DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
-
-    partial_sort_copy(cscData.dragCoefficients.cbegin(), cscData.dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
-
-    return sortedArray[sortedArray.size() / 2];
+    return cscData.driveDuration / 1e6;
 }
 
-unsigned long StrokeController::getLastRevReadTime() const
+unsigned int StrokeController::getAvgStrokePower() const
 {
-    return lastRevReadTime;
+    return lround(cscData.avgStrokePower);
 }
 
-void StrokeController::setLastRevReadTime()
+byte StrokeController::getDragFactor() const
 {
-    lastRevReadTime = cscData.lastRevTime;
+    return lround(cscData.dragCoefficient * 1e6);
+}
+
+unsigned long StrokeController::getPreviousRevCount() const
+{
+    return previousRevCount;
+}
+
+void StrokeController::setPreviousRevCount()
+{
+    previousRevCount = cscData.revCount;
 }

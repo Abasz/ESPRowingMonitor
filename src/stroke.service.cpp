@@ -1,5 +1,7 @@
+#include <array>
 #include <algorithm>
 #include <numeric>
+#include <math.h>
 
 #include <Arduino.h>
 
@@ -9,7 +11,9 @@
 #include "stroke.service.h"
 
 using std::any_of;
+using std::array;
 using std::minmax;
+using std::partial_sort_copy;
 
 using StrokeModel::CscData;
 
@@ -17,7 +21,7 @@ StrokeService::StrokeService()
 {
 }
 
-bool StrokeService::isFlywheelUnpowered()
+bool StrokeService::isFlywheelUnpowered() const
 {
     byte numberOfAccelerations = 0;
     byte i = cleanDeltaTimes.size() - 1;
@@ -41,7 +45,7 @@ bool StrokeService::isFlywheelUnpowered()
     return true;
 }
 
-bool StrokeService::isFlywheelPowered()
+bool StrokeService::isFlywheelPowered() const
 {
     byte numberOfDecelerations = 0;
     byte i = cleanDeltaTimes.size() - 1;
@@ -71,6 +75,53 @@ void StrokeService::setup() const
     attachRotationInterrupt();
 }
 
+void StrokeService::calculateDragCoefficient()
+{
+    auto recoveryEndAngularVelocity = 2 * PI / cleanDeltaTimes[DELTA_TIME_ARRAY_LENGTH - 1];
+    if (recoveryStartAngularVelocity > recoveryEndAngularVelocity && recoveryDuration < MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
+    {
+        auto rawNewDragCoefficient = -1 * FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryDuration;
+
+        if (rawNewDragCoefficient < UPPER_DRAG_FACTOR_THRESHOLD &&
+            rawNewDragCoefficient > LOWER_DRAG_FACTOR_THRESHOLD)
+        {
+
+            // TODO: Test if removing the moving averager would yield good results. Reason is that when averager is used the changes made to the damper on the run does not get reflected properly.
+            auto newDragCoefficient = any_of(dragCoefficients.cbegin(),
+                                             dragCoefficients.cend(),
+                                             [](double item)
+                                             { return item == 0; })
+                                          ? rawNewDragCoefficient
+                                          : std::accumulate(dragCoefficients.cbegin(), dragCoefficients.cend(), rawNewDragCoefficient) / (dragCoefficients.size() + 1);
+
+            char i = dragCoefficients.size() - 1;
+            while (i > 0)
+            {
+                dragCoefficients[i] = dragCoefficients[i - 1];
+                i--;
+            }
+            dragCoefficients[0] = newDragCoefficient;
+
+            array<double, DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
+
+            partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
+            dragCoefficient = sortedArray[sortedArray.size() / 2];
+        }
+    }
+}
+
+void StrokeService::calculateAvgStrokePower()
+{
+    avgStrokePower = dragCoefficient * pow((revCount - 1 - driveStartRevCount) * 2 * PI / ((lastDriveDuration + recoveryDuration) / 1e6), 3);
+    // Log.infoln("test: %D", pow((revCount - 1 - driveStartRevCount) * 2 * PI / ((lastDriveDuration + recoveryDuration) / 1e6), 3));
+    // Log.infoln("test: %d", revCount);
+    // Log.infoln("test: %d", driveStartRevCount);
+    // Log.infoln("test: %d", recoveryStartRevCount);
+    // Log.infoln("test: %d", (revCount - 1 - driveStartRevCount));
+    // Log.infoln("test: %D", (lastDriveDuration + recoveryDuration) / 1e6);
+    // Log.infoln("test: %D", avgStrokePower);
+}
+
 CscData StrokeService::getData() const
 {
     // execution time: 8-9 microsec
@@ -82,7 +133,9 @@ CscData StrokeService::getData() const
         .lastStrokeTime = lastStrokeTime,
         .strokeCount = strokeCount,
         .deltaTime = cleanDeltaTimes[0],
-        .dragCoefficients = dragCoefficients};
+        .driveDuration = lastDriveDuration,
+        .avgStrokePower = avgStrokePower,
+        .dragCoefficient = dragCoefficient};
     attachRotationInterrupt();
     // auto stop = micros();
 
@@ -122,12 +175,9 @@ void StrokeService::processRotation(unsigned long now)
     {
         cyclePhase = CyclePhase::Stopped;
 
-        recoveryPhaseStartTime = 0;
-        recoveryStartAngularVelocity = 0;
-        recoveryPhaseDuration = 0;
-
-        drivePhaseStartTime = 0;
-        drivePhaseDuration = 0;
+        recoveryDuration = 0;
+        driveDuration = 0;
+        avgStrokePower = 0;
 
         return;
     }
@@ -143,7 +193,9 @@ void StrokeService::processRotation(unsigned long now)
 
         // Since we detected power, setting to "Drive" phase and increasing rotation count and registering rotation time
         cyclePhase = CyclePhase::Drive;
-        drivePhaseStartTime = now - cleanDeltaTimes[0];
+        driveStartTime = now - cleanDeltaTimes[0];
+        driveStartRevCount = revCount; // no need to subtract 1 from revCount as it is not incremented yet
+
         lastRevTime = now;
         revCount++;
 
@@ -161,21 +213,23 @@ void StrokeService::processRotation(unsigned long now)
         if (isFlywheelUnpowered())
         {
             // It seems that we lost power to the flywheel lets check if drive time was sufficint for detecting a stroke (i.e. drivePhaseDuration exceeds debounce time)
-            if (drivePhaseDuration > STROKE_DEBOUNCE_TIME * 1000)
+            if (driveDuration > STROKE_DEBOUNCE_TIME * 1000)
             {
                 // Here we can conclude the "Drive" phase as there is no more drive detected to the flywheel (e.g. for calculating power etc.)
                 strokeCount++;
+                lastDriveDuration = driveDuration;
                 lastStrokeTime = now;
             }
 
             cyclePhase = CyclePhase::Recovery;
-            recoveryPhaseStartTime = now - cleanDeltaTimes[0];
+            recoveryStartTime = now - cleanDeltaTimes[0];
             recoveryStartAngularVelocity = 2 * PI / cleanDeltaTimes[0];
-            drivePhaseDuration = 0;
+            recoveryStartRevCount = revCount - 1;
+            driveDuration = 0;
             return;
         }
 
-        drivePhaseDuration = now - drivePhaseStartTime;
+        driveDuration = now - driveStartTime;
         return;
     }
 
@@ -184,40 +238,18 @@ void StrokeService::processRotation(unsigned long now)
         // We are currently in the "Recovery" phase, lets determine what the next phase is
         if (isFlywheelPowered())
         {
-            // Here we can conclude the "Recovery" phase as drive to the flywheel is detected (e.g. calculating drag factor)
-            auto recoveryEndAngularVelocity = 2 * PI / cleanDeltaTimes[DELTA_TIME_ARRAY_LENGTH - 1];
-            if (recoveryStartAngularVelocity > recoveryEndAngularVelocity && recoveryPhaseDuration < MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
-            {
-                auto dragCoefficient = -1 * FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryPhaseDuration;
-
-                if (dragCoefficient < UPPER_DRAG_FACTOR_THRESHOLD &&
-                    dragCoefficient > LOWER_DRAG_FACTOR_THRESHOLD)
-                {
-
-                    auto newDragCoefficient = any_of(dragCoefficients.cbegin(),
-                                                     dragCoefficients.cend(),
-                                                     [](double item)
-                                                     { return item == 0; })
-                                                  ? dragCoefficient
-                                                  : std::accumulate(dragCoefficients.cbegin(), dragCoefficients.cend(), dragCoefficient) / (dragCoefficients.size() + 1);
-
-                    char i = dragCoefficients.size() - 1;
-                    while (i > 0)
-                    {
-                        dragCoefficients[i] = dragCoefficients[i - 1];
-                        i--;
-                    }
-                    dragCoefficients[0] = newDragCoefficient;
-                }
-            }
+            // Here we can conclude the "Recovery" phase (and the current stroke cycle) as drive to the flywheel is detected (e.g. calculating drag factor)
+            calculateDragCoefficient();
+            calculateAvgStrokePower();
 
             cyclePhase = CyclePhase::Drive;
-            drivePhaseStartTime = now - cleanDeltaTimes[0];
-            recoveryPhaseDuration = 0;
+            driveStartTime = now - cleanDeltaTimes[0];
+            driveStartRevCount = revCount - 1;
+            recoveryDuration = 0;
             return;
         }
 
-        recoveryPhaseDuration = now - recoveryPhaseStartTime;
+        recoveryDuration = now - recoveryStartTime;
         return;
     }
 }

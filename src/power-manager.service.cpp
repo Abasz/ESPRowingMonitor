@@ -31,6 +31,7 @@ byte PowerManagerService::getBatteryLevel() const
 
 void PowerManagerService::measureBattery()
 {
+    // TODO: // add better filtering like drag factor (i.e. keep an array and use median so the szélsőértékek will not be considered). the only thing that needs to be considered if the median calculation is done during a single measurement and that is added to the batteryLevel value or doing a measurement and keeping a batteryLevel array and selected from that the median. With the latter my issue is that battery measurement will not happen very often so actually battery level is determined at startup and will not change much while switched on. so filtering per measurement is a better approach (but will take a longer time to do 5 measurement)
     // auto start = micros();
     // execution time: 90 micro sec
     auto measurement = analogRead(GPIO_NUM_4);

@@ -22,8 +22,10 @@ void setup()
     bleController.notifyCsc(0, 0, 0, 0);
 }
 
+// TODO: these tracking values should be moved to the controllers like for lastRevReadTime
 auto lastStrokeCount = 0U;
 byte lastBatteryLevel = 0;
+auto lastAvgStrokePower = 0U;
 // execution time
 // - not connected 30 microsec
 // - connected 1  1800-2350
@@ -43,22 +45,8 @@ void loop()
     // - not connected 20-30 microsec
     // - connected 1900-2200 microsec
     // auto start = micros();
-    if (strokeController.getLastRevTime() != strokeController.getLastRevReadTime())
+    if (strokeController.getRevCount() != strokeController.getPreviousRevCount())
     {
-        if (strokeController.getStrokeCount() > lastStrokeCount)
-        {
-            Log.infoln("dragFactor: %d", lround(strokeController.getDragCoefficient() * 1e6));
-            // execution time
-            // - not connected: 73
-            // - connected: 2000-2600
-            // auto start = micros();
-            bleController.notifyDragFactor(lround(strokeController.getDragCoefficient() * 1e6));
-            lastStrokeCount = strokeController.getStrokeCount();
-            // auto stop = micros();
-            // Serial.print("notifyDragFactor: ");
-            // Serial.println(stop - start);
-        }
-
         // execution time
         // - not connected: 5 microsec
         // - connected: 1800-2100 microsec
@@ -72,11 +60,40 @@ void loop()
         // Serial.print("notifyCsc: ");
         // Serial.println(stop - start);
 
-        strokeController.setLastRevReadTime();
+        strokeController.setPreviousRevCount();
         // auto stop = micros();
         // Serial.print("Main loop if statement: ");
         // Serial.println(stop - start);
     }
+
+        if (strokeController.getStrokeCount() > lastStrokeCount)
+        {
+        Log.infoln("driveDuration: %D", strokeController.getDriveDuration());
+        Log.infoln("dragFactor: %d", strokeController.getDragFactor());
+            // execution time
+            // - not connected: 73
+            // - connected: 2000-2600
+            // auto start = micros();
+        bleController.notifyDragFactor(strokeController.getDragFactor());
+            lastStrokeCount = strokeController.getStrokeCount();
+            // auto stop = micros();
+            // Serial.print("notifyDragFactor: ");
+            // Serial.println(stop - start);
+        }
+
+    if (strokeController.getAvgStrokePower() != lastAvgStrokePower)
+    {
+        Log.infoln("power: %d", strokeController.getAvgStrokePower());
+        lastAvgStrokePower = strokeController.getAvgStrokePower();
+        // execution time
+        // - not connected: 73
+        // - connected: 2000-2600
+        // auto start = micros();
+        // auto stop = micros();
+        // Serial.print("notifyDragFactor: ");
+        // Serial.println(stop - start);
+    }
+
     auto battLevel = powerManagerController.getBatteryLevel();
     if (battLevel != lastBatteryLevel)
     {
