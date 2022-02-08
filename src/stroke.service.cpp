@@ -92,13 +92,14 @@ void StrokeService::calculateDragCoefficient()
             rawNewDragCoefficient > LOWER_DRAG_FACTOR_THRESHOLD)
         {
 
-            // TODO: Test if removing the moving averager would yield good results. Reason is that when averager is used the changes made to the damper on the run does not get reflected properly.
-            auto newDragCoefficient = any_of(dragCoefficients.cbegin(),
-                                             dragCoefficients.cend(),
-                                             [](double item)
-                                             { return item == 0; })
-                                          ? rawNewDragCoefficient
-                                          : accumulate(dragCoefficients.cbegin(), dragCoefficients.cend(), rawNewDragCoefficient) / (dragCoefficients.size() + 1);
+            // auto newDragCoefficient = any_of(dragCoefficients.cbegin(),
+            //                                  dragCoefficients.cend(),
+            //                                  [](double item)
+            //                                  { return item == 0; })
+            //                               ? rawNewDragCoefficient
+            //                               : accumulate(dragCoefficients.cbegin(), dragCoefficients.cend(), rawNewDragCoefficient) / (dragCoefficients.size() + 1);
+
+            auto newDragCoefficient = rawNewDragCoefficient;
 
             char i = dragCoefficients.size() - 1;
             while (i > 0)
@@ -177,7 +178,8 @@ void StrokeService::processRotation(unsigned long now)
     previousRawRevTime = now;
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
-    if (cyclePhase == CyclePhase::Recovery && currentDeltaTime > ROTATION_DEBOUNCE_TIME_MAX * 1000)
+    // TODO: decide whether the recovery duration should be checked instead
+    if (cyclePhase == CyclePhase::Recovery && recoveryDuration > ROWING_STOPPED_THRESHOLD_PERIOD * 1000)
     {
         cyclePhase = CyclePhase::Stopped;
 

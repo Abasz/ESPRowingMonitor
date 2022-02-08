@@ -7,7 +7,7 @@ class PowerManagerService
 
     static byte const VOLTAGE_DIVIDER_RATIO = 2;
     static double constexpr BATTERY_VOLTAGE_MIN = 3.3 / VOLTAGE_DIVIDER_RATIO;
-    static double constexpr BATTERY_VOLTAGE_MAX = 4.2 / VOLTAGE_DIVIDER_RATIO;
+    static double constexpr BATTERY_VOLTAGE_MAX = 4.1 / VOLTAGE_DIVIDER_RATIO;
 
     volatile byte batteryLevel = 0;
     hw_timer_t *const batteryMeasurementTimer = timerBegin(1, 80, true);
