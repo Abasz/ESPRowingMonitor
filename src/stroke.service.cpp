@@ -10,6 +10,7 @@
 #include "globals.h"
 #include "stroke.service.h"
 
+using std::accumulate;
 using std::any_of;
 using std::array;
 using std::minmax;
@@ -92,7 +93,7 @@ void StrokeService::calculateDragCoefficient()
                                              [](double item)
                                              { return item == 0; })
                                           ? rawNewDragCoefficient
-                                          : std::accumulate(dragCoefficients.cbegin(), dragCoefficients.cend(), rawNewDragCoefficient) / (dragCoefficients.size() + 1);
+                                          : accumulate(dragCoefficients.cbegin(), dragCoefficients.cend(), rawNewDragCoefficient) / (dragCoefficients.size() + 1);
 
             char i = dragCoefficients.size() - 1;
             while (i > 0)
