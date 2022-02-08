@@ -7,7 +7,12 @@
 
 #include "ArduinoLog.h"
 
+#ifdef ROWING_SIMULATION
+#include "../test/globals.h"
+#else
 #include "globals.h"
+#endif
+
 #include "stroke.service.h"
 
 using std::accumulate;

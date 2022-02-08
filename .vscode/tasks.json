@@ -1,0 +1,27 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Compile with g++",
+			"type": "shell",
+			"command": "g++ -std=c++17 src/stroke.*.cpp test/*.cpp -o testRun -D byte=uint8_t -D PI=3.1415926535897932384626433832795 -D INPUT_PULLUP=1 -D GPIO_NUM_26=26 -include stdint.h -include string -include cmath -Itest -D ROWING_SIMULATION",
+			"problemMatcher": ["$msCompile"],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
+		},
+		{
+			"label": "Run test",
+			"type": "shell",
+			"command": "testRun.exe > output.txt",
+			"dependsOn": ["Compile with g++"],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
+		}
+	]
+}

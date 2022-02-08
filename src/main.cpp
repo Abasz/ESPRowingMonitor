@@ -4,6 +4,8 @@
 
 #include "globals.h"
 
+#include "test.array.h"
+
 void setup()
 {
     Serial.begin(115200);
@@ -32,13 +34,11 @@ auto lastAvgStrokePower = 0U;
 // - connected 2 microsec 4000-4400
 void loop()
 {
+    // simulatRotation();
+
     strokeController.update();
     powerManagerController.update(strokeController.getLastRevTime(), bleController.isAnyDeviceConnected());
 
-    // for (auto deltaTime : testDeltaRotations)
-    // {
-    //     delay(deltaTime / 1000);
-    //     rotationInterrupt();
     // auto start = micros();
 
     // execution time
@@ -66,20 +66,20 @@ void loop()
         // Serial.println(stop - start);
     }
 
-        if (strokeController.getStrokeCount() > lastStrokeCount)
-        {
+    if (strokeController.getStrokeCount() > lastStrokeCount)
+    {
         Log.infoln("driveDuration: %D", strokeController.getDriveDuration());
         Log.infoln("dragFactor: %d", strokeController.getDragFactor());
-            // execution time
-            // - not connected: 73
-            // - connected: 2000-2600
-            // auto start = micros();
+        // execution time
+        // - not connected: 73
+        // - connected: 2000-2600
+        // auto start = micros();
         bleController.notifyDragFactor(strokeController.getDragFactor());
-            lastStrokeCount = strokeController.getStrokeCount();
-            // auto stop = micros();
-            // Serial.print("notifyDragFactor: ");
-            // Serial.println(stop - start);
-        }
+        lastStrokeCount = strokeController.getStrokeCount();
+        // auto stop = micros();
+        // Serial.print("notifyDragFactor: ");
+        // Serial.println(stop - start);
+    }
 
     if (strokeController.getAvgStrokePower() != lastAvgStrokePower)
     {
