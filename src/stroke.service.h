@@ -46,6 +46,7 @@ class StrokeService
 
     volatile unsigned long previousDeltaTime = 0;
     volatile unsigned long previousRawRevTime = 0;
+    volatile unsigned long lastDataReadTime = 0;
 
     volatile CyclePhase cyclePhase = CyclePhase::Stopped;
     std::array<volatile unsigned long, DELTA_TIME_ARRAY_LENGTH> cleanDeltaTimes{};
@@ -60,6 +61,7 @@ public:
     StrokeService();
 
     void setup() const;
+    bool hasDataChanged();
     StrokeModel::CscData getData() const;
     void processRotation(unsigned long now);
 };

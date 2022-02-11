@@ -16,12 +16,15 @@ void StrokeController::begin() const
 
 void StrokeController::update()
 {
+    if (strokeService.hasDataChanged())
+    {
     cscData = strokeService.getData();
     if (cscData.revCount != previousRevCount)
     {
         Log.infoln("deltaTime: %u", cscData.deltaTime);
         // Serial.print("deltaTimeDiff: ");
         // Serial.println(data.deltaTimeDiff);
+        }
     }
 }
 

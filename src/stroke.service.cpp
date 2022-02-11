@@ -151,6 +151,17 @@ CscData StrokeService::getData() const
     return data;
 }
 
+bool StrokeService::hasDataChanged()
+{
+    if (previousRawRevTime != lastDataReadTime)
+    {
+        lastDataReadTime = previousRawRevTime;
+        return true;
+    }
+
+    return false;
+}
+
 void StrokeService::processRotation(unsigned long now)
 {
     auto currentDeltaTime = now - previousRawRevTime;
