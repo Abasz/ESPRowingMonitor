@@ -1,9 +1,17 @@
+#include <array>
+#include <algorithm>
+#include <numeric>
+
 #include <Arduino.h>
 
 #include "ArduinoLog.h"
 
 #include "globals.h"
 #include "power-manager.service.h"
+
+using std::accumulate;
+using std::array;
+using std::sort;
 
 PowerManagerService::PowerManagerService()
 {
@@ -31,26 +39,35 @@ byte PowerManagerService::getBatteryLevel() const
 
 void PowerManagerService::measureBattery()
 {
-    // TODO: // add better filtering like drag factor (i.e. keep an array and use median so the szélsőértékek will not be considered). the only thing that needs to be considered if the median calculation is done during a single measurement and that is added to the batteryLevel value or doing a measurement and keeping a batteryLevel array and selected from that the median. With the latter my issue is that battery measurement will not happen very often so actually battery level is determined at startup and will not change much while switched on. so filtering per measurement is a better approach (but will take a longer time to do 5 measurement)
+    // execution time: 460 micro sec
     // auto start = micros();
-    // execution time: 90 micro sec
-    auto measurement = analogRead(GPIO_NUM_4);
-    auto newBatteryLevel = ((measurement * 3.3 / 4095) - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100;
+    array<double, BATTERY_LEVEL_ARRAY_LENGTH> batteryLevels{};
 
-    if (newBatteryLevel > 100.0)
+    for (byte i = 0; i < BATTERY_LEVEL_ARRAY_LENGTH; i++)
     {
-        newBatteryLevel = 100;
+        auto measurement = analogRead(GPIO_NUM_34);
+
+        auto rawNewBatteryLevel = ((measurement * 3.3 / 4095) - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100;
+
+        if (rawNewBatteryLevel > 100)
+        {
+            rawNewBatteryLevel = 100;
+        }
+
+        if (rawNewBatteryLevel < 0)
+        {
+            rawNewBatteryLevel = 0;
+        }
+
+        batteryLevels[i] = accumulate(batteryLevels.cbegin(), batteryLevels.cbegin() + i, rawNewBatteryLevel) / (i + 1);
     }
 
-    if (newBatteryLevel < 0)
-    {
-        newBatteryLevel = 0;
-    }
+    sort(batteryLevels.begin(), batteryLevels.end());
 
-    batteryLevel = batteryLevel == 0 ? lround(newBatteryLevel) : lround((newBatteryLevel + batteryLevel) / 2);
-    //     auto stop = micros();
-    //     Serial.print("battery level: ");
-    //     Serial.println(stop - start);
+    batteryLevel = batteryLevel == 0 ? lround(batteryLevels[BATTERY_LEVEL_ARRAY_LENGTH / 2]) : lround((batteryLevels[BATTERY_LEVEL_ARRAY_LENGTH / 2] + batteryLevel) / 2);
+    // auto stop = micros();
+    // Serial.print("battery level: ");
+    // Serial.println(stop - start);
 }
 
 void PowerManagerService::setupBatteryMeasurement()
