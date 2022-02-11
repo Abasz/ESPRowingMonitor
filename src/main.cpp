@@ -30,8 +30,7 @@ byte lastBatteryLevel = 0;
 auto lastAvgStrokePower = 0U;
 // execution time
 // - not connected 30 microsec
-// - connected 1  1800-2350
-// - connected 2 microsec 4000-4400
+// - connected  microsec 2000-4900
 void loop()
 {
     // simulatRotation();
@@ -71,8 +70,8 @@ void loop()
         Log.infoln("driveDuration: %D", strokeController.getDriveDuration());
         Log.infoln("dragFactor: %d", strokeController.getDragFactor());
         // execution time
-        // - not connected: 73
-        // - connected: 2000-2600
+        // - not connected: 173-200
+        // - connected: 900-2700
         // auto start = micros();
         bleController.notifyDragFactor(strokeController.getDragFactor());
         lastStrokeCount = strokeController.getStrokeCount();
@@ -85,13 +84,6 @@ void loop()
     {
         Log.infoln("power: %d", strokeController.getAvgStrokePower());
         lastAvgStrokePower = strokeController.getAvgStrokePower();
-        // execution time
-        // - not connected: 73
-        // - connected: 2000-2600
-        // auto start = micros();
-        // auto stop = micros();
-        // Serial.print("notifyDragFactor: ");
-        // Serial.println(stop - start);
     }
 
     auto battLevel = powerManagerController.getBatteryLevel();
@@ -102,7 +94,9 @@ void loop()
         lastBatteryLevel = battLevel;
     }
     // auto stop = micros();
-    // Serial.print("Main loop: ");
-    // Serial.println(stop - start);
+    // if (stop - start > 10)
+    // {
+    //     Serial.print("Main loop: ");
+    //     Serial.println(stop - start);
     // }
 }

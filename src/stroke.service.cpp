@@ -131,7 +131,7 @@ void StrokeService::calculateAvgStrokePower()
 
 CscData StrokeService::getData() const
 {
-    // execution time: 8-9 microsec
+    // execution time: 12 microsec
     // auto start = micros();
     detachRotationInterrupt();
     CscData data = {
