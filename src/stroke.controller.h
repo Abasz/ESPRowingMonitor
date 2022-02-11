@@ -4,7 +4,7 @@ class StrokeController
 {
     StrokeService &strokeService;
 
-    unsigned long previousRevCount = 0;
+    unsigned int previousRevCount = 0;
 
     StrokeModel::CscData cscData{
         0UL,
@@ -19,7 +19,7 @@ public:
 
     void begin() const;
     void update();
-    unsigned long getPreviousRevCount() const;
+    unsigned int getPreviousRevCount() const;
     void setPreviousRevCount();
     unsigned long getLastRevTime() const;
     unsigned int getRevCount() const;

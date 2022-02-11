@@ -65,9 +65,9 @@ void BluetoothService::notifyBattery(byte batteryLevel) const
 
 void BluetoothService::notifyDragFactor(unsigned short distance, byte dragFactor) const
 {
+    dragFactorCharacteristic->setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
     if (dragFactorCharacteristic->getSubscribedCount() > 0)
     {
-        dragFactorCharacteristic->setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
         dragFactorCharacteristic->notify();
     }
 }
@@ -78,8 +78,8 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
     {
         // execution time: 11-16 microsec
         // auto start = micros();
-        unsigned short revTime = lround(lastRevTime / 1000000.0 * 1024) % UINT16_MAX;
-        unsigned short strokeTime = lround(lastStrokeTime / 1000000.0 * 1024) % UINT16_MAX;
+        unsigned short revTime = lround(lastRevTime / 1000000.0 * 1024) % USHRT_MAX;
+        unsigned short strokeTime = lround(lastStrokeTime / 1000000.0 * 1024) % USHRT_MAX;
         // auto stop = micros();
         // Serial.print("Time stamp calc: ");
         // Serial.println(stop - start);
