@@ -30,6 +30,7 @@ void PowerManagerService::goToSleep() const
     esp_sleep_enable_ext0_wakeup(Settings::sensorPinNumber, !digitalRead(Settings::sensorPinNumber));
     gpio_hold_en(Settings::sensorPinNumber);
     Log.infoln("Going to sleep mode");
+    FastLED.clear(true);
     esp_deep_sleep_start();
 }
 

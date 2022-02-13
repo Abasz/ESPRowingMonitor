@@ -282,5 +282,5 @@ void BluetoothService::setupAdvertisement() const
 
 void BluetoothService::setupConnectionIndicatorLed() const
 {
-    FastLED.addLeds<WS2812, GPIO_NUM_5>(leds, 1);
+    FastLED.addLeds<WS2812, GPIO_NUM_5, GRB>(leds, 1);
 }
