@@ -44,18 +44,13 @@ void printPrefix(Print *_logOutput, int logLevel)
 
 void printTimestamp(Print *_logOutput)
 {
-
-    // Total time
     unsigned long const msecs = micros();
     unsigned long const secs = msecs / MSECS_PER_SEC;
-
-    // Time in components
     unsigned long const microSeconds = msecs % MSECS_PER_SEC;
     unsigned long const seconds = secs % SECS_PER_MIN;
     unsigned long const minutes = (secs / SECS_PER_MIN) % SECS_PER_MIN;
     unsigned long const hours = (secs % SECS_PER_DAY) / SECS_PER_HOUR;
 
-    // Time as string
     char timestamp[20];
     sprintf(timestamp, "%02d:%02d:%02d.%06d ", hours, minutes, seconds, microSeconds);
     _logOutput->print(timestamp);
@@ -63,7 +58,6 @@ void printTimestamp(Print *_logOutput)
 
 void printLogLevel(Print *_logOutput, int logLevel)
 {
-    /// Show log description based on log level
     switch (logLevel)
     {
     default:
@@ -90,53 +84,3 @@ void printLogLevel(Print *_logOutput, int logLevel)
         break;
     }
 }
-
-// void DEBUG_PrintDeltaTimesData()
-// {
-//     for (auto i : [])
-//     {
-//         Serial.print(i);
-//         Serial.print(",");
-//     }
-//     Serial.println();
-// }
-
-// void DEBUG_CalculateRPMData()
-// {
-// if (testI == sizeof(testData) / sizeof(testData[0]))
-// {
-//     Serial.println("Resetting test data");
-//     Serial.print("Final Revcount: ");
-//     Serial.println(strokeController.getRevCount());
-//     Serial.print("Final StrokeCount: ");
-//     Serial.println(strokeController.getStrokeCount());
-//     testI = 0;
-// }
-// double currentRPM = (revCount - lastRev) / ((lastRevTime - lastRevReadTime()) / 1000.0) * 60;
-
-//     if (lastStrokeTime != lastStrokeReadTime)
-//     {
-//         strokeRate = (strokeCount - strokeSinceLastRead) / ((lastStrokeTime - lastStrokeReadTime) / 1000.0) * 60;
-//         lastStrokeReadTime = lastStrokeTime;
-//         strokeSinceLastRead = strokeCount;
-//     }
-//     Serial.print("count: ");
-//     Serial.println(revCount);
-//     Serial.print("stroke rate: ");
-//     Serial.println(strokeRate);
-//     Serial.print("RPM: ");
-//     Serial.println((revCount - revSinceLastRead) / ((lastRevTime - lastRevReadTime) / 1000.0) * 60);
-//     Serial.print("StrokeCount: ");
-//     Serial.println(strokeCount);
-//     lastRevReadTime = lastRevTime;
-//     revSinceLastRead = revCount;
-
-// if (now - strokeController.getLastRevTime() > testData[testI] * 1000)
-// {
-//     if (testI != sizeof(testData) / sizeof(testData[0]))
-//     {
-//         run();
-//         testI++;
-//     }
-// }
-// }

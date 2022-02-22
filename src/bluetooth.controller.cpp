@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 #include "ArduinoLog.h"
 
 #include "bluetooth.controller.h"

@@ -91,14 +91,6 @@ void StrokeService::calculateDragCoefficient()
         if (rawNewDragCoefficient < UPPER_DRAG_FACTOR_THRESHOLD &&
             rawNewDragCoefficient > LOWER_DRAG_FACTOR_THRESHOLD)
         {
-
-            // auto newDragCoefficient = any_of(dragCoefficients.cbegin(),
-            //                                  dragCoefficients.cend(),
-            //                                  [](double item)
-            //                                  { return item == 0; })
-            //                               ? rawNewDragCoefficient
-            //                               : accumulate(dragCoefficients.cbegin(), dragCoefficients.cend(), rawNewDragCoefficient) / (dragCoefficients.size() + 1);
-
             auto newDragCoefficient = rawNewDragCoefficient;
 
             char i = dragCoefficients.size() - 1;
@@ -120,13 +112,6 @@ void StrokeService::calculateDragCoefficient()
 void StrokeService::calculateAvgStrokePower()
 {
     avgStrokePower = dragCoefficient * pow((revCount - 1 - driveStartRevCount) * 2 * PI / ((lastDriveDuration + recoveryDuration) / 1e6), 3);
-    // Log.infoln("test: %D", pow((revCount - 1 - driveStartRevCount) * 2 * PI / ((lastDriveDuration + recoveryDuration) / 1e6), 3));
-    // Log.infoln("test: %d", revCount);
-    // Log.infoln("test: %d", driveStartRevCount);
-    // Log.infoln("test: %d", recoveryStartRevCount);
-    // Log.infoln("test: %d", (revCount - 1 - driveStartRevCount));
-    // Log.infoln("test: %D", (lastDriveDuration + recoveryDuration) / 1e6);
-    // Log.infoln("test: %D", avgStrokePower);
 }
 
 CscData StrokeService::getData() const
@@ -272,11 +257,3 @@ void StrokeService::processRotation(unsigned long now)
         return;
     }
 }
-
-// c(2.8) * (distance / time)^3 = P
-
-// driveLinearDistance = Math.pow((dragFactor(1) / rowerSettings.magicConstant(2.8)), 1.0 / 3.0) * ((totalNumberOfImpulses - flankDetector.noImpulsesToBeginFlank()) - drivePhaseStartAngularDisplacement) * (2.0 * Math.PI) / rowerSettings.numOfImpulsesPerRevolution(1)
-
-// driveLinearDistance = Math.pow((dragFactor(1) / rowerSettings.magicConstant(2.8)), 1.0 / 3.0) * ((totalNumberOfImpulses - drivePhaseStartAngularDisplacement"impulses") *  (2.0 * Math.PI) / rowerSettings.numOfImpulsesPerRevolution(1)
-// *angularVelocity = (2.0 * Math.PI) / deltaTime
-// currentDragFactor = -1 * rowerSettings.flywheelInertia(0.0802) * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryPhaseLength

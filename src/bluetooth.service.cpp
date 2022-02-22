@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
@@ -144,7 +142,6 @@ void BluetoothService::setupServices()
     auto cscService = server->createService(CYCLING_SPEED_CADENCE_SVC_UUID);
     auto deviceInfoService = server->createService(DEVICE_INFO_SVC_UUID);
 
-    // Create a BLE Characteristic
     Log.traceln("Setting up BLE Characteristics");
 
     batteryLevelCharacteristic = batteryService->createCharacteristic(BATTERY_LEVEL_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
@@ -178,7 +175,6 @@ void BluetoothService::setupServices()
 
     Log.traceln("Starting BLE Service");
 
-    // Start the service
     batteryService->start();
     cscService->start();
     deviceInfoService->start();

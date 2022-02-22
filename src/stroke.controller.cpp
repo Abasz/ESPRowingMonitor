@@ -20,8 +20,6 @@ void StrokeController::update()
         if (cscData.revCount != previousRevCount)
         {
             Log.infoln("deltaTime: %u", cscData.deltaTime);
-            // Serial.print("deltaTimeDiff: ");
-            // Serial.println(data.deltaTimeDiff);
         }
     }
 }
