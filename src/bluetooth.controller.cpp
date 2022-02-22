@@ -8,9 +8,14 @@ BluetoothController::BluetoothController(BluetoothService &_bluetoothService) : 
 {
 }
 
-bool BluetoothController::isAnyDeviceConnected() const
+void BluetoothController::update()
 {
-    return bluetoothService.isAnyDeviceConnected();
+    auto now = millis();
+    if (now - lastConnectedDeviceCheckTime > LED_BLINK_FREQUENCY)
+    {
+        bluetoothService.updateLed();
+        lastConnectedDeviceCheckTime = now;
+    }
 }
 
 void BluetoothController::begin()
@@ -18,6 +23,11 @@ void BluetoothController::begin()
     Log.infoln("Setting up BLE Controller");
     bluetoothService.setup();
     bluetoothService.startBLEServer();
+}
+
+bool BluetoothController::isAnyDeviceConnected() const
+{
+    return bluetoothService.isAnyDeviceConnected();
 }
 
 void BluetoothController::notifyBattery(byte batteryLevel) const

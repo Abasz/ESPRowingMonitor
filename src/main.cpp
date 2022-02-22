@@ -32,6 +32,7 @@ void loop()
     // simulatRotation();
 
     strokeController.update();
+    bleController.update();
     powerManagerController.update(strokeController.getLastRevTime(), bleController.isAnyDeviceConnected());
 
     // auto start = micros();

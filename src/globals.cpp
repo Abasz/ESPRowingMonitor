@@ -21,11 +21,6 @@ IRAM_ATTR void rotationInterrupt()
     // Serial.println(stop - start);
 }
 
-IRAM_ATTR void connectionLedIndicatorInterrupt()
-{
-    bleService.checkConnectedDevices();
-}
-
 IRAM_ATTR void batteryMeasurementInterrupt()
 {
     powerManagerService.measureBattery();

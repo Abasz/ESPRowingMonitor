@@ -3,7 +3,6 @@
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
-#include "globals.h"
 #include "bluetooth.service.h"
 
 using std::array;
@@ -18,7 +17,7 @@ bool BluetoothService::isAnyDeviceConnected() const
     return NimBLEDevice::getServer()->getConnectedCount() > 0;
 }
 
-void BluetoothService::checkConnectedDevices()
+void BluetoothService::updateLed()
 {
     // execution time: 1-5 micro sec
     // auto start = micros();
@@ -196,9 +195,4 @@ void BluetoothService::setupAdvertisment() const
 void BluetoothService::setupConnectionIndicatorLed() const
 {
     pinMode(GPIO_NUM_2, OUTPUT);
-
-    Log.traceln("Attach connection led timer interrupt");
-    timerAttachInterrupt(ledTimer, connectionLedIndicatorInterrupt, true);
-    timerAlarmWrite(ledTimer, LED_BLINK_FREQUENCY, true);
-    timerAlarmEnable(ledTimer);
 }

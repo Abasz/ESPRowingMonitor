@@ -6,7 +6,6 @@
 
 #include "ArduinoLog.h"
 
-#include "globals.h"
 #include "power-manager.service.h"
 
 using std::accumulate;
@@ -23,21 +22,13 @@ void PowerManagerService::setup()
     setupBatteryMeasurement();
 }
 
-void PowerManagerService::checkSleep(unsigned long lastRevTime, bool isDeviceConnected) const
+void PowerManagerService::goToSleep() const
 {
-    if (!isDeviceConnected && micros() - lastRevTime > DEEP_SLEEP_TIMEOUT)
-    {
-        Log.infoln("Going to sleep mode");
-        esp_deep_sleep_start();
-    }
+    Log.infoln("Going to sleep mode");
+    esp_deep_sleep_start();
 }
 
-byte PowerManagerService::getBatteryLevel() const
-{
-    return batteryLevel;
-}
-
-void PowerManagerService::measureBattery()
+byte PowerManagerService::measureBattery()
 {
     // execution time: 460 micro sec
     // auto start = micros();
@@ -65,6 +56,8 @@ void PowerManagerService::measureBattery()
     sort(batteryLevels.begin(), batteryLevels.end());
 
     batteryLevel = batteryLevel == 0 ? lround(batteryLevels[BATTERY_LEVEL_ARRAY_LENGTH / 2]) : lround((batteryLevels[BATTERY_LEVEL_ARRAY_LENGTH / 2] + batteryLevel) / 2);
+
+    return batteryLevel;
     // auto stop = micros();
     // Serial.print("battery level: ");
     // Serial.println(stop - start);
@@ -75,17 +68,11 @@ void PowerManagerService::setupBatteryMeasurement()
     pinMode(GPIO_NUM_4, INPUT);
 
     delay(500);
-    for (byte i = 0; i < 10; i++)
+    for (byte i = 0; i < INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT; i++)
     {
         measureBattery();
         delay(100);
     }
-
-    Log.traceln("Attache battery measurement timer interrupt");
-
-    timerAttachInterrupt(batteryMeasurementTimer, batteryMeasurementInterrupt, true);
-    timerAlarmWrite(batteryMeasurementTimer, BATTERY_LEVEL_MEASUREMENT_FREQUENCY, true);
-    timerAlarmEnable(batteryMeasurementTimer);
 }
 
 void PowerManagerService::setupDeepSleep() const
