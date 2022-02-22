@@ -24,10 +24,6 @@ void setup()
     bleController.notifyCsc(0, 0, 0, 0);
 }
 
-// TODO: these tracking values should be moved to the controllers like for lastRevReadTime
-auto lastStrokeCount = 0U;
-byte lastBatteryLevel = 0;
-auto lastAvgStrokePower = 0U;
 // execution time
 // - not connected 30 microsec
 // - connected  microsec 2000-4900
@@ -65,7 +61,7 @@ void loop()
         // Serial.println(stop - start);
     }
 
-    if (strokeController.getStrokeCount() > lastStrokeCount)
+    if (strokeController.getStrokeCount() > strokeController.getPreviousStrokeCount())
     {
         Log.infoln("driveDuration: %D", strokeController.getDriveDuration());
         Log.infoln("dragFactor: %d", strokeController.getDragFactor());
@@ -74,24 +70,24 @@ void loop()
         // - connected: 900-2700
         // auto start = micros();
         bleController.notifyDragFactor(strokeController.getDragFactor());
-        lastStrokeCount = strokeController.getStrokeCount();
+        strokeController.setPreviousStrokeCount();
         // auto stop = micros();
         // Serial.print("notifyDragFactor: ");
         // Serial.println(stop - start);
     }
 
-    if (strokeController.getAvgStrokePower() != lastAvgStrokePower)
+    if (strokeController.getAvgStrokePower() != strokeController.getPreviousAvgStrokePower())
     {
         Log.infoln("power: %d", strokeController.getAvgStrokePower());
-        lastAvgStrokePower = strokeController.getAvgStrokePower();
+        strokeController.setPreviousAvgStrokePower();
     }
 
     auto battLevel = powerManagerController.getBatteryLevel();
-    if (battLevel != lastBatteryLevel)
+    if (battLevel != powerManagerController.getPreviousBatteryLevel())
     {
         Log.infoln("batteryLevel: %d", battLevel);
         bleController.notifyBattery(battLevel);
-        lastBatteryLevel = battLevel;
+        powerManagerController.setPreviousBatteryLevel();
     }
     // auto stop = micros();
     // if (stop - start > 10)

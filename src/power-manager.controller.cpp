@@ -15,12 +15,23 @@ void PowerManagerController::begin()
     powerManagerService.setup();
 }
 
-void PowerManagerController::update(unsigned long lastRevTime, bool isDeviceConnected) const
+void PowerManagerController::update(unsigned long lastRevTime, bool isDeviceConnected)
 {
     powerManagerService.checkSleep(lastRevTime, isDeviceConnected);
+    batteryLevel = powerManagerService.getBatteryLevel();
 }
 
 byte PowerManagerController::getBatteryLevel() const
 {
-    return powerManagerService.getBatteryLevel();
+    return batteryLevel;
+}
+
+byte PowerManagerController::getPreviousBatteryLevel() const
+{
+    return previousBatteryLevel;
+}
+
+void PowerManagerController::setPreviousBatteryLevel()
+{
+    previousBatteryLevel = batteryLevel;
 }

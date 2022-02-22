@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 #include "ArduinoLog.h"
 
 #include "stroke.controller.h"
@@ -73,7 +71,27 @@ unsigned int StrokeController::getPreviousRevCount() const
     return previousRevCount;
 }
 
+unsigned int StrokeController::getPreviousStrokeCount() const
+{
+    return previousStrokeCount;
+}
+
+unsigned int StrokeController::getPreviousAvgStrokePower() const
+{
+    return previousAvgStrokePower;
+}
+
 void StrokeController::setPreviousRevCount()
 {
     previousRevCount = cscData.revCount;
+}
+
+void StrokeController::setPreviousStrokeCount()
+{
+    previousStrokeCount = cscData.strokeCount;
+}
+
+void StrokeController::setPreviousAvgStrokePower()
+{
+    previousAvgStrokePower = lround(cscData.avgStrokePower);
 }
