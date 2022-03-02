@@ -11,7 +11,6 @@ class PowerManagerService
     byte batteryLevel = 0;
 
     void setupBatteryMeasurement();
-    void setupDeepSleep() const;
     void printWakeupReason() const;
 
 public:

@@ -18,12 +18,15 @@ PowerManagerService::PowerManagerService()
 
 void PowerManagerService::setup()
 {
-    setupDeepSleep();
+    printWakeupReason();
     setupBatteryMeasurement();
 }
 
 void PowerManagerService::goToSleep() const
 {
+    Log.traceln("Configure deep sleep mode");
+    esp_sleep_enable_ext0_wakeup(GPIO_NUM_26, !digitalRead(GPIO_NUM_26));
+    gpio_hold_en(GPIO_NUM_26);
     Log.infoln("Going to sleep mode");
     esp_deep_sleep_start();
 }
@@ -73,14 +76,6 @@ void PowerManagerService::setupBatteryMeasurement()
         measureBattery();
         delay(100);
     }
-}
-
-void PowerManagerService::setupDeepSleep() const
-{
-    printWakeupReason();
-    Log.traceln("Configure deep sleep mode");
-    esp_sleep_enable_ext0_wakeup(GPIO_NUM_26, LOW);
-    gpio_hold_en(GPIO_NUM_26);
 }
 
 void PowerManagerService::printWakeupReason() const
