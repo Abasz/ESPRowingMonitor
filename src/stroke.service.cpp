@@ -91,20 +91,23 @@ void StrokeService::calculateDragCoefficient()
         if (rawNewDragCoefficient < UPPER_DRAG_FACTOR_THRESHOLD &&
             rawNewDragCoefficient > LOWER_DRAG_FACTOR_THRESHOLD)
         {
-            auto newDragCoefficient = rawNewDragCoefficient;
-
-            char i = dragCoefficients.size() - 1;
-            while (i > 0)
+            if (DRAG_COEFFICIENTS_ARRAY_LENGTH > 1)
             {
-                dragCoefficients[i] = dragCoefficients[i - 1];
-                i--;
+                char i = DRAG_COEFFICIENTS_ARRAY_LENGTH - 1;
+                while (i > 0)
+                {
+                    dragCoefficients[i] = dragCoefficients[i - 1];
+                    i--;
+                }
+                dragCoefficients[0] = rawNewDragCoefficient;
+
+                array<double, DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
+
+                partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
+                rawNewDragCoefficient = sortedArray[sortedArray.size() / 2];
             }
-            dragCoefficients[0] = newDragCoefficient;
 
-            array<double, DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
-
-            partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
-            dragCoefficient = sortedArray[sortedArray.size() / 2];
+            dragCoefficient = rawNewDragCoefficient;
         }
     }
 }
