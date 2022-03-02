@@ -83,7 +83,7 @@ void StrokeService::setup() const
 
 void StrokeService::calculateDragCoefficient()
 {
-    auto recoveryEndAngularVelocity = 2 * PI / cleanDeltaTimes[DELTA_TIME_ARRAY_LENGTH - 1];
+    auto recoveryEndAngularVelocity = ANGULAR_DISPLACEMENT_PER_IMPULSE / cleanDeltaTimes[DELTA_TIME_ARRAY_LENGTH - 1];
     if (recoveryStartAngularVelocity > recoveryEndAngularVelocity && recoveryDuration < MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
     {
         auto rawNewDragCoefficient = -1 * FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryDuration;
@@ -111,7 +111,7 @@ void StrokeService::calculateDragCoefficient()
 
 void StrokeService::calculateAvgStrokePower()
 {
-    avgStrokePower = dragCoefficient * pow((revCount - 1 - driveStartRevCount) * 2 * PI / ((lastDriveDuration + recoveryDuration) / 1e6), 3);
+    avgStrokePower = dragCoefficient * pow((impulseCount - 1 - driveStartImpulseCount) * ANGULAR_DISPLACEMENT_PER_IMPULSE / ((lastDriveDuration + recoveryDuration) / 1e6), 3);
 }
 
 CscData StrokeService::getData() const
@@ -182,6 +182,7 @@ void StrokeService::processRotation(unsigned long now)
         recoveryDuration = 0;
         driveDuration = 0;
         avgStrokePower = 0;
+        impulseCount = 0;
 
         return;
     }
@@ -198,17 +199,23 @@ void StrokeService::processRotation(unsigned long now)
         // Since we detected power, setting to "Drive" phase and increasing rotation count and registering rotation time
         cyclePhase = CyclePhase::Drive;
         driveStartTime = now - cleanDeltaTimes[0];
-        driveStartRevCount = revCount; // no need to subtract 1 from revCount as it is not incremented yet
+        driveStartImpulseCount = 0;
 
-        lastRevTime = now;
-        revCount++;
-
+        impulseCount++;
+        if (impulseCount % IMPULSES_PER_REVOLUTION == 0)
+        {
+            revCount++;
+            lastRevTime = now;
+        }
         return;
     }
 
-    // We add a new rotation since we are not in the "Stopped" phase
-    lastRevTime = now;
-    revCount++;
+    impulseCount++;
+    if (impulseCount % IMPULSES_PER_REVOLUTION == 0)
+    {
+        revCount++;
+        lastRevTime = now;
+    }
 
     // we implement a finite state machine that goes between "Drive" and "Recovery" phases while paddeling on the machine. This allows a phase-change if sufficient time has passed and there is a plausible flank
     if (cyclePhase == CyclePhase::Drive)
@@ -227,8 +234,8 @@ void StrokeService::processRotation(unsigned long now)
 
             cyclePhase = CyclePhase::Recovery;
             recoveryStartTime = now - cleanDeltaTimes[0];
-            recoveryStartAngularVelocity = 2 * PI / cleanDeltaTimes[0];
-            recoveryStartRevCount = revCount - 1;
+            recoveryStartAngularVelocity = ANGULAR_DISPLACEMENT_PER_IMPULSE / cleanDeltaTimes[0];
+            recoveryStartImpulseCount = impulseCount - 1;
             driveDuration = 0;
             return;
         }
@@ -248,7 +255,7 @@ void StrokeService::processRotation(unsigned long now)
 
             cyclePhase = CyclePhase::Drive;
             driveStartTime = now - cleanDeltaTimes[0];
-            driveStartRevCount = revCount - 1;
+            driveStartImpulseCount = impulseCount - 1;
             recoveryDuration = 0;
             return;
         }

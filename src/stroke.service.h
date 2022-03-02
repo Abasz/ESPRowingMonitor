@@ -21,6 +21,8 @@ class StrokeService
     static double constexpr LOWER_DRAG_FACTOR_THRESHOLD = 75 / 1e6;
     static double constexpr UPPER_DRAG_FACTOR_THRESHOLD = 250 / 1e6;
     static double constexpr FLYWHEEL_INERTIA = 0.073;
+    static byte const IMPULSES_PER_REVOLUTION = 1;
+    static double constexpr ANGULAR_DISPLACEMENT_PER_IMPULSE = (2 * PI) / IMPULSES_PER_REVOLUTION;
 
     static byte const FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD = 1;
     static byte const DELTA_TIME_ARRAY_LENGTH = 2;
@@ -28,6 +30,7 @@ class StrokeService
 
     volatile unsigned long lastRevTime = 0;
     volatile unsigned long lastStrokeTime = 0;
+    volatile unsigned int impulseCount = 0;
     volatile unsigned int revCount = 0;
     volatile unsigned short strokeCount = 0;
 
@@ -36,12 +39,12 @@ class StrokeService
     volatile unsigned int lastDriveDuration = 0;
 
     volatile unsigned long driveStartTime = 0;
-    volatile unsigned int driveStartRevCount = 0;
+    volatile unsigned int driveStartImpulseCount = 0;
     volatile unsigned int driveDuration = 0;
 
     volatile double recoveryStartAngularVelocity = 0.0;
     volatile unsigned long recoveryStartTime = 0;
-    volatile unsigned int recoveryStartRevCount = 0;
+    volatile unsigned int recoveryStartImpulseCount = 0;
     volatile unsigned int recoveryDuration = 0;
 
     volatile unsigned long previousDeltaTime = 0;
