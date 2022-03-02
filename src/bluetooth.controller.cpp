@@ -1,6 +1,7 @@
 #include "ArduinoLog.h"
 
 #include "bluetooth.controller.h"
+#include "settings.h"
 
 BluetoothController::BluetoothController(BluetoothService &_bluetoothService) : bluetoothService(_bluetoothService)
 {
@@ -9,7 +10,7 @@ BluetoothController::BluetoothController(BluetoothService &_bluetoothService) : 
 void BluetoothController::update()
 {
     auto now = millis();
-    if (now - lastConnectedDeviceCheckTime > LED_BLINK_FREQUENCY)
+    if (now - lastConnectedDeviceCheckTime > Settings::LED_BLINK_FREQUENCY)
     {
         bluetoothService.updateLed();
         lastConnectedDeviceCheckTime = now;

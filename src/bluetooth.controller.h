@@ -4,8 +4,6 @@
 
 class BluetoothController
 {
-    static unsigned short const LED_BLINK_FREQUENCY = 1000;
-
     BluetoothService &bluetoothService;
 
     unsigned long lastConnectedDeviceCheckTime = 0;

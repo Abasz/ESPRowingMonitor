@@ -7,6 +7,7 @@
 #include "ArduinoLog.h"
 
 #include "power-manager.service.h"
+#include "settings.h"
 
 using std::accumulate;
 using std::array;
@@ -25,8 +26,8 @@ void PowerManagerService::setup()
 void PowerManagerService::goToSleep() const
 {
     Log.traceln("Configure deep sleep mode");
-    esp_sleep_enable_ext0_wakeup(GPIO_NUM_26, !digitalRead(GPIO_NUM_26));
-    gpio_hold_en(GPIO_NUM_26);
+    esp_sleep_enable_ext0_wakeup(Settings::SENSOR_PIN_NUMBER, !digitalRead(Settings::SENSOR_PIN_NUMBER));
+    gpio_hold_en(Settings::SENSOR_PIN_NUMBER);
     Log.infoln("Going to sleep mode");
     esp_deep_sleep_start();
 }
@@ -35,13 +36,13 @@ byte PowerManagerService::measureBattery()
 {
     // execution time: 460 micro sec
     // auto start = micros();
-    array<double, BATTERY_LEVEL_ARRAY_LENGTH> batteryLevels{};
+    array<double, Settings::BATTERY_LEVEL_ARRAY_LENGTH> batteryLevels{};
 
-    for (byte i = 0; i < BATTERY_LEVEL_ARRAY_LENGTH; i++)
+    for (byte i = 0; i < Settings::BATTERY_LEVEL_ARRAY_LENGTH; i++)
     {
         auto measurement = analogRead(GPIO_NUM_34);
 
-        auto rawNewBatteryLevel = ((measurement * 3.3 / 4095) - BATTERY_VOLTAGE_MIN) / (BATTERY_VOLTAGE_MAX - BATTERY_VOLTAGE_MIN) * 100;
+        auto rawNewBatteryLevel = ((measurement * 3.3 / 4095) - Settings::BATTERY_VOLTAGE_MIN) / (Settings::BATTERY_VOLTAGE_MAX - Settings::BATTERY_VOLTAGE_MIN) * 100;
 
         if (rawNewBatteryLevel > 100)
         {
@@ -58,7 +59,7 @@ byte PowerManagerService::measureBattery()
 
     sort(batteryLevels.begin(), batteryLevels.end());
 
-    batteryLevel = batteryLevel == 0 ? lround(batteryLevels[BATTERY_LEVEL_ARRAY_LENGTH / 2]) : lround((batteryLevels[BATTERY_LEVEL_ARRAY_LENGTH / 2] + batteryLevel) / 2);
+    batteryLevel = batteryLevel == 0 ? lround(batteryLevels[Settings::BATTERY_LEVEL_ARRAY_LENGTH / 2]) : lround((batteryLevels[Settings::BATTERY_LEVEL_ARRAY_LENGTH / 2] + batteryLevel) / 2);
 
     return batteryLevel;
     // auto stop = micros();
@@ -71,7 +72,7 @@ void PowerManagerService::setupBatteryMeasurement()
     pinMode(GPIO_NUM_4, INPUT);
 
     delay(500);
-    for (byte i = 0; i < INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT; i++)
+    for (byte i = 0; i < Settings::INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT; i++)
     {
         measureBattery();
         delay(100);

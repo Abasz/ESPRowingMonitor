@@ -28,12 +28,12 @@ IRAM_ATTR void batteryMeasurementInterrupt()
 
 void attachRotationInterrupt()
 {
-    attachInterrupt(digitalPinToInterrupt(GPIO_NUM_26), rotationInterrupt, RISING);
+    attachInterrupt(digitalPinToInterrupt(Settings::SENSOR_PIN_NUMBER), rotationInterrupt, RISING);
 }
 
 void detachRotationInterrupt()
 {
-    detachInterrupt(digitalPinToInterrupt(GPIO_NUM_26));
+    detachInterrupt(digitalPinToInterrupt(Settings::SENSOR_PIN_NUMBER));
 }
 
 void printPrefix(Print *_logOutput, int logLevel)

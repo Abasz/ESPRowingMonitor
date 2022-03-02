@@ -4,9 +4,6 @@
 
 class PowerManagerController
 {
-    static unsigned int const BATTERY_MEASUREMENT_FREQUENCY = 10 * 60 * 1000;
-    static unsigned long const DEEP_SLEEP_TIMEOUT = 4 * 60 * 1000;
-
     PowerManagerService &powerManagerService;
 
     byte batteryLevel = 0;

@@ -43,7 +43,7 @@ bool StrokeService::isFlywheelUnpowered() const
     }
 
     // If not all of the data points are consistently increasing or they are actually decreasing report unpowered
-    if (numberOfAccelerations >= FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD)
+    if (numberOfAccelerations >= Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD)
     {
         return false;
     }
@@ -66,7 +66,7 @@ bool StrokeService::isFlywheelPowered() const
         i--;
     }
     // If not all of the data points are consistently decreasing or they are actually increasing report powered
-    if (numberOfDecelerations >= FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD)
+    if (numberOfDecelerations >= Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD)
     {
         return false;
     }
@@ -76,24 +76,24 @@ bool StrokeService::isFlywheelPowered() const
 
 void StrokeService::setup() const
 {
-    pinMode(GPIO_NUM_26, INPUT_PULLUP);
+    pinMode(Settings::SENSOR_PIN_NUMBER, INPUT_PULLUP);
     Log.traceln("Attach interrupt");
     attachRotationInterrupt();
 }
 
 void StrokeService::calculateDragCoefficient()
 {
-    auto recoveryEndAngularVelocity = ANGULAR_DISPLACEMENT_PER_IMPULSE / cleanDeltaTimes[DELTA_TIME_ARRAY_LENGTH - 1];
-    if (recoveryStartAngularVelocity > recoveryEndAngularVelocity && recoveryDuration < MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
+    auto recoveryEndAngularVelocity = ANGULAR_DISPLACEMENT_PER_IMPULSE / cleanDeltaTimes[Settings::DELTA_TIME_ARRAY_LENGTH - 1];
+    if (recoveryStartAngularVelocity > recoveryEndAngularVelocity && recoveryDuration < Settings::MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
     {
-        auto rawNewDragCoefficient = -1 * FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryDuration;
+        auto rawNewDragCoefficient = -1 * Settings::FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryDuration;
 
-        if (rawNewDragCoefficient < UPPER_DRAG_FACTOR_THRESHOLD &&
-            rawNewDragCoefficient > LOWER_DRAG_FACTOR_THRESHOLD)
+        if (rawNewDragCoefficient < Settings::UPPER_DRAG_FACTOR_THRESHOLD &&
+            rawNewDragCoefficient > Settings::LOWER_DRAG_FACTOR_THRESHOLD)
         {
-            if (DRAG_COEFFICIENTS_ARRAY_LENGTH > 1)
+            if (Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH > 1)
             {
-                char i = DRAG_COEFFICIENTS_ARRAY_LENGTH - 1;
+                char i = Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH - 1;
                 while (i > 0)
                 {
                     dragCoefficients[i] = dragCoefficients[i - 1];
@@ -101,7 +101,7 @@ void StrokeService::calculateDragCoefficient()
                 }
                 dragCoefficients[0] = rawNewDragCoefficient;
 
-                array<double, DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
+                array<double, Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
 
                 partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
                 rawNewDragCoefficient = sortedArray[sortedArray.size() / 2];
@@ -154,7 +154,7 @@ void StrokeService::processRotation(unsigned long now)
 {
     auto currentDeltaTime = now - previousRawRevTime;
 
-    if (currentDeltaTime < ROTATION_DEBOUNCE_TIME_MIN * 1000)
+    if (currentDeltaTime < Settings::ROTATION_DEBOUNCE_TIME_MIN * 1000)
         return;
 
     auto deltaTimeDiffPair = minmax<volatile unsigned long>(currentDeltaTime, previousDeltaTime);
@@ -178,7 +178,7 @@ void StrokeService::processRotation(unsigned long now)
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
     // TODO: decide whether the recovery duration should be checked instead
-    if (cyclePhase == CyclePhase::Recovery && recoveryDuration > ROWING_STOPPED_THRESHOLD_PERIOD * 1000)
+    if (cyclePhase == CyclePhase::Recovery && recoveryDuration > Settings::ROWING_STOPPED_THRESHOLD_PERIOD * 1000)
     {
         cyclePhase = CyclePhase::Stopped;
 
@@ -205,7 +205,7 @@ void StrokeService::processRotation(unsigned long now)
         driveStartImpulseCount = 0;
 
         impulseCount++;
-        if (impulseCount % IMPULSES_PER_REVOLUTION == 0)
+        if (impulseCount % Settings::IMPULSES_PER_REVOLUTION == 0)
         {
             revCount++;
             lastRevTime = now;
@@ -214,7 +214,7 @@ void StrokeService::processRotation(unsigned long now)
     }
 
     impulseCount++;
-    if (impulseCount % IMPULSES_PER_REVOLUTION == 0)
+    if (impulseCount % Settings::IMPULSES_PER_REVOLUTION == 0)
     {
         revCount++;
         lastRevTime = now;
@@ -227,7 +227,7 @@ void StrokeService::processRotation(unsigned long now)
         if (isFlywheelUnpowered())
         {
             // It seems that we lost power to the flywheel lets check if drive time was sufficint for detecting a stroke (i.e. drivePhaseDuration exceeds debounce time)
-            if (driveDuration > STROKE_DEBOUNCE_TIME * 1000)
+            if (driveDuration > Settings::STROKE_DEBOUNCE_TIME * 1000)
             {
                 // Here we can conclude the "Drive" phase as there is no more drive detected to the flywheel (e.g. for calculating power etc.)
                 strokeCount++;
