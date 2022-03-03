@@ -6,7 +6,7 @@
 		{
 			"label": "Compile with g++",
 			"type": "shell",
-			"command": "g++ -std=c++17 src/stroke.*.cpp test/*.cpp -o testRun -D byte=uint8_t -D PI=3.1415926535897932384626433832795 -D INPUT_PULLUP=1 -D GPIO_NUM_26=26 -include stdint.h -include string -include cmath -Itest -D ROWING_SIMULATION",
+			"command": "g++ -g -std=c++17 src/stroke.*.cpp test/*.cpp -o testRun -D byte=uint8_t -D PI=3.1415926535897932384626433832795 -D INPUT_PULLUP=1 -include stdint.h -include string -include cmath -include Esp32-typedefs.h -Itest -D ROWING_SIMULATION",
 			"problemMatcher": ["$msCompile"],
 			"group": {
 				"kind": "build",
