@@ -36,6 +36,7 @@ class StrokeService
     volatile unsigned int recoveryDuration = 0;
 
     volatile unsigned long previousDeltaTime = 0;
+    volatile unsigned long previousCleanRevTime = 0;
     volatile unsigned long previousRawRevTime = 0;
     volatile unsigned long lastDataReadTime = 0;
 

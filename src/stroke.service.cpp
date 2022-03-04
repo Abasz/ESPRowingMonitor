@@ -141,9 +141,9 @@ CscData StrokeService::getData() const
 
 bool StrokeService::hasDataChanged()
 {
-    if (previousRawRevTime != lastDataReadTime)
+    if (previousCleanRevTime != lastDataReadTime)
     {
-        lastDataReadTime = previousRawRevTime;
+        lastDataReadTime = previousCleanRevTime;
         return true;
     }
 
@@ -152,17 +152,21 @@ bool StrokeService::hasDataChanged()
 
 void StrokeService::processRotation(unsigned long now)
 {
-    auto currentDeltaTime = now - previousRawRevTime;
+    auto currentRawDeltaTime = now - previousRawRevTime;
 
-    if (currentDeltaTime < Settings::ROTATION_DEBOUNCE_TIME_MIN * 1000)
+    previousRawRevTime = now;
+
+    if (currentRawDeltaTime < Settings::ROTATION_DEBOUNCE_TIME_MIN * 1000)
         return;
 
-    auto deltaTimeDiffPair = minmax<volatile unsigned long>(currentDeltaTime, previousDeltaTime);
+    auto currentCleanDeltaTime = now - previousCleanRevTime;
+
+    auto deltaTimeDiffPair = minmax<volatile unsigned long>(currentCleanDeltaTime, previousDeltaTime);
     auto deltaTimeDiff = deltaTimeDiffPair.second - deltaTimeDiffPair.first;
 
-    previousDeltaTime = currentDeltaTime;
+    previousDeltaTime = currentCleanDeltaTime;
     // We disregard rotation signals that are non sensible (the absolute difference of the current and the previous deltas exceeds the current delta)
-    if (deltaTimeDiff > currentDeltaTime)
+    if (deltaTimeDiff > currentCleanDeltaTime)
         return;
 
     // If we got this far, we must have a sensible delta for flywheel rotation time, updating the deltaTime array
@@ -172,9 +176,9 @@ void StrokeService::processRotation(unsigned long now)
         cleanDeltaTimes[i] = cleanDeltaTimes[i - 1];
         i--;
     }
-    cleanDeltaTimes[0] = currentDeltaTime;
+    cleanDeltaTimes[0] = currentCleanDeltaTime;
 
-    previousRawRevTime = now;
+    previousCleanRevTime = now;
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
     // TODO: decide whether the recovery duration should be checked instead
