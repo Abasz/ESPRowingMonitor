@@ -14,7 +14,7 @@ enum class CyclePhase
 
 class StrokeService
 {
-    static double constexpr ANGULAR_DISPLACEMENT_PER_IMPULSE = (2 * PI) / Settings::IMPULSES_PER_REVOLUTION ;
+    static double constexpr ANGULAR_DISPLACEMENT_PER_IMPULSE = (2 * PI) / Settings::IMPULSES_PER_REVOLUTION;
 
     volatile unsigned long lastRevTime = 0;
     volatile unsigned long lastStrokeTime = 0;

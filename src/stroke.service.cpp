@@ -33,7 +33,7 @@ bool StrokeService::isFlywheelUnpowered() const
     byte i = cleanDeltaTimes.size() - 1;
     while (i > 0)
     {
-        if (cleanDeltaTimes[i] >= cleanDeltaTimes[i - 1])
+        if (cleanDeltaTimes[i] >= cleanDeltaTimes[i - 1] || cleanDeltaTimes[i - 1] - cleanDeltaTimes[i] < Settings::MINIMUM_ACCELERATION_DELTA_TO_POWERED)
         {
             // Oldest interval (dataPoints[i]) is larger than the younger one (datapoint[i-1], as the distance is
             // fixed, we are accelerating
@@ -57,7 +57,7 @@ bool StrokeService::isFlywheelPowered() const
     byte i = cleanDeltaTimes.size() - 1;
     while (i > 0)
     {
-        if (cleanDeltaTimes[i] < cleanDeltaTimes[i - 1])
+        if (cleanDeltaTimes[i] < cleanDeltaTimes[i - 1] && cleanDeltaTimes[i - 1] - cleanDeltaTimes[i] > Settings::MINIMUM_DECELERATION_DELTA_TO_UNPOWERED)
         {
             // Oldest interval (dataPoints[i]) is shorter than the younger one (datapoint[i-1], as the distance is fixed, we
             // discovered a deceleration
@@ -83,33 +83,37 @@ void StrokeService::setup() const
 
 void StrokeService::calculateDragCoefficient()
 {
+    if (cleanDeltaTimes[Settings::DELTA_TIME_ARRAY_LENGTH - 1] < Settings::DRAG_FACTOR_ROTATION_DELTA_UPPER_THRESHOLD * 1000)
+        return;
+
     auto recoveryEndAngularVelocity = ANGULAR_DISPLACEMENT_PER_IMPULSE / cleanDeltaTimes[Settings::DELTA_TIME_ARRAY_LENGTH - 1];
-    if (recoveryStartAngularVelocity > recoveryEndAngularVelocity && recoveryDuration < Settings::MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
+
+    if (recoveryStartAngularVelocity < recoveryEndAngularVelocity || recoveryDuration > Settings::MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
+        return;
+
+    auto rawNewDragCoefficient = -1 * Settings::FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryDuration;
+
+    if (rawNewDragCoefficient > Settings::UPPER_DRAG_FACTOR_THRESHOLD ||
+        rawNewDragCoefficient < Settings::LOWER_DRAG_FACTOR_THRESHOLD)
+        return;
+
+    if (Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH > 1)
     {
-        auto rawNewDragCoefficient = -1 * Settings::FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryDuration;
-
-        if (rawNewDragCoefficient < Settings::UPPER_DRAG_FACTOR_THRESHOLD &&
-            rawNewDragCoefficient > Settings::LOWER_DRAG_FACTOR_THRESHOLD)
+        char i = Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH - 1;
+        while (i > 0)
         {
-            if (Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH > 1)
-            {
-                char i = Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH - 1;
-                while (i > 0)
-                {
-                    dragCoefficients[i] = dragCoefficients[i - 1];
-                    i--;
-                }
-                dragCoefficients[0] = rawNewDragCoefficient;
-
-                array<double, Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
-
-                partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
-                rawNewDragCoefficient = sortedArray[sortedArray.size() / 2];
-            }
-
-            dragCoefficient = rawNewDragCoefficient;
+            dragCoefficients[i] = dragCoefficients[i - 1];
+            i--;
         }
+        dragCoefficients[0] = rawNewDragCoefficient;
+
+        array<double, Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH> sortedArray{};
+
+        partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
+        rawNewDragCoefficient = sortedArray[sortedArray.size() / 2];
     }
+
+    dragCoefficient = rawNewDragCoefficient;
 }
 
 void StrokeService::calculateAvgStrokePower()
@@ -170,7 +174,7 @@ void StrokeService::processRotation(unsigned long now)
         return;
 
     // If we got this far, we must have a sensible delta for flywheel rotation time, updating the deltaTime array
-    char i = cleanDeltaTimes.size() - 1;
+    byte i = cleanDeltaTimes.size() - 1;
     while (i > 0)
     {
         cleanDeltaTimes[i] = cleanDeltaTimes[i - 1];
@@ -181,7 +185,6 @@ void StrokeService::processRotation(unsigned long now)
     previousCleanRevTime = now;
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
-    // TODO: decide whether the recovery duration should be checked instead
     if (cyclePhase == CyclePhase::Recovery && recoveryDuration > Settings::ROWING_STOPPED_THRESHOLD_PERIOD * 1000)
     {
         cyclePhase = CyclePhase::Stopped;
@@ -241,6 +244,7 @@ void StrokeService::processRotation(unsigned long now)
 
             cyclePhase = CyclePhase::Recovery;
             recoveryStartTime = now - cleanDeltaTimes[0];
+            // TODO: probably the last drive deltaTime should be used as recoveryStartAngularVelocity as this is the velocity we begin the recoveryPhase. But this is not obvious as generally there should be no harm to the drag factor calculation if we use a later deltaTime and that startDeltaTime is deducted from the recoveryPhaseLength (i.e. the total time of the measurement are in pare with the other data used for calculating DF). So actually we may need to use cleanDeltaTimes[i-1] i.e. the last element of the array. Then in this case no adjustment is necessary to the recoveryPhaseLength (in the other case, i.e. using cleanDeltaTimes[0] that is a deltaTime that is already decelerating recoveryStartDelta should be deducted on the calculation of the drag factor)
             recoveryStartAngularVelocity = ANGULAR_DISPLACEMENT_PER_IMPULSE / cleanDeltaTimes[0];
             recoveryStartImpulseCount = impulseCount - 1;
             driveDuration = 0;
