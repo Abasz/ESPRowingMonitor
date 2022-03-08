@@ -4,6 +4,7 @@
 
 #include "stroke.model.h"
 #include "settings.h"
+#include "regressor.service.h"
 
 enum class CyclePhase
 {
@@ -14,6 +15,8 @@ enum class CyclePhase
 
 class StrokeService
 {
+    LinearRegressorService &regressorService;
+
     static double constexpr ANGULAR_DISPLACEMENT_PER_IMPULSE = (2 * PI) / Settings::IMPULSES_PER_REVOLUTION;
 
     volatile unsigned long lastRevTime = 0;
@@ -30,9 +33,7 @@ class StrokeService
     volatile unsigned int driveStartImpulseCount = 0;
     volatile unsigned int driveDuration = 0;
 
-    volatile double recoveryStartAngularVelocity = 0.0;
     volatile unsigned long recoveryStartTime = 0;
-    volatile unsigned int recoveryStartImpulseCount = 0;
     volatile unsigned int recoveryDuration = 0;
 
     volatile unsigned long previousDeltaTime = 0;
@@ -50,7 +51,7 @@ class StrokeService
     void calculateAvgStrokePower();
 
 public:
-    StrokeService();
+    StrokeService(LinearRegressorService &_regressorService);
 
     void setup() const;
     bool hasDataChanged();

@@ -3,7 +3,8 @@
 #include "globals.h"
 
 BluetoothService bleService;
-StrokeService strokeService;
+LinearRegressorService regressorService;
+StrokeService strokeService(regressorService);
 PowerManagerService powerManagerService;
 
 BluetoothController bleController(bleService);

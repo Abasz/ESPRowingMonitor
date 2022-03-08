@@ -1,6 +1,7 @@
 #include "globals.h"
 
-StrokeService strokeService;
+LinearRegressorService regressorService;
+StrokeService strokeService(regressorService);
 StrokeController strokeController(strokeService);
 
 void attachRotationInterrupt()

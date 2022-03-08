@@ -13,6 +13,7 @@ public:
 
     // Drag factor filter settings
     static byte const DRAG_FACTOR_ROTATION_DELTA_UPPER_THRESHOLD = 0;
+    static double constexpr GOODNESS_OF_FIT_THRESHOLD = 0.9996;
     static unsigned short const MAX_DRAG_FACTOR_RECOVERY_PERIOD = 6000;
     static double constexpr LOWER_DRAG_FACTOR_THRESHOLD = 75 / 1e6;
     static double constexpr UPPER_DRAG_FACTOR_THRESHOLD = 250 / 1e6;

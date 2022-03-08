@@ -23,7 +23,7 @@ using std::partial_sort_copy;
 
 using StrokeModel::CscData;
 
-StrokeService::StrokeService()
+StrokeService::StrokeService(LinearRegressorService &_regressorService) : regressorService(_regressorService)
 {
 }
 
@@ -83,15 +83,13 @@ void StrokeService::setup() const
 
 void StrokeService::calculateDragCoefficient()
 {
-    if (cleanDeltaTimes[Settings::DELTA_TIME_ARRAY_LENGTH - 1] < Settings::DRAG_FACTOR_ROTATION_DELTA_UPPER_THRESHOLD * 1000)
+    if (cleanDeltaTimes[Settings::DELTA_TIME_ARRAY_LENGTH - 1] < Settings::DRAG_FACTOR_ROTATION_DELTA_UPPER_THRESHOLD * 1000 || recoveryDuration > Settings::MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
         return;
 
-    auto recoveryEndAngularVelocity = ANGULAR_DISPLACEMENT_PER_IMPULSE / cleanDeltaTimes[Settings::DELTA_TIME_ARRAY_LENGTH - 1];
-
-    if (recoveryStartAngularVelocity < recoveryEndAngularVelocity || recoveryDuration > Settings::MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000)
+    if (regressorService.goodnessOfFit() < Settings::GOODNESS_OF_FIT_THRESHOLD)
         return;
 
-    auto rawNewDragCoefficient = -1 * Settings::FLYWHEEL_INERTIA * ((1 / recoveryStartAngularVelocity) - (1 / recoveryEndAngularVelocity)) / recoveryDuration;
+    auto rawNewDragCoefficient = (regressorService.slope() * Settings::FLYWHEEL_INERTIA) / ANGULAR_DISPLACEMENT_PER_IMPULSE;
 
     if (rawNewDragCoefficient > Settings::UPPER_DRAG_FACTOR_THRESHOLD ||
         rawNewDragCoefficient < Settings::LOWER_DRAG_FACTOR_THRESHOLD)
@@ -148,6 +146,7 @@ bool StrokeService::hasDataChanged()
     if (previousCleanRevTime != lastDataReadTime)
     {
         lastDataReadTime = previousCleanRevTime;
+
         return true;
     }
 
@@ -170,6 +169,7 @@ void StrokeService::processRotation(unsigned long now)
 
     previousDeltaTime = currentCleanDeltaTime;
     // We disregard rotation signals that are non sensible (the absolute difference of the current and the previous deltas exceeds the current delta)
+    // TODO: check if adding a constraint to being in the Recovery Phase would help with the data skipping in the drive phase where sudden high power if applied to the flywheel causing quick increase in the revtime. This needs to be tested with a low ROTATION_DEBOUNCE_TIME_MIN
     if (deltaTimeDiff > currentCleanDeltaTime)
         return;
 
@@ -217,6 +217,7 @@ void StrokeService::processRotation(unsigned long now)
             revCount++;
             lastRevTime = now;
         }
+
         return;
     }
 
@@ -243,15 +244,15 @@ void StrokeService::processRotation(unsigned long now)
             }
 
             cyclePhase = CyclePhase::Recovery;
+            regressorService.addToDataset(cleanDeltaTimes[0], cleanDeltaTimes[0]);
             recoveryStartTime = now - cleanDeltaTimes[0];
-            // TODO: probably the last drive deltaTime should be used as recoveryStartAngularVelocity as this is the velocity we begin the recoveryPhase. But this is not obvious as generally there should be no harm to the drag factor calculation if we use a later deltaTime and that startDeltaTime is deducted from the recoveryPhaseLength (i.e. the total time of the measurement are in pare with the other data used for calculating DF). So actually we may need to use cleanDeltaTimes[i-1] i.e. the last element of the array. Then in this case no adjustment is necessary to the recoveryPhaseLength (in the other case, i.e. using cleanDeltaTimes[0] that is a deltaTime that is already decelerating recoveryStartDelta should be deducted on the calculation of the drag factor)
-            recoveryStartAngularVelocity = ANGULAR_DISPLACEMENT_PER_IMPULSE / cleanDeltaTimes[0];
-            recoveryStartImpulseCount = impulseCount - 1;
             driveDuration = 0;
+
             return;
         }
 
         driveDuration = now - driveStartTime;
+
         return;
     }
 
@@ -268,10 +269,14 @@ void StrokeService::processRotation(unsigned long now)
             driveStartTime = now - cleanDeltaTimes[0];
             driveStartImpulseCount = impulseCount - 1;
             recoveryDuration = 0;
+            regressorService.resetData();
+
             return;
         }
 
         recoveryDuration = now - recoveryStartTime;
+        regressorService.addToDataset(recoveryDuration, cleanDeltaTimes[0]);
+
         return;
     }
 }

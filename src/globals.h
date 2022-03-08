@@ -11,6 +11,7 @@ static unsigned long const SECS_PER_DAY = 86400;
 
 extern BluetoothService bleService;
 extern BluetoothController bleController;
+extern LinearRegressorService regressorService;
 extern StrokeService strokeService;
 extern StrokeController strokeController;
 extern PowerManagerController powerManagerController;
