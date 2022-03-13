@@ -16,7 +16,7 @@
 #include "stroke.service.h"
 
 using std::accumulate;
-using std::any_of;
+using std::all_of;
 using std::array;
 using std::minmax;
 using std::partial_sort_copy;
@@ -170,7 +170,7 @@ void StrokeService::processRotation(unsigned long now)
     previousDeltaTime = currentCleanDeltaTime;
     // We disregard rotation signals that are non sensible (the absolute difference of the current and the previous deltas exceeds the current delta)
     // TODO: check if adding a constraint to being in the Recovery Phase would help with the data skipping in the drive phase where sudden high power if applied to the flywheel causing quick increase in the revtime. This needs to be tested with a low ROTATION_DEBOUNCE_TIME_MIN
-    if (deltaTimeDiff > currentCleanDeltaTime)
+    if (deltaTimeDiff > currentCleanDeltaTime && cyclePhase != CyclePhase::Drive)
         return;
 
     // If we got this far, we must have a sensible delta for flywheel rotation time, updating the deltaTime array
@@ -201,24 +201,24 @@ void StrokeService::processRotation(unsigned long now)
     {
         // We are currently in the "Stopped" phase, as power was not applied for a long period of time or the device just started. Since rotation was detected we check if cleanDeltaTimes array is filled (i.e. whether we have sufficient data for determining the next phase) and whether power is being applied to the flywheel
         if (
-            any_of(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend(), [](unsigned long cleanDeltaTime)
-                   { return cleanDeltaTime == 0; }) ||
-            isFlywheelUnpowered())
-            return;
-
-        // Since we detected power, setting to "Drive" phase and increasing rotation count and registering rotation time
-        cyclePhase = CyclePhase::Drive;
-        driveStartTime = now - cleanDeltaTimes[0];
-        driveStartImpulseCount = 0;
-
-        impulseCount++;
-        if (impulseCount % Settings::IMPULSES_PER_REVOLUTION == 0)
+            all_of(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend(), [](unsigned long cleanDeltaTime)
+                   { return cleanDeltaTime != 0; }) &&
+            isFlywheelPowered())
         {
-            revCount++;
-            lastRevTime = now;
-        }
+            // Since we detected power, setting to "Drive" phase and increasing rotation count and registering rotation time
+            cyclePhase = CyclePhase::Drive;
+            driveStartTime = now - accumulate(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend() - Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD - 1, 0);
+            driveStartImpulseCount = 0;
 
-        return;
+            impulseCount++;
+            if (impulseCount % Settings::IMPULSES_PER_REVOLUTION == 0)
+            {
+                revCount++;
+                lastRevTime = now;
+            }
+
+            return;
+        }
     }
 
     impulseCount++;
@@ -244,14 +244,15 @@ void StrokeService::processRotation(unsigned long now)
             }
 
             cyclePhase = CyclePhase::Recovery;
-            regressorService.addToDataset(cleanDeltaTimes[0], cleanDeltaTimes[0]);
-            recoveryStartTime = now - cleanDeltaTimes[0];
+            dragTimer = cleanDeltaTimes[FLANK_START_INDEX];
+            regressorService.addToDataset(dragTimer, cleanDeltaTimes[FLANK_START_INDEX]);
+            recoveryStartTime = now - accumulate(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend() - Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD, 0);
             driveDuration = 0;
 
             return;
         }
 
-        driveDuration = now - driveStartTime;
+        driveDuration = now - driveStartTime - accumulate(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend() - Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD - 1, 0);
 
         return;
     }
@@ -266,16 +267,18 @@ void StrokeService::processRotation(unsigned long now)
             calculateAvgStrokePower();
 
             cyclePhase = CyclePhase::Drive;
-            driveStartTime = now - cleanDeltaTimes[0];
+            driveStartTime = now - accumulate(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend() - Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD, 0);
             driveStartImpulseCount = impulseCount - 1;
             recoveryDuration = 0;
+            dragTimer = 0;
             regressorService.resetData();
 
             return;
         }
 
-        recoveryDuration = now - recoveryStartTime;
-        regressorService.addToDataset(recoveryDuration, cleanDeltaTimes[0]);
+        recoveryDuration = now - recoveryStartTime - accumulate(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend() - Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD - 1, 0);
+        dragTimer += cleanDeltaTimes[FLANK_START_INDEX];
+        regressorService.addToDataset(dragTimer, cleanDeltaTimes[FLANK_START_INDEX]);
 
         return;
     }
