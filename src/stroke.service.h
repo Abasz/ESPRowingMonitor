@@ -18,7 +18,7 @@ class StrokeService
     LinearRegressorService &regressorService;
 
     static double constexpr ANGULAR_DISPLACEMENT_PER_IMPULSE = (2 * PI) / Settings::IMPULSES_PER_REVOLUTION;
-    static byte const FLANK_START_INDEX = Settings::DELTA_TIME_ARRAY_LENGTH - Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD - 1;
+    static byte const STROKE_CYCLE_START_INDEX = Settings::DELTA_TIME_ARRAY_LENGTH - Settings::FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD - 1;
 
     volatile unsigned long lastRevTime = 0;
     volatile unsigned long lastStrokeTime = 0;
