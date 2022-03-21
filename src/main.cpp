@@ -64,6 +64,7 @@ void loop()
     {
         Log.infoln("driveDuration: %D", strokeController.getDriveDuration());
         Log.infoln("dragFactor: %d", strokeController.getDragFactor());
+        Log.infoln("power: %d", strokeController.getAvgStrokePower());
         // execution time
         // - not connected: 173-200
         // - connected: 900-2700
@@ -73,12 +74,6 @@ void loop()
         // auto stop = micros();
         // Serial.print("notifyDragFactor: ");
         // Serial.println(stop - start);
-    }
-
-    if (strokeController.getAvgStrokePower() != strokeController.getPreviousAvgStrokePower())
-    {
-        Log.infoln("power: %d", strokeController.getAvgStrokePower());
-        strokeController.setPreviousAvgStrokePower();
     }
 
     auto battLevel = powerManagerController.getBatteryLevel();

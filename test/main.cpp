@@ -20,13 +20,8 @@ void loop()
     {
         Log.infoln("driveDuration: %f", strokeController.getDriveDuration());
         Log.infoln("dragFactor: %d", strokeController.getDragFactor());
-        strokeController.setPreviousStrokeCount();
-    }
-
-    if (strokeController.getAvgStrokePower() != strokeController.getPreviousAvgStrokePower())
-    {
         Log.infoln("power: %d", strokeController.getAvgStrokePower());
-        strokeController.setPreviousAvgStrokePower();
+        strokeController.setPreviousStrokeCount();
     }
 }
 

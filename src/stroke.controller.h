@@ -6,7 +6,6 @@ class StrokeController
 
     unsigned int previousRevCount = 0;
     unsigned int previousStrokeCount = 0U;
-    unsigned int previousAvgStrokePower = 0U;
 
     StrokeModel::CscData cscData{
         0UL,
@@ -25,8 +24,6 @@ public:
     void setPreviousRevCount();
     unsigned int getPreviousStrokeCount() const;
     void setPreviousStrokeCount();
-    unsigned int getPreviousAvgStrokePower() const;
-    void setPreviousAvgStrokePower();
     unsigned long getLastRevTime() const;
     unsigned int getRevCount() const;
     unsigned long getLastStrokeTime() const;

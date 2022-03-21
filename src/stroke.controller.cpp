@@ -71,11 +71,6 @@ unsigned int StrokeController::getPreviousStrokeCount() const
     return previousStrokeCount;
 }
 
-unsigned int StrokeController::getPreviousAvgStrokePower() const
-{
-    return previousAvgStrokePower;
-}
-
 void StrokeController::setPreviousRevCount()
 {
     previousRevCount = cscData.revCount;
@@ -84,9 +79,4 @@ void StrokeController::setPreviousRevCount()
 void StrokeController::setPreviousStrokeCount()
 {
     previousStrokeCount = cscData.strokeCount;
-}
-
-void StrokeController::setPreviousAvgStrokePower()
-{
-    previousAvgStrokePower = lround(cscData.avgStrokePower);
 }
