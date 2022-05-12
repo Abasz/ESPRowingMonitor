@@ -6,6 +6,7 @@ class StrokeController
 
     unsigned int previousRevCount = 0;
     unsigned int previousStrokeCount = 0U;
+    unsigned long lastDeltaRead = 0;
 
     StrokeModel::CscData cscData{
         0UL,

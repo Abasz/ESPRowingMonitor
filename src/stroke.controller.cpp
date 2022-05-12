@@ -17,7 +17,12 @@ void StrokeController::update()
     if (strokeService.hasDataChanged())
     {
         cscData = strokeService.getData();
-        Log.infoln("deltaTime: %u", cscData.deltaTime);
+        Log.infoln("rawRevTime: %u", cscData.rawRevTime);
+        if (cscData.deltaTime != lastDeltaRead)
+        {
+            Log.infoln("deltaTime: %u", cscData.deltaTime);
+            lastDeltaRead = cscData.deltaTime;
+        }
     }
 }
 

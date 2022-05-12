@@ -130,6 +130,7 @@ CscData StrokeService::getData() const
         .lastStrokeTime = lastStrokeTime,
         .strokeCount = strokeCount,
         .deltaTime = cleanDeltaTimes[0],
+        .rawRevTime = previousRawRevTime,
         .driveDuration = lastDriveDuration,
         .avgStrokePower = avgStrokePower,
         .dragCoefficient = dragCoefficient};
@@ -143,9 +144,9 @@ CscData StrokeService::getData() const
 
 bool StrokeService::hasDataChanged()
 {
-    if (previousCleanRevTime != lastDataReadTime)
+    if (previousRawRevTime != lastDataReadTime)
     {
-        lastDataReadTime = previousCleanRevTime;
+        lastDataReadTime = previousRawRevTime;
 
         return true;
     }
