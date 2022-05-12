@@ -3,12 +3,12 @@ class Settings
 public:
     // Hardware settings
     static gpio_num_t const SENSOR_PIN_NUMBER = GPIO_NUM_26;
-    static byte const IMPULSES_PER_REVOLUTION = 1;
+    static byte const IMPULSES_PER_REVOLUTION = 3;
     static double constexpr FLYWHEEL_INERTIA = 0.073;
     static unsigned short const LED_BLINK_FREQUENCY = 1000;
 
     // Sensor signal filter settings
-    static byte const ROTATION_DEBOUNCE_TIME_MIN = 15;
+    static byte const ROTATION_DEBOUNCE_TIME_MIN = 7;
     static unsigned short const ROWING_STOPPED_THRESHOLD_PERIOD = 7000;
 
     // Drag factor filter settings

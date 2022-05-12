@@ -171,7 +171,7 @@ void StrokeService::processRotation(unsigned long now)
     previousDeltaTime = currentCleanDeltaTime;
     // We disregard rotation signals that are non sensible (the absolute difference of the current and the previous deltas exceeds the current delta)
     // TODO: check if adding a constraint to being in the Recovery Phase would help with the data skipping in the drive phase where sudden high power if applied to the flywheel causing quick increase in the revtime. This needs to be tested with a low ROTATION_DEBOUNCE_TIME_MIN
-    if (deltaTimeDiff > currentCleanDeltaTime && cyclePhase != CyclePhase::Drive)
+    if (deltaTimeDiff > currentCleanDeltaTime /* && cyclePhase != CyclePhase::Drive */)
         return;
 
     // If we got this far, we must have a sensible delta for flywheel rotation time, updating the deltaTime array
@@ -181,7 +181,7 @@ void StrokeService::processRotation(unsigned long now)
         cleanDeltaTimes[i] = cleanDeltaTimes[i - 1];
         i--;
     }
-    cleanDeltaTimes[0] = currentCleanDeltaTime;
+    cleanDeltaTimes[0] = cleanDeltaTimes[0] == 0 ? currentCleanDeltaTime : lround((currentCleanDeltaTime + cleanDeltaTimes[0]) / 2.0);
 
     previousCleanRevTime = now;
 
@@ -192,6 +192,7 @@ void StrokeService::processRotation(unsigned long now)
 
         recoveryDuration = 0;
         driveDuration = 0;
+        dragTimer = 0;
         avgStrokePower = 0;
         impulseCount = 0;
 
