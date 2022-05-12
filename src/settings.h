@@ -20,11 +20,11 @@ public:
     static byte const DRAG_COEFFICIENTS_ARRAY_LENGTH = 1;
 
     // Stroke phase detection filter settings
-    static unsigned short const MINIMUM_DECELERATION_DELTA_TO_UNPOWERED = 0;
-    static unsigned short const MINIMUM_ACCELERATION_DELTA_TO_POWERED = 0;
+    static unsigned short const MIN_DECELERATION_DELTA_FOR_UNPOWERED = 0;
+    static unsigned short const MAX_DECELERATION_DELTA_FOR_POWERED = 0;
     static byte const STROKE_DEBOUNCE_TIME = 200;
-    static byte const FLYWHEEL_POWER_CHANGE_DETECTION_THRESHOLD = 1;
-    static byte const DELTA_TIME_ARRAY_LENGTH = 2;
+    static byte const FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD = 0;
+    static byte const DELTA_TIME_ARRAY_LENGTH = 4;
 
     // Device power management settings
     static byte const VOLTAGE_DIVIDER_RATIO = 2;
