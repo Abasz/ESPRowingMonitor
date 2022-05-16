@@ -29,12 +29,12 @@ IRAM_ATTR void batteryMeasurementInterrupt()
 
 void attachRotationInterrupt()
 {
-    attachInterrupt(digitalPinToInterrupt(Settings::SENSOR_PIN_NUMBER), rotationInterrupt, RISING);
+    attachInterrupt(digitalPinToInterrupt(Settings::sensorPinNumber), rotationInterrupt, RISING);
 }
 
 void detachRotationInterrupt()
 {
-    detachInterrupt(digitalPinToInterrupt(Settings::SENSOR_PIN_NUMBER));
+    detachInterrupt(digitalPinToInterrupt(Settings::sensorPinNumber));
 }
 
 void printPrefix(Print *_logOutput, int logLevel)
@@ -46,11 +46,11 @@ void printPrefix(Print *_logOutput, int logLevel)
 void printTimestamp(Print *_logOutput)
 {
     unsigned long const msecs = micros();
-    unsigned long const secs = msecs / MSECS_PER_SEC;
-    unsigned long const microSeconds = msecs % MSECS_PER_SEC;
-    unsigned long const seconds = secs % SECS_PER_MIN;
-    unsigned long const minutes = (secs / SECS_PER_MIN) % SECS_PER_MIN;
-    unsigned long const hours = (secs % SECS_PER_DAY) / SECS_PER_HOUR;
+    unsigned long const secs = msecs / msecsPerSec;
+    unsigned long const microSeconds = msecs % msecsPerSec;
+    unsigned long const seconds = secs % secsPerMin;
+    unsigned long const minutes = (secs / secsPerMin) % secsPerMin;
+    unsigned long const hours = (secs % secsPerDay) / secsPerHour;
 
     char timestamp[20];
     sprintf(timestamp, "%02d:%02d:%02d.%06d ", hours, minutes, seconds, microSeconds);

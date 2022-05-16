@@ -26,8 +26,8 @@ void PowerManagerService::setup()
 void PowerManagerService::goToSleep() const
 {
     Log.traceln("Configure deep sleep mode");
-    esp_sleep_enable_ext0_wakeup(Settings::SENSOR_PIN_NUMBER, !digitalRead(Settings::SENSOR_PIN_NUMBER));
-    gpio_hold_en(Settings::SENSOR_PIN_NUMBER);
+    esp_sleep_enable_ext0_wakeup(Settings::sensorPinNumber, !digitalRead(Settings::sensorPinNumber));
+    gpio_hold_en(Settings::sensorPinNumber);
     Log.infoln("Going to sleep mode");
     esp_deep_sleep_start();
 }
@@ -36,13 +36,13 @@ byte PowerManagerService::measureBattery()
 {
     // execution time: 460 micro sec
     // auto start = micros();
-    array<double, Settings::BATTERY_LEVEL_ARRAY_LENGTH> batteryLevels{};
+    array<double, Settings::batteryLevelArrayLength> batteryLevels{};
 
-    for (byte i = 0; i < Settings::BATTERY_LEVEL_ARRAY_LENGTH; i++)
+    for (byte i = 0; i < Settings::batteryLevelArrayLength; i++)
     {
         auto measurement = analogRead(GPIO_NUM_34);
 
-        auto rawNewBatteryLevel = ((measurement * 3.3 / 4095) - Settings::BATTERY_VOLTAGE_MIN) / (Settings::BATTERY_VOLTAGE_MAX - Settings::BATTERY_VOLTAGE_MIN) * 100;
+        auto rawNewBatteryLevel = ((measurement * 3.3 / 4095) - Settings::batteryVoltageMin) / (Settings::batteryVoltageMax - Settings::batteryVoltageMin) * 100;
 
         if (rawNewBatteryLevel > 100)
         {
@@ -59,7 +59,7 @@ byte PowerManagerService::measureBattery()
 
     sort(batteryLevels.begin(), batteryLevels.end());
 
-    batteryLevel = batteryLevel == 0 ? lround(batteryLevels[Settings::BATTERY_LEVEL_ARRAY_LENGTH / 2]) : lround((batteryLevels[Settings::BATTERY_LEVEL_ARRAY_LENGTH / 2] + batteryLevel) / 2);
+    batteryLevel = batteryLevel == 0 ? lround(batteryLevels[Settings::batteryLevelArrayLength / 2]) : lround((batteryLevels[Settings::batteryLevelArrayLength / 2] + batteryLevel) / 2);
 
     return batteryLevel;
     // auto stop = micros();
@@ -72,7 +72,7 @@ void PowerManagerService::setupBatteryMeasurement()
     pinMode(GPIO_NUM_4, INPUT);
 
     delay(500);
-    for (byte i = 0; i < Settings::INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT; i++)
+    for (byte i = 0; i < Settings::initialBatteryLevelMeasurementCount; i++)
     {
         measureBattery();
         delay(100);

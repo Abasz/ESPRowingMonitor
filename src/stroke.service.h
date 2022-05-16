@@ -17,8 +17,8 @@ class StrokeService
 {
     LinearRegressorService &regressorService;
 
-    static double constexpr ANGULAR_DISPLACEMENT_PER_IMPULSE = (2 * PI) / Settings::IMPULSES_PER_REVOLUTION;
-    static byte const STROKE_CYCLE_START_INDEX = Settings::DELTA_TIME_ARRAY_LENGTH - Settings::FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD - 1;
+    static double constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
+    static byte const strokeCycleStartIndex = Settings::deltaTimeArrayLength - Settings::flywheelPowerChangeDetectionErrorThreshold - 1;
 
     volatile unsigned long lastRevTime = 0;
     volatile unsigned long lastStrokeTime = 0;
@@ -45,8 +45,8 @@ class StrokeService
     volatile unsigned long dragTimer = 0;
 
     volatile CyclePhase cyclePhase = CyclePhase::Stopped;
-    std::array<volatile unsigned long, Settings::DELTA_TIME_ARRAY_LENGTH> cleanDeltaTimes{};
-    std::array<double, Settings::DRAG_COEFFICIENTS_ARRAY_LENGTH> dragCoefficients{};
+    std::array<volatile unsigned long, Settings::deltaTimeArrayLength> cleanDeltaTimes{};
+    std::array<double, Settings::dragCoefficientsArrayLength> dragCoefficients{};
 
     bool isFlywheelUnpowered() const;
     bool isFlywheelPowered() const;

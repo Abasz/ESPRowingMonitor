@@ -6,26 +6,26 @@
 
 class BluetoothService
 {
-    inline static std::array<uint8_t, 2> const FEATURES_FLAG{0b11, 0b0};
+    inline static std::array<uint8_t, 2> const featuresFlag{0b11, 0b0};
 
-    static unsigned short const CYCLING_SPEED_CADENCE_SVC_UUID = 0x1816;
-    static unsigned short const CSC_MEASUREMENT_UUID = 0x2A5B;
-    static unsigned short const SC_CONTROL_POINT_UUID = 0x2A55;
-    static unsigned short const CSC_FEATURE_UUID = 0x2A5C;
-    static unsigned short const SENSOR_LOCATION_UUID = 0x2A5D;
-    inline static std::string const DRAG_FACTOR_UUID = "CE060031-43E5-11E4-916C-0800200C9A66";
-    inline static std::string const DRAG_FACTOR_SVC_UUID = "CE060030-43E5-11E4-916C-0800200C9A66";
+    static unsigned short const cyclingSpeedCadenceSvcUuid = 0x1816;
+    static unsigned short const cscMeasurementUuid = 0x2A5B;
+    static unsigned short const cscControlPointUuid = 0x2A55;
+    static unsigned short const cscFeatureUuid = 0x2A5C;
+    static unsigned short const sensorLocationUuid = 0x2A5D;
+    inline static std::string const dragFactorUuid = "CE060031-43E5-11E4-916C-0800200C9A66";
+    inline static std::string const dragFactorSvcUuid = "CE060030-43E5-11E4-916C-0800200C9A66";
 
-    static unsigned short const BATTERY_SVC_UUID = 0x180F;
-    static unsigned short const BATTERY_LEVEL_UUID = 0x2A19;
+    static unsigned short const batterySvcUuid = 0x180F;
+    static unsigned short const batteryLevelUuid = 0x2A19;
 
-    static unsigned short const DEVICE_INFO_SVC_UUID = 0x180A;
-    static unsigned short const MODEL_NUMBER_SVC_UUID = 0x2A24;
-    static unsigned short const SERIAL_NUMBER_SVC_UUID = 0x2A25;
-    static unsigned short const SOFTWARE_NUMBER_SVC_UUID = 0x2A28;
-    static unsigned short const MANUFACTURER_NAME_SVC_UUID = 0x2A29;
+    static unsigned short const deviceInfoSvcUuid = 0x180A;
+    static unsigned short const modelNumberSvcUuid = 0x2A24;
+    static unsigned short const serialNumberSvcUuid = 0x2A25;
+    static unsigned short const softwareNumberSvcUuid = 0x2A28;
+    static unsigned short const manufacturerNameSvcUuid = 0x2A29;
 
-    static unsigned short const BLE_APPEARANCE_CYCLING_SPEED_CADENCE = 1157;
+    static unsigned short const bleAppearanceCyclingSpeedCadence = 1157;
 
     byte ledState = HIGH;
 

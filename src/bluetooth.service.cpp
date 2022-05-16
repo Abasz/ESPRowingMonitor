@@ -84,7 +84,7 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
         // execution time: 0-1 microsec
         // auto start = micros();
         array<uint8_t, 11> temp = {
-            FEATURES_FLAG[0],
+            featuresFlag[0],
 
             static_cast<byte>(revCount),
             static_cast<byte>(revCount >> 8),
@@ -138,39 +138,39 @@ void BluetoothService::setupServices()
 {
     Log.traceln("Setting up BLE Services");
     auto server = NimBLEDevice::getServer();
-    auto batteryService = server->createService(BATTERY_SVC_UUID);
-    auto cscService = server->createService(CYCLING_SPEED_CADENCE_SVC_UUID);
-    auto deviceInfoService = server->createService(DEVICE_INFO_SVC_UUID);
+    auto batteryService = server->createService(batterySvcUuid);
+    auto cscService = server->createService(cyclingSpeedCadenceSvcUuid);
+    auto deviceInfoService = server->createService(deviceInfoSvcUuid);
 
     Log.traceln("Setting up BLE Characteristics");
 
-    batteryLevelCharacteristic = batteryService->createCharacteristic(BATTERY_LEVEL_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+    batteryLevelCharacteristic = batteryService->createCharacteristic(batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
-    cscMeasurementCharacteristic = cscService->createCharacteristic(CSC_MEASUREMENT_UUID, NIMBLE_PROPERTY::NOTIFY);
+    cscMeasurementCharacteristic = cscService->createCharacteristic(cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
-    dragFactorCharacteristic = cscService->createCharacteristic(DRAG_FACTOR_UUID, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
-
-    cscService
-        ->createCharacteristic(CSC_FEATURE_UUID, NIMBLE_PROPERTY::READ)
-        ->setValue(FEATURES_FLAG.data(), FEATURES_FLAG.size());
+    dragFactorCharacteristic = cscService->createCharacteristic(dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     cscService
-        ->createCharacteristic(SENSOR_LOCATION_UUID, NIMBLE_PROPERTY::READ)
-        ->setValue(&FEATURES_FLAG[1], 1);
+        ->createCharacteristic(cscFeatureUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(featuresFlag.data(), featuresFlag.size());
 
-    cscService->createCharacteristic(SC_CONTROL_POINT_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
+    cscService
+        ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(&featuresFlag[1], 1);
+
+    cscService->createCharacteristic(cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
 
     deviceInfoService
-        ->createCharacteristic(MANUFACTURER_NAME_SVC_UUID, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue("ZOCO BODY FIT");
     deviceInfoService
-        ->createCharacteristic(MODEL_NUMBER_SVC_UUID, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(modelNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue("AR-C2");
     deviceInfoService
-        ->createCharacteristic(SERIAL_NUMBER_SVC_UUID, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue("20220104");
     deviceInfoService
-        ->createCharacteristic(SOFTWARE_NUMBER_SVC_UUID, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue("0.1.0");
 
     Log.traceln("Starting BLE Service");
@@ -184,8 +184,8 @@ void BluetoothService::setupServices()
 void BluetoothService::setupAdvertisment() const
 {
     auto pAdvertising = NimBLEDevice::getAdvertising();
-    pAdvertising->setAppearance(BLE_APPEARANCE_CYCLING_SPEED_CADENCE);
-    pAdvertising->addServiceUUID(CYCLING_SPEED_CADENCE_SVC_UUID);
+    pAdvertising->setAppearance(bleAppearanceCyclingSpeedCadence);
+    pAdvertising->addServiceUUID(cyclingSpeedCadenceSvcUuid);
 }
 
 void BluetoothService::setupConnectionIndicatorLed() const

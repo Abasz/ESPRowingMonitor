@@ -4,10 +4,10 @@
 #include "stroke.controller.h"
 #include "power-manager.controller.h"
 
-static unsigned long const MSECS_PER_SEC = 1000000;
-static unsigned long const SECS_PER_MIN = 60;
-static unsigned long const SECS_PER_HOUR = 3600;
-static unsigned long const SECS_PER_DAY = 86400;
+static unsigned long const msecsPerSec = 1000000;
+static unsigned long const secsPerMin = 60;
+static unsigned long const secsPerHour = 3600;
+static unsigned long const secsPerDay = 86400;
 
 extern BluetoothService bleService;
 extern BluetoothController bleController;

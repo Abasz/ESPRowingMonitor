@@ -10,7 +10,7 @@ BluetoothController::BluetoothController(BluetoothService &_bluetoothService) : 
 void BluetoothController::update()
 {
     auto now = millis();
-    if (now - lastConnectedDeviceCheckTime > Settings::LED_BLINK_FREQUENCY)
+    if (now - lastConnectedDeviceCheckTime > Settings::ledBlinkFrequency)
     {
         bluetoothService.updateLed();
         lastConnectedDeviceCheckTime = now;
