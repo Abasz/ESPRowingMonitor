@@ -190,9 +190,8 @@ void StrokeService::processRotation(unsigned long now)
     {
         cyclePhase = CyclePhase::Stopped;
 
-        recoveryDuration = 0;
         driveDuration = 0;
-        dragTimer = 0;
+        recoveryDuration = 0;
         avgStrokePower = 0;
         impulseCount = 0;
 
@@ -248,8 +247,8 @@ void StrokeService::processRotation(unsigned long now)
             }
 
             cyclePhase = CyclePhase::Recovery;
-            dragTimer = cleanDeltaTimes[strokeCycleStartIndex];
-            regressorService.addToDataset(dragTimer, cleanDeltaTimes[strokeCycleStartIndex]);
+            recoveryDuration = cleanDeltaTimes[strokeCycleStartIndex];
+            regressorService.addToDataset(recoveryDuration, cleanDeltaTimes[strokeCycleStartIndex]);
             recoveryStartTime = now - accumulate(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold, 0);
             driveDuration = 0;
 
@@ -274,15 +273,13 @@ void StrokeService::processRotation(unsigned long now)
             driveStartTime = now - accumulate(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold, 0);
             driveStartImpulseCount = impulseCount - strokeCycleStartIndex - 1;
             recoveryDuration = 0;
-            dragTimer = 0;
             regressorService.resetData();
 
             return;
         }
 
-        recoveryDuration = now - recoveryStartTime - accumulate(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
-        dragTimer += cleanDeltaTimes[strokeCycleStartIndex];
-        regressorService.addToDataset(dragTimer, cleanDeltaTimes[strokeCycleStartIndex]);
+        recoveryDuration += cleanDeltaTimes[strokeCycleStartIndex];
+        regressorService.addToDataset(recoveryDuration, cleanDeltaTimes[strokeCycleStartIndex]);
 
         return;
     }

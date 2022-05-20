@@ -42,8 +42,6 @@ class StrokeService
     volatile unsigned long previousRawRevTime = 0;
     volatile unsigned long lastDataReadTime = 0;
 
-    volatile unsigned long dragTimer = 0;
-
     volatile CyclePhase cyclePhase = CyclePhase::Stopped;
     std::array<volatile unsigned long, Settings::deltaTimeArrayLength> cleanDeltaTimes{};
     std::array<double, Settings::dragCoefficientsArrayLength> dragCoefficients{};
