@@ -35,7 +35,7 @@ bool StrokeService::isFlywheelUnpowered() const
     {
         if (cleanDeltaTimes[i] >= cleanDeltaTimes[i - 1] || cleanDeltaTimes[i - 1] - cleanDeltaTimes[i] < Settings::maxDecelerationDeltaForPowered)
         {
-            // Oldest interval (dataPoints[i]) is larger than the younger one (datapoint[i-1], as the distance is
+            // Oldest interval (dataPoints[i]) is larger than the younger one (dataPoint[i-1], as the distance is
             // fixed, we are accelerating
             numberOfAccelerations++;
         }
@@ -59,7 +59,7 @@ bool StrokeService::isFlywheelPowered() const
     {
         if (cleanDeltaTimes[i] < cleanDeltaTimes[i - 1] && cleanDeltaTimes[i - 1] - cleanDeltaTimes[i] > Settings::minDecelerationDeltaForUnpowered)
         {
-            // Oldest interval (dataPoints[i]) is shorter than the younger one (datapoint[i-1], as the distance is fixed, we
+            // Oldest interval (dataPoints[i]) is shorter than the younger one (dataPoint[i-1], as the distance is fixed, we
             // discovered a deceleration
             numberOfDecelerations++;
         }
@@ -89,7 +89,7 @@ void StrokeService::calculateDragCoefficient()
     if (regressorService.goodnessOfFit() < Settings::goodnessOfFitThreshold)
         return;
 
-    auto rawNewDragCoefficient = (regressorService.slope() * Settings::flywheel_Intertia) / angularDisplacementPerImpulse;
+    auto rawNewDragCoefficient = (regressorService.slope() * Settings::flywheelInertia) / angularDisplacementPerImpulse;
 
     if (rawNewDragCoefficient > Settings::upperDragFactorThreshold ||
         rawNewDragCoefficient < Settings::lowerDragFactorThreshold)
@@ -231,13 +231,13 @@ void StrokeService::processRotation(unsigned long now)
         lastRevTime = now;
     }
 
-    // we implement a finite state machine that goes between "Drive" and "Recovery" phases while paddeling on the machine. This allows a phase-change if sufficient time has passed and there is a plausible flank
+    // we implement a finite state machine that goes between "Drive" and "Recovery" phases while paddling on the machine. This allows a phase-change if sufficient time has passed and there is a plausible flank
     if (cyclePhase == CyclePhase::Drive)
     {
         // We are currently in the "Drive" phase, lets determine what the next phase is (if we come from "Stopped" phase )
         if (isFlywheelUnpowered())
         {
-            // It seems that we lost power to the flywheel lets check if drive time was sufficint for detecting a stroke (i.e. drivePhaseDuration exceeds debounce time)
+            // It seems that we lost power to the flywheel lets check if drive time was sufficient for detecting a stroke (i.e. drivePhaseDuration exceeds debounce time)
             if (driveDuration > Settings::strokeDebounceTime * 1000)
             {
                 // Here we can conclude the "Drive" phase as there is no more drive detected to the flywheel (e.g. for calculating power etc.)

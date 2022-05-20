@@ -3,5 +3,13 @@
         {
             "path": "."
         }
-    ]
+    ],
+    "settings": {
+        "cSpell.words": [
+            "infoln",
+            "revtime",
+            "traceln",
+            "Unpowered"
+        ]
+    }
 }
