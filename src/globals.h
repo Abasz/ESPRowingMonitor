@@ -1,8 +1,8 @@
 #pragma once
 
 #include "bluetooth.controller.h"
-#include "stroke.controller.h"
 #include "power-manager.controller.h"
+#include "stroke.controller.h"
 
 static unsigned long const msecsPerSec = 1000000;
 static unsigned long const secsPerMin = 60;

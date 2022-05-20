@@ -1,16 +1,16 @@
-#include <array>
 #include <algorithm>
-#include <numeric>
+#include <array>
 #include <math.h>
+#include <numeric>
 
 #include <Arduino.h>
 
 #include "ArduinoLog.h"
 
 #ifdef ROWING_SIMULATION
-#include "../test/globals.h"
+    #include "../test/globals.h"
 #else
-#include "globals.h"
+    #include "globals.h"
 #endif
 
 #include "stroke.service.h"

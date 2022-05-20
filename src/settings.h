@@ -72,8 +72,8 @@ public:
 
 // Sanity checks
 #if DELTA_TIME_ARRAY_LENGTH <= 1
-#error "DELTA_TIME_ARRAY_LENGTH should not be less than 2"
+    #error "DELTA_TIME_ARRAY_LENGTH should not be less than 2"
 #endif
 #if DELTA_TIME_ARRAY_LENGTH - FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD - 2 < 0
-#error "FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD should be less then or equal to the half of the DELTA_TIME_ARRAY_LENGTH"
+    #error "FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD should be less then or equal to the half of the DELTA_TIME_ARRAY_LENGTH"
 #endif

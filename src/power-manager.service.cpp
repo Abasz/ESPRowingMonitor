@@ -1,5 +1,5 @@
-#include <array>
 #include <algorithm>
+#include <array>
 #include <numeric>
 
 #include <Arduino.h>
