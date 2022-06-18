@@ -18,12 +18,12 @@ void setup()
     strokeController.begin();
     powerManagerController.begin();
 
-    bleController.notifyBattery(powerManagerController.getBatteryLevel());
-#ifndef POWERMETER
-    bleController.notifyCsc(0, 0, 0, 0);
-#else
-    bleController.notifyPsc(0, 0, 0, 0, 0);
-#endif
+    //     bleController.notifyBattery(powerManagerController.getBatteryLevel());
+    // #ifndef POWERMETER
+    //     bleController.notifyCsc(0, 0, 0, 0);
+    // #else
+    //     bleController.notifyPsc(0, 0, 0, 0, 0);
+    // #endif
 }
 
 // execution time
@@ -34,7 +34,10 @@ void loop()
     // simulateRotation();
 
     strokeController.update();
-    powerManagerController.update(strokeController.getLastRevTime(), bleController.isAnyDeviceConnected());
+
+    powerManagerController.update(strokeController.getLastRevTime(), false);
+    return;
+
     bleController.update(powerManagerController.getBatteryLevel());
 
     // auto start = micros();

@@ -30,7 +30,7 @@ void BluetoothController::begin()
 {
     Log.infoln("Setting up BLE Controller");
     bluetoothService.setup();
-    bluetoothService.startBLEServer();
+    // bluetoothService.startBLEServer();
 }
 
 bool BluetoothController::isAnyDeviceConnected() const

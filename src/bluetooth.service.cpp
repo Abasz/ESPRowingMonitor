@@ -38,7 +38,7 @@ void BluetoothService::updateLed(CRGB::HTMLColorCode newLedColor)
 
 void BluetoothService::setup()
 {
-    setupBleDevice();
+    // setupBleDevice();
     setupConnectionIndicatorLed();
 }
 

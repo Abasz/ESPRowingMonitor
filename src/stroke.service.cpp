@@ -160,6 +160,8 @@ void StrokeService::processRotation(unsigned long now)
 
     previousRawRevTime = now;
 
+    return;
+
     if (currentRawDeltaTime < Settings::rotationDebounceTimeMin * 1000)
         return;
 
