@@ -12,8 +12,9 @@ void LinearRegressorService::resetData()
     count = 0;
 }
 
-void LinearRegressorService::addToDataset(volatile unsigned long long x, volatile unsigned long long y)
+void LinearRegressorService::addToDataset(volatile unsigned long long y)
 {
+    auto x = sumY + y;
     sumX += x;
     sumXSquare += x * x;
     sumY += y;

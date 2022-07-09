@@ -11,7 +11,7 @@ public:
     LinearRegressorService();
 
     void resetData();
-    void addToDataset(unsigned long long x, unsigned long long y);
+    void addToDataset(unsigned long long y);
     double slope();
     double goodnessOfFit();
 };

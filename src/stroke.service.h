@@ -44,6 +44,7 @@ class StrokeService
 
     volatile CyclePhase cyclePhase = CyclePhase::Stopped;
     std::array<volatile unsigned long, Settings::deltaTimeArrayLength> cleanDeltaTimes{};
+    std::array<volatile unsigned long, Settings::deltaTimeArrayLength> rawDeltaTimes{};
     std::array<double, Settings::dragCoefficientsArrayLength> dragCoefficients{};
 
     bool isFlywheelUnpowered() const;

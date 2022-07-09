@@ -10,7 +10,7 @@
 
 // Drag factor filter settings
 #define DRAG_FACTOR_ROTATION_DELTA_UPPER_THRESHOLD 0
-#define GOODNESS_OF_FIT_THRESHOLD 0.9996
+#define GOODNESS_OF_FIT_THRESHOLD 0.97
 #define MAX_DRAG_FACTOR_RECOVERY_PERIOD 6000
 #define LOWER_DRAG_FACTOR_THRESHOLD 75
 #define UPPER_DRAG_FACTOR_THRESHOLD 250
@@ -21,7 +21,8 @@
 #define MAX_DECELERATION_DELTA_FOR_POWERED 0
 #define STROKE_DEBOUNCE_TIME 200
 #define FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD 0
-#define DELTA_TIME_ARRAY_LENGTH 3
+#define DELTA_TIME_ARRAY_LENGTH 4
+#define ROTATION_SMOOTHING_FACTOR 1
 
 // Device power management settings
 #define VOLTAGE_DIVIDER_RATIO 2
@@ -59,6 +60,7 @@ public:
     static byte const strokeDebounceTime = STROKE_DEBOUNCE_TIME;
     static byte const flywheelPowerChangeDetectionErrorThreshold = FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD;
     static byte const deltaTimeArrayLength = DELTA_TIME_ARRAY_LENGTH;
+    static byte const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;
 
     // Device power management settings
     static byte const voltageDividerRatio = VOLTAGE_DIVIDER_RATIO;
