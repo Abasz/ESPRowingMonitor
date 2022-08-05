@@ -83,13 +83,17 @@ void StrokeService::setup() const
 
 void StrokeService::calculateDragCoefficient()
 {
+    Log.traceln("= -1 * 0,073 * ((1 / (2 * PI() / %lu)) - (1 / (2 * PI() / %lu))) / %u * 1e6", recoveryStartDelta, cleanDeltaTimes[strokeCycleStartIndex + 1], recoveryDuration);
+    Log.traceln("goodnessOfFit: %f", regressorService.goodnessOfFit());
+
     if (cleanDeltaTimes[Settings::deltaTimeArrayLength - 1] < Settings::dragFactorRotationDeltaUpperThreshold * 1000 || recoveryDuration > Settings::maxDragFactorRecoveryPeriod * 1000)
         return;
 
+    auto rawNewDragCoefficient = (regressorService.slope() * Settings::flywheelInertia) / angularDisplacementPerImpulse;
+    Log.infoln("dragfactorraw: %f", lround(rawNewDragCoefficient * 1e6 * 10) / 10.0);
+
     if (regressorService.goodnessOfFit() < Settings::goodnessOfFitThreshold)
         return;
-
-    auto rawNewDragCoefficient = (regressorService.slope() * Settings::flywheelInertia) / angularDisplacementPerImpulse;
 
     if (rawNewDragCoefficient > Settings::upperDragFactorThreshold ||
         rawNewDragCoefficient < Settings::lowerDragFactorThreshold)
@@ -132,6 +136,7 @@ CscData StrokeService::getData() const
         .deltaTime = cleanDeltaTimes[0],
         .rawRevTime = previousRawRevTime,
         .driveDuration = lastDriveDuration,
+        .recoveryDuration = lastRecoveryDuration,
         .avgStrokePower = avgStrokePower,
         .dragCoefficient = dragCoefficient};
     attachRotationInterrupt();
@@ -160,6 +165,12 @@ void StrokeService::processRotation(unsigned long now)
 
     previousRawRevTime = now;
 
+    // if (currentRawDeltaTime > 7 * 1000 * 1000)
+    // {
+    //     previousCleanRevTime = currentRawDeltaTime;
+    //     return;
+    // }
+
     if (currentRawDeltaTime < Settings::rotationDebounceTimeMin * 1000)
         return;
 
@@ -171,7 +182,8 @@ void StrokeService::processRotation(unsigned long now)
     previousDeltaTime = currentCleanDeltaTime;
     // We disregard rotation signals that are non sensible (the absolute difference of the current and the previous deltas exceeds the current delta)
     // TODO: check if adding a constraint to being in the Recovery Phase would help with the data skipping in the drive phase where sudden high power if applied to the flywheel causing quick increase in the revtime. This needs to be tested with a low ROTATION_DEBOUNCE_TIME_MIN
-    if (deltaTimeDiff > currentCleanDeltaTime /* && cyclePhase != CyclePhase::Drive */)
+    if (deltaTimeDiff > currentCleanDeltaTime)
+        // || (currentCleanDeltaTime < cleanDeltaTimes[0] * 0.8 && cyclePhase != CyclePhase::Drive))
         return;
 
     // If we got this far, we must have a sensible delta for flywheel rotation time, updating the deltaTime array
@@ -190,12 +202,15 @@ void StrokeService::processRotation(unsigned long now)
                              : lround((currentCleanDeltaTime + accumulate(cleanDeltaTimes.begin(), cleanDeltaTimes.begin() + Settings::rotationSmoothingFactor, 0)) / (Settings::rotationSmoothingFactor + 1.0));
 
     previousCleanRevTime = now;
+    Log.infoln("deltaTimeClean: %u", cleanDeltaTimes[0]);
+    Log.infoln("deltaTimeRaw: %u", currentCleanDeltaTime);
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
     if (cyclePhase == CyclePhase::Recovery && recoveryDuration > Settings::rowingStoppedThresholdPeriod * 1000)
     {
         cyclePhase = CyclePhase::Stopped;
 
+        Log.traceln("goodnessOfFit: %f", regressorService.goodnessOfFit());
         driveDuration = 0;
         recoveryDuration = 0;
         avgStrokePower = 0;

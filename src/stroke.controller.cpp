@@ -20,7 +20,7 @@ void StrokeController::update()
         Log.infoln("rawRevTime: %u", cscData.rawRevTime);
         if (cscData.deltaTime != lastDeltaRead)
         {
-            Log.infoln("deltaTime: %u", cscData.deltaTime);
+            // Log.infoln("deltaTime: %u", cscData.deltaTime);
             lastDeltaRead = cscData.deltaTime;
         }
     }
@@ -56,6 +56,11 @@ double StrokeController::getDriveDuration() const
     return cscData.driveDuration / 1e6;
 }
 
+double StrokeController::getRecoveryDuration() const
+{
+    return cscData.recoveryDuration / 1e6;
+}
+
 short StrokeController::getAvgStrokePower() const
 {
     return lround(cscData.avgStrokePower);
@@ -63,6 +68,8 @@ short StrokeController::getAvgStrokePower() const
 
 byte StrokeController::getDragFactor() const
 {
+    Log.infoln("dragfactorfra: %f", lround(cscData.dragCoefficient * 1e6 * 10) / 10.0);
+
     return lround(cscData.dragCoefficient * 1e6);
 }
 

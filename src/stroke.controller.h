@@ -31,6 +31,7 @@ public:
     unsigned short getStrokeCount() const;
     unsigned int getDeltaTime() const;
     double getDriveDuration() const;
+    double getRecoveryDuration() const;
     short getAvgStrokePower() const;
     byte getDragFactor() const;
 };

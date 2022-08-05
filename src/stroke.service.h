@@ -29,12 +29,15 @@ class StrokeService
     volatile double avgStrokePower = 0;
     volatile double dragCoefficient = 0;
     volatile unsigned int lastDriveDuration = 0;
+    volatile unsigned int lastRecoveryDuration = 0;
 
     volatile unsigned long driveStartTime = 0;
     volatile unsigned int driveStartImpulseCount = 0;
     volatile unsigned int driveDuration = 0;
 
     volatile unsigned long recoveryStartTime = 0;
+    volatile unsigned long recoveryStartDelta = 0;
+    volatile unsigned int recoveryStartImpulseCount = 0;
     volatile unsigned int recoveryDuration = 0;
 
     volatile unsigned long previousDeltaTime = 0;
