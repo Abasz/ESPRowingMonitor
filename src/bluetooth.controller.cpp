@@ -39,6 +39,11 @@ void BluetoothController::notifyCsc(unsigned long lastRevTime, unsigned int revC
     bluetoothService.notifyCsc(lastRevTime, revCount, lastStrokeTime, strokeCount);
 }
 
+void BluetoothController::notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const
+{
+    bluetoothService.notifyPsc(lastRevTime, revCount, lastStrokeTime, strokeCount, avgStrokePower);
+}
+
 void BluetoothController::notifyDragFactor(byte dragFactor) const
 {
     auto distance = pow(dragFactor / 2.8, 1.0 / 3.0) * (2.0 * PI) * 10;

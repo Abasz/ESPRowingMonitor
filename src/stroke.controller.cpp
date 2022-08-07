@@ -56,7 +56,7 @@ double StrokeController::getDriveDuration() const
     return cscData.driveDuration / 1e6;
 }
 
-unsigned int StrokeController::getAvgStrokePower() const
+short StrokeController::getAvgStrokePower() const
 {
     return lround(cscData.avgStrokePower);
 }

@@ -15,6 +15,7 @@ public:
     void update();
     void notifyBattery(byte batteryLevel) const;
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
+    void notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const;
     void notifyDragFactor(byte dragFactor) const;
     bool isAnyDeviceConnected() const;
 };

@@ -6,12 +6,22 @@
 
 class BluetoothService
 {
-    inline static std::array<uint8_t, 2> const featuresFlag{0b11, 0b0};
+    static byte constexpr sensorLocationFlag = 0b0;
 
+    static byte const cscMeasurementFeaturesFlag = 0b11;
+    static unsigned short constexpr cscFeaturesFlag = 0b11;
     static unsigned short const cyclingSpeedCadenceSvcUuid = 0x1816;
     static unsigned short const cscMeasurementUuid = 0x2A5B;
     static unsigned short const cscControlPointUuid = 0x2A55;
     static unsigned short const cscFeatureUuid = 0x2A5C;
+
+    static unsigned short const pscMeasurementFeaturesFlag = 0b110000;
+    static unsigned int constexpr pscFeaturesFlag = 0b1100;
+    static unsigned short const cyclingPowerSvcUuid = 0x1818;
+    static unsigned short const pscMeasurementUuid = 0x2A63;
+    static unsigned short const pscControlPointUuid = 0x2A66;
+    static unsigned short const pscFeatureUuid = 0x2A65;
+
     static unsigned short const sensorLocationUuid = 0x2A5D;
     inline static std::string const dragFactorUuid = "CE060031-43E5-11E4-916C-0800200C9A66";
     inline static std::string const dragFactorSvcUuid = "CE060030-43E5-11E4-916C-0800200C9A66";
@@ -26,16 +36,20 @@ class BluetoothService
     static unsigned short const manufacturerNameSvcUuid = 0x2A29;
 
     static unsigned short const bleAppearanceCyclingSpeedCadence = 1157;
+    static unsigned short const bleAppearanceCyclingPower = 1156;
 
     byte ledState = HIGH;
 
     NimBLECharacteristic *batteryLevelCharacteristic;
     NimBLECharacteristic *cscMeasurementCharacteristic;
+    NimBLECharacteristic *pscMeasurementCharacteristic;
     NimBLECharacteristic *dragFactorCharacteristic;
 
     void setupBleDevice();
     void setupServices();
-    void setupAdvertisment() const;
+    NimBLEService *setupCscServices(NimBLEServer *server);
+    NimBLEService *setupPscServices(NimBLEServer *server);
+    void setupAdvertisement() const;
     void setupConnectionIndicatorLed() const;
 
 public:
@@ -46,6 +60,7 @@ public:
     void stopServer() const;
     void notifyBattery(byte batteryLevel) const;
     void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
+    void notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const;
     void notifyDragFactor(unsigned short distance, byte dragFactor) const;
     bool isAnyDeviceConnected() const;
     void updateLed();

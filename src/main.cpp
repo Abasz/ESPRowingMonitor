@@ -19,7 +19,11 @@ void setup()
     powerManagerController.begin();
 
     bleController.notifyBattery(powerManagerController.getBatteryLevel());
+#ifndef POWERMETER
     bleController.notifyCsc(0, 0, 0, 0);
+#else
+    bleController.notifyPsc(0, 0, 0, 0, 0);
+#endif
 }
 
 // execution time
@@ -45,11 +49,20 @@ void loop()
         // - not connected: 5 microsec
         // - connected: 1800-2100 microsec
         // auto start = micros();
+#ifndef POWERMETER
         bleController.notifyCsc(
             strokeController.getLastRevTime(),
             strokeController.getRevCount(),
             strokeController.getLastStrokeTime(),
             strokeController.getStrokeCount());
+#else
+        bleController.notifyPsc(
+            strokeController.getLastRevTime(),
+            strokeController.getRevCount(),
+            strokeController.getLastStrokeTime(),
+            strokeController.getStrokeCount(),
+            strokeController.getAvgStrokePower());
+#endif
         // auto stop = micros();
         // Serial.print("notifyCsc: ");
         // Serial.println(stop - start);

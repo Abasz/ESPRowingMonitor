@@ -2,6 +2,7 @@
 #include "NimBLEDevice.h"
 
 #include "bluetooth.service.h"
+#include "settings.h"
 
 using std::array;
 using std::to_string;
@@ -84,7 +85,7 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
         // execution time: 0-1 microsec
         // auto start = micros();
         array<uint8_t, 11> temp = {
-            featuresFlag[0],
+            cscMeasurementFeaturesFlag,
 
             static_cast<byte>(revCount),
             static_cast<byte>(revCount >> 8),
@@ -119,11 +120,65 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
     }
 }
 
+void BluetoothService::notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const
+{
+    if (pscMeasurementCharacteristic->getSubscribedCount() > 0)
+    {
+        // execution time: 11-16 microsec
+        // auto start = micros();
+        unsigned short revTime = lround(lastRevTime / 1000000.0 * 2048) % USHRT_MAX;
+        unsigned short strokeTime = lround(lastStrokeTime / 1000000.0 * 1024) % USHRT_MAX;
+        // auto stop = micros();
+        // Serial.print("Time stamp calc: ");
+        // Serial.println(stop - start);
+
+        // execution time: 0-1 microsec
+        // auto start = micros();
+        array<uint8_t, 14> temp = {
+            static_cast<byte>(pscMeasurementFeaturesFlag),
+            static_cast<byte>(pscMeasurementFeaturesFlag >> 8),
+
+            static_cast<byte>(avgStrokePower),
+            static_cast<byte>(avgStrokePower >> 8),
+
+            static_cast<byte>(revCount),
+            static_cast<byte>(revCount >> 8),
+            static_cast<byte>(revCount >> 16),
+            static_cast<byte>(revCount >> 24),
+            static_cast<byte>(revTime),
+            static_cast<byte>(revTime >> 8),
+
+            static_cast<byte>(strokeCount),
+            static_cast<byte>(strokeCount >> 8),
+            static_cast<byte>(strokeTime),
+            static_cast<byte>(strokeTime >> 8),
+        };
+
+        // auto stop = micros();
+        // Serial.print("data calc: ");
+        // Serial.println(stop - start);
+
+        // execution time: 28-35 microsec
+        // auto start = micros();
+        pscMeasurementCharacteristic->setValue(temp);
+        // auto stop = micros();
+        // Serial.print("set value: ");
+        // Serial.println(stop - start);
+
+        // execution time: 1000-1600 microsec
+        // start = micros();
+        pscMeasurementCharacteristic->notify();
+        // stop = micros();
+        // Serial.print("notify: ");
+        // Serial.println(stop - start);
+    }
+}
+
 void BluetoothService::setupBleDevice()
 {
     Log.traceln("Initializing BLE device");
 
-    NimBLEDevice::init("CSC-Sensor");
+    NimBLEDevice::init("Concept2");
     NimBLEDevice::setPower(ESP_PWR_LVL_N8);
 
     Log.traceln("Setting up Server");
@@ -131,7 +186,7 @@ void BluetoothService::setupBleDevice()
     NimBLEDevice::createServer();
 
     setupServices();
-    setupAdvertisment();
+    setupAdvertisement();
 }
 
 void BluetoothService::setupServices()
@@ -139,26 +194,17 @@ void BluetoothService::setupServices()
     Log.traceln("Setting up BLE Services");
     auto server = NimBLEDevice::getServer();
     auto batteryService = server->createService(batterySvcUuid);
-    auto cscService = server->createService(cyclingSpeedCadenceSvcUuid);
     auto deviceInfoService = server->createService(deviceInfoSvcUuid);
-
+#ifndef POWERMETER
+    Log.infoln("Setting up Cycling Speed and Cadence Profile");
+    auto measurementService = setupCscServices(server);
+#else
+    Log.infoln("Setting up Cycling Power Profile");
+    auto measurementService = setupPscServices(server);
+#endif
     Log.traceln("Setting up BLE Characteristics");
 
     batteryLevelCharacteristic = batteryService->createCharacteristic(batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
-
-    cscMeasurementCharacteristic = cscService->createCharacteristic(cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
-
-    dragFactorCharacteristic = cscService->createCharacteristic(dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
-
-    cscService
-        ->createCharacteristic(cscFeatureUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(featuresFlag.data(), featuresFlag.size());
-
-    cscService
-        ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(&featuresFlag[1], 1);
-
-    cscService->createCharacteristic(cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
 
     deviceInfoService
         ->createCharacteristic(manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)
@@ -176,16 +222,61 @@ void BluetoothService::setupServices()
     Log.traceln("Starting BLE Service");
 
     batteryService->start();
-    cscService->start();
+    measurementService->start();
     deviceInfoService->start();
     server->start();
 }
 
-void BluetoothService::setupAdvertisment() const
+NimBLEService *BluetoothService::setupCscServices(NimBLEServer *server)
+{
+    auto cscService = server->createService(cyclingSpeedCadenceSvcUuid);
+    cscMeasurementCharacteristic = cscService->createCharacteristic(cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
+
+    dragFactorCharacteristic = cscService->createCharacteristic(dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+
+    cscService
+        ->createCharacteristic(cscFeatureUuid, NIMBLE_PROPERTY::READ)
+        ->setValue((uint8_t *)&cscFeaturesFlag, 2);
+
+    cscService
+        ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(&sensorLocationFlag, 1);
+
+    cscService->createCharacteristic(cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
+
+    return cscService;
+}
+
+NimBLEService *BluetoothService::setupPscServices(NimBLEServer *server)
+{
+    auto pscService = server->createService(cyclingPowerSvcUuid);
+    pscMeasurementCharacteristic = pscService->createCharacteristic(pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
+
+    dragFactorCharacteristic = pscService->createCharacteristic(dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+
+    pscService
+        ->createCharacteristic(pscFeatureUuid, NIMBLE_PROPERTY::READ)
+        ->setValue((uint8_t *)&pscFeaturesFlag, 4);
+
+    pscService
+        ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(&sensorLocationFlag, 1);
+
+    pscService->createCharacteristic(pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
+
+    return pscService;
+}
+
+void BluetoothService::setupAdvertisement() const
 {
     auto pAdvertising = NimBLEDevice::getAdvertising();
+#ifndef POWERMETER
     pAdvertising->setAppearance(bleAppearanceCyclingSpeedCadence);
     pAdvertising->addServiceUUID(cyclingSpeedCadenceSvcUuid);
+#else
+    pAdvertising->setAppearance(bleAppearanceCyclingPower);
+    pAdvertising->addServiceUUID(cyclingPowerSvcUuid);
+#endif
 }
 
 void BluetoothService::setupConnectionIndicatorLed() const

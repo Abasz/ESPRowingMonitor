@@ -1,3 +1,5 @@
+#define POWERMETER
+
 // Hardware settings
 #define SENSOR_PIN_NUMBER GPIO_NUM_26
 #define IMPULSES_PER_REVOLUTION 3
