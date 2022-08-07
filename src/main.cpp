@@ -27,7 +27,7 @@ void setup()
 // - connected  microsec 2000-4900
 void loop()
 {
-    // simulatRotation();
+    // simulateRotation();
 
     strokeController.update();
     bleController.update();
