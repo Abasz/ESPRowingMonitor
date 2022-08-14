@@ -179,7 +179,7 @@ void BluetoothService::setupBleDevice()
     Log.traceln("Initializing BLE device");
 
     NimBLEDevice::init("Concept2");
-    NimBLEDevice::setPower(ESP_PWR_LVL_N8);
+    NimBLEDevice::setPower(ESP_PWR_LVL_N6);
 
     Log.traceln("Setting up Server");
 
