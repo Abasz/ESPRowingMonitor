@@ -13,6 +13,8 @@ void loop()
     strokeController.update();
     if (strokeController.getRevCount() != strokeController.getPreviousRevCount())
     {
+        Log.infoln("distance: %f", strokeController.getDistance() / 100.0);
+        Log.infoln("revCount: %d", strokeController.getRevCount());
         strokeController.setPreviousRevCount();
     }
 

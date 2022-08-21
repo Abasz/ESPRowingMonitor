@@ -9,6 +9,7 @@ namespace StrokeModel
         unsigned int deltaTime;
         unsigned long rawRevTime;
         unsigned int driveDuration;
+        unsigned int distance;
         double avgStrokePower;
         double dragCoefficient;
     };

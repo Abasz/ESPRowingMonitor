@@ -66,6 +66,8 @@ void loop()
         // auto stop = micros();
         // Serial.print("notifyCsc: ");
         // Serial.println(stop - start);
+        Log.infoln("distance: %D", strokeController.getDistance() / 100.0);
+        Log.infoln("revCount: %d", strokeController.getRevCount());
 
         strokeController.setPreviousRevCount();
         // auto stop = micros();

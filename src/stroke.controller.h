@@ -14,6 +14,7 @@ class StrokeController
         0UL,
         0U,
         0U,
+        0U,
         0};
 
 public:
@@ -30,6 +31,7 @@ public:
     unsigned long getLastStrokeTime() const;
     unsigned short getStrokeCount() const;
     unsigned int getDeltaTime() const;
+    unsigned int getDistance() const;
     double getDriveDuration() const;
     short getAvgStrokePower() const;
     byte getDragFactor() const;

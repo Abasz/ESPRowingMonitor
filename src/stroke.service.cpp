@@ -132,6 +132,7 @@ CscData StrokeService::getData() const
         .deltaTime = cleanDeltaTimes[0],
         .rawRevTime = previousRawRevTime,
         .driveDuration = lastDriveDuration,
+        .distance = distance,
         .avgStrokePower = avgStrokePower,
         .dragCoefficient = dragCoefficient};
     attachRotationInterrupt();
@@ -221,9 +222,11 @@ void StrokeService::processRotation(unsigned long now)
         regressorService.resetData();
 
         impulseCount = strokeCycleStartIndex + 1;
-        if (impulseCount % Settings::impulsesPerRevolution == 0)
+        auto startupRevCount = floor(impulseCount / Settings::impulsesPerRevolution);
+        if (startupRevCount > 0)
         {
-            revCount++;
+            revCount += startupRevCount;
+            distance = round(pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * (2.0 * PI) * revCount);
             lastRevTime = now;
         }
 
@@ -234,6 +237,7 @@ void StrokeService::processRotation(unsigned long now)
     if (impulseCount % Settings::impulsesPerRevolution == 0)
     {
         revCount++;
+        distance = round(pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * (2.0 * PI) * revCount);
         lastRevTime = now;
     }
 
