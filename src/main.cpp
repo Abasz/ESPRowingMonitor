@@ -66,8 +66,6 @@ void loop()
         // auto stop = micros();
         // Serial.print("notifyCsc: ");
         // Serial.println(stop - start);
-        Log.infoln("distance: %D", strokeController.getDistance() / 100.0);
-        Log.infoln("revCount: %d", strokeController.getRevCount());
 
         strokeController.setPreviousRevCount();
         // auto stop = micros();
@@ -80,6 +78,9 @@ void loop()
         Log.infoln("driveDuration: %D", strokeController.getDriveDuration());
         Log.infoln("dragFactor: %d", strokeController.getDragFactor());
         Log.infoln("power: %d", strokeController.getAvgStrokePower());
+        Log.infoln("distance: %D", strokeController.getDistance() / 100.0);
+        Log.infoln("revCount: %d", strokeController.getRevCount());
+
         // execution time
         // - not connected: 173-200
         // - connected: 900-2700
