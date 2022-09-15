@@ -129,7 +129,7 @@ CscData StrokeService::getData() const
         .revCount = revCount,
         .lastStrokeTime = lastStrokeTime,
         .strokeCount = strokeCount,
-        .deltaTime = cleanDeltaTimes[0],
+        .deltaTime = rawDeltaTimes[0],
         .rawRevTime = previousRawRevTime,
         .driveDuration = lastDriveDuration,
         .distance = distance,
