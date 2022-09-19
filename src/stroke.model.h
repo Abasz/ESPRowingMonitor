@@ -7,6 +7,7 @@ namespace StrokeModel
         unsigned long lastStrokeTime;
         unsigned short strokeCount;
         unsigned int deltaTime;
+        unsigned int cleanDeltaTime;
         unsigned long rawRevTime;
         unsigned int driveDuration;
         unsigned int distance;
