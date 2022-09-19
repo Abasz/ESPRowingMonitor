@@ -29,7 +29,7 @@ IRAM_ATTR void batteryMeasurementInterrupt()
 
 void attachRotationInterrupt()
 {
-    attachInterrupt(digitalPinToInterrupt(Settings::sensorPinNumber), rotationInterrupt, RISING);
+    attachInterrupt(digitalPinToInterrupt(Settings::sensorPinNumber), rotationInterrupt, FALLING);
 }
 
 void detachRotationInterrupt()
