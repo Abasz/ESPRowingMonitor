@@ -67,7 +67,7 @@ short StrokeController::getAvgStrokePower() const
 
 unsigned int StrokeController::getDistance() const
 {
-    return cscData.distance;
+    return round(cscData.distance);
 }
 
 byte StrokeController::getDragFactor() const

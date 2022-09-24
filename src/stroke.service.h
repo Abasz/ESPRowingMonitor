@@ -20,7 +20,7 @@ class StrokeService
     static double constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
     static byte const strokeCycleStartIndex = Settings::deltaTimeArrayLength - Settings::flywheelPowerChangeDetectionErrorThreshold - 1;
 
-    volatile unsigned int distance = 0;
+    volatile double distance = 0;
     volatile unsigned long lastRevTime = 0;
     volatile unsigned long lastStrokeTime = 0;
     volatile unsigned int impulseCount = 0;

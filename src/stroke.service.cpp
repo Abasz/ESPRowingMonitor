@@ -227,18 +227,18 @@ void StrokeService::processRotation(unsigned long now)
         if (startupRevCount > 0)
         {
             revCount += startupRevCount;
-            distance = round(pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * (2.0 * PI) * revCount);
             lastRevTime = now;
         }
+        distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse * impulseCount;
 
         return;
     }
 
     impulseCount++;
+    distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse;
     if (impulseCount % Settings::impulsesPerRevolution == 0)
     {
         revCount++;
-        distance = round(pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * (2.0 * PI) * revCount);
         lastRevTime = now;
     }
 
@@ -280,6 +280,10 @@ void StrokeService::processRotation(unsigned long now)
             // Here we can conclude the "Recovery" phase (and the current stroke cycle) as drive to the flywheel is detected (e.g. calculating drag factor)
             calculateDragCoefficient();
             calculateAvgStrokePower();
+
+            // Calculate distance since start if no distance has been calculated so far (due to the lack of valid drag factor)
+            if (distance == 0)
+                distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse * impulseCount;
 
             cyclePhase = CyclePhase::Drive;
             driveStartTime = now - accumulate(rawDeltaTimes.cbegin(), rawDeltaTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
