@@ -158,12 +158,12 @@ bool StrokeService::hasDataChanged()
 
 void StrokeService::processRotation(unsigned long now)
 {
-    auto currentRawDeltaTime = now - previousCleanRevTime;
-
-    previousRawRevTime = now;
+    auto currentRawDeltaTime = now - previousRawRevTime;
 
     if (currentRawDeltaTime < Settings::rotationDebounceTimeMin * 1000)
         return;
+
+    previousRawRevTime = now;
 
     auto currentCleanDeltaTime = now - previousCleanRevTime;
 
@@ -173,7 +173,10 @@ void StrokeService::processRotation(unsigned long now)
     previousDeltaTime = currentCleanDeltaTime;
     // We disregard rotation signals that are non sensible (the absolute difference of the current and the previous deltas exceeds the current delta)
     // TODO: check if adding a constraint to being in the Recovery Phase would help with the data skipping in the drive phase where sudden high power if applied to the flywheel causing quick increase in the revtime. This needs to be tested with a low ROTATION_DEBOUNCE_TIME_MIN
-    if (deltaTimeDiff > currentCleanDeltaTime /* && cyclePhase != CyclePhase::Drive */)
+    if (deltaTimeDiff > currentCleanDeltaTime &&
+        cyclePhase != CyclePhase::Drive &&
+        !any_of(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend(), [](unsigned long cleanDeltaTime)
+                { return cleanDeltaTime == 0; }))
         return;
 
     // If we got this far, we must have a sensible delta for flywheel rotation time, updating the deltaTime array
