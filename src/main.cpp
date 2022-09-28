@@ -76,6 +76,7 @@ void loop()
     if (strokeController.getStrokeCount() > strokeController.getPreviousStrokeCount())
     {
         Log.infoln("driveDuration: %D", strokeController.getDriveDuration());
+        Log.infoln("recoveryDuration: %D", strokeController.getRecoveryDuration());
         Log.infoln("dragFactor: %d", strokeController.getDragFactor());
         Log.infoln("power: %d", strokeController.getAvgStrokePower());
         Log.infoln("distance: %D", strokeController.getDistance() / 100.0);

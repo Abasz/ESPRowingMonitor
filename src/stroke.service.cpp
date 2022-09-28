@@ -133,6 +133,7 @@ CscData StrokeService::getData() const
         .cleanDeltaTime = cleanDeltaTimes[0],
         .rawRevTime = previousRawRevTime,
         .driveDuration = lastDriveDuration,
+        .recoveryDuration = lastRecoveryDuration,
         .distance = distance,
         .avgStrokePower = avgStrokePower,
         .dragCoefficient = dragCoefficient};
@@ -280,6 +281,7 @@ void StrokeService::processRotation(unsigned long now)
         {
             regressorService.addToDataset(rawDeltaTimes[strokeCycleStartIndex]);
             recoveryDuration += rawDeltaTimes[strokeCycleStartIndex];
+            lastRecoveryDuration = recoveryDuration;
             // Here we can conclude the "Recovery" phase (and the current stroke cycle) as drive to the flywheel is detected (e.g. calculating drag factor)
             calculateDragCoefficient();
             calculateAvgStrokePower();

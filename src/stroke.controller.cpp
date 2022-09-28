@@ -60,6 +60,11 @@ double StrokeController::getDriveDuration() const
     return cscData.driveDuration / 1e6;
 }
 
+double StrokeController::getRecoveryDuration() const
+{
+    return cscData.recoveryDuration / 1e6;
+}
+
 short StrokeController::getAvgStrokePower() const
 {
     return lround(cscData.avgStrokePower);
