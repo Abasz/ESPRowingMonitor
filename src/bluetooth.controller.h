@@ -6,7 +6,10 @@ class BluetoothController
 {
     BluetoothService &bluetoothService;
 
-    unsigned long lastConnectedDeviceCheckTime = 0;
+    unsigned int lastConnectedDeviceCheckTime = 0;
+
+    unsigned short revTime = 0;
+    unsigned short crankTime = 0;
 
 public:
     BluetoothController(BluetoothService &_bluetoothService);
@@ -14,8 +17,8 @@ public:
     void begin();
     void update();
     void notifyBattery(byte batteryLevel) const;
-    void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
-    void notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const;
+    void notifyCsc(unsigned int deltaRevTime, unsigned int revCount, unsigned int deltaStrokeTime, unsigned short strokeCount);
+    void notifyPsc(unsigned int deltaRevTime, unsigned int revCount, unsigned int deltaStrokeTime, unsigned short strokeCount, short avgStrokePower);
     void notifyDragFactor(byte dragFactor) const;
     bool isAnyDeviceConnected() const;
 };

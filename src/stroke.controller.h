@@ -26,9 +26,11 @@ public:
     void setPreviousRevCount();
     unsigned int getPreviousStrokeCount() const;
     void setPreviousStrokeCount();
-    unsigned long getLastRevTime() const;
+    unsigned long getRawImpulseTime() const;
+
+    unsigned long getLastDeltaRevTime() const;
     unsigned int getRevCount() const;
-    unsigned long getLastStrokeTime() const;
+    unsigned long getLastDeltaStrokeTime() const;
     unsigned short getStrokeCount() const;
     unsigned int getDistance() const;
     double getRecoveryDuration() const;

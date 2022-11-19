@@ -70,18 +70,10 @@ void BluetoothService::notifyDragFactor(unsigned short distance, byte dragFactor
     }
 }
 
-void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const
+void BluetoothService::notifyCsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount) const
 {
     if (cscMeasurementCharacteristic->getSubscribedCount() > 0)
     {
-        // execution time: 11-16 microsec
-        // auto start = micros();
-        unsigned short revTime = lround(lastRevTime / 1000000.0 * 1024) % USHRT_MAX;
-        unsigned short strokeTime = lround(lastStrokeTime / 1000000.0 * 1024) % USHRT_MAX;
-        // auto stop = micros();
-        // Serial.print("Time stamp calc: ");
-        // Serial.println(stop - start);
-
         // execution time: 0-1 microsec
         // auto start = micros();
         array<uint8_t, 11> temp = {
@@ -120,18 +112,10 @@ void BluetoothService::notifyCsc(unsigned long lastRevTime, unsigned int revCoun
     }
 }
 
-void BluetoothService::notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const
+void BluetoothService::notifyPsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const
 {
     if (pscMeasurementCharacteristic->getSubscribedCount() > 0)
     {
-        // execution time: 11-16 microsec
-        // auto start = micros();
-        unsigned short revTime = lround(lastRevTime / 1000000.0 * 2048) % USHRT_MAX;
-        unsigned short strokeTime = lround(lastStrokeTime / 1000000.0 * 1024) % USHRT_MAX;
-        // auto stop = micros();
-        // Serial.print("Time stamp calc: ");
-        // Serial.println(stop - start);
-
         // execution time: 0-1 microsec
         // auto start = micros();
         array<uint8_t, 14> temp = {

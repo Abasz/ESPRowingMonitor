@@ -125,9 +125,9 @@ CscData StrokeService::getData() const
     // auto start = micros();
     detachRotationInterrupt();
     CscData data = {
-        .lastRevTime = lastRevTime,
+        .lastDeltaRevTime = deltaRevTime,
         .revCount = revCount,
-        .lastStrokeTime = lastStrokeTime,
+        .lastDeltaStrokeTime = deltaStrokeTime,
         .strokeCount = strokeCount,
         .rawImpulseTime = previousRawImpulseTime,
         .driveDuration = lastDriveDuration,
@@ -230,6 +230,7 @@ void StrokeService::processRotation(unsigned long now)
         if (startupRevCount > 0)
         {
             revCount += startupRevCount;
+            deltaRevTime = now - lastRevTime;
             lastRevTime = now;
         }
         distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse * impulseCount;
@@ -242,6 +243,7 @@ void StrokeService::processRotation(unsigned long now)
     if (impulseCount % Settings::impulsesPerRevolution == 0)
     {
         revCount++;
+        deltaRevTime = now - lastRevTime;
         lastRevTime = now;
     }
 

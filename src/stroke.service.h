@@ -23,6 +23,9 @@ class StrokeService
     volatile unsigned long impulseCount = 0UL;
     volatile unsigned long lastRevTime = 0UL;
     volatile unsigned long lastStrokeTime = 0UL;
+
+    volatile unsigned int deltaRevTime = 0;
+    volatile unsigned int deltaStrokeTime = 0;
     volatile unsigned int revCount = 0;
     volatile unsigned short strokeCount = 0;
 

@@ -35,7 +35,7 @@ void loop()
 
     strokeController.update();
     bleController.update();
-    powerManagerController.update(strokeController.getLastRevTime(), bleController.isAnyDeviceConnected());
+    powerManagerController.update(strokeController.getRawImpulseTime(), bleController.isAnyDeviceConnected());
 
     // auto start = micros();
 
@@ -51,15 +51,15 @@ void loop()
         // auto start = micros();
 #ifndef POWERMETER
         bleController.notifyCsc(
-            strokeController.getLastRevTime(),
+            strokeController.getLastDeltaRevTime(),
             strokeController.getRevCount(),
-            strokeController.getLastStrokeTime(),
+            strokeController.getLastDeltaStrokeTime(),
             strokeController.getStrokeCount());
 #else
         bleController.notifyPsc(
-            strokeController.getLastRevTime(),
+            strokeController.getLastDeltaRevTime(),
             strokeController.getRevCount(),
-            strokeController.getLastStrokeTime(),
+            strokeController.getLastDeltaStrokeTime(),
             strokeController.getStrokeCount(),
             strokeController.getAvgStrokePower());
 #endif

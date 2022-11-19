@@ -129,8 +129,8 @@ public:
     void startBLEServer() const;
     void stopServer() const;
     void notifyBattery(byte batteryLevel) const;
-    void notifyCsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount) const;
-    void notifyPsc(unsigned long lastRevTime, unsigned int revCount, unsigned long lastStrokeTime, unsigned short strokeCount, short avgStrokePower) const;
+    void notifyCsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount) const;
+    void notifyPsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const;
     void notifyDragFactor(unsigned short distance, byte dragFactor) const;
     bool isAnyDeviceConnected() const;
     void updateLed();
