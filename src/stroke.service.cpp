@@ -30,10 +30,10 @@ StrokeService::StrokeService(LinearRegressorService &_regressorService) : regres
 bool StrokeService::isFlywheelUnpowered() const
 {
     byte numberOfAccelerations = 0;
-    byte i = cleanDeltaTimes.size() - 1;
+    byte i = cleanDeltaImpulseTimes.size() - 1;
     while (i > 0)
     {
-        if (cleanDeltaTimes[i] >= cleanDeltaTimes[i - 1] || cleanDeltaTimes[i - 1] - cleanDeltaTimes[i] < Settings::maxDecelerationDeltaForPowered)
+        if (cleanDeltaImpulseTimes[i] >= cleanDeltaImpulseTimes[i - 1] || cleanDeltaImpulseTimes[i - 1] - cleanDeltaImpulseTimes[i] < Settings::maxDecelerationDeltaForPowered)
         {
             // Oldest interval (dataPoints[i]) is larger than the younger one (dataPoint[i-1], as the distance is
             // fixed, we are accelerating
@@ -54,10 +54,10 @@ bool StrokeService::isFlywheelUnpowered() const
 bool StrokeService::isFlywheelPowered() const
 {
     byte numberOfDecelerations = 0;
-    byte i = cleanDeltaTimes.size() - 1;
+    byte i = cleanDeltaImpulseTimes.size() - 1;
     while (i > 0)
     {
-        if (cleanDeltaTimes[i] < cleanDeltaTimes[i - 1] && cleanDeltaTimes[i - 1] - cleanDeltaTimes[i] > Settings::minDecelerationDeltaForUnpowered)
+        if (cleanDeltaImpulseTimes[i] < cleanDeltaImpulseTimes[i - 1] && cleanDeltaImpulseTimes[i - 1] - cleanDeltaImpulseTimes[i] > Settings::minDecelerationDeltaForUnpowered)
         {
             // Oldest interval (dataPoints[i]) is shorter than the younger one (dataPoint[i-1], as the distance is fixed, we
             // discovered a deceleration
@@ -83,7 +83,7 @@ void StrokeService::setup() const
 
 void StrokeService::calculateDragCoefficient()
 {
-    if (cleanDeltaTimes[Settings::deltaTimeArrayLength - 1] < Settings::dragFactorRotationDeltaUpperThreshold * 1000 || recoveryDuration > Settings::maxDragFactorRecoveryPeriod * 1000)
+    if (cleanDeltaImpulseTimes[Settings::deltaImpulseTimeArrayLength - 1] < Settings::dragFactorRotationDeltaUpperThreshold * 1000 || recoveryDuration > Settings::maxDragFactorRecoveryPeriod * 1000)
         return;
 
     if (regressorService.goodnessOfFit() < Settings::goodnessOfFitThreshold)
@@ -129,14 +129,14 @@ CscData StrokeService::getData() const
         .revCount = revCount,
         .lastStrokeTime = lastStrokeTime,
         .strokeCount = strokeCount,
-        .deltaTime = rawDeltaTimes[0],
-        .cleanDeltaTime = cleanDeltaTimes[0],
-        .rawRevTime = previousRawRevTime,
+        .rawImpulseTime = previousRawImpulseTime,
         .driveDuration = lastDriveDuration,
         .recoveryDuration = lastRecoveryDuration,
         .distance = distance,
         .avgStrokePower = avgStrokePower,
-        .dragCoefficient = dragCoefficient};
+        .dragCoefficient = dragCoefficient,
+        .rawDeltaImpulseTime = rawDeltaImpulseTimes[0],
+        .cleanDeltaImpulseTime = cleanDeltaImpulseTimes[0]};
     attachRotationInterrupt();
     // auto stop = micros();
 
@@ -147,9 +147,9 @@ CscData StrokeService::getData() const
 
 bool StrokeService::hasDataChanged()
 {
-    if (previousRawRevTime != lastDataReadTime)
+    if (previousRawImpulseTime != lastDataReadTime)
     {
-        lastDataReadTime = previousRawRevTime;
+        lastDataReadTime = previousRawImpulseTime;
 
         return true;
     }
@@ -159,43 +159,42 @@ bool StrokeService::hasDataChanged()
 
 void StrokeService::processRotation(unsigned long now)
 {
-    auto currentRawDeltaTime = now - previousRawRevTime;
+    auto currentRawImpulseDeltaTime = now - previousRawImpulseTime;
 
-    if (currentRawDeltaTime < Settings::rotationDebounceTimeMin * 1000)
+    if (currentRawImpulseDeltaTime < Settings::rotationDebounceTimeMin * 1000)
         return;
 
-    previousRawRevTime = now;
+    previousRawImpulseTime = now;
 
-    auto currentCleanDeltaTime = now - previousCleanRevTime;
+    auto currentCleanImpulseDeltaTime = now - previousCleanImpulseTime;
 
-    auto deltaTimeDiffPair = minmax<volatile unsigned long>(currentCleanDeltaTime, previousDeltaTime);
-    auto deltaTimeDiff = deltaTimeDiffPair.second - deltaTimeDiffPair.first;
+    auto deltaTimeDiffPair = minmax<volatile unsigned long>(currentCleanImpulseDeltaTime, previousDeltaImpulseTime);
+    auto deltaImpulseTimeDiff = deltaTimeDiffPair.second - deltaTimeDiffPair.first;
 
-    previousDeltaTime = currentCleanDeltaTime;
+    previousDeltaImpulseTime = currentCleanImpulseDeltaTime;
     // We disregard rotation signals that are non sensible (the absolute difference of the current and the previous deltas exceeds the current delta)
-    // TODO: check if adding a constraint to being in the Recovery Phase would help with the data skipping in the drive phase where sudden high power if applied to the flywheel causing quick increase in the revtime. This needs to be tested with a low ROTATION_DEBOUNCE_TIME_MIN
-    if (deltaTimeDiff > currentCleanDeltaTime &&
+    if (deltaImpulseTimeDiff > currentCleanImpulseDeltaTime &&
         cyclePhase != CyclePhase::Drive &&
-        !any_of(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend(), [](unsigned long cleanDeltaTime)
-                { return cleanDeltaTime == 0; }))
+        !any_of(cleanDeltaImpulseTimes.cbegin(), cleanDeltaImpulseTimes.cend(), [](unsigned long cleanDeltaImpulseTime)
+                { return cleanDeltaImpulseTime == 0; }))
         return;
 
     // If we got this far, we must have a sensible delta for flywheel rotation time, updating the deltaTime array
-    byte i = Settings::deltaTimeArrayLength - 1;
+    byte i = Settings::deltaImpulseTimeArrayLength - 1;
     while (i > 0)
     {
-        cleanDeltaTimes[i] = cleanDeltaTimes[i - 1];
-        rawDeltaTimes[i] = rawDeltaTimes[i - 1];
+        cleanDeltaImpulseTimes[i] = cleanDeltaImpulseTimes[i - 1];
+        rawDeltaImpulseTimes[i] = rawDeltaImpulseTimes[i - 1];
         i--;
     }
 
-    rawDeltaTimes[0] = currentCleanDeltaTime;
-    cleanDeltaTimes[0] = any_of(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cbegin() + Settings::rotationSmoothingFactor, [](unsigned long cleanDeltaTime)
-                                { return cleanDeltaTime == 0; })
-                             ? currentCleanDeltaTime
-                             : lround((currentCleanDeltaTime + accumulate(cleanDeltaTimes.begin(), cleanDeltaTimes.begin() + Settings::rotationSmoothingFactor, 0)) / (Settings::rotationSmoothingFactor + 1.0));
+    rawDeltaImpulseTimes[0] = currentCleanImpulseDeltaTime;
+    cleanDeltaImpulseTimes[0] = any_of(cleanDeltaImpulseTimes.cbegin(), cleanDeltaImpulseTimes.cbegin() + Settings::rotationSmoothingFactor, [](unsigned long cleanDeltaImpulseTime)
+                                       { return cleanDeltaImpulseTime == 0; })
+                                    ? currentCleanImpulseDeltaTime
+                                    : lround((currentCleanImpulseDeltaTime + accumulate(cleanDeltaImpulseTimes.begin(), cleanDeltaImpulseTimes.begin() + Settings::rotationSmoothingFactor, 0)) / (Settings::rotationSmoothingFactor + 1.0));
 
-    previousCleanRevTime = now;
+    previousCleanImpulseTime = now;
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
     if (cyclePhase == CyclePhase::Recovery && recoveryDuration > Settings::rowingStoppedThresholdPeriod * 1000)
@@ -214,7 +213,7 @@ void StrokeService::processRotation(unsigned long now)
     {
         // We are currently in the "Stopped" phase, as power was not applied for a long period of time or the device just started. Since rotation was detected we check if cleanDeltaTimes array is filled (i.e. whether we have sufficient data for determining the next phase) and whether power is being applied to the flywheel
         if (
-            any_of(cleanDeltaTimes.cbegin(), cleanDeltaTimes.cend(), [](unsigned long cleanDeltaTime)
+            any_of(cleanDeltaImpulseTimes.cbegin(), cleanDeltaImpulseTimes.cend(), [](unsigned long cleanDeltaTime)
                    { return cleanDeltaTime == 0; }) ||
             !isFlywheelPowered())
         {
@@ -222,7 +221,7 @@ void StrokeService::processRotation(unsigned long now)
         }
         // Since we detected power, setting to "Drive" phase and increasing rotation count and registering rotation time
         cyclePhase = CyclePhase::Drive;
-        driveStartTime = now - accumulate(rawDeltaTimes.cbegin(), rawDeltaTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
+        driveStartTime = now - accumulate(rawDeltaImpulseTimes.cbegin(), rawDeltaImpulseTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
         driveStartImpulseCount = 0;
         regressorService.resetData();
 
@@ -252,7 +251,7 @@ void StrokeService::processRotation(unsigned long now)
         // We are currently in the "Drive" phase, lets determine what the next phase is (if we come from "Stopped" phase )
         if (isFlywheelUnpowered())
         {
-            driveDuration += rawDeltaTimes[strokeCycleStartIndex];
+            driveDuration += rawDeltaImpulseTimes[strokeCycleStartIndex];
             // It seems that we lost power to the flywheel lets check if drive time was sufficient for detecting a stroke (i.e. drivePhaseDuration exceeds debounce time)
             if (driveDuration > Settings::strokeDebounceTime * 1000)
             {
@@ -264,12 +263,12 @@ void StrokeService::processRotation(unsigned long now)
 
             cyclePhase = CyclePhase::Recovery;
             driveDuration = 0;
-            recoveryStartTime = now - accumulate(rawDeltaTimes.cbegin(), rawDeltaTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
+            recoveryStartTime = now - accumulate(rawDeltaImpulseTimes.cbegin(), rawDeltaImpulseTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
 
             return;
         }
 
-        driveDuration += rawDeltaTimes[strokeCycleStartIndex];
+        driveDuration += rawDeltaImpulseTimes[strokeCycleStartIndex];
 
         return;
     }
@@ -279,8 +278,8 @@ void StrokeService::processRotation(unsigned long now)
         // We are currently in the "Recovery" phase, lets determine what the next phase is
         if (isFlywheelPowered())
         {
-            regressorService.addToDataset(rawDeltaTimes[strokeCycleStartIndex]);
-            recoveryDuration += rawDeltaTimes[strokeCycleStartIndex];
+            regressorService.addToDataset(rawDeltaImpulseTimes[strokeCycleStartIndex]);
+            recoveryDuration += rawDeltaImpulseTimes[strokeCycleStartIndex];
             lastRecoveryDuration = recoveryDuration;
             // Here we can conclude the "Recovery" phase (and the current stroke cycle) as drive to the flywheel is detected (e.g. calculating drag factor)
             calculateDragCoefficient();
@@ -291,7 +290,7 @@ void StrokeService::processRotation(unsigned long now)
                 distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse * impulseCount;
 
             cyclePhase = CyclePhase::Drive;
-            driveStartTime = now - accumulate(rawDeltaTimes.cbegin(), rawDeltaTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
+            driveStartTime = now - accumulate(rawDeltaImpulseTimes.cbegin(), rawDeltaImpulseTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
             driveStartImpulseCount = impulseCount - strokeCycleStartIndex - 1;
             recoveryDuration = 0;
             regressorService.resetData();
@@ -299,8 +298,8 @@ void StrokeService::processRotation(unsigned long now)
             return;
         }
 
-        regressorService.addToDataset(rawDeltaTimes[strokeCycleStartIndex]);
-        recoveryDuration += rawDeltaTimes[strokeCycleStartIndex];
+        regressorService.addToDataset(rawDeltaImpulseTimes[strokeCycleStartIndex]);
+        recoveryDuration += rawDeltaImpulseTimes[strokeCycleStartIndex];
 
         return;
     }

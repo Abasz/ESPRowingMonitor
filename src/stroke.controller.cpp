@@ -16,16 +16,16 @@ void StrokeController::update()
 {
     if (strokeService.hasDataChanged())
     {
-        auto lastRawRevTime = cscData.rawRevTime;
+        auto lastRawRevTime = cscData.rawImpulseTime;
         cscData = strokeService.getData();
-        if (lastRawRevTime != cscData.rawRevTime)
-            Log.infoln("rawRevTime: %u", cscData.rawRevTime);
+        if (lastRawRevTime != cscData.rawImpulseTime)
+            Log.traceln("rawImpulseTime: %u", cscData.rawImpulseTime);
 
-        if (cscData.deltaTime != lastDeltaRead)
+        if (cscData.rawDeltaImpulseTime != lastDeltaRead)
         {
-            Log.infoln("deltaTime: %u", cscData.deltaTime);
-            Log.infoln("cleanDeltaTime: %u", cscData.cleanDeltaTime);
-            lastDeltaRead = cscData.deltaTime;
+            Log.infoln("deltaTime: %u", cscData.rawDeltaImpulseTime);
+            Log.traceln("cleanDeltaTime: %u", cscData.cleanDeltaImpulseTime);
+            lastDeltaRead = cscData.rawDeltaImpulseTime;
         }
     }
 }
@@ -48,11 +48,6 @@ unsigned long StrokeController::getLastStrokeTime() const
 unsigned short StrokeController::getStrokeCount() const
 {
     return cscData.strokeCount;
-}
-
-unsigned int StrokeController::getDeltaTime() const
-{
-    return cscData.deltaTime;
 }
 
 double StrokeController::getDriveDuration() const

@@ -30,7 +30,6 @@ public:
     unsigned int getRevCount() const;
     unsigned long getLastStrokeTime() const;
     unsigned short getStrokeCount() const;
-    unsigned int getDeltaTime() const;
     unsigned int getDistance() const;
     double getRecoveryDuration() const;
     double getDriveDuration() const;

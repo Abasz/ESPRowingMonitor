@@ -23,7 +23,7 @@
 #define MAX_DECELERATION_DELTA_FOR_POWERED 0
 #define STROKE_DEBOUNCE_TIME 200
 #define FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD 0
-#define DELTA_TIME_ARRAY_LENGTH 5
+#define DELTA_IMPULSE_TIME_ARRAY_LENGTH 5
 #define ROTATION_SMOOTHING_FACTOR 1
 
 // Device power management settings
@@ -61,7 +61,7 @@ public:
     static unsigned short const maxDecelerationDeltaForPowered = MAX_DECELERATION_DELTA_FOR_POWERED;
     static byte const strokeDebounceTime = STROKE_DEBOUNCE_TIME;
     static byte const flywheelPowerChangeDetectionErrorThreshold = FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD;
-    static byte const deltaTimeArrayLength = DELTA_TIME_ARRAY_LENGTH;
+    static byte const deltaImpulseTimeArrayLength = DELTA_IMPULSE_TIME_ARRAY_LENGTH;
     static byte const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;
 
     // Device power management settings
@@ -75,9 +75,9 @@ public:
 };
 
 // Sanity checks
-#if DELTA_TIME_ARRAY_LENGTH <= 1
-    #error "DELTA_TIME_ARRAY_LENGTH should not be less than 2"
+#if DELTA_IMPULSE_TIME_ARRAY_LENGTH <= 1
+    #error "DELTA_IMPULSE_TIME_ARRAY_LENGTH should not be less than 2"
 #endif
-#if DELTA_TIME_ARRAY_LENGTH - FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD - 2 < 0
-    #error "FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD should be less then or equal to the half of the DELTA_TIME_ARRAY_LENGTH"
+#if DELTA_IMPULSE_TIME_ARRAY_LENGTH - FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD - 2 < 0
+    #error "FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD should be less then or equal to the half of the DELTA_IMPULSE_TIME_ARRAY_LENGTH"
 #endif
