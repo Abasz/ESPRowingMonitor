@@ -12,6 +12,6 @@ public:
 
     void resetData();
     void addToDataset(unsigned long long y);
-    double slope();
-    double goodnessOfFit();
+    double slope() const;
+    double goodnessOfFit() const;
 };

@@ -23,7 +23,7 @@ void LinearRegressorService::addToDataset(volatile unsigned long long y)
     count++;
 }
 
-double LinearRegressorService::slope()
+double LinearRegressorService::slope() const
 {
     if (count > 0 && sumX > 0)
     {
@@ -35,7 +35,7 @@ double LinearRegressorService::slope()
     }
 }
 
-double LinearRegressorService::goodnessOfFit()
+double LinearRegressorService::goodnessOfFit() const
 {
     // This function returns the R^2 as a goodness of fit indicator
     if (count >= 2 && sumX > 0)
