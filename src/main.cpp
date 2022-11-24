@@ -22,11 +22,7 @@ void setup()
     powerManagerController.begin();
 
     bleController.notifyBattery(powerManagerController.getBatteryLevel());
-#ifndef POWERMETER
-    bleController.notifyCsc(0, 0, 0, 0);
-#else
-    bleController.notifyPsc(0, 0, 0, 0, 0);
-#endif
+    bleController.notify(0, 0, 0, 0, 0);
 }
 
 // execution time
@@ -52,20 +48,12 @@ void loop()
         // - not connected: 5 microsec
         // - connected: 1800-2100 microsec
         // auto start = micros();
-#ifndef POWERMETER
-        bleController.notifyCsc(
-            strokeController.getLastDeltaRevTime(),
-            strokeController.getRevCount(),
-            strokeController.getLastDeltaStrokeTime(),
-            strokeController.getStrokeCount());
-#else
-        bleController.notifyPsc(
+        bleController.notify(
             strokeController.getLastDeltaRevTime(),
             strokeController.getRevCount(),
             0,
             strokeController.getStrokeCount(),
             strokeController.getAvgStrokePower());
-#endif
         // auto stop = micros();
         // Serial.print("notifyCsc: ");
         // Serial.println(stop - start);
@@ -84,20 +72,12 @@ void loop()
         Log.infoln("power: %d", strokeController.getAvgStrokePower());
         Log.infoln("distance: %D", strokeController.getDistance() / 100.0);
 
-#ifndef POWERMETER
-        bleController.notifyCsc(
-            strokeController.getLastDeltaRevTime(),
-            strokeController.getRevCount(),
-            strokeController.getLastDeltaStrokeTime(),
-            strokeController.getStrokeCount());
-#else
-        bleController.notifyPsc(
+        bleController.notify(
             0,
             strokeController.getRevCount(),
             strokeController.getLastDeltaStrokeTime(),
             strokeController.getStrokeCount(),
             strokeController.getAvgStrokePower());
-#endif
         // execution time
         // - not connected: 173-200
         // - connected: 900-2700

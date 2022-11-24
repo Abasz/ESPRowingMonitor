@@ -1,5 +1,11 @@
 #pragma once
 
+enum class BleServiceFlag
+{
+    CpsService,
+    CscService
+};
+
 enum class ArduinoLogLevel
 {
     LogLevelSilent = 0,

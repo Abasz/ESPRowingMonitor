@@ -9,7 +9,8 @@
 		"files.associations": {
 			"*.service": "ini",
 			"*.timer": "ini",
-			"array": "cpp"
+			"array": "cpp",
+			"cmath": "cpp"
 		}
 	}
 }

@@ -10,7 +10,7 @@ LinearRegressorService regressorService;
 StrokeService strokeService(regressorService);
 PowerManagerService powerManagerService;
 
-BluetoothController bleController(bleService);
+BluetoothController bleController(bleService, eepromService);
 StrokeController strokeController(strokeService);
 PowerManagerController powerManagerController(powerManagerService);
 

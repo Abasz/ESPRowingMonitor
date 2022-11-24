@@ -2,9 +2,8 @@
 
 #include "enums.h"
 
-#define POWERMETER
-
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
+#define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
 
 // Hardware settings
 #define SENSOR_PIN_NUMBER GPIO_NUM_26
@@ -45,6 +44,7 @@ class Settings
 {
 public:
     static ArduinoLogLevel const defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
+    static BleServiceFlag const defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
 
     // Hardware settings
     static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;

@@ -55,6 +55,37 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *pCha
     }
     break;
 
+    case static_cast<int>(PSCOpCodes::ChangeBleService):
+    {
+        Log.infoln("Change BLE Service");
+
+        if (message.length() == 2 && message[1] >= 0 && message[1] <= 1)
+        {
+            Log.infoln("New BLE Service: %s", message[1] == static_cast<byte>(BleServiceFlag::CscService) ? "CSC" : "CPS");
+            bleService.eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
+            array<uint8_t, 3> temp = {
+                static_cast<byte>(PSCOpCodes::ResponseCode),
+                static_cast<byte>(message[0]),
+                static_cast<byte>(PSCResponseOpCodes::Successful)};
+            pCharacteristic->setValue(temp);
+            pCharacteristic->indicate();
+
+            Log.verboseln("Restarting device in 5s");
+            delay(5000);
+            esp_restart();
+
+            break;
+        }
+
+        array<uint8_t, 3> temp = {
+            static_cast<byte>(PSCOpCodes::ResponseCode),
+            static_cast<byte>(message[0]),
+            static_cast<byte>(PSCResponseOpCodes::InvalidParameter)};
+
+        pCharacteristic->setValue(temp);
+    }
+    break;
+
     default:
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);
@@ -226,7 +257,8 @@ void BluetoothService::setupBleDevice()
 {
     Log.verboseln("Initializing BLE device");
 
-    NimBLEDevice::init("Concept2");
+    auto deviceName = "Concept2 (" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
+    NimBLEDevice::init(deviceName);
     NimBLEDevice::setPower(ESP_PWR_LVL_N6);
 
     Log.verboseln("Setting up Server");
@@ -243,13 +275,9 @@ void BluetoothService::setupServices()
     auto server = NimBLEDevice::getServer();
     auto batteryService = server->createService(batterySvcUuid);
     auto deviceInfoService = server->createService(deviceInfoSvcUuid);
-#ifndef POWERMETER
-    Log.infoln("Setting up Cycling Speed and Cadence Profile");
-    auto measurementService = setupCscServices(server);
-#else
-    Log.infoln("Setting up Cycling Power Profile");
-    auto measurementService = setupPscServices(server);
-#endif
+
+    auto measurementService = eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? setupCscServices(server) : setupPscServices(server);
+
     Log.verboseln("Setting up BLE Characteristics");
 
     batteryLevelCharacteristic = batteryService->createCharacteristic(batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
@@ -277,6 +305,8 @@ void BluetoothService::setupServices()
 
 NimBLEService *BluetoothService::setupCscServices(NimBLEServer *server)
 {
+    Log.infoln("Setting up Cycling Speed and Cadence Profile");
+
     auto cscService = server->createService(cyclingSpeedCadenceSvcUuid);
     cscMeasurementCharacteristic = cscService->createCharacteristic(cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
@@ -297,6 +327,7 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *server)
 
 NimBLEService *BluetoothService::setupPscServices(NimBLEServer *server)
 {
+    Log.infoln("Setting up Cycling Power Profile");
     auto pscService = server->createService(cyclingPowerSvcUuid);
     pscMeasurementCharacteristic = pscService->createCharacteristic(pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
@@ -318,13 +349,16 @@ NimBLEService *BluetoothService::setupPscServices(NimBLEServer *server)
 void BluetoothService::setupAdvertisement() const
 {
     auto pAdvertising = NimBLEDevice::getAdvertising();
-#ifndef POWERMETER
-    pAdvertising->setAppearance(bleAppearanceCyclingSpeedCadence);
-    pAdvertising->addServiceUUID(cyclingSpeedCadenceSvcUuid);
-#else
-    pAdvertising->setAppearance(bleAppearanceCyclingPower);
-    pAdvertising->addServiceUUID(cyclingPowerSvcUuid);
-#endif
+    if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
+    {
+        pAdvertising->setAppearance(bleAppearanceCyclingPower);
+        pAdvertising->addServiceUUID(cyclingPowerSvcUuid);
+    }
+    if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
+    {
+        pAdvertising->setAppearance(bleAppearanceCyclingSpeedCadence);
+        pAdvertising->addServiceUUID(cyclingSpeedCadenceSvcUuid);
+    }
 }
 
 void BluetoothService::setupConnectionIndicatorLed() const

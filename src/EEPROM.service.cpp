@@ -20,10 +20,17 @@ void EEPROMService::setup()
         Log.infoln("Setting LogLevel to default");
         preferences.putUChar(logLevelAddress, static_cast<byte>(Settings::defaultLogLevel));
     }
+    if (!preferences.isKey(logLevelAddress))
+    {
+        Log.infoln("Setting BleServiceFlag to default");
+        preferences.putUChar(bleServiceFlagAddress, static_cast<byte>(Settings::defaultBleServiceFlag));
+    }
 
     logLevel = static_cast<ArduinoLogLevel>(preferences.getUChar(logLevelAddress, static_cast<byte>(Settings::defaultLogLevel)));
+    bleServiceFlag = static_cast<BleServiceFlag>(preferences.getUChar(bleServiceFlagAddress, static_cast<byte>(Settings::defaultBleServiceFlag)));
 
     Log.verboseln("%s: %d", logLevelAddress, logLevel);
+    Log.verboseln("%s: %d", bleServiceFlagAddress, bleServiceFlag);
 }
 
 void EEPROMService::setLogLevel(ArduinoLogLevel newLogLevel)
@@ -37,6 +44,23 @@ void EEPROMService::setLogLevel(ArduinoLogLevel newLogLevel)
 
     preferences.putUChar(logLevelAddress, intLogLevel);
     Log.setLevel(intLogLevel);
+}
+
+void EEPROMService::setBleServiceFlag(BleServiceFlag bewBleServiceFlag)
+{
+    int intBleServiceFlag = static_cast<int>(bewBleServiceFlag);
+    if (intBleServiceFlag < 0 || intBleServiceFlag > 1)
+    {
+        Log.errorln("Invalid BLE Service setting, should be between 0 or 1");
+        return;
+    }
+
+    preferences.putUChar(bleServiceFlagAddress, intBleServiceFlag);
+}
+
+BleServiceFlag EEPROMService::getBleServiceFlag() const
+{
+    return bleServiceFlag;
 }
 
 ArduinoLogLevel EEPROMService::getLogLevel() const
