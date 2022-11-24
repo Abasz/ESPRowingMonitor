@@ -226,23 +226,22 @@ void StrokeService::processRotation(unsigned long now)
         regressorService.resetData();
 
         impulseCount = strokeCycleStartIndex + 1;
-        auto startupRevCount = floor(impulseCount / Settings::impulsesPerRevolution);
-        if (startupRevCount > 0)
+        distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse * impulseCount;
+        if (floor(impulseCount / Settings::impulsesPerRevolution) > 0)
         {
-            revCount += startupRevCount;
+            revCount = lround(distance);
             deltaRevTime = now - lastRevTime;
             lastRevTime = now;
         }
-        distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse * impulseCount;
 
         return;
     }
 
     impulseCount++;
     distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse;
-    if (impulseCount % Settings::impulsesPerRevolution == 0)
+    if (impulseCount % Settings::impulsesPerRevolution == 0 && distance > 0)
     {
-        revCount++;
+        revCount = lround(distance);
         deltaRevTime = now - lastRevTime;
         lastRevTime = now;
     }
@@ -260,6 +259,7 @@ void StrokeService::processRotation(unsigned long now)
                 // Here we can conclude the "Drive" phase as there is no more drive detected to the flywheel (e.g. for calculating power etc.)
                 strokeCount++;
                 lastDriveDuration = driveDuration;
+                deltaStrokeTime = now - lastStrokeTime;
                 lastStrokeTime = now;
             }
 
@@ -289,7 +289,12 @@ void StrokeService::processRotation(unsigned long now)
 
             // Calculate distance since start if no distance has been calculated so far (due to the lack of valid drag factor)
             if (distance == 0)
+            {
                 distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse * impulseCount;
+                revCount = lround(distance);
+                deltaRevTime = now - lastRevTime;
+                lastRevTime = now;
+            }
 
             cyclePhase = CyclePhase::Drive;
             driveStartTime = now - accumulate(rawDeltaImpulseTimes.cbegin(), rawDeltaImpulseTimes.cend() - Settings::flywheelPowerChangeDetectionErrorThreshold - 1, 0);
