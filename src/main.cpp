@@ -59,7 +59,7 @@ void loop()
         bleController.notifyPsc(
             strokeController.getLastDeltaRevTime(),
             strokeController.getRevCount(),
-            strokeController.getLastDeltaStrokeTime(),
+            0,
             strokeController.getStrokeCount(),
             strokeController.getAvgStrokePower());
 #endif
@@ -73,7 +73,7 @@ void loop()
         // Serial.println(stop - start);
     }
 
-    if (strokeController.getStrokeCount() > strokeController.getPreviousStrokeCount())
+    if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount())
     {
         Log.infoln("driveDuration: %D", strokeController.getDriveDuration());
         Log.infoln("recoveryDuration: %D", strokeController.getRecoveryDuration());
@@ -82,6 +82,20 @@ void loop()
         Log.infoln("distance: %D", strokeController.getDistance() / 100.0);
         Log.infoln("revCount: %d", strokeController.getRevCount());
 
+#ifndef POWERMETER
+        bleController.notifyCsc(
+            strokeController.getLastDeltaRevTime(),
+            strokeController.getRevCount(),
+            strokeController.getLastDeltaStrokeTime(),
+            strokeController.getStrokeCount());
+#else
+        bleController.notifyPsc(
+            0,
+            strokeController.getRevCount(),
+            strokeController.getLastDeltaStrokeTime(),
+            strokeController.getStrokeCount(),
+            strokeController.getAvgStrokePower());
+#endif
         // execution time
         // - not connected: 173-200
         // - connected: 900-2700

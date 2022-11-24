@@ -9,7 +9,7 @@ class BluetoothController
     unsigned int lastConnectedDeviceCheckTime = 0;
 
     unsigned short revTime = 0;
-    unsigned short crankTime = 0;
+    unsigned short strokeTime = 0;
 
 public:
     BluetoothController(BluetoothService &_bluetoothService);

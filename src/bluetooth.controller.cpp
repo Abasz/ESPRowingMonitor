@@ -37,15 +37,15 @@ void BluetoothController::notifyBattery(byte batteryLevel) const
 void BluetoothController::notifyCsc(unsigned int deltaRevTime, unsigned int revCount, unsigned int deltaStrokeTime, unsigned short strokeCount)
 {
     revTime += lround((deltaRevTime / 1e6) * 1024);
-    crankTime += lround((deltaStrokeTime / 1e6) * 1024);
-    bluetoothService.notifyCsc(deltaRevTime, revCount, deltaStrokeTime, strokeCount);
+    strokeTime += lround((deltaStrokeTime / 1e6) * 1024);
+    bluetoothService.notifyCsc(revTime, revCount, strokeTime, strokeCount);
 }
 
 void BluetoothController::notifyPsc(unsigned int deltaRevTime, unsigned int revCount, unsigned int deltaStrokeTime, unsigned short strokeCount, short avgStrokePower)
 {
     revTime += lround((deltaRevTime / 1e6) * 2048);
-    crankTime += lround((deltaStrokeTime / 1e6) * 1024);
-    bluetoothService.notifyPsc(deltaRevTime, revCount, deltaStrokeTime, strokeCount, avgStrokePower);
+    strokeTime += lround((deltaStrokeTime / 1e6) * 1024);
+    bluetoothService.notifyPsc(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
 }
 
 void BluetoothController::notifyDragFactor(byte dragFactor) const
