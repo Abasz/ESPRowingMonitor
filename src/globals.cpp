@@ -2,7 +2,10 @@
 
 #include "globals.h"
 
-BluetoothService bleService;
+Preferences preferences;
+
+EEPROMService eepromService(preferences);
+BluetoothService bleService(eepromService);
 LinearRegressorService regressorService;
 StrokeService strokeService(regressorService);
 PowerManagerService powerManagerService;

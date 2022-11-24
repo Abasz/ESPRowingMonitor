@@ -77,7 +77,7 @@ bool StrokeService::isFlywheelPowered() const
 void StrokeService::setup() const
 {
     pinMode(Settings::sensorPinNumber, INPUT_PULLUP);
-    Log.traceln("Attach interrupt");
+    Log.verboseln("Attach interrupt");
     attachRotationInterrupt();
 }
 

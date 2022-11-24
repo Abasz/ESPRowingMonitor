@@ -19,12 +19,12 @@ void StrokeController::update()
         auto lastRawRevTime = cscData.rawImpulseTime;
         cscData = strokeService.getData();
         if (lastRawRevTime != cscData.rawImpulseTime)
-            Log.traceln("rawImpulseTime: %u", cscData.rawImpulseTime);
+            Log.verboseln("rawImpulseTime: %u", cscData.rawImpulseTime);
 
         if (cscData.rawDeltaImpulseTime != lastDeltaRead)
         {
-            Log.infoln("deltaTime: %u", cscData.rawDeltaImpulseTime);
-            Log.traceln("cleanDeltaTime: %u", cscData.cleanDeltaImpulseTime);
+            Log.traceln("deltaTime: %u", cscData.rawDeltaImpulseTime);
+            Log.verboseln("cleanDeltaTime: %u", cscData.cleanDeltaImpulseTime);
             lastDeltaRead = cscData.rawDeltaImpulseTime;
         }
     }

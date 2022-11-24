@@ -11,7 +11,7 @@ public:
     };
 
     template <class T, typename... Args>
-    static void traceln(T msg, Args... args)
+    static void verboseln(T msg, Args... args)
     {
         printf(msg, args...);
         printf("\n");

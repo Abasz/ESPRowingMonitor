@@ -25,7 +25,7 @@ void PowerManagerService::setup()
 
 void PowerManagerService::goToSleep() const
 {
-    Log.traceln("Configure deep sleep mode");
+    Log.verboseln("Configure deep sleep mode");
     esp_sleep_enable_ext0_wakeup(Settings::sensorPinNumber, !digitalRead(Settings::sensorPinNumber));
     gpio_hold_en(Settings::sensorPinNumber);
     Log.infoln("Going to sleep mode");

@@ -11,8 +11,11 @@ void setup()
     {
     }
 
-    Log.begin(static_cast<int>(ArduinoLog::Log_level_trace), &Serial, false);
+    Log.begin(static_cast<int>(Settings::defaultLogLevel), &Serial, false);
     Log.setPrefix(printPrefix);
+
+    eepromService.setup();
+    Log.setLevel(static_cast<int>(eepromService.getLogLevel()));
 
     bleController.begin();
     strokeController.begin();
@@ -80,7 +83,6 @@ void loop()
         Log.infoln("dragFactor: %d", strokeController.getDragFactor());
         Log.infoln("power: %d", strokeController.getAvgStrokePower());
         Log.infoln("distance: %D", strokeController.getDistance() / 100.0);
-        Log.infoln("revCount: %d", strokeController.getRevCount());
 
 #ifndef POWERMETER
         bleController.notifyCsc(

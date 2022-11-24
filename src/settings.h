@@ -1,4 +1,10 @@
+#pragma once
+
+#include "enums.h"
+
 #define POWERMETER
+
+#define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 
 // Hardware settings
 #define SENSOR_PIN_NUMBER GPIO_NUM_26
@@ -38,6 +44,8 @@
 class Settings
 {
 public:
+    static ArduinoLogLevel const defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
+
     // Hardware settings
     static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;
     static byte const impulsesPerRevolution = IMPULSES_PER_REVOLUTION;

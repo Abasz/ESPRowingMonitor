@@ -7,7 +7,71 @@
 using std::array;
 using std::to_string;
 
-BluetoothService::BluetoothService()
+BluetoothService::ControlPointCallbacks::ControlPointCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
+
+void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *pCharacteristic)
+{
+    NimBLEAttValue message = pCharacteristic->getValue();
+
+    Log.verboseln("Incoming connection");
+
+    if (message.length() == 0)
+    {
+        Log.infoln("Invalid request, no Op Code");
+        array<uint8_t, 3> errorResponse = {
+            static_cast<byte>(PSCOpCodes::ResponseCode),
+            static_cast<byte>(0),
+            static_cast<byte>(PSCResponseOpCodes::OperationFailed)};
+        pCharacteristic->setValue(errorResponse);
+        pCharacteristic->indicate();
+
+        return;
+    }
+
+    Log.infoln("Op Code: %d; Length: %d", message[0], message.length());
+
+    switch (message[0])
+    {
+
+    case static_cast<int>(PSCOpCodes::SetLogLevel):
+    {
+        Log.infoln("Set LogLevel");
+
+        auto response = PSCResponseOpCodes::InvalidParameter;
+        if (message.length() == 2 && message[1] >= 0 && message[1] <= 6)
+        {
+            Log.infoln("New LogLevel: %d", message[1]);
+            bleService.eepromService.setLogLevel(static_cast<ArduinoLogLevel>(message[1]));
+            response = PSCResponseOpCodes::Successful;
+        }
+
+        array<uint8_t, 3>
+            temp = {
+                static_cast<byte>(PSCOpCodes::ResponseCode),
+                static_cast<byte>(message[0]),
+                static_cast<byte>(response)};
+
+        pCharacteristic->setValue(temp);
+    }
+    break;
+
+    default:
+    {
+        Log.infoln("Not Supported Op Code: %d", message[0]);
+        array<uint8_t, 3> response = {
+            static_cast<byte>(PSCOpCodes::ResponseCode),
+            static_cast<byte>(message[0]),
+            static_cast<byte>(PSCResponseOpCodes::UnsupportedOpCode)};
+        pCharacteristic->setValue(response);
+    }
+    break;
+    }
+
+    Log.verboseln("Send indicate");
+    pCharacteristic->indicate();
+}
+
+BluetoothService::BluetoothService(EEPROMService &_eepromService) : eepromService(_eepromService), controlPointCallbacks(*this)
 {
 }
 
@@ -44,7 +108,7 @@ void BluetoothService::setup()
 void BluetoothService::startBLEServer() const
 {
     NimBLEDevice::getAdvertising()->start();
-    Log.traceln("Waiting a client connection to notify...");
+    Log.verboseln("Waiting a client connection to notify...");
 }
 
 void BluetoothService::stopServer() const
@@ -160,12 +224,12 @@ void BluetoothService::notifyPsc(unsigned short revTime, unsigned int revCount, 
 
 void BluetoothService::setupBleDevice()
 {
-    Log.traceln("Initializing BLE device");
+    Log.verboseln("Initializing BLE device");
 
     NimBLEDevice::init("Concept2");
     NimBLEDevice::setPower(ESP_PWR_LVL_N6);
 
-    Log.traceln("Setting up Server");
+    Log.verboseln("Setting up Server");
 
     NimBLEDevice::createServer();
 
@@ -175,7 +239,7 @@ void BluetoothService::setupBleDevice()
 
 void BluetoothService::setupServices()
 {
-    Log.traceln("Setting up BLE Services");
+    Log.verboseln("Setting up BLE Services");
     auto server = NimBLEDevice::getServer();
     auto batteryService = server->createService(batterySvcUuid);
     auto deviceInfoService = server->createService(deviceInfoSvcUuid);
@@ -186,7 +250,7 @@ void BluetoothService::setupServices()
     Log.infoln("Setting up Cycling Power Profile");
     auto measurementService = setupPscServices(server);
 #endif
-    Log.traceln("Setting up BLE Characteristics");
+    Log.verboseln("Setting up BLE Characteristics");
 
     batteryLevelCharacteristic = batteryService->createCharacteristic(batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
@@ -203,7 +267,7 @@ void BluetoothService::setupServices()
         ->createCharacteristic(softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue("0.1.0");
 
-    Log.traceln("Starting BLE Service");
+    Log.verboseln("Starting BLE Service");
 
     batteryService->start();
     measurementService->start();
@@ -226,7 +290,7 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *server)
         ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
         ->setValue(&sensorLocationFlag, 1);
 
-    cscService->createCharacteristic(cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
+    cscService->createCharacteristic(cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
     return cscService;
 }
@@ -246,7 +310,7 @@ NimBLEService *BluetoothService::setupPscServices(NimBLEServer *server)
         ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
         ->setValue(&sensorLocationFlag, 1);
 
-    pscService->createCharacteristic(pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE);
+    pscService->createCharacteristic(pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
     return pscService;
 }
