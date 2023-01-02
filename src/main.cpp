@@ -49,9 +49,9 @@ void loop()
         // - connected: 1800-2100 microsec
         // auto start = micros();
         bleController.notify(
-            strokeController.getLastDeltaRevTime(),
+            strokeController.getLastRevTime(),
             strokeController.getRevCount(),
-            0,
+            strokeController.getLastStrokeTime(),
             strokeController.getStrokeCount(),
             strokeController.getAvgStrokePower());
         // auto stop = micros();
@@ -72,12 +72,6 @@ void loop()
         Log.infoln("power: %d", strokeController.getAvgStrokePower());
         Log.infoln("distance: %D", strokeController.getDistance() / 100.0);
 
-        bleController.notify(
-            0,
-            strokeController.getRevCount(),
-            strokeController.getLastDeltaStrokeTime(),
-            strokeController.getStrokeCount(),
-            strokeController.getAvgStrokePower());
         // execution time
         // - not connected: 173-200
         // - connected: 900-2700

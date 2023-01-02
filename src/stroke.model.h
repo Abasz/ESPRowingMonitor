@@ -2,9 +2,9 @@ namespace StrokeModel
 {
     struct CscData
     {
-        unsigned int lastDeltaRevTime;
+        unsigned long long lastRevTime;
         unsigned int revCount;
-        unsigned int lastDeltaStrokeTime;
+        unsigned long long lastStrokeTime;
         unsigned short strokeCount;
         unsigned long rawImpulseTime;
         unsigned int driveDuration;

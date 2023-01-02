@@ -30,9 +30,9 @@ void StrokeController::update()
     }
 }
 
-unsigned long StrokeController::getLastDeltaRevTime() const
+unsigned long long StrokeController::getLastRevTime() const
 {
-    return cscData.lastDeltaRevTime;
+    return cscData.lastRevTime;
 }
 
 unsigned int StrokeController::getRevCount() const
@@ -40,9 +40,9 @@ unsigned int StrokeController::getRevCount() const
     return cscData.revCount;
 }
 
-unsigned long StrokeController::getLastDeltaStrokeTime() const
+unsigned long long StrokeController::getLastStrokeTime() const
 {
-    return cscData.lastDeltaStrokeTime;
+    return cscData.lastStrokeTime;
 }
 
 unsigned short StrokeController::getStrokeCount() const

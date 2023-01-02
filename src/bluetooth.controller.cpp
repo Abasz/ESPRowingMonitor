@@ -34,19 +34,15 @@ void BluetoothController::notifyBattery(byte batteryLevel) const
     bluetoothService.notifyBattery(batteryLevel);
 }
 
-void BluetoothController::notify(unsigned int deltaRevTime, unsigned int revCount, unsigned int deltaStrokeTime, unsigned short strokeCount, short avgStrokePower)
+void BluetoothController::notify(unsigned long long revTime, unsigned int revCount, unsigned long long strokeTime, unsigned short strokeCount, short avgStrokePower)
 {
-    strokeTime += lround((deltaStrokeTime / 1e6) * 1024);
-
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
     {
-        revTime += lround((deltaRevTime / 1e6) * 2048);
-        bluetoothService.notifyPsc(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+        bluetoothService.notifyPsc(lround((revTime / 1e6) * 2048) % USHRT_MAX, revCount, lround((strokeTime / 1e6) * 1024) % USHRT_MAX, strokeCount, avgStrokePower);
     }
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
     {
-        revTime += lround((deltaRevTime / 1e6) * 1024);
-        bluetoothService.notifyCsc(revTime, revCount, strokeTime, strokeCount);
+        bluetoothService.notifyCsc(lround((revTime / 1e6) * 1024) % USHRT_MAX, revCount, lround((strokeTime / 1e6) * 1024) % USHRT_MAX, strokeCount);
     }
 }
 

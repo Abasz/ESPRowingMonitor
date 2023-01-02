@@ -125,9 +125,9 @@ CscData StrokeService::getData() const
     // auto start = micros();
     detachRotationInterrupt();
     CscData data = {
-        .lastDeltaRevTime = deltaRevTime,
+        .lastRevTime = revTime,
         .revCount = revCount,
-        .lastDeltaStrokeTime = deltaStrokeTime,
+        .lastStrokeTime = strokeTime,
         .strokeCount = strokeCount,
         .rawImpulseTime = previousRawImpulseTime,
         .driveDuration = lastDriveDuration,
@@ -230,7 +230,7 @@ void StrokeService::processRotation(unsigned long now)
         if (floor(impulseCount / Settings::impulsesPerRevolution) > 0)
         {
             revCount = lround(distance);
-            deltaRevTime = now - lastRevTime;
+            revTime += now - lastRevTime;
             lastRevTime = now;
         }
 
@@ -242,7 +242,7 @@ void StrokeService::processRotation(unsigned long now)
     if (impulseCount % Settings::impulsesPerRevolution == 0 && distance > 0)
     {
         revCount = lround(distance);
-        deltaRevTime = now - lastRevTime;
+        revTime += now - lastRevTime;
         lastRevTime = now;
     }
 
@@ -259,7 +259,7 @@ void StrokeService::processRotation(unsigned long now)
                 // Here we can conclude the "Drive" phase as there is no more drive detected to the flywheel (e.g. for calculating power etc.)
                 strokeCount++;
                 lastDriveDuration = driveDuration;
-                deltaStrokeTime = now - lastStrokeTime;
+                strokeTime += now - lastStrokeTime;
                 lastStrokeTime = now;
             }
 
@@ -292,7 +292,7 @@ void StrokeService::processRotation(unsigned long now)
             {
                 distance += pow((dragCoefficient * 1e6) / 2.8, 1 / 3.0) * angularDisplacementPerImpulse * impulseCount;
                 revCount = lround(distance);
-                deltaRevTime = now - lastRevTime;
+                revTime += now - lastRevTime;
                 lastRevTime = now;
             }
 
