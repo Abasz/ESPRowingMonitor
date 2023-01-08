@@ -7,6 +7,8 @@
 #include "power-manager.controller.h"
 #include "stroke.controller.h"
 
+static unsigned long lastUpdateTime = 0UL;
+
 static unsigned long const msecsPerSec = 1000000;
 static unsigned long const secsPerMin = 60;
 static unsigned long const secsPerHour = 3600;

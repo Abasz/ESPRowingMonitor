@@ -22,7 +22,6 @@ void setup()
     powerManagerController.begin();
 
     bleController.notifyBattery(powerManagerController.getBatteryLevel());
-    bleController.notify(0, 0, 0, 0, 0);
 }
 
 // execution time
@@ -42,26 +41,16 @@ void loop()
     // - not connected 20-30 microsec
     // - connected 1900-2200 microsec
     // auto start = micros();
-    if (strokeController.getRevCount() != strokeController.getPreviousRevCount())
+    auto now = millis();
+    if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount() || now - lastUpdateTime > 4000)
     {
-        // execution time
-        // - not connected: 5 microsec
-        // - connected: 1800-2100 microsec
-        // auto start = micros();
-        bleController.notify(
+        bleController.updateData(
             strokeController.getLastRevTime(),
             strokeController.getRevCount(),
             strokeController.getLastStrokeTime(),
             strokeController.getStrokeCount(),
             strokeController.getAvgStrokePower());
-        // auto stop = micros();
-        // Serial.print("notifyCsc: ");
-        // Serial.println(stop - start);
-
-        strokeController.setPreviousRevCount();
-        // auto stop = micros();
-        // Serial.print("Main loop if statement: ");
-        // Serial.println(stop - start);
+        lastUpdateTime = now;
     }
 
     if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount())
@@ -83,11 +72,10 @@ void loop()
         // Serial.println(stop - start);
     }
 
-    auto battLevel = powerManagerController.getBatteryLevel();
-    if (battLevel != powerManagerController.getPreviousBatteryLevel())
+    if (powerManagerController.getBatteryLevel() != powerManagerController.getPreviousBatteryLevel())
     {
-        Log.infoln("batteryLevel: %d", battLevel);
-        bleController.notifyBattery(battLevel);
+        Log.infoln("batteryLevel: %d", powerManagerController.getBatteryLevel());
+        bleController.notifyBattery(powerManagerController.getBatteryLevel());
         powerManagerController.setPreviousBatteryLevel();
     }
     // auto stop = micros();
