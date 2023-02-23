@@ -2,17 +2,10 @@
 
 #include "globals.h"
 
-Preferences preferences;
-
-EEPROMService eepromService(preferences);
-BluetoothService bleService(eepromService);
 LinearRegressorService regressorService;
 StrokeService strokeService(regressorService);
-PowerManagerService powerManagerService;
 
-BluetoothController bleController(bleService, eepromService);
 StrokeController strokeController(strokeService);
-PowerManagerController powerManagerController(powerManagerService);
 
 IRAM_ATTR void rotationInterrupt()
 {
@@ -27,7 +20,6 @@ IRAM_ATTR void rotationInterrupt()
 
 IRAM_ATTR void batteryMeasurementInterrupt()
 {
-    powerManagerService.measureBattery();
 }
 
 void attachRotationInterrupt()

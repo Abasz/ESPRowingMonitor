@@ -6,7 +6,7 @@
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
 
 // Hardware settings
-#define SENSOR_PIN_NUMBER GPIO_NUM_26
+#define SENSOR_PIN_NUMBER D4
 #define IMPULSES_PER_REVOLUTION 3
 #define FLYWHEEL_INERTIA 0.073
 #define LED_BLINK_FREQUENCY 1000
@@ -47,7 +47,7 @@ public:
     static BleServiceFlag const defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
 
     // Hardware settings
-    static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;
+    static int const sensorPinNumber = SENSOR_PIN_NUMBER;
     static byte const impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
     static double constexpr flywheelInertia = FLYWHEEL_INERTIA;
     static unsigned short const ledBlinkFrequency = LED_BLINK_FREQUENCY;
