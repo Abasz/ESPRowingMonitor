@@ -4,8 +4,8 @@
 
 #include "NimBLEDevice.h"
 
-#include "EEPROM.service.h"
-#include "enums.h"
+#include "utils/EEPROM.service.h"
+#include "utils/enums.h"
 
 class BluetoothService
 {

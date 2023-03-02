@@ -2,10 +2,10 @@
 
 #include <Preferences.h>
 
-#include "EEPROM.service.h"
-#include "bluetooth.controller.h"
-#include "power-manager.controller.h"
-#include "stroke.controller.h"
+#include "monitor/bluetooth.controller.h"
+#include "rower/stroke.controller.h"
+#include "utils/EEPROM.service.h"
+#include "utils/power-manager.controller.h"
 
 static unsigned long lastUpdateTime = 0UL;
 

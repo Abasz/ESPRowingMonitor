@@ -1,7 +1,7 @@
 #pragma once
 
-#include "EEPROM.service.h"
 #include "bluetooth.service.h"
+#include "utils/EEPROM.service.h"
 
 class BluetoothController
 {

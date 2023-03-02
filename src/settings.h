@@ -1,6 +1,6 @@
 #pragma once
 
-#include "enums.h"
+#include "utils/enums.h"
 
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService

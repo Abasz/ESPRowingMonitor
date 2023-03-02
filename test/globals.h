@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../src/stroke.controller.h"
+#include "../src/rower/stroke.controller.h"
 
 extern LinearRegressorService regressorService;
 extern StrokeService strokeService;

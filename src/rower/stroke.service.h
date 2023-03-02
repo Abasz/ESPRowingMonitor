@@ -2,9 +2,9 @@
 
 #include <array>
 
-#include "regressor.service.h"
 #include "settings.h"
 #include "stroke.model.h"
+#include "utils/regressor.service.h"
 
 enum class CyclePhase
 {
