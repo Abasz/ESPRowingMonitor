@@ -36,5 +36,5 @@ public:
     double getRecoveryDuration() const;
     double getDriveDuration() const;
     short getAvgStrokePower() const;
-    byte getDragFactor() const;
+    unsigned char getDragFactor() const;
 };

@@ -75,7 +75,7 @@ unsigned int StrokeController::getDistance() const
     return round(cscData.distance);
 }
 
-byte StrokeController::getDragFactor() const
+unsigned char StrokeController::getDragFactor() const
 {
     return lround(cscData.dragCoefficient * 1e6);
 }

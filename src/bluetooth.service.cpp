@@ -19,9 +19,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *pCha
     {
         Log.infoln("Invalid request, no Op Code");
         array<uint8_t, 3> errorResponse = {
-            static_cast<byte>(PSCOpCodes::ResponseCode),
-            static_cast<byte>(0),
-            static_cast<byte>(PSCResponseOpCodes::OperationFailed)};
+            static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+            static_cast<unsigned char>(0),
+            static_cast<unsigned char>(PSCResponseOpCodes::OperationFailed)};
         pCharacteristic->setValue(errorResponse);
         pCharacteristic->indicate();
 
@@ -47,9 +47,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *pCha
 
         array<uint8_t, 3>
             temp = {
-                static_cast<byte>(PSCOpCodes::ResponseCode),
-                static_cast<byte>(message[0]),
-                static_cast<byte>(response)};
+                static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+                static_cast<unsigned char>(message[0]),
+                static_cast<unsigned char>(response)};
 
         pCharacteristic->setValue(temp);
     }
@@ -61,12 +61,12 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *pCha
 
         if (message.length() == 2 && message[1] >= 0 && message[1] <= 1)
         {
-            Log.infoln("New BLE Service: %s", message[1] == static_cast<byte>(BleServiceFlag::CscService) ? "CSC" : "CPS");
+            Log.infoln("New BLE Service: %s", message[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
             bleService.eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
             array<uint8_t, 3> temp = {
-                static_cast<byte>(PSCOpCodes::ResponseCode),
-                static_cast<byte>(message[0]),
-                static_cast<byte>(PSCResponseOpCodes::Successful)};
+                static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+                static_cast<unsigned char>(message[0]),
+                static_cast<unsigned char>(PSCResponseOpCodes::Successful)};
             pCharacteristic->setValue(temp);
             pCharacteristic->indicate();
 
@@ -78,9 +78,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *pCha
         }
 
         array<uint8_t, 3> temp = {
-            static_cast<byte>(PSCOpCodes::ResponseCode),
-            static_cast<byte>(message[0]),
-            static_cast<byte>(PSCResponseOpCodes::InvalidParameter)};
+            static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+            static_cast<unsigned char>(message[0]),
+            static_cast<unsigned char>(PSCResponseOpCodes::InvalidParameter)};
 
         pCharacteristic->setValue(temp);
     }
@@ -90,9 +90,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *pCha
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);
         array<uint8_t, 3> response = {
-            static_cast<byte>(PSCOpCodes::ResponseCode),
-            static_cast<byte>(message[0]),
-            static_cast<byte>(PSCResponseOpCodes::UnsupportedOpCode)};
+            static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+            static_cast<unsigned char>(message[0]),
+            static_cast<unsigned char>(PSCResponseOpCodes::UnsupportedOpCode)};
         pCharacteristic->setValue(response);
     }
     break;
@@ -147,7 +147,7 @@ void BluetoothService::stopServer() const
     NimBLEDevice::getAdvertising()->stop();
 }
 
-void BluetoothService::notifyBattery(byte batteryLevel) const
+void BluetoothService::notifyBattery(unsigned char batteryLevel) const
 {
     batteryLevelCharacteristic->setValue(batteryLevel);
     if (batteryLevelCharacteristic->getSubscribedCount() > 0)
@@ -156,7 +156,7 @@ void BluetoothService::notifyBattery(byte batteryLevel) const
     }
 }
 
-void BluetoothService::notifyDragFactor(unsigned short distance, byte dragFactor) const
+void BluetoothService::notifyDragFactor(unsigned short distance, unsigned char dragFactor) const
 {
     dragFactorCharacteristic->setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
     if (dragFactorCharacteristic->getSubscribedCount() > 0)
@@ -174,18 +174,18 @@ void BluetoothService::notifyCsc(unsigned short revTime, unsigned int revCount, 
         array<uint8_t, 11> temp = {
             cscMeasurementFeaturesFlag,
 
-            static_cast<byte>(revCount),
-            static_cast<byte>(revCount >> 8),
-            static_cast<byte>(revCount >> 16),
-            static_cast<byte>(revCount >> 24),
+            static_cast<unsigned char>(revCount),
+            static_cast<unsigned char>(revCount >> 8),
+            static_cast<unsigned char>(revCount >> 16),
+            static_cast<unsigned char>(revCount >> 24),
 
-            static_cast<byte>(revTime),
-            static_cast<byte>(revTime >> 8),
+            static_cast<unsigned char>(revTime),
+            static_cast<unsigned char>(revTime >> 8),
 
-            static_cast<byte>(strokeCount),
-            static_cast<byte>(strokeCount >> 8),
-            static_cast<byte>(strokeTime),
-            static_cast<byte>(strokeTime >> 8)};
+            static_cast<unsigned char>(strokeCount),
+            static_cast<unsigned char>(strokeCount >> 8),
+            static_cast<unsigned char>(strokeTime),
+            static_cast<unsigned char>(strokeTime >> 8)};
 
         // auto stop = micros();
         // Serial.print("data calc: ");
@@ -214,23 +214,23 @@ void BluetoothService::notifyPsc(unsigned short revTime, unsigned int revCount, 
         // execution time: 0-1 microsec
         // auto start = micros();
         array<uint8_t, 14> temp = {
-            static_cast<byte>(pscMeasurementFeaturesFlag),
-            static_cast<byte>(pscMeasurementFeaturesFlag >> 8),
+            static_cast<unsigned char>(pscMeasurementFeaturesFlag),
+            static_cast<unsigned char>(pscMeasurementFeaturesFlag >> 8),
 
-            static_cast<byte>(avgStrokePower),
-            static_cast<byte>(avgStrokePower >> 8),
+            static_cast<unsigned char>(avgStrokePower),
+            static_cast<unsigned char>(avgStrokePower >> 8),
 
-            static_cast<byte>(revCount),
-            static_cast<byte>(revCount >> 8),
-            static_cast<byte>(revCount >> 16),
-            static_cast<byte>(revCount >> 24),
-            static_cast<byte>(revTime),
-            static_cast<byte>(revTime >> 8),
+            static_cast<unsigned char>(revCount),
+            static_cast<unsigned char>(revCount >> 8),
+            static_cast<unsigned char>(revCount >> 16),
+            static_cast<unsigned char>(revCount >> 24),
+            static_cast<unsigned char>(revTime),
+            static_cast<unsigned char>(revTime >> 8),
 
-            static_cast<byte>(strokeCount),
-            static_cast<byte>(strokeCount >> 8),
-            static_cast<byte>(strokeTime),
-            static_cast<byte>(strokeTime >> 8),
+            static_cast<unsigned char>(strokeCount),
+            static_cast<unsigned char>(strokeCount >> 8),
+            static_cast<unsigned char>(strokeTime),
+            static_cast<unsigned char>(strokeTime >> 8),
         };
 
         // auto stop = micros();

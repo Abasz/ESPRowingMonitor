@@ -2,7 +2,7 @@
 
 class PowerManagerService
 {
-    byte batteryLevel = 0;
+    unsigned char batteryLevel = 0;
 
     void setupBatteryMeasurement();
     void printWakeupReason() const;
@@ -12,5 +12,5 @@ public:
 
     void setup();
     void goToSleep() const;
-    byte measureBattery();
+    unsigned char measureBattery();
 };

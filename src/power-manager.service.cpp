@@ -33,13 +33,13 @@ void PowerManagerService::goToSleep() const
     esp_deep_sleep_start();
 }
 
-byte PowerManagerService::measureBattery()
+unsigned char PowerManagerService::measureBattery()
 {
     // execution time: 460 micro sec
     // auto start = micros();
     array<double, Settings::batteryLevelArrayLength> batteryLevels{};
 
-    for (byte i = 0; i < Settings::batteryLevelArrayLength; i++)
+    for (unsigned char i = 0; i < Settings::batteryLevelArrayLength; i++)
     {
         auto measurement = analogRead(GPIO_NUM_34);
 
@@ -73,7 +73,7 @@ void PowerManagerService::setupBatteryMeasurement()
     pinMode(GPIO_NUM_4, INPUT);
 
     delay(500);
-    for (byte i = 0; i < Settings::initialBatteryLevelMeasurementCount; i++)
+    for (unsigned char i = 0; i < Settings::initialBatteryLevelMeasurementCount; i++)
     {
         measureBattery();
         delay(100);

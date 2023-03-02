@@ -18,14 +18,14 @@ class StrokeService
     LinearRegressorService &regressorService;
 
     static double constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
-    static byte const strokeCycleStartIndex = Settings::deltaImpulseTimeArrayLength - Settings::flywheelPowerChangeDetectionErrorThreshold - 1;
+    static unsigned char const strokeCycleStartIndex = Settings::deltaImpulseTimeArrayLength - Settings::flywheelPowerChangeDetectionErrorThreshold - 1;
 
     volatile unsigned long impulseCount = 0UL;
     volatile unsigned long lastRevTime = 0UL;
     volatile unsigned long lastStrokeTime = 0UL;
 
-    unsigned long long revTime = 0ULL;
-    unsigned long long strokeTime = 0ULL;
+    volatile unsigned long long revTime = 0ULL;
+    volatile unsigned long long strokeTime = 0ULL;
     volatile unsigned int revCount = 0;
     volatile unsigned short strokeCount = 0;
 

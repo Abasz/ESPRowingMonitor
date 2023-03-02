@@ -9,7 +9,7 @@ using std::size;
 
 void loop()
 {
-    simulatRotation();
+    simulateRotation();
     strokeController.update();
     if (strokeController.getRevCount() != strokeController.getPreviousRevCount())
     {

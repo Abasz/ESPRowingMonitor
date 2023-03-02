@@ -5,7 +5,7 @@
 
 using std::accumulate;
 
-void simulatRotation()
+void simulateRotation()
 {
     strokeService.processRotation(accumulate(testDeltaTimes, testDeltaTimes + i, 0));
     i++;

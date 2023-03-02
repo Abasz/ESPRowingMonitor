@@ -6,8 +6,8 @@ class PowerManagerController
 {
     PowerManagerService &powerManagerService;
 
-    byte batteryLevel = 0;
-    byte previousBatteryLevel = 0;
+    unsigned char batteryLevel = 0;
+    unsigned char previousBatteryLevel = 0;
 
     unsigned long lastBatteryMeasurementTime = 0;
 
@@ -16,7 +16,7 @@ public:
 
     void begin();
     void update(unsigned long lastRevTime, bool isDeviceConnected);
-    byte getBatteryLevel() const;
-    byte getPreviousBatteryLevel() const;
+    unsigned char getBatteryLevel() const;
+    unsigned char getPreviousBatteryLevel() const;
     void setPreviousBatteryLevel();
 };

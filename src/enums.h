@@ -52,31 +52,31 @@ enum class PSCResponseOpCodes
 class SensorLocations
 {
 public:
-    static byte const Other = 0;
-    static byte const TopOfShoe = 1;
-    static byte const InShoe = 2;
-    static byte const Hip = 3;
-    static byte const FrontWheel = 4;
-    static byte const LeftCrank = 5;
-    static byte const RightCrank = 6;
-    static byte const LeftPedal = 7;
-    static byte const RightPedal = 8;
-    static byte const FrontHub = 9;
-    static byte const RearDropout = 10;
-    static byte const Chainstay = 11;
-    static byte const RearWheel = 12;
-    static byte const RearHub = 13;
-    static byte const Chest = 14;
-    static byte const Spider = 15;
-    static byte const ChainRing = 16;
+    static unsigned char const Other = 0;
+    static unsigned char const TopOfShoe = 1;
+    static unsigned char const InShoe = 2;
+    static unsigned char const Hip = 3;
+    static unsigned char const FrontWheel = 4;
+    static unsigned char const LeftCrank = 5;
+    static unsigned char const RightCrank = 6;
+    static unsigned char const LeftPedal = 7;
+    static unsigned char const RightPedal = 8;
+    static unsigned char const FrontHub = 9;
+    static unsigned char const RearDropout = 10;
+    static unsigned char const Chainstay = 11;
+    static unsigned char const RearWheel = 12;
+    static unsigned char const RearHub = 13;
+    static unsigned char const Chest = 14;
+    static unsigned char const Spider = 15;
+    static unsigned char const ChainRing = 16;
 };
 
 class CSCFeaturesFlags
 {
 public:
-    static byte const WheelRevolutionDataSupported = (0x01 << 0U);
-    static byte const CrankRevolutionDataSupported = (0x01 << 1U);
-    static byte const MultipleSensorLocationSupported = (0x01 << 2U);
+    static unsigned char const WheelRevolutionDataSupported = (0x01 << 0U);
+    static unsigned char const CrankRevolutionDataSupported = (0x01 << 1U);
+    static unsigned char const MultipleSensorLocationSupported = (0x01 << 2U);
 };
 
 class PSCFeaturesFlags

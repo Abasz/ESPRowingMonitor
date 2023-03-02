@@ -31709,4 +31709,4 @@ inline unsigned long const testDeltaTimes[] = {
     168700,
 };
 
-void simulatRotation();
+void simulateRotation();

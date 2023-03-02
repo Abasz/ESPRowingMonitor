@@ -24,8 +24,8 @@ public:
 
     void begin();
     void update();
-    void notifyBattery(byte batteryLevel) const;
+    void notifyBattery(unsigned char batteryLevel) const;
     void updateData(unsigned long long revTime, unsigned int revCount, unsigned long long strokeTime, unsigned short strokeCount, short avgStrokePower = 0);
-    void notifyDragFactor(byte dragFactor) const;
+    void notifyDragFactor(unsigned char dragFactor) const;
     bool isAnyDeviceConnected() const;
 };

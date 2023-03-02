@@ -22,11 +22,11 @@ class BluetoothService
     EEPROMService &eepromService;
     ControlPointCallbacks controlPointCallbacks;
 
-    static byte constexpr sensorLocationFlag = SensorLocations::Other;
+    static unsigned char constexpr sensorLocationFlag = SensorLocations::Other;
 
     static unsigned short constexpr cscFeaturesFlag = CSCFeaturesFlags::CrankRevolutionDataSupported |
                                                       CSCFeaturesFlags::WheelRevolutionDataSupported;
-    static byte const cscMeasurementFeaturesFlag = cscFeaturesFlag;
+    static unsigned char const cscMeasurementFeaturesFlag = cscFeaturesFlag;
     static unsigned short const cyclingSpeedCadenceSvcUuid = 0x1816;
     static unsigned short const cscMeasurementUuid = 0x2A5B;
     static unsigned short const cscControlPointUuid = 0x2A55;
@@ -78,10 +78,10 @@ public:
     void setup();
     void startBLEServer() const;
     void stopServer() const;
-    void notifyBattery(byte batteryLevel) const;
+    void notifyBattery(unsigned char batteryLevel) const;
     void notifyCsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount) const;
     void notifyPsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const;
-    void notifyDragFactor(unsigned short distance, byte dragFactor) const;
+    void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;
     bool isAnyDeviceConnected() const;
     void updateLed();
 };

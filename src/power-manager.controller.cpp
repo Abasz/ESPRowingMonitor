@@ -29,12 +29,12 @@ void PowerManagerController::update(unsigned long lastRevTime, bool isDeviceConn
     }
 }
 
-byte PowerManagerController::getBatteryLevel() const
+unsigned char PowerManagerController::getBatteryLevel() const
 {
     return batteryLevel;
 }
 
-byte PowerManagerController::getPreviousBatteryLevel() const
+unsigned char PowerManagerController::getPreviousBatteryLevel() const
 {
     return previousBatteryLevel;
 }

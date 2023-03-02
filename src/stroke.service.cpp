@@ -29,8 +29,8 @@ StrokeService::StrokeService(LinearRegressorService &_regressorService) : regres
 
 bool StrokeService::isFlywheelUnpowered() const
 {
-    byte numberOfAccelerations = 0;
-    byte i = cleanDeltaImpulseTimes.size() - 1;
+    unsigned char numberOfAccelerations = 0;
+    unsigned char i = cleanDeltaImpulseTimes.size() - 1;
     while (i > 0)
     {
         if (cleanDeltaImpulseTimes[i] >= cleanDeltaImpulseTimes[i - 1] || cleanDeltaImpulseTimes[i - 1] - cleanDeltaImpulseTimes[i] < Settings::maxDecelerationDeltaForPowered)
@@ -53,8 +53,8 @@ bool StrokeService::isFlywheelUnpowered() const
 
 bool StrokeService::isFlywheelPowered() const
 {
-    byte numberOfDecelerations = 0;
-    byte i = cleanDeltaImpulseTimes.size() - 1;
+    unsigned char numberOfDecelerations = 0;
+    unsigned char i = cleanDeltaImpulseTimes.size() - 1;
     while (i > 0)
     {
         if (cleanDeltaImpulseTimes[i] < cleanDeltaImpulseTimes[i - 1] && cleanDeltaImpulseTimes[i - 1] - cleanDeltaImpulseTimes[i] > Settings::minDecelerationDeltaForUnpowered)
@@ -180,7 +180,7 @@ void StrokeService::processRotation(unsigned long now)
         return;
 
     // If we got this far, we must have a sensible delta for flywheel rotation time, updating the deltaTime array
-    byte i = Settings::deltaImpulseTimeArrayLength - 1;
+    unsigned char i = Settings::deltaImpulseTimeArrayLength - 1;
     while (i > 0)
     {
         cleanDeltaImpulseTimes[i] = cleanDeltaImpulseTimes[i - 1];

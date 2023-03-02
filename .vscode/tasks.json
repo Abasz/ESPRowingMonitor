@@ -6,8 +6,10 @@
 		{
 			"label": "Compile with g++",
 			"type": "shell",
-			"command": "g++ -g -std=c++17 src/stroke.*.cpp src/regressor.service.cpp test/*.cpp -o testRun -D byte=uint8_t -D PI=3.1415926535897932384626433832795 -D INPUT_PULLUP=1 -include stdint.h -include string -include cmath -include Esp32-typedefs.h -Itest -D ROWING_SIMULATION",
-			"problemMatcher": ["$msCompile"],
+			"command": "g++ -g -O3 -std=c++17 test/*.cpp src/rower/*.cpp src/utils/regressor.service.cpp -o testRun -D PI=3.1415926535897932384626433832795 -D INPUT_PULLUP=1 -include stdint.h -include string -include cmath -include Esp32-typedefs.h -Itest -Isrc -D ROWING_SIMULATION",
+			"problemMatcher": [
+				"$msCompile"
+			],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -16,8 +18,10 @@
 		{
 			"label": "Run test",
 			"type": "shell",
-			"command": "testRun.exe > output.txt",
-			"dependsOn": ["Compile with g++"],
+			"command": "testRun > output.txt",
+			"dependsOn": [
+				"Compile with g++"
+			],
 			"group": {
 				"kind": "test",
 				"isDefault": true
