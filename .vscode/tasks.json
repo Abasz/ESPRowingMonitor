@@ -4,12 +4,12 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "Compile with g++",
 			"type": "cppbuild",
+			"label": "e2e test",
 			"command": "mingw32-make",
 			"args": [
 				"e2e",
-				"--trace",
+				"--trace"
 			],
 			"problemMatcher": [
 				"$gcc"
@@ -20,19 +20,8 @@
 			"group": {
 				"kind": "build",
 				"isDefault": true
-			}
-		},
-		{
-			"label": "Run test",
-			"type": "shell",
-			"command": "testRun > output.txt",
-			"dependsOn": [
-				"Compile with g++"
-			],
-			"group": {
-				"kind": "test",
-				"isDefault": true
-			}
+			},
+			"detail": "compiler: mingw32-make"
 		},
 		{
 			"type": "cppbuild",
@@ -41,7 +30,7 @@
 			"args": [
 				"test",
 				"TEST_SRC=${file}",
-				"--trace",
+				"--trace"
 			],
 			"options": {
 				"cwd": "${cwd}"
@@ -51,8 +40,9 @@
 			],
 			"group": {
 				"kind": "test",
-				"isDefault": true
-			}
+				"isDefault": false
+			},
+			"detail": "compiler: mingw32-make"
 		},
 		{
 			"type": "cppbuild",
@@ -61,7 +51,7 @@
 			"args": [
 				"test",
 				"TEST_SRC=test/unit/*.spec.cpp",
-				"--trace",
+				"--trace"
 			],
 			"options": {
 				"cwd": "${cwd}"
@@ -72,7 +62,8 @@
 			"group": {
 				"kind": "test",
 				"isDefault": true
-			}
+			},
+			"detail": "compiler: mingw32-make"
 		}
 	]
 }

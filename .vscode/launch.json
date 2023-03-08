@@ -11,7 +11,7 @@
             "name": "C++ Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/run_e2e_test.exe",
+            "program": "${workspaceFolder}/build/run_e2e_test.out",
             "args": [
                 "threshold.txt"
             ],
@@ -20,7 +20,33 @@
             "environment": [],
             "externalConsole": true,
             "MIMode": "gdb",
-            "preLaunchTask": "Compile with g++",
+            "preLaunchTask": "e2e test",
+            "miDebuggerPath": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "C++ Test Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/tests.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "preLaunchTask": "catch test all",
             "miDebuggerPath": "gdb",
             "setupCommands": [
                 {

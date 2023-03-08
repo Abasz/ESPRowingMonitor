@@ -17,23 +17,22 @@ ifeq ($(OS), Windows_NT)
 	MK_BUILD_DIR_COMMAND=if not exist $(BUILD_DIR)\$(subst /,\,$(dir $<)) mkdir $(BUILD_DIR)\$(subst /,\,$(dir $<))
 endif
 
-INCLUDES:=-include test/Esp32-typedefs.h -include test/Arduino.h -Itest
-DEPFLAGS=-MT $@ -MMD -MP -MF $(@:.o=.d)
+INCLUDES:=-include test/Arduino.h -Itest
+
+DEPFLAGS=-MT $@ -MMD -MP -MF $(BUILD_DIR)/$*.d
 
 E2E_SRCS:=$(wildcard $(TEST_DIR)/*.cpp) $(wildcard $(LIB_DIR)/utils/*series.cpp) $(wildcard $(LIB_DIR)/rower/*.cpp)
 E2E_OBJS:=$(E2E_SRCS:%.cpp=$(BUILD_DIR)/%.o)
 
 e2e: $(E2E_OBJS)
-# @$(MKDIR_COMMAND)
 	@$(CC) $(CPP_FLAGS) $(INCLUDES) $(DEFINES) -o $(BUILD_DIR)/run_e2e_test.out $^
 
-TEST_SRCS:=$(wildcard $(LIB_DIR)/utils/*series.cpp) $(UNIT_TEST_DIR)/catch_amalgamated.cpp $(UNIT_TEST_DIR)/main.cpp $(wildcard $(TEST_SRC))
-#  $(wildcard $(LIB_DIR)/rower/*.cpp)
+TEST_SRCS:=$(wildcard $(LIB_DIR)/utils/*series.cpp)  $(wildcard $(LIB_DIR)/rower/*.cpp) $(UNIT_TEST_DIR)/catch_amalgamated.cpp $(filter-out $(TEST_DIR)/main.cpp, $(wildcard $(TEST_DIR)/*.cpp)) $(wildcard $(TEST_SRC))
+
 TEST_OBJS:=$(TEST_SRCS:%.cpp=$(BUILD_DIR)/%.o)
 
 test: $(TEST_OBJS)
-# @$(MKDIR_COMMAND)
-	@$(CC) $(CPP_FLAGS) $(INCLUDES) $(DEFINES) -o $(BUILD_DIR)/tests.out $^
+	@$(CC) $(CPP_FLAGS) $(INCLUDES) $(DEFINES) -o $(BUILD_DIR)/tests.out $^ 
 	@./$(BUILD_DIR)/tests.out
 
 $(BUILD_DIR)/%.o: %.cpp
@@ -43,5 +42,5 @@ $(BUILD_DIR)/%.o: %.cpp
 clean:
 	$(RMDIR_COMMAND) $(BUILD_DIR)
 
-DEPFILES:= $(TEST_OBJS:%.o=%.d)
-include $(wildcard $(DEPFILES))
+include $(wildcard $(TEST_OBJS:%.o=%.d))
+include $(wildcard $(E2E_OBJS:%.o=%.d))
