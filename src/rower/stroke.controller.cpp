@@ -2,82 +2,83 @@
 
 #include "stroke.controller.h"
 
-StrokeController::StrokeController(StrokeService &_strokeService) : strokeService(_strokeService)
+StrokeController::StrokeController(StrokeService &_strokeService, FlywheelService &_flywheelService) : strokeService(_strokeService), flywheelService(_flywheelService)
 {
 }
 
 void StrokeController::begin() const
 {
-    Log.infoln("Setting up stroke monitor controller");
-    strokeService.setup();
+    Log.infoln("Setting up rowing monitor controller");
+    flywheelService.setup();
 }
 
 void StrokeController::update()
 {
-    if (strokeService.hasDataChanged())
+    if (flywheelService.hasDataChanged())
     {
-        auto lastRawRevTime = cscData.rawImpulseTime;
-        cscData = strokeService.getData();
-        if (lastRawRevTime != cscData.rawImpulseTime)
-            Log.verboseln("rawImpulseTime: %u", cscData.rawImpulseTime);
+        auto lastFlywheelData = flywheelData;
+        flywheelData = flywheelService.getData();
+        if (lastFlywheelData.rawImpulseTime != flywheelData.rawImpulseTime)
+            Log.verboseln("rawImpulseTime: %u", flywheelData.rawImpulseTime);
 
-        if (cscData.rawDeltaImpulseTime != lastDeltaRead)
-        {
-            Log.traceln("deltaTime: %u", cscData.rawDeltaImpulseTime);
-            Log.verboseln("cleanDeltaTime: %u", cscData.cleanDeltaImpulseTime);
-            lastDeltaRead = cscData.rawDeltaImpulseTime;
-        }
+        if (lastFlywheelData.rawImpulseCount == flywheelData.rawImpulseCount)
+            return;
+
+        Log.traceln("deltaTime: %u", flywheelData.deltaTime);
+
+        strokeService.processData(flywheelData);
+        rowerState = strokeService.getData();
     }
 }
 
 unsigned long long StrokeController::getLastRevTime() const
 {
-    return cscData.lastRevTime;
+    return rowerState.lastRevTime;
 }
 
 unsigned int StrokeController::getRevCount() const
 {
-    return cscData.revCount;
+    return lround(rowerState.distance);
 }
 
 unsigned long long StrokeController::getLastStrokeTime() const
 {
-    return cscData.lastStrokeTime;
+    return rowerState.lastStrokeTime;
 }
 
 unsigned short StrokeController::getStrokeCount() const
 {
-    return cscData.strokeCount;
+    return rowerState.strokeCount;
 }
 
 unsigned long StrokeController::getRawImpulseTime() const
 {
-    return cscData.rawImpulseTime;
+    return flywheelData.rawImpulseTime;
 }
 
 double StrokeController::getDriveDuration() const
 {
-    return cscData.driveDuration / 1e6;
+    return rowerState.driveDuration / 1e6;
 }
 
 double StrokeController::getRecoveryDuration() const
 {
-    return cscData.recoveryDuration / 1e6;
+    return rowerState.recoveryDuration / 1e6;
 }
 
 short StrokeController::getAvgStrokePower() const
 {
-    return lround(cscData.avgStrokePower);
+    return rowerState.avgStrokePower;
 }
 
-unsigned int StrokeController::getDistance() const
+double StrokeController::getDistance() const
 {
-    return lroundl(cscData.distance);
+    return rowerState.distance;
 }
 
 unsigned char StrokeController::getDragFactor() const
 {
-    return lround(cscData.dragCoefficient * 1e6);
+    return lround(rowerState.dragCoefficient * 1e6);
 }
 
 unsigned int StrokeController::getPreviousRevCount() const
@@ -92,10 +93,10 @@ unsigned int StrokeController::getPreviousStrokeCount() const
 
 void StrokeController::setPreviousRevCount()
 {
-    previousRevCount = cscData.revCount;
+    previousRevCount = lround(rowerState.distance);
 }
 
 void StrokeController::setPreviousStrokeCount()
 {
-    previousStrokeCount = cscData.strokeCount;
+    previousStrokeCount = rowerState.strokeCount;
 }

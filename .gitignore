@@ -86,3 +86,4 @@ build
 
 # Misc
 *.txt
+!*.spec.*.txt

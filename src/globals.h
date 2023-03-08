@@ -18,7 +18,7 @@ extern Preferences preferences;
 extern EEPROMService eepromService;
 extern BluetoothService bleService;
 extern BluetoothController bleController;
-extern LinearRegressorService regressorService;
+extern FlywheelService flywheelService;
 extern StrokeService strokeService;
 extern StrokeController strokeController;
 extern PowerManagerController powerManagerController;

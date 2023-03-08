@@ -1,24 +1,34 @@
+#include "flywheel.service.h"
 #include "stroke.service.h"
 
 class StrokeController
 {
     StrokeService &strokeService;
+    FlywheelService &flywheelService;
 
     unsigned int previousRevCount = 0;
     unsigned int previousStrokeCount = 0U;
-    unsigned long lastDeltaRead = 0;
 
-    StrokeModel::CscData cscData{
+    StrokeModel::RowingMetrics rowerState{
+        0.0,
+        0ULL,
+        0ULL,
+        0U,
+        0U,
+        0U,
+        0.0,
+        0.0,
+        std::vector<double>{}};
+
+    StrokeModel::FlywheelData flywheelData{
         0UL,
-        0U,
         0UL,
-        0U,
-        0U,
-        0U,
-        0};
+        0ULL,
+        0UL,
+        0UL};
 
 public:
-    StrokeController(StrokeService &_strokeService);
+    StrokeController(StrokeService &_strokeService, FlywheelService &_flywheelService);
 
     void begin() const;
     void update();
@@ -32,7 +42,7 @@ public:
     unsigned int getRevCount() const;
     unsigned long long getLastStrokeTime() const;
     unsigned short getStrokeCount() const;
-    unsigned int getDistance() const;
+    double getDistance() const;
     double getRecoveryDuration() const;
     double getDriveDuration() const;
     short getAvgStrokePower() const;

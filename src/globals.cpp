@@ -6,19 +6,19 @@ Preferences preferences;
 
 EEPROMService eepromService(preferences);
 BluetoothService bleService(eepromService);
-LinearRegressorService regressorService;
-StrokeService strokeService(regressorService);
+FlywheelService flywheelService;
+StrokeService strokeService;
 PowerManagerService powerManagerService;
 
 BluetoothController bleController(bleService, eepromService);
-StrokeController strokeController(strokeService);
+StrokeController strokeController(strokeService, flywheelService);
 PowerManagerController powerManagerController(powerManagerService);
 
 IRAM_ATTR void rotationInterrupt()
 {
     // execution time general: 1-5, max: 520 and a few 120
     // auto start = micros();
-    strokeService.processRotation(micros());
+    flywheelService.processRotation(micros());
     // auto stop = micros();
 
     // Serial.print("rotationInterrupt: ");

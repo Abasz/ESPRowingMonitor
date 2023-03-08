@@ -1,18 +1,29 @@
+#pragma once
+
+#include <vector>
+// TODO: rename this to RowingModel or RowingEngingModel or somthing
 namespace StrokeModel
 {
-    struct CscData
+    struct FlywheelData
     {
+        unsigned long rawImpulseCount;
+        unsigned long deltaTime;
+        unsigned long long totalTime;
+        double totalAngularDisplacement;
+        unsigned long cleanImpulseTime;
+        unsigned long rawImpulseTime;
+    };
+
+    struct RowingMetrics
+    {
+        double distance;
         unsigned long long lastRevTime;
-        unsigned int revCount;
         unsigned long long lastStrokeTime;
         unsigned short strokeCount;
-        unsigned long rawImpulseTime;
         unsigned int driveDuration;
         unsigned int recoveryDuration;
-        double distance;
         double avgStrokePower;
         double dragCoefficient;
-        unsigned int rawDeltaImpulseTime;
-        unsigned int cleanDeltaImpulseTime;
+        std::vector<double> driveHandleForces;
     };
 }

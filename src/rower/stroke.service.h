@@ -2,66 +2,75 @@
 
 #include <array>
 
-#include "settings.h"
+#include "../settings.h"
+#include "../utils/ols-linear-series.h"
+#include "../utils/ts-quadratic-series.h"
 #include "stroke.model.h"
-#include "utils/regressor.service.h"
-
-enum class CyclePhase
-{
-    Stopped,
-    Recovery,
-    Drive
-};
 
 class StrokeService
 {
-    LinearRegressorService &regressorService;
-
     static double constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
-    static unsigned char const strokeCycleStartIndex = Settings::deltaImpulseTimeArrayLength - Settings::flywheelPowerChangeDetectionErrorThreshold - 1;
+    static double constexpr sprocketRadius = Settings::sprocketRadius / 100;
 
-    volatile unsigned long impulseCount = 0UL;
-    volatile unsigned long lastRevTime = 0UL;
-    volatile unsigned long lastStrokeTime = 0UL;
+    // rower state
+    CyclePhase cyclePhase = CyclePhase::Stopped;
+    unsigned long long rowingTotalTime = 0ULL;
+    unsigned long long rowingImpulseCount = 0UL;
+    double rowingTotalAngularDisplacement = 0.0;
 
-    volatile unsigned long long revTime = 0ULL;
-    volatile unsigned long long strokeTime = 0ULL;
-    volatile unsigned int revCount = 0;
-    volatile unsigned short strokeCount = 0;
+    // Drive related
+    unsigned long long driveStartTime = 0ULL;
+    unsigned int driveDuration = 0;
+    double driveStartAngularDisplacement = 0.0;
+    double driveTotalAngularDisplacement = 0.0;
 
-    volatile double distance = 0;
-    volatile double avgStrokePower = 0;
-    volatile double dragCoefficient = 0;
-    volatile unsigned int lastDriveDuration = 0;
-    volatile unsigned int lastRecoveryDuration = 0;
+    // Recovery related
+    unsigned long long recoveryStartTime = 0;
+    unsigned int recoveryDuration = 0;
+    double recoveryStartAngularDisplacement = 0.0;
+    double recoveryTotalAngularDisplacement = 0.0;
 
-    volatile unsigned long driveStartTime = 0;
-    volatile unsigned int driveStartImpulseCount = 0;
-    volatile unsigned int driveDuration = 0;
+    // metrics
+    double distance = 0;
+    unsigned short strokeCount = 0;
+    unsigned long long strokeTime = 0ULL;
+    unsigned long long revTime = 0ULL;
+    double avgStrokePower = 0;
 
-    volatile unsigned long recoveryStartTime = 0;
-    volatile unsigned int recoveryDuration = 0;
+    double dragCoefficient = 0;
 
-    volatile unsigned long previousDeltaImpulseTime = 0;
-    volatile unsigned long previousCleanImpulseTime = 0;
-    volatile unsigned long previousRawImpulseTime = 0;
-    volatile unsigned long lastDataReadTime = 0;
-
-    volatile CyclePhase cyclePhase = CyclePhase::Stopped;
-    std::array<volatile unsigned long, Settings::deltaImpulseTimeArrayLength> cleanDeltaImpulseTimes{};
-    std::array<volatile unsigned long, Settings::deltaImpulseTimeArrayLength> rawDeltaImpulseTimes{};
     std::array<double, Settings::dragCoefficientsArrayLength> dragCoefficients{};
+
+    double totalAngularDisplacement = 0;
+
+    // advance metrics
+    double currentAngularVelocity = 0;
+    double currentAngularAcceleration = 0;
+    double currentTorque = 0;
+    vector<double> driveHandleForces;
+
+    vector<Series> angularVelocityMatrix;
+    vector<Series> angularAccelerationMatrix;
+
+    OLSLinearSeries deltaTimes = OLSLinearSeries(Settings::impulseDataArrayLength);
+    OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries();
+    TSQuadraticSeries angularDistances = TSQuadraticSeries(Settings::impulseDataArrayLength);
 
     bool isFlywheelUnpowered() const;
     bool isFlywheelPowered() const;
     void calculateDragCoefficient();
     void calculateAvgStrokePower();
 
-public:
-    StrokeService(LinearRegressorService &_regressorService);
+    void driveStart();
+    void driveUpdate();
+    void driveEnd();
+    void recoveryStart();
+    void recoveryUpdate();
+    void recoveryEnd();
 
-    void setup() const;
-    bool hasDataChanged();
-    StrokeModel::CscData getData() const;
-    void processRotation(unsigned long now);
+public:
+    StrokeService();
+
+    StrokeModel::RowingMetrics getData();
+    void processData(StrokeModel::FlywheelData data);
 };

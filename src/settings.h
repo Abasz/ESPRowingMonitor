@@ -10,13 +10,13 @@
 #define IMPULSES_PER_REVOLUTION 3
 #define FLYWHEEL_INERTIA 0.073
 #define LED_BLINK_FREQUENCY 1000
+#define SPROCKET_RADIUS 1.50
 
 // Sensor signal filter settings
 #define ROTATION_DEBOUNCE_TIME_MIN 7
 #define ROWING_STOPPED_THRESHOLD_PERIOD 7000
 
 // Drag factor filter settings
-#define DRAG_FACTOR_ROTATION_DELTA_UPPER_THRESHOLD 0
 #define GOODNESS_OF_FIT_THRESHOLD 0.97
 #define MAX_DRAG_FACTOR_RECOVERY_PERIOD 6000
 #define LOWER_DRAG_FACTOR_THRESHOLD 75
@@ -24,12 +24,11 @@
 #define DRAG_COEFFICIENTS_ARRAY_LENGTH 1
 
 // Stroke phase detection filter settings
-#define MIN_DECELERATION_DELTA_FOR_UNPOWERED 0
-#define MAX_DECELERATION_DELTA_FOR_POWERED 0
+#define MINIMUM_POWERED_TORQUE 0
+#define MINIMUM_DRAG_TORQUE 0
 #define STROKE_DEBOUNCE_TIME 200
-#define FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD 0
-#define DELTA_IMPULSE_TIME_ARRAY_LENGTH 5
-#define ROTATION_SMOOTHING_FACTOR 1
+#define IMPULSE_DATA_ARRAY_LENGTH 7
+// #define ROTATION_SMOOTHING_FACTOR 1
 
 // Device power management settings
 #define VOLTAGE_DIVIDER_RATIO 2
@@ -51,13 +50,13 @@ public:
     static unsigned char const impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
     static double constexpr flywheelInertia = FLYWHEEL_INERTIA;
     static unsigned short const ledBlinkFrequency = LED_BLINK_FREQUENCY;
+    static double constexpr sprocketRadius = SPROCKET_RADIUS;
 
     // Sensor signal filter settings
     static unsigned char const rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN;
     static unsigned short const rowingStoppedThresholdPeriod = ROWING_STOPPED_THRESHOLD_PERIOD;
 
     // Drag factor filter settings
-    static unsigned char const dragFactorRotationDeltaUpperThreshold = DRAG_FACTOR_ROTATION_DELTA_UPPER_THRESHOLD;
     static double constexpr goodnessOfFitThreshold = GOODNESS_OF_FIT_THRESHOLD;
     static unsigned short const maxDragFactorRecoveryPeriod = MAX_DRAG_FACTOR_RECOVERY_PERIOD;
     static double constexpr lowerDragFactorThreshold = LOWER_DRAG_FACTOR_THRESHOLD / 1e6;
@@ -65,12 +64,11 @@ public:
     static unsigned char const dragCoefficientsArrayLength = DRAG_COEFFICIENTS_ARRAY_LENGTH;
 
     // Stroke phase detection filter settings
-    static unsigned short const minDecelerationDeltaForUnpowered = MIN_DECELERATION_DELTA_FOR_UNPOWERED;
-    static unsigned short const maxDecelerationDeltaForPowered = MAX_DECELERATION_DELTA_FOR_POWERED;
+    static double constexpr minimumPoweredTorque = MINIMUM_POWERED_TORQUE;
+    static double constexpr minimumDragTorque = MINIMUM_DRAG_TORQUE;
     static unsigned char const strokeDebounceTime = STROKE_DEBOUNCE_TIME;
-    static unsigned char const flywheelPowerChangeDetectionErrorThreshold = FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD;
-    static unsigned char const deltaImpulseTimeArrayLength = DELTA_IMPULSE_TIME_ARRAY_LENGTH;
-    static unsigned char const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;
+    static unsigned char const impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
+    // static unsigned char const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;
 
     // Device power management settings
     static unsigned char const voltageDividerRatio = VOLTAGE_DIVIDER_RATIO;
@@ -83,9 +81,12 @@ public:
 };
 
 // Sanity checks
-#if DELTA_IMPULSE_TIME_ARRAY_LENGTH <= 1
-    #error "DELTA_IMPULSE_TIME_ARRAY_LENGTH should not be less than 2"
+#if IMPULSE_DATA_ARRAY_LENGTH <= 3
+    #error "IMPULSE_DATA_ARRAY_LENGTH should not be less than 3"
 #endif
-#if DELTA_IMPULSE_TIME_ARRAY_LENGTH - FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD - 2 < 0
-    #error "FLYWHEEL_POWER_CHANGE_DETECTION_ERROR_THRESHOLD should be less then or equal to the half of the DELTA_IMPULSE_TIME_ARRAY_LENGTH"
+#if IMPULSE_DATA_ARRAY_LENGTH >= 12
+    #warning "Consider changing doubles to float "
+#endif
+#if IMPULSE_DATA_ARRAY_LENGTH >= 15
+    #error "Using too many data points will increase loop execution time. Using 15 and doubles would require approx. 7ms to complete calculation. Hence impulses may be missed"
 #endif

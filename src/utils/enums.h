@@ -1,5 +1,12 @@
 #pragma once
 
+enum class CyclePhase
+{
+    Stopped,
+    Recovery,
+    Drive
+};
+
 enum class BleServiceFlag
 {
     CpsService,
