@@ -2,7 +2,7 @@
 
 #include "../src/rower/stroke.controller.h"
 
-extern LinearRegressorService regressorService;
+extern FlywheelService flywheelService;
 extern StrokeService strokeService;
 extern StrokeController strokeController;
 

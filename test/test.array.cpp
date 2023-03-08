@@ -7,6 +7,6 @@ using std::accumulate;
 
 void simulateRotation()
 {
-    strokeService.processRotation(accumulate(testDeltaTimes, testDeltaTimes + i, 0));
+    flywheelService.processRotation(accumulate(testDeltaTimes, testDeltaTimes + i, 0));
     i++;
 }

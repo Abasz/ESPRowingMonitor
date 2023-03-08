@@ -25,6 +25,22 @@ public:
         printf(msg, args...);
         printf("\n");
     };
+
+    template <class T, typename... Args>
+    static void warningln(T msg, Args... args)
+    {
+        printf(msg, args...);
+        printf("\n");
+    };
+
+    template <class T, typename... Args>
+    static void errorln(T msg, Args... args)
+    {
+        printf(msg, args...);
+        printf("\n");
+    };
+
+    inline void setLevel(int level) {}
 };
 
 extern Logging Log;
