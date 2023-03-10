@@ -1,5 +1,5 @@
 CC:=g++
-CPP_FLAGS:=-g -Wall -O3 -std=c++17
+CPP_FLAGS:=-g -Wall -O3 -std=c++20 -std=gnu++20
 .PHONY: e2e test clean
 .DEFAULT_GOAL:=e2e
 

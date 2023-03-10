@@ -5,7 +5,12 @@
 		}
 	],
 	"settings": {
-		"cSpell.words": ["infoln", "revtime", "traceln", "Unpowered"],
+		"cSpell.words": [
+			"infoln",
+			"revtime",
+			"traceln",
+			"Unpowered"
+		],
 		"files.associations": {
 			"*.service": "ini",
 			"*.timer": "ini",
@@ -57,7 +62,12 @@
 			"stdexcept": "cpp",
 			"streambuf": "cpp",
 			"cinttypes": "cpp",
-			"typeinfo": "cpp"
+			"typeinfo": "cpp",
+			"bitset": "cpp",
+			"regex": "cpp",
+			"ranges": "cpp",
+			"span": "cpp",
+			"cassert": "cpp"
 		}
 	}
 }
