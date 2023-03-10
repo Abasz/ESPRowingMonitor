@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "ArduinoLog.h"
 
 #include "stroke.controller.h"

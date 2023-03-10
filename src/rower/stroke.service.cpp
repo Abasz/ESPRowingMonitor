@@ -1,9 +1,9 @@
 #include <algorithm>
 #include <array>
-#include <math.h>
+#include <cmath>
 #include <numeric>
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 #include "ArduinoLog.h"
 

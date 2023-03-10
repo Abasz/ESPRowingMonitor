@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Preferences.h>
+#include "Preferences.h"
 
 #include "ArduinoLog.h"
 
+#include "../settings.h"
 #include "enums.h"
-#include "settings.h"
 
 class EEPROMService
 {

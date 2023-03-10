@@ -1,7 +1,5 @@
 #include <algorithm>
 
-// #include <Arduino.h>
-
 #include "series.h"
 
 Series::Series(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength) {}

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <math.h>
-
 typedef enum gpio_num_t
 {
     GPIO_NUM_NC = -1,

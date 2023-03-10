@@ -2,12 +2,12 @@
 #include <array>
 #include <numeric>
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 #include "ArduinoLog.h"
 
+#include "../settings.h"
 #include "power-manager.service.h"
-#include "settings.h"
 
 using std::accumulate;
 using std::array;
