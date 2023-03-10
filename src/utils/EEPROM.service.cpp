@@ -46,9 +46,9 @@ void EEPROMService::setLogLevel(ArduinoLogLevel newLogLevel)
     Log.setLevel(intLogLevel);
 }
 
-void EEPROMService::setBleServiceFlag(BleServiceFlag bewBleServiceFlag)
+void EEPROMService::setBleServiceFlag(BleServiceFlag newServiceFlag)
 {
-    int intBleServiceFlag = static_cast<int>(bewBleServiceFlag);
+    int intBleServiceFlag = static_cast<int>(newServiceFlag);
     if (intBleServiceFlag < 0 || intBleServiceFlag > 1)
     {
         Log.errorln("Invalid BLE Service setting, should be between 0 or 1");

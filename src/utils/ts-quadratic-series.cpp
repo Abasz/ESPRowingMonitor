@@ -4,18 +4,22 @@
 #include "ts-linear-series.h"
 #include "ts-quadratic-series.h"
 
-TSQuadraticSeries::TSQuadraticSeries(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength) {}
+TSQuadraticSeries::TSQuadraticSeries(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
+{
+    if (_maxSeriesLength > 0)
+    {
+        seriesA.reserve(_maxSeriesLength);
+    }
+}
 
 double TSQuadraticSeries::firstDerivativeAtPosition(unsigned char position) const
 {
     if (seriesX.size() > 2 && position < seriesX.size())
     {
-        return a * 2 * seriesX.seriesArray.at(position) + b;
+        return a * 2 * seriesX[position] + b;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 double TSQuadraticSeries::secondDerivativeAtPosition(unsigned char position) const
@@ -24,18 +28,16 @@ double TSQuadraticSeries::secondDerivativeAtPosition(unsigned char position) con
     {
         return a * 2;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
-void TSQuadraticSeries::push(double x, double y)
+void TSQuadraticSeries::push(double pointX, double pointY)
 {
     TSLinearSeries linearResidue(maxSeriesLength);
 
-    seriesX.push(x);
-    seriesY.push(y);
+    seriesX.push(pointX);
+    seriesY.push(pointY);
 
     if (maxSeriesLength > 0 && seriesA.size() >= maxSeriesLength)
     {
@@ -50,6 +52,10 @@ void TSQuadraticSeries::push(double x, double y)
 
     // Add an empty array at the end to store futurs results for the most recent points
     seriesA.push_back({});
+    if (maxSeriesLength > 0)
+    {
+        seriesA[seriesA.size() - 1].reserve(maxSeriesLength);
+    }
 
     // calculate the coefficients of this new point
     if (seriesX.size() > 2)
@@ -66,10 +72,10 @@ void TSQuadraticSeries::push(double x, double y)
         i = 0;
         while (i < seriesX.size() - 1U)
         {
-            auto seriesXPointI = seriesX.seriesArray.at(i);
+            auto seriesXPointI = seriesX[i];
             linearResidue.push(
                 seriesXPointI,
-                seriesY.seriesArray.at(i) - a * (seriesXPointI * seriesXPointI));
+                seriesY[i] - a * (seriesXPointI * seriesXPointI));
             i++;
         }
         b = linearResidue.coefficientA();
@@ -84,15 +90,15 @@ void TSQuadraticSeries::push(double x, double y)
 // EXEC_TIME_15: approx 2000us
 double TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char pointThree) const
 {
-    auto xPointOne = seriesX.seriesArray.at(pointOne);
-    auto xPointThree = seriesX.seriesArray.at(pointThree);
+    auto xPointOne = seriesX[pointOne];
+    auto xPointThree = seriesX[pointThree];
 
     if (pointOne + 1 < pointThree && xPointOne != xPointThree)
     {
         Series results(maxSeriesLength);
         auto pointTwo = pointOne + 1;
 
-        auto xPointTwo = seriesX.seriesArray.at(pointTwo);
+        auto xPointTwo = seriesX[pointTwo];
 
         while (
             pointOne < pointTwo &&
@@ -101,13 +107,13 @@ double TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char point
             xPointTwo != xPointThree)
         {
             // for the underlying math, see https://www.quora.com/How-do-I-find-a-quadratic-equation-from-points/answer/Robert-Paxson
-            auto xPointTwo = seriesX.seriesArray.at(pointTwo);
-            auto yPointThree = seriesY.seriesArray.at(pointThree);
-            auto yPointTwo = seriesY.seriesArray.at(pointTwo);
+            auto xPointTwo = seriesX[pointTwo];
+            auto yPointThree = seriesY[pointThree];
+            auto yPointTwo = seriesY[pointTwo];
 
             results.push(
                 (xPointOne * (yPointThree - yPointTwo) +
-                 seriesY.seriesArray.at(pointOne) * (xPointTwo - xPointThree) +
+                 seriesY[pointOne] * (xPointTwo - xPointThree) +
                  (xPointThree * yPointTwo - xPointTwo * yPointThree)) /
                 ((xPointOne - xPointTwo) * (xPointOne - xPointThree) * (xPointTwo - xPointThree)));
             pointTwo += 1;
@@ -115,20 +121,23 @@ double TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char point
 
         return results.median();
     }
+
     return 0.0;
 }
 
 // EXEC_TIME_15: approx 800us
-double TSQuadraticSeries::matrixMedian(vector<vector<double>> inputMatrix) const
+double TSQuadraticSeries::matrixMedian(vector<vector<double>> inputMatrix)
 {
     if (inputMatrix.size() > 1)
     {
         vector<double> flattened;
 
         for (auto &input : inputMatrix)
+        {
             flattened.insert(end(flattened), begin(input), end(input));
+        }
 
-        auto mid = flattened.size() / 2;
+        unsigned int mid = flattened.size() / 2;
         partial_sort(begin(flattened), begin(flattened) + mid + 1, end(flattened));
 
         return flattened.size() % 2 != 0

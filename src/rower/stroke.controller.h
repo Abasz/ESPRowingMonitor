@@ -9,7 +9,7 @@ class StrokeController
     unsigned int previousRevCount = 0;
     unsigned int previousStrokeCount = 0U;
 
-    StrokeModel::RowingMetrics rowerState{
+    RowingDataModels::RowingMetrics rowerState{
         0.0,
         0ULL,
         0ULL,
@@ -20,7 +20,7 @@ class StrokeController
         0.0,
         std::vector<double>{}};
 
-    StrokeModel::FlywheelData flywheelData{
+    RowingDataModels::FlywheelData flywheelData{
         0UL,
         0UL,
         0ULL,
@@ -30,7 +30,7 @@ class StrokeController
 public:
     StrokeController(StrokeService &_strokeService, FlywheelService &_flywheelService);
 
-    void begin() const;
+    static void begin();
     void update();
     unsigned int getPreviousRevCount() const;
     void setPreviousRevCount();

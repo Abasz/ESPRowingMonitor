@@ -8,6 +8,8 @@ class BluetoothController
     BluetoothService &bluetoothService;
     EEPROMService &eepromService;
 
+    static const unsigned int updateInterval = 1000;
+
     unsigned int lastConnectedDeviceCheckTime = 0;
     unsigned int lastBroadcastTime = 0UL;
 
@@ -17,7 +19,7 @@ class BluetoothController
     unsigned short strokeCountData = 0;
     short avgStrokePowerData = 0;
 
-    void notify();
+    void notify() const;
 
 public:
     BluetoothController(BluetoothService &_bluetoothService, EEPROMService &_eepromService);
@@ -27,5 +29,5 @@ public:
     void notifyBattery(unsigned char batteryLevel) const;
     void updateData(unsigned long long revTime, unsigned int revCount, unsigned long long strokeTime, unsigned short strokeCount, short avgStrokePower = 0);
     void notifyDragFactor(unsigned char dragFactor) const;
-    bool isAnyDeviceConnected() const;
+    static bool isAnyDeviceConnected();
 };

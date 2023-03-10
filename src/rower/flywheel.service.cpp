@@ -9,20 +9,20 @@
 
 FlywheelService::FlywheelService() {}
 
-void FlywheelService::setup() const
+void FlywheelService::setup()
 {
     Log.verboseln("Attach interrupt");
     attachRotationInterrupt();
 }
 
-StrokeModel::FlywheelData FlywheelService::getData()
+RowingDataModels::FlywheelData FlywheelService::getData()
 {
     // execution time: 12 microsec
     // auto start = micros();
     detachRotationInterrupt();
     isDataChanged = false;
 
-    StrokeModel::FlywheelData data = {
+    RowingDataModels::FlywheelData data = {
         .rawImpulseCount = impulseCount,
         .deltaTime = cleanDeltaTime,
         .totalTime = totalTime,
@@ -48,7 +48,9 @@ void FlywheelService::processRotation(unsigned long now)
     auto currentRawImpulseDeltaTime = now - lastRawImpulseTime;
 
     if (currentRawImpulseDeltaTime < Settings::rotationDebounceTimeMin * 1000)
+    {
         return;
+    }
 
     isDataChanged = true;
 

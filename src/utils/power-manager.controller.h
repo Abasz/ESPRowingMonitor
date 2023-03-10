@@ -12,7 +12,7 @@ class PowerManagerController
     unsigned long lastBatteryMeasurementTime = 0;
 
 public:
-    PowerManagerController(PowerManagerService &_powerManagerService);
+    explicit PowerManagerController(PowerManagerService &_powerManagerService);
 
     void begin();
     void update(unsigned long lastRevTime, bool isDeviceConnected);

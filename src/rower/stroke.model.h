@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-// TODO: rename this to RowingModel or RowingEngingModel or somthing
-namespace StrokeModel
+
+namespace RowingDataModels
 {
     struct FlywheelData
     {

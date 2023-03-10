@@ -5,17 +5,21 @@
 
 TSLinearSeries::TSLinearSeries(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
 {
+    if (_maxSeriesLength > 0)
+    {
+        slopes.reserve(_maxSeriesLength);
+    }
 }
 
 // EXEC_TIME_15: approx 450us
 double TSLinearSeries::calculateSlope(unsigned char pointOne, unsigned char pointTwo) const
 {
-    auto seriesXPointOne = seriesX.seriesArray.at(pointOne);
-    auto seriesXPointTwo = seriesX.seriesArray.at(pointTwo);
+    auto seriesXPointOne = seriesX[pointOne];
+    auto seriesXPointTwo = seriesX[pointTwo];
 
     if (pointOne != pointTwo && seriesXPointOne != seriesXPointTwo)
     {
-        return (seriesY.seriesArray.at(pointTwo) - seriesY.seriesArray.at(pointOne)) /
+        return (seriesY[pointTwo] - seriesY[pointOne]) /
                (seriesXPointTwo - seriesXPointOne);
     }
 
@@ -30,14 +34,16 @@ double TSLinearSeries::coefficientA() const
 // EXEC_TIME_15: approx 1670us
 double TSLinearSeries::median() const
 {
-    if (slopes.size() > 0)
+    if (!slopes.empty())
     {
         vector<double> flattened;
 
-        for (auto &slope : slopes)
+        for (const auto &slope : slopes)
+        {
             flattened.insert(end(flattened), begin(slope), end(slope));
+        }
 
-        auto mid = flattened.size() / 2;
+        unsigned int mid = flattened.size() / 2;
         partial_sort(begin(flattened), begin(flattened) + mid + 1, end(flattened));
 
         return flattened.size() % 2 != 0
@@ -48,10 +54,10 @@ double TSLinearSeries::median() const
     return 0.0;
 }
 
-void TSLinearSeries::push(double x, double y)
+void TSLinearSeries::push(double pointX, double pointY)
 {
-    seriesX.push(x);
-    seriesY.push(y);
+    seriesX.push(pointX);
+    seriesY.push(pointY);
 
     if (maxSeriesLength > 0 && slopes.size() >= maxSeriesLength)
     {
@@ -79,7 +85,10 @@ void TSLinearSeries::push(double x, double y)
     }
     // add an empty array at the end to store futurs results for the most recent points
     slopes.push_back({});
-
+    if (maxSeriesLength > 0)
+    {
+        slopes[slopes.size() - 1].reserve(maxSeriesLength);
+    }
     // calculate the median of the slopes
     if (seriesX.size() > 1)
     {

@@ -2,18 +2,29 @@
 
 #include "series.h"
 
-Series::Series(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength) {}
+Series::Series(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength)
+{
+    if (_maxSeriesLength > 0)
+    {
+        seriesArray.reserve(_maxSeriesLength);
+    }
+}
 
-unsigned char Series::size() const
+double const &Series::operator[](size_t index) const
+{
+    return seriesArray[index];
+};
+
+size_t Series::size() const
 {
     return seriesArray.size();
 }
 
 double Series::median() const
 {
-    if (seriesArray.size() > 0)
+    if (!seriesArray.empty())
     {
-        auto mid = seriesArray.size() / 2;
+        unsigned int mid = seriesArray.size() / 2;
         vector<double> sortedArray(seriesArray);
         partial_sort(begin(sortedArray), begin(sortedArray) + mid + 1, end(sortedArray));
 

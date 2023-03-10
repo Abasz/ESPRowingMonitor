@@ -23,10 +23,10 @@ void PowerManagerService::setup()
     setupBatteryMeasurement();
 }
 
-void PowerManagerService::goToSleep() const
+void PowerManagerService::goToSleep()
 {
     Log.verboseln("Configure deep sleep mode");
-    esp_sleep_enable_ext0_wakeup(Settings::sensorPinNumber, !digitalRead(Settings::sensorPinNumber));
+    esp_sleep_enable_ext0_wakeup(Settings::sensorPinNumber, digitalRead(Settings::sensorPinNumber) == HIGH ? LOW : HIGH);
     gpio_hold_en(Settings::sensorPinNumber);
     Log.infoln("Going to sleep mode");
     Serial.flush();
@@ -43,7 +43,9 @@ unsigned char PowerManagerService::measureBattery()
     {
         auto measurement = analogRead(GPIO_NUM_34);
 
-        auto rawNewBatteryLevel = ((measurement * 3.3 / 4095) - Settings::batteryVoltageMin) / (Settings::batteryVoltageMax - Settings::batteryVoltageMin) * 100;
+        const auto espRefVolt = 3.3;
+        const auto dacResolution = 4095;
+        auto rawNewBatteryLevel = ((measurement * espRefVolt / dacResolution) - Settings::batteryVoltageMin) / (Settings::batteryVoltageMax - Settings::batteryVoltageMin) * 100;
 
         if (rawNewBatteryLevel > 100)
         {
@@ -80,7 +82,7 @@ void PowerManagerService::setupBatteryMeasurement()
     }
 }
 
-void PowerManagerService::printWakeupReason() const
+void PowerManagerService::printWakeupReason()
 {
     auto wakeup_reason = esp_sleep_get_wakeup_cause();
 

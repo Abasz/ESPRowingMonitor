@@ -19,7 +19,7 @@ void PowerManagerController::update(unsigned long lastRevTime, bool isDeviceConn
     auto now = micros();
     if (!isDeviceConnected && now - lastRevTime > Settings::deepSleepTimeout * 1000)
     {
-        powerManagerService.goToSleep();
+        PowerManagerService::goToSleep();
     }
 
     if (now - lastBatteryMeasurementTime > Settings::batteryMeasurementFrequency * 1000)

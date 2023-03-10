@@ -11,7 +11,7 @@ class FlywheelService
     volatile unsigned long cleanDeltaTime = 0;
     volatile unsigned long lastRawImpulseTime = 0;
     volatile unsigned long lastCleanImpulseTime = 0;
-    volatile double totalAngularDisplacement = 0.0;
+    volatile double totalAngularDisplacement = 0;
 
     volatile unsigned long impulseCount = 0UL;
     unsigned long long totalTime = 0ULL;
@@ -21,8 +21,8 @@ class FlywheelService
 public:
     FlywheelService();
 
-    void setup() const;
+    static void setup();
     bool hasDataChanged() const;
-    StrokeModel::FlywheelData getData();
+    RowingDataModels::FlywheelData getData();
     void processRotation(unsigned long now);
 };

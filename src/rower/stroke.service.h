@@ -16,19 +16,19 @@ class StrokeService
     CyclePhase cyclePhase = CyclePhase::Stopped;
     unsigned long long rowingTotalTime = 0ULL;
     unsigned long long rowingImpulseCount = 0UL;
-    double rowingTotalAngularDisplacement = 0.0;
+    double rowingTotalAngularDisplacement = 0;
 
     // Drive related
     unsigned long long driveStartTime = 0ULL;
     unsigned int driveDuration = 0;
-    double driveStartAngularDisplacement = 0.0;
-    double driveTotalAngularDisplacement = 0.0;
+    double driveStartAngularDisplacement = 0;
+    double driveTotalAngularDisplacement = 0;
 
     // Recovery related
     unsigned long long recoveryStartTime = 0;
     unsigned int recoveryDuration = 0;
-    double recoveryStartAngularDisplacement = 0.0;
-    double recoveryTotalAngularDisplacement = 0.0;
+    double recoveryStartAngularDisplacement = 0;
+    double recoveryTotalAngularDisplacement = 0;
 
     // metrics
     double distance = 0;
@@ -47,10 +47,10 @@ class StrokeService
     double currentAngularVelocity = 0;
     double currentAngularAcceleration = 0;
     double currentTorque = 0;
-    vector<double> driveHandleForces;
+    vector<double> driveHandleForces{};
 
-    vector<Series> angularVelocityMatrix;
-    vector<Series> angularAccelerationMatrix;
+    vector<Series> angularVelocityMatrix{};
+    vector<Series> angularAccelerationMatrix{};
 
     OLSLinearSeries deltaTimes = OLSLinearSeries(Settings::impulseDataArrayLength);
     OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries();
@@ -71,6 +71,6 @@ class StrokeService
 public:
     StrokeService();
 
-    StrokeModel::RowingMetrics getData();
-    void processData(StrokeModel::FlywheelData data);
+    RowingDataModels::RowingMetrics getData();
+    void processData(RowingDataModels::FlywheelData data);
 };

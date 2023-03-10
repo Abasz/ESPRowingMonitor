@@ -2,20 +2,21 @@
 
 #include <vector>
 
+using std::size_t;
 using std::vector;
 
 class Series
 {
     unsigned char maxSeriesLength = 0UL;
-    double seriesSum = 0ULL;
+    double seriesSum = 0;
+    vector<double> seriesArray;
 
 public:
     explicit Series(unsigned char _maxSeriesLength = 0);
 
-    // TODO: convert this to a template to take advantage of generics as double is not always needed
-    vector<double> seriesArray;
+    double const &operator[](size_t index) const;
 
-    unsigned char size() const;
+    size_t size() const;
     double median() const;
     double sum() const;
 

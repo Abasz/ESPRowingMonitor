@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #pragma once
 
 #include "Esp32-typedefs.h"
@@ -36,3 +37,4 @@ public:
     inline int availableForWrite(void) { return 1; };
     inline void flush(void){};
 };
+// NOLINTEND

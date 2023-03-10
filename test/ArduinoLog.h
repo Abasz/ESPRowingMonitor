@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #pragma once
 
 #include <stdio.h>
@@ -44,3 +45,4 @@ public:
 };
 
 extern Logging Log;
+// NOLINTEND

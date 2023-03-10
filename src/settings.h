@@ -7,12 +7,14 @@
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 // Hardware settings
 #define SENSOR_PIN_NUMBER GPIO_NUM_26
 #define IMPULSES_PER_REVOLUTION 3
 #define FLYWHEEL_INERTIA 0.073
 #define LED_BLINK_FREQUENCY 1000
 #define SPROCKET_RADIUS 1.50
+#define CONCEPT_2_MAGIC_NUMBER 2.8
 
 // Sensor signal filter settings
 #define ROTATION_DEBOUNCE_TIME_MIN 7
@@ -30,7 +32,6 @@
 #define MINIMUM_DRAG_TORQUE 0
 #define STROKE_DEBOUNCE_TIME 200
 #define IMPULSE_DATA_ARRAY_LENGTH 7
-// #define ROTATION_SMOOTHING_FACTOR 1
 
 // Device power management settings
 #define VOLTAGE_DIVIDER_RATIO 2
@@ -40,7 +41,7 @@
 #define INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT 10
 #define BATTERY_MEASUREMENT_FREQUENCY 10
 #define DEEP_SLEEP_TIMEOUT 4
-
+// NOLINTEND(cppcoreguidelines-macro-usage)
 class Settings
 {
 public:
@@ -53,6 +54,7 @@ public:
     static double constexpr flywheelInertia = FLYWHEEL_INERTIA;
     static unsigned short const ledBlinkFrequency = LED_BLINK_FREQUENCY;
     static double constexpr sprocketRadius = SPROCKET_RADIUS;
+    static double constexpr concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
 
     // Sensor signal filter settings
     static unsigned char const rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN;
@@ -90,5 +92,5 @@ public:
     #warning "Consider changing doubles to float "
 #endif
 #if IMPULSE_DATA_ARRAY_LENGTH >= 15
-    #error "Using too many data points will increase loop execution time. Using 15 and doubles would require approx. 7ms to complete calculation. Hence impulses may be missed"
+    #error "Using too many data points will increase loop execution time. Using 15 and doubles would require approx. 7ms to complete calculation. Hence impulses may be missed. Change to floats to save on execution time (but loose some precision)"
 #endif

@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #define NAN (__builtin_nanf(""))
 
 class Preferences
@@ -55,3 +56,4 @@ public:
     inline unsigned char getBytes(const char *key, void *buf, unsigned char maxLen) { return 1; }
     inline unsigned char freeEntries() { return 1; }
 };
+// NOLINTEND

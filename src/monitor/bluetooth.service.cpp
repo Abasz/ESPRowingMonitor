@@ -1,3 +1,5 @@
+#include <string>
+
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
@@ -106,7 +108,7 @@ BluetoothService::BluetoothService(EEPROMService &_eepromService) : eepromServic
 {
 }
 
-bool BluetoothService::isAnyDeviceConnected() const
+bool BluetoothService::isAnyDeviceConnected()
 {
     return NimBLEDevice::getServer()->getConnectedCount() > 0;
 }
@@ -121,7 +123,7 @@ void BluetoothService::updateLed()
     }
     else
     {
-        ledState = !ledState;
+        ledState = ledState == HIGH ? LOW : HIGH;
     }
 
     digitalWrite(GPIO_NUM_2, ledState);
@@ -136,13 +138,13 @@ void BluetoothService::setup()
     setupConnectionIndicatorLed();
 }
 
-void BluetoothService::startBLEServer() const
+void BluetoothService::startBLEServer()
 {
     NimBLEDevice::getAdvertising()->start();
     Log.verboseln("Waiting a client connection to notify...");
 }
 
-void BluetoothService::stopServer() const
+void BluetoothService::stopServer()
 {
     NimBLEDevice::getAdvertising()->stop();
 }
@@ -158,7 +160,8 @@ void BluetoothService::notifyBattery(unsigned char batteryLevel) const
 
 void BluetoothService::notifyDragFactor(unsigned short distance, unsigned char dragFactor) const
 {
-    dragFactorCharacteristic->setValue("DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance));
+    std::string value = "DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance);
+    dragFactorCharacteristic->setValue(value);
     if (dragFactorCharacteristic->getSubscribedCount() > 0)
     {
         dragFactorCharacteristic->notify();
@@ -272,11 +275,11 @@ void BluetoothService::setupBleDevice()
 void BluetoothService::setupServices()
 {
     Log.verboseln("Setting up BLE Services");
-    auto server = NimBLEDevice::getServer();
-    auto batteryService = server->createService(batterySvcUuid);
-    auto deviceInfoService = server->createService(deviceInfoSvcUuid);
+    auto *server = NimBLEDevice::getServer();
+    auto *batteryService = server->createService(batterySvcUuid);
+    auto *deviceInfoService = server->createService(deviceInfoSvcUuid);
 
-    auto measurementService = eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? setupCscServices(server) : setupPscServices(server);
+    auto *measurementService = eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? setupCscServices(server) : setupPscServices(server);
 
     Log.verboseln("Setting up BLE Characteristics");
 
@@ -307,18 +310,18 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *server)
 {
     Log.infoln("Setting up Cycling Speed and Cadence Profile");
 
-    auto cscService = server->createService(cyclingSpeedCadenceSvcUuid);
+    auto *cscService = server->createService(cyclingSpeedCadenceSvcUuid);
     cscMeasurementCharacteristic = cscService->createCharacteristic(cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
     dragFactorCharacteristic = cscService->createCharacteristic(dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     cscService
         ->createCharacteristic(cscFeatureUuid, NIMBLE_PROPERTY::READ)
-        ->setValue((uint8_t *)&cscFeaturesFlag, 2);
+        ->setValue(cscFeaturesFlag);
 
     cscService
         ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(&sensorLocationFlag, 1);
+        ->setValue(sensorLocationFlag);
 
     cscService->createCharacteristic(cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
@@ -328,18 +331,18 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *server)
 NimBLEService *BluetoothService::setupPscServices(NimBLEServer *server)
 {
     Log.infoln("Setting up Cycling Power Profile");
-    auto pscService = server->createService(cyclingPowerSvcUuid);
+    auto *pscService = server->createService(cyclingPowerSvcUuid);
     pscMeasurementCharacteristic = pscService->createCharacteristic(pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
     dragFactorCharacteristic = pscService->createCharacteristic(dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     pscService
         ->createCharacteristic(pscFeatureUuid, NIMBLE_PROPERTY::READ)
-        ->setValue((uint8_t *)&pscFeaturesFlag, 4);
+        ->setValue(pscFeaturesFlag);
 
     pscService
         ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(&sensorLocationFlag, 1);
+        ->setValue(sensorLocationFlag);
 
     pscService->createCharacteristic(pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
@@ -348,7 +351,7 @@ NimBLEService *BluetoothService::setupPscServices(NimBLEServer *server)
 
 void BluetoothService::setupAdvertisement() const
 {
-    auto pAdvertising = NimBLEDevice::getAdvertising();
+    auto *pAdvertising = NimBLEDevice::getAdvertising();
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
     {
         pAdvertising->setAppearance(bleAppearanceCyclingPower);

@@ -1,3 +1,4 @@
+// NOLINTBEGIN(cppcoreguidelines-init-variables,readability-function-cognitive-complexity)
 #include <fstream>
 #include <vector>
 
@@ -38,11 +39,12 @@ TEST_CASE("StrokeService")
     REQUIRE(forceCurveStream.good());
 
     vector<unsigned long> deltaTimes;
-    deltaTimes.reserve(1764);
+    const auto arraySize = 1764;
+    deltaTimes.reserve(arraySize);
     vector<double> slopes;
-    slopes.reserve(1763);
+    slopes.reserve(arraySize - 1);
     vector<double> torques;
-    torques.reserve(1763);
+    torques.reserve(arraySize - 1);
     vector<vector<double>> forceCurves;
     forceCurves.reserve(10);
 
@@ -52,13 +54,13 @@ TEST_CASE("StrokeService")
         deltaTimes.push_back(deltaTime);
     }
 
-    double slope = 0.0;
+    auto slope = 0.0;
     while (slopeStream >> slope)
     {
         slopes.push_back(slope);
     }
 
-    double torque = 0.0;
+    auto torque = 0.0;
     while (torqueStream >> torque)
     {
         torques.push_back(torque);
@@ -67,9 +69,9 @@ TEST_CASE("StrokeService")
     string forceCurve = "";
     while (forceCurveStream >> forceCurve)
     {
-
-        size_t pos_start = 0, pos_end;
-        string token;
+        size_t pos_start = 0;
+        size_t pos_end = 0;
+        string token = "";
         vector<double> res;
 
         while ((pos_end = forceCurve.find(",", pos_start)) != string::npos)
@@ -96,13 +98,13 @@ TEST_CASE("StrokeService")
         auto rawImpulseCount = 0UL;
         auto totalTime = 0UL;
         auto totalAngularDisplacement = 0.0;
-        StrokeModel::RowingMetrics rowingMetrics;
+        RowingDataModels::RowingMetrics rowingMetrics;
         for (auto &deltaTime : deltaTimes)
         {
             totalAngularDisplacement += angularDisplacementPerImpulse;
             totalTime += deltaTime;
             rawImpulseCount++;
-            StrokeModel::FlywheelData data{
+            RowingDataModels::FlywheelData data{
                 .rawImpulseCount = rawImpulseCount,
                 .deltaTime = deltaTime,
                 .totalTime = totalTime,
@@ -129,8 +131,10 @@ TEST_CASE("StrokeService")
         {
             REQUIRE(rowingMetrics.strokeCount == 10);
             REQUIRE(rowingMetrics.lastStrokeTime == 32679715);
-            REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(9307.2041350242, 0.000001));
+            const auto expectedDistance = 9307.2041350242;
+            REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(expectedDistance, 0.0000001));
             REQUIRE(rowingMetrics.lastRevTime == 39707220);
         }
     }
 }
+// NOLINTEND(cppcoreguidelines-init-variables,readability-function-cognitive-complexity)

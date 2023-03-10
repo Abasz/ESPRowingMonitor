@@ -8,10 +8,10 @@ StrokeController::StrokeController(StrokeService &_strokeService, FlywheelServic
 {
 }
 
-void StrokeController::begin() const
+void StrokeController::begin()
 {
     Log.infoln("Setting up rowing monitor controller");
-    flywheelService.setup();
+    FlywheelService::setup();
 }
 
 void StrokeController::update()
@@ -21,10 +21,14 @@ void StrokeController::update()
         auto lastFlywheelData = flywheelData;
         flywheelData = flywheelService.getData();
         if (lastFlywheelData.rawImpulseTime != flywheelData.rawImpulseTime)
+        {
             Log.verboseln("rawImpulseTime: %u", flywheelData.rawImpulseTime);
+        }
 
         if (lastFlywheelData.rawImpulseCount == flywheelData.rawImpulseCount)
+        {
             return;
+        }
 
         Log.traceln("deltaTime: %u", flywheelData.deltaTime);
 

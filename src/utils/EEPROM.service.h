@@ -18,7 +18,7 @@ class EEPROMService
     BleServiceFlag bleServiceFlag = Settings::defaultBleServiceFlag;
 
 public:
-    EEPROMService(Preferences &_preferences);
+    explicit EEPROMService(Preferences &_preferences);
 
     void setup();
 

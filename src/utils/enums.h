@@ -1,19 +1,19 @@
 #pragma once
 
-enum class CyclePhase
+enum class CyclePhase : unsigned char
 {
     Stopped,
     Recovery,
     Drive
 };
 
-enum class BleServiceFlag
+enum class BleServiceFlag : unsigned char
 {
     CpsService,
     CscService
 };
 
-enum class ArduinoLogLevel
+enum class ArduinoLogLevel : unsigned char
 {
     LogLevelSilent = 0,
     LogLevelFatal = 1,
@@ -25,7 +25,7 @@ enum class ArduinoLogLevel
     LogLevelVerbose = 6
 };
 
-enum class PSCOpCodes
+enum class PSCOpCodes : unsigned char
 {
     SetCumulativeValue = 1U,
     UpdateSensorLocation = 2U,
@@ -48,7 +48,7 @@ enum class PSCOpCodes
     ResponseCode = 32U
 };
 
-enum class PSCResponseOpCodes
+enum class PSCResponseOpCodes : unsigned char
 {
     Successful = 1U,
     UnsupportedOpCode,

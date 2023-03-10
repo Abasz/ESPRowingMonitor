@@ -16,9 +16,9 @@ void BluetoothController::update()
         lastConnectedDeviceCheckTime = now;
     }
 
-    if (now - lastBroadcastTime > 1000)
+    if (now - lastBroadcastTime > updateInterval)
     {
-        BluetoothController::notify();
+        notify();
         lastBroadcastTime = now;
     }
 }
@@ -27,12 +27,12 @@ void BluetoothController::begin()
 {
     Log.infoln("Setting up BLE Controller");
     bluetoothService.setup();
-    bluetoothService.startBLEServer();
+    BluetoothService::startBLEServer();
 }
 
-bool BluetoothController::isAnyDeviceConnected() const
+bool BluetoothController::isAnyDeviceConnected()
 {
-    return bluetoothService.isAnyDeviceConnected();
+    return BluetoothService::isAnyDeviceConnected();
 }
 
 void BluetoothController::notifyBattery(unsigned char batteryLevel) const
@@ -42,14 +42,15 @@ void BluetoothController::notifyBattery(unsigned char batteryLevel) const
 
 void BluetoothController::updateData(unsigned long long revTime, unsigned int revCount, unsigned long long strokeTime, unsigned short strokeCount, short avgStrokePower)
 {
-    revTimeData = lround((revTime / 1e6) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
+    const auto secInMicroSec = 1e6L;
+    revTimeData = lroundl((revTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
     revCountData = revCount;
-    strokeTimeData = lround((strokeTime / 1e6) * 1024) % USHRT_MAX;
+    strokeTimeData = lroundl((strokeTime / secInMicroSec) * 1024) % USHRT_MAX;
     strokeCountData = strokeCount;
     avgStrokePowerData = avgStrokePower;
 }
 
-void BluetoothController::notify()
+void BluetoothController::notify() const
 {
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
     {
@@ -63,6 +64,6 @@ void BluetoothController::notify()
 
 void BluetoothController::notifyDragFactor(unsigned char dragFactor) const
 {
-    auto distance = pow(dragFactor / 2.8, 1.0 / 3.0) * (2.0 * PI) * 10;
+    auto distance = pow(dragFactor / Settings::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
     bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
 }

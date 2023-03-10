@@ -14,9 +14,9 @@ class BluetoothService
         BluetoothService &bleService;
 
     public:
-        ControlPointCallbacks(BluetoothService &_bleService);
+        explicit ControlPointCallbacks(BluetoothService &_bleService);
 
-        virtual void onWrite(NimBLECharacteristic *pCharacteristic);
+        void onWrite(NimBLECharacteristic *pCharacteristic) override;
     };
 
     EEPROMService &eepromService;
@@ -58,12 +58,12 @@ class BluetoothService
     static unsigned short const softwareNumberSvcUuid = 0x2A28;
     static unsigned short const manufacturerNameSvcUuid = 0x2A29;
 
-    byte ledState = HIGH;
+    unsigned char ledState = HIGH;
 
-    NimBLECharacteristic *batteryLevelCharacteristic;
-    NimBLECharacteristic *cscMeasurementCharacteristic;
-    NimBLECharacteristic *pscMeasurementCharacteristic;
-    NimBLECharacteristic *dragFactorCharacteristic;
+    NimBLECharacteristic *batteryLevelCharacteristic = nullptr;
+    NimBLECharacteristic *cscMeasurementCharacteristic = nullptr;
+    NimBLECharacteristic *pscMeasurementCharacteristic = nullptr;
+    NimBLECharacteristic *dragFactorCharacteristic = nullptr;
 
     void setupBleDevice();
     void setupServices();
@@ -73,15 +73,15 @@ class BluetoothService
     void setupConnectionIndicatorLed() const;
 
 public:
-    BluetoothService(EEPROMService &_eepromService);
+    explicit BluetoothService(EEPROMService &_eepromService);
 
     void setup();
-    void startBLEServer() const;
-    void stopServer() const;
+    static void startBLEServer();
+    static void stopServer();
     void notifyBattery(unsigned char batteryLevel) const;
     void notifyCsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount) const;
     void notifyPsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const;
     void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;
-    bool isAnyDeviceConnected() const;
+    static bool isAnyDeviceConnected();
     void updateLed();
 };

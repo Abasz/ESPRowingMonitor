@@ -6,8 +6,9 @@
 
 void setup()
 {
-    Serial.begin(115200);
-    while (!Serial && !Serial.available())
+    const auto baudRate = 115200;
+    Serial.begin(baudRate);
+    while (!Serial && !(bool)Serial.available())
     {
     }
 
@@ -18,7 +19,7 @@ void setup()
     Log.setLevel(static_cast<int>(eepromService.getLogLevel()));
 
     bleController.begin();
-    strokeController.begin();
+    StrokeController::begin();
     powerManagerController.begin();
 
     bleController.notifyBattery(powerManagerController.getBatteryLevel());
@@ -33,7 +34,7 @@ void loop()
 
     strokeController.update();
     bleController.update();
-    powerManagerController.update(strokeController.getRawImpulseTime(), bleController.isAnyDeviceConnected());
+    powerManagerController.update(strokeController.getRawImpulseTime(), BluetoothController::isAnyDeviceConnected());
 
     // auto start = micros();
 
@@ -41,8 +42,9 @@ void loop()
     // - not connected 20-30 microsec
     // - connected 1900-2200 microsec
     // auto start = micros();
-    auto now = millis();
-    if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount() || now - lastUpdateTime > 4000)
+    const auto now = millis();
+    const auto minUpdateInterval = 4000;
+    if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount() || now - lastUpdateTime > minUpdateInterval)
     {
         bleController.updateData(
             strokeController.getLastRevTime(),

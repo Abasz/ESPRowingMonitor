@@ -25,11 +25,6 @@ IRAM_ATTR void rotationInterrupt()
     // Serial.println(stop - start);
 }
 
-IRAM_ATTR void batteryMeasurementInterrupt()
-{
-    powerManagerService.measureBattery();
-}
-
 void attachRotationInterrupt()
 {
     attachInterrupt(digitalPinToInterrupt(Settings::sensorPinNumber), rotationInterrupt, FALLING);
@@ -55,9 +50,11 @@ void printTimestamp(Print *_logOutput)
     unsigned long const minutes = (secs / secsPerMin) % secsPerMin;
     unsigned long const hours = (secs % secsPerDay) / secsPerHour;
 
+    // NOLINTBEGIN
     char timestamp[20];
     sprintf(timestamp, "%02d:%02d:%02d.%06d ", hours, minutes, seconds, microSeconds);
     _logOutput->print(timestamp);
+    // NOLINTEND
 }
 
 void printLogLevel(Print *_logOutput, int logLevel)
