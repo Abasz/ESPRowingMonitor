@@ -1,8 +1,18 @@
 #pragma once
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+#define VAL(str) #str
+#define TOSTRING(str) VAL(str)
+#define EMPTY(...) (true __VA_OPT__(&&false))
+// NOLINTEND(cppcoreguidelines-macro-usage)
+
+#include <string>
+
 #include "Arduino.h"
 
 #include "utils/enums.h"
+
+using std::string;
 
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
@@ -33,6 +43,9 @@
 #define MINIMUM_RECOVERY_SLOPE_MARGIN 0.0000022
 #define STROKE_DEBOUNCE_TIME 300
 #define IMPULSE_DATA_ARRAY_LENGTH 7
+
+// Network settings
+#define PORT 80
 
 // Device power management settings
 #define VOLTAGE_DIVIDER_RATIO 2
@@ -76,6 +89,11 @@ public:
     static unsigned char const impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
     // static unsigned char const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;
 
+    // Network settings
+    static inline string const ssid = TOSTRING(LOCAL_SSID);
+    static inline string const passphrase = TOSTRING(PASSPHRASE);
+    static unsigned char const port = PORT;
+
     // Device power management settings
     static unsigned char const voltageDividerRatio = VOLTAGE_DIVIDER_RATIO;
     static double constexpr batteryVoltageMin = BATTERY_VOLTAGE_MIN / Settings::voltageDividerRatio;
@@ -98,4 +116,8 @@ public:
 #endif
 #if IMPULSE_DATA_ARRAY_LENGTH >= 18
     #error "Using too many data points will increase loop execution time. It should not be more than 17"
+#endif
+#if (!defined(LOCAL_SSID) || !defined(PASSPHRASE))
+    #define DISABLE_WIFI_MONITOR
+    #error "Not provided SSID and/or Passphrase, disabling wifi monitor"
 #endif

@@ -87,3 +87,4 @@ build
 # Misc
 *.txt
 !*.spec.*.txt
+wifi-config.ini
