@@ -5,11 +5,18 @@
 	"tasks": [
 		{
 			"label": "Compile with g++",
-			"type": "shell",
-			"command": "g++ -g -O3 -std=c++17 test/*.cpp src/rower/*.cpp src/utils/regressor.service.cpp -o testRun -D PI=3.1415926535897932384626433832795 -D INPUT_PULLUP=1 -include stdint.h -include string -include cmath -include Esp32-typedefs.h -Itest -Isrc -D ROWING_SIMULATION",
-			"problemMatcher": [
-				"$msCompile"
+			"type": "cppbuild",
+			"command": "mingw32-make",
+			"args": [
+				"e2e",
+				"--trace",
 			],
+			"problemMatcher": [
+				"$gcc"
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -21,6 +28,46 @@
 			"command": "testRun > output.txt",
 			"dependsOn": [
 				"Compile with g++"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "cppbuild",
+			"label": "catch test file",
+			"command": "mingw32-make",
+			"args": [
+				"test",
+				"TEST_SRC=${file}",
+				"--trace",
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
+		},
+		{
+			"type": "cppbuild",
+			"label": "catch test all",
+			"command": "mingw32-make",
+			"args": [
+				"test",
+				"TEST_SRC=test/unit/*.spec.cpp",
+				"--trace",
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [
+				"$gcc"
 			],
 			"group": {
 				"kind": "test",

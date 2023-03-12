@@ -1,3 +1,6 @@
+#pragma once
+
+#include <math.h>
 
 typedef enum gpio_num_t
 {
