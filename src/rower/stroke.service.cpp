@@ -188,7 +188,7 @@ void StrokeService::processData(RowingDataModels::FlywheelData data)
     // Log.infoln("currentTorque: %f", currentTorque);
     // Log.infoln("slope: %f", deltaTimes.slope());
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
-    if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > Settings::rowingStoppedThresholdPeriod * 1000ULL)
+    if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > Settings::rowingStoppedThresholdPeriod)
     {
         recoveryEnd();
         cyclePhase = CyclePhase::Stopped;

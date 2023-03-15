@@ -57,12 +57,12 @@ public:
     static double constexpr concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
 
     // Sensor signal filter settings
-    static unsigned char const rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN;
-    static unsigned short const rowingStoppedThresholdPeriod = ROWING_STOPPED_THRESHOLD_PERIOD;
+    static unsigned short const rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN * 1000;
+    static unsigned int const rowingStoppedThresholdPeriod = ROWING_STOPPED_THRESHOLD_PERIOD * 1000;
 
     // Drag factor filter settings
     static double constexpr goodnessOfFitThreshold = GOODNESS_OF_FIT_THRESHOLD;
-    static unsigned short const maxDragFactorRecoveryPeriod = MAX_DRAG_FACTOR_RECOVERY_PERIOD;
+    static unsigned int const maxDragFactorRecoveryPeriod = MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000;
     static double constexpr lowerDragFactorThreshold = LOWER_DRAG_FACTOR_THRESHOLD / 1e6;
     static double constexpr upperDragFactorThreshold = UPPER_DRAG_FACTOR_THRESHOLD / 1e6;
     static unsigned char const dragCoefficientsArrayLength = DRAG_COEFFICIENTS_ARRAY_LENGTH;
@@ -70,7 +70,7 @@ public:
     // Stroke phase detection filter settings
     static double constexpr minimumPoweredTorque = MINIMUM_POWERED_TORQUE;
     static double constexpr minimumDragTorque = MINIMUM_DRAG_TORQUE;
-    static unsigned char const strokeDebounceTime = STROKE_DEBOUNCE_TIME;
+    static unsigned int const strokeDebounceTime = STROKE_DEBOUNCE_TIME * 1000;
     static unsigned char const impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
     // static unsigned char const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;
 
@@ -85,12 +85,15 @@ public:
 };
 
 // Sanity checks
-#if IMPULSE_DATA_ARRAY_LENGTH <= 3
+#if IMPULSE_DATA_ARRAY_LENGTH < 3
     #error "IMPULSE_DATA_ARRAY_LENGTH should not be less than 3"
 #endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 12
+#if IMPULSE_DATA_ARRAY_LENGTH >= 12 && IMPULSE_DATA_ARRAY_LENGTH < 15
     #warning "Consider changing doubles to float "
 #endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 15
-    #error "Using too many data points will increase loop execution time. Using 15 and doubles would require approx. 7ms to complete calculation. Hence impulses may be missed. Change to floats to save on execution time (but loose some precision)"
+#if IMPULSE_DATA_ARRAY_LENGTH >= 15 && IMPULSE_DATA_ARRAY_LENGTH < 18
+    #error "Using too many data points will increase loop execution time. Using 15 and doubles would require approx. 7ms to complete calculation. Hence impulses may be missed. Change to floats to save on execution time (but potentially loose some precision)"
+#endif
+#if IMPULSE_DATA_ARRAY_LENGTH >= 18
+    #error "Using too many data points will increase loop execution time. It should not be more than 17"
 #endif

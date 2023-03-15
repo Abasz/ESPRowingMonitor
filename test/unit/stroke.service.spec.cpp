@@ -21,9 +21,9 @@ TEST_CASE("StrokeService")
         CHECK(Settings::flywheelInertia == 0.073);
         CHECK(Settings::dragCoefficientsArrayLength == 1);
         CHECK(Settings::goodnessOfFitThreshold == 0.97);
-        CHECK(Settings::rotationDebounceTimeMin == 7);
+        CHECK(Settings::rotationDebounceTimeMin == 7000);
         CHECK(Settings::sprocketRadius == 1.5);
-        CHECK(Settings::strokeDebounceTime == 200);
+        CHECK(Settings::strokeDebounceTime == 200000);
     }
 
     ifstream deltaTimesStream("test/unit/stroke.service.spec.deltaTimes.txt");
