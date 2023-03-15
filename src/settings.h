@@ -30,7 +30,8 @@
 // Stroke phase detection filter settings
 #define MINIMUM_POWERED_TORQUE 0
 #define MINIMUM_DRAG_TORQUE 0
-#define STROKE_DEBOUNCE_TIME 200
+#define MINIMUM_RECOVERY_SLOPE_MARGIN 0.0000055
+#define STROKE_DEBOUNCE_TIME 300
 #define IMPULSE_DATA_ARRAY_LENGTH 7
 
 // Device power management settings
@@ -70,6 +71,7 @@ public:
     // Stroke phase detection filter settings
     static double constexpr minimumPoweredTorque = MINIMUM_POWERED_TORQUE;
     static double constexpr minimumDragTorque = MINIMUM_DRAG_TORQUE;
+    static double constexpr minimumRecoverySlopeMargin = MINIMUM_RECOVERY_SLOPE_MARGIN / 1e6;
     static unsigned int const strokeDebounceTime = STROKE_DEBOUNCE_TIME * 1000;
     static unsigned char const impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
     // static unsigned char const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;

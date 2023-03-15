@@ -4,6 +4,7 @@
 
 #include "../settings.h"
 #include "../utils/ols-linear-series.h"
+#include "../utils/series.h"
 #include "../utils/ts-quadratic-series.h"
 #include "stroke.model.h"
 
@@ -53,6 +54,8 @@ class StrokeService
     vector<Series> angularAccelerationMatrix{};
 
     OLSLinearSeries deltaTimes = OLSLinearSeries(Settings::impulseDataArrayLength);
+    OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Settings::impulseDataArrayLength);
+    Series deltaTimesSlopesSeries = Series(Settings::impulseDataArrayLength);
     OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries();
     TSQuadraticSeries angularDistances = TSQuadraticSeries(Settings::impulseDataArrayLength);
 

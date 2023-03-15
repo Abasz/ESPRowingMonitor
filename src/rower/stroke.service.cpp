@@ -26,7 +26,7 @@ StrokeService::StrokeService()
 
 bool StrokeService::isFlywheelUnpowered() const
 {
-    return currentTorque < Settings::minimumDragTorque;
+    return currentTorque < Settings::minimumDragTorque || (deltaTimesSlopesSeries.size() >= Settings::impulseDataArrayLength && rowingTotalTime - driveStartTime > Settings::strokeDebounceTime && std::abs(deltaTimesSlopesSeries.average()) < Settings::minimumRecoverySlopeMargin);
 }
 
 bool StrokeService::isFlywheelPowered() const
@@ -84,13 +84,21 @@ void StrokeService::driveStart()
     cyclePhase = CyclePhase::Drive;
     driveStartTime = rowingTotalTime;
     driveStartAngularDisplacement = rowingTotalAngularDisplacement;
+
     driveHandleForces.clear();
     driveHandleForces.push_back(currentTorque / sprocketRadius);
+
+    deltaTimesSlopes.reset();
+    deltaTimesSlopesSeries.reset();
+    deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
+    deltaTimesSlopesSeries.push(deltaTimesSlopes.slope());
 }
 
 void StrokeService::driveUpdate()
 {
     driveHandleForces.push_back(currentTorque / sprocketRadius);
+    deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
+    deltaTimesSlopesSeries.push(deltaTimesSlopes.slope());
 }
 
 void StrokeService::driveEnd()
