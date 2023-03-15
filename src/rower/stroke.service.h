@@ -30,8 +30,10 @@ class StrokeService
     unsigned int recoveryDuration = 0;
     double recoveryStartAngularDisplacement = 0;
     double recoveryTotalAngularDisplacement = 0;
+    double recoveryStartDistance = 0;
 
     // metrics
+    double distancePerAngularDisplacement = 0;
     double distance = 0;
     unsigned short strokeCount = 0;
     unsigned long long strokeTime = 0ULL;

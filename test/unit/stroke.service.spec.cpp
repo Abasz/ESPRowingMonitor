@@ -23,7 +23,7 @@ TEST_CASE("StrokeService")
         CHECK(Settings::goodnessOfFitThreshold == 0.97);
         CHECK(Settings::rotationDebounceTimeMin == 7000);
         CHECK(Settings::sprocketRadius == 1.5);
-        CHECK(Settings::strokeDebounceTime == 200000);
+        CHECK(Settings::strokeDebounceTime == 300000);
     }
 
     ifstream deltaTimesStream("test/unit/stroke.service.spec.deltaTimes.txt");
@@ -38,6 +38,9 @@ TEST_CASE("StrokeService")
     ifstream forceCurveStream("test/unit/stroke.service.spec.forceCurves.txt");
     REQUIRE(forceCurveStream.good());
 
+    ifstream dragFactorStream("test/unit/stroke.service.spec.dragFactor.txt");
+    REQUIRE(dragFactorStream.good());
+
     vector<unsigned long> deltaTimes;
     const auto arraySize = 1764;
     deltaTimes.reserve(arraySize);
@@ -47,6 +50,8 @@ TEST_CASE("StrokeService")
     torques.reserve(arraySize - 1);
     vector<vector<double>> forceCurves;
     forceCurves.reserve(10);
+    vector<double> dragFactors;
+    dragFactors.reserve(10);
 
     unsigned long deltaTime = 0;
     while (deltaTimesStream >> deltaTime)
@@ -64,6 +69,12 @@ TEST_CASE("StrokeService")
     while (torqueStream >> torque)
     {
         torques.push_back(torque);
+    }
+
+    auto dragFactor = 0.0;
+    while (dragFactorStream >> dragFactor)
+    {
+        dragFactors.push_back(dragFactor);
     }
 
     string forceCurve = "";
@@ -123,6 +134,7 @@ TEST_CASE("StrokeService")
                     INFO("deltaTime: " << deltaTime);
                     REQUIRE_THAT(rowingMetrics.driveHandleForces, Catch::Matchers::RangeEquals(forceCurves[rowingMetrics.strokeCount - 1], [](double a, double b)
                                                                                                { return std::abs(a - b) < 0.0000001; }));
+                    REQUIRE_THAT(rowingMetrics.dragCoefficient * 1e6, Catch::Matchers::WithinRel(dragFactors[rowingMetrics.strokeCount - 1], 0.0000001));
                 }
             }
         }
