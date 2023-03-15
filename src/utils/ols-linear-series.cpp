@@ -32,7 +32,7 @@ double OLSLinearSeries::yAtSeriesBegin() const
 
 double OLSLinearSeries::slope() const
 {
-    if (sumX.size() > 0 && sumX.sum() > 0)
+    if (sumX.size() >= 2 && sumX.sum() > 0)
     {
         return ((double)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((double)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
     }

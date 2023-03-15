@@ -20,6 +20,16 @@ size_t Series::size() const
     return seriesArray.size();
 }
 
+double Series::average() const
+{
+    if (!seriesArray.empty())
+    {
+        return seriesSum / (double)seriesArray.size();
+    }
+
+    return 0.0;
+}
+
 double Series::median() const
 {
     if (!seriesArray.empty())

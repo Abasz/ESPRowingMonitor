@@ -17,6 +17,7 @@ public:
     double const &operator[](size_t index) const;
 
     size_t size() const;
+    double average() const;
     double median() const;
     double sum() const;
 
