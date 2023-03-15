@@ -1,15 +1,18 @@
+#include <fstream>
 #include <numeric>
+#include <span>
+#include <string>
 
 #include "ArduinoLog.h"
 
 #include "globals.h"
 #include "test.array.h"
 
-using std::size;
+using std::string;
 
-void loop()
+void loop(unsigned long now)
 {
-    simulateRotation();
+    simulateRotation(now);
     strokeController.update();
     if (strokeController.getRevCount() != strokeController.getPreviousRevCount())
     {
@@ -28,11 +31,32 @@ void loop()
     }
 }
 
-int main()
+int main(int argc, const char *argv[])
 {
-    while (i < size(testDeltaTimes))
+    auto args = std::span(argv, size_t(argc));
+
+    unsigned long now = 0;
+    if (argc < 2 || string(args[1]).empty())
     {
-        loop();
+        for (auto &deltaTime : testDeltaTimes)
+        {
+            now += deltaTime;
+            loop(now);
+        }
+
+        return 0;
     }
+
+    unsigned long deltaTime = 0;
+
+    std::ifstream deltaTimeStream(args[1]);
+    printf("Running external file: %s\n", args[1]);
+
+    while (deltaTimeStream >> deltaTime)
+    {
+        now += deltaTime;
+        loop(now);
+    }
+
     return 0;
 }

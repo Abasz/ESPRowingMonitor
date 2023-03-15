@@ -1,10 +1,8 @@
 #include <numeric>
 
 #include "globals.h"
-#include "test.array.h"
 
-void simulateRotation()
+void simulateRotation(unsigned long now)
 {
-    flywheelService.processRotation(std::accumulate(testDeltaTimes.begin(), testDeltaTimes.begin() + i, 0));
-    i++;
+    flywheelService.processRotation(now);
 }

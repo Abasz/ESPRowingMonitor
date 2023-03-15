@@ -2,8 +2,6 @@
 
 #include <array>
 
-inline auto i = 1U;
-
 const std::array testDeltaTimes{
     5331447UL,
     315008UL,
@@ -1771,4 +1769,4 @@ const std::array testDeltaTimes{
     2252060UL,
 };
 
-void simulateRotation();
+void simulateRotation(unsigned long now);
