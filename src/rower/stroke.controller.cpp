@@ -37,6 +37,11 @@ void StrokeController::update()
     }
 }
 
+RowingDataModels::RowingMetrics StrokeController::getAllData() const
+{
+    return rowerState;
+}
+
 unsigned long long StrokeController::getLastRevTime() const
 {
     return rowerState.lastRevTime;
@@ -74,7 +79,7 @@ double StrokeController::getRecoveryDuration() const
 
 short StrokeController::getAvgStrokePower() const
 {
-    return rowerState.avgStrokePower;
+    return lround(rowerState.avgStrokePower);
 }
 
 double StrokeController::getDistance() const

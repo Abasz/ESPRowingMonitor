@@ -32,6 +32,8 @@ public:
 
     static void begin();
     void update();
+
+    RowingDataModels::RowingMetrics getAllData() const;
     unsigned int getPreviousRevCount() const;
     void setPreviousRevCount();
     unsigned int getPreviousStrokeCount() const;

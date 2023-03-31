@@ -34,7 +34,7 @@ void loop()
 
     strokeController.update();
     bleController.update();
-    powerManagerController.update(strokeController.getRawImpulseTime(), BluetoothController::isAnyDeviceConnected());
+    powerManagerController.update(strokeController.getRawImpulseTime(), bleController.isAnyDeviceConnected());
 
     // auto start = micros();
 
@@ -46,12 +46,7 @@ void loop()
     const auto minUpdateInterval = 4000;
     if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount() || now - lastUpdateTime > minUpdateInterval)
     {
-        bleController.updateData(
-            strokeController.getLastRevTime(),
-            strokeController.getRevCount(),
-            strokeController.getLastStrokeTime(),
-            strokeController.getStrokeCount(),
-            strokeController.getAvgStrokePower());
+        bleController.updateData(strokeController.getAllData());
         lastUpdateTime = now;
     }
 

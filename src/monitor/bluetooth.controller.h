@@ -15,11 +15,12 @@ class BluetoothController
     unsigned int lastConnectedDeviceCheckTime = 0;
     unsigned int lastBroadcastTime = 0UL;
 
-    unsigned short revTimeData = 0;
-    unsigned int revCountData = 0;
-    unsigned short strokeTimeData = 0;
-    unsigned short strokeCountData = 0;
-    short avgStrokePowerData = 0;
+    unsigned char batteryLevelData = 0;
+    unsigned short bleRevTimeData = 0;
+    unsigned int bleRevCountData = 0;
+    unsigned short bleStrokeTimeData = 0;
+    unsigned short bleStrokeCountData = 0;
+    short bleAvgStrokePowerData = 0;
 
     unsigned char ledState = HIGH;
 
@@ -32,8 +33,8 @@ public:
 
     void begin();
     void update();
-    void notifyBattery(unsigned char batteryLevel) const;
-    void updateData(unsigned long long revTime, unsigned int revCount, unsigned long long strokeTime, unsigned short strokeCount, short avgStrokePower = 0);
+    void notifyBattery(unsigned char batteryLevel);
+    void updateData(RowingDataModels::RowingMetrics);
     void notifyDragFactor(unsigned char dragFactor) const;
-    static bool isAnyDeviceConnected();
+    bool isAnyDeviceConnected();
 };

@@ -9,6 +9,7 @@ BluetoothController::BluetoothController(BluetoothService &_bluetoothService, Ne
 
 void BluetoothController::update()
 {
+    networkService.update();
     auto now = millis();
     if (now - lastConnectedDeviceCheckTime > Settings::ledBlinkFrequency)
     {
@@ -26,6 +27,7 @@ void BluetoothController::update()
 void BluetoothController::begin()
 {
     Log.infoln("Setting up BLE Controller");
+    NetworkService::setup();
     bluetoothService.setup();
     BluetoothService::startBLEServer();
     setupConnectionIndicatorLed();
@@ -33,41 +35,44 @@ void BluetoothController::begin()
 
 bool BluetoothController::isAnyDeviceConnected()
 {
-    return BluetoothService::isAnyDeviceConnected();
+    return BluetoothService::isAnyDeviceConnected() || networkService.isAnyDeviceConnected();
 }
 
 void BluetoothController::updateLed()
 {
-    ledState = BluetoothController::isAnyDeviceConnected() ? HIGH : ledState == HIGH ? LOW
-                                                                                     : HIGH;
+    ledState = isAnyDeviceConnected() ? HIGH : ledState == HIGH ? LOW
+                                                                : HIGH;
 
     digitalWrite(GPIO_NUM_2, ledState);
 }
 
-void BluetoothController::notifyBattery(unsigned char batteryLevel) const
+void BluetoothController::notifyBattery(unsigned char batteryLevel)
 {
+    batteryLevelData = batteryLevel;
     bluetoothService.notifyBattery(batteryLevel);
 }
 
-void BluetoothController::updateData(unsigned long long revTime, unsigned int revCount, unsigned long long strokeTime, unsigned short strokeCount, short avgStrokePower)
+void BluetoothController::updateData(RowingDataModels::RowingMetrics data)
 {
     const auto secInMicroSec = 1e6L;
-    revTimeData = lroundl((revTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
-    revCountData = revCount;
-    strokeTimeData = lroundl((strokeTime / secInMicroSec) * 1024) % USHRT_MAX;
-    strokeCountData = strokeCount;
-    avgStrokePowerData = avgStrokePower;
+    bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
+    bleRevCountData = lround(data.distance);
+    bleStrokeTimeData = lroundl((data.lastStrokeTime / secInMicroSec) * 1024) % USHRT_MAX;
+    bleStrokeCountData = data.strokeCount;
+    bleAvgStrokePowerData = static_cast<short>(lround(data.avgStrokePower));
+
+    networkService.notifyClients(data, batteryLevelData, eepromService.getBleServiceFlag(), eepromService.getLogLevel());
 }
 
 void BluetoothController::notify() const
 {
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
     {
-        bluetoothService.notifyPsc(revTimeData, revCountData, strokeTimeData, strokeCountData, avgStrokePowerData);
+        bluetoothService.notifyPsc(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
     }
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
     {
-        bluetoothService.notifyCsc(revTimeData, revCountData, strokeTimeData, strokeCountData);
+        bluetoothService.notifyCsc(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData);
     }
 }
 
