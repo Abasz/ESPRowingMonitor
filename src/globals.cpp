@@ -6,7 +6,7 @@ Preferences preferences;
 
 EEPROMService eepromService(preferences);
 BluetoothService bleService(eepromService);
-NetworkService networkService;
+NetworkService networkService(eepromService);
 FlywheelService flywheelService;
 StrokeService strokeService;
 PowerManagerService powerManagerService;

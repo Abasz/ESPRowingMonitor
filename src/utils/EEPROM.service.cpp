@@ -44,6 +44,7 @@ void EEPROMService::setLogLevel(ArduinoLogLevel newLogLevel)
 
     preferences.putUChar(logLevelAddress, intLogLevel);
     Log.setLevel(intLogLevel);
+    logLevel = newLogLevel;
 }
 
 void EEPROMService::setBleServiceFlag(BleServiceFlag newServiceFlag)

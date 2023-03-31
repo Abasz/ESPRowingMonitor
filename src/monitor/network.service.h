@@ -1,23 +1,28 @@
+#include <string>
+
 #include "AsyncTCP.h"
 #include "ESPAsyncWebServer.h"
 
 #include "../rower/stroke.model.h"
 #include "../settings.h"
+#include "../utils/EEPROM.service.h"
 #include "../utils/enums.h"
 
 class NetworkService
 {
+    EEPROMService &eepromService;
+
     AsyncWebServer server;
     AsyncWebSocket webSocket;
 
     bool isWifiConnected = false;
     unsigned long lastCleanupTime = 0UL;
 
-    static void onEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len);
-    static void handleWebSocketMessage(void *arg, uint8_t *data, size_t len);
+    void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) const;
+    static std::vector<unsigned char> parseOpCode(std::string requestOpCommand);
 
 public:
-    NetworkService();
+    explicit NetworkService(EEPROMService &_eepromService);
     static void setup();
     void update();
     void stopServer();
