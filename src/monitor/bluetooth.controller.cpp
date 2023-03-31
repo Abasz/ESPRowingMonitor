@@ -3,7 +3,7 @@
 #include "bluetooth.controller.h"
 #include "settings.h"
 
-BluetoothController::BluetoothController(BluetoothService &_bluetoothService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), eepromService(_eepromService)
+BluetoothController::BluetoothController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService)
 {
 }
 

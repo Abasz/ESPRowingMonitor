@@ -6,11 +6,12 @@ Preferences preferences;
 
 EEPROMService eepromService(preferences);
 BluetoothService bleService(eepromService);
+NetworkService networkService;
 FlywheelService flywheelService;
 StrokeService strokeService;
 PowerManagerService powerManagerService;
 
-BluetoothController bleController(bleService, eepromService);
+BluetoothController bleController(bleService, networkService, eepromService);
 StrokeController strokeController(strokeService, flywheelService);
 PowerManagerController powerManagerController(powerManagerService);
 

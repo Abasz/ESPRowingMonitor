@@ -17,6 +17,7 @@ static unsigned long const secsPerDay = 86400;
 extern Preferences preferences;
 extern EEPROMService eepromService;
 extern BluetoothService bleService;
+extern NetworkService networkService;
 extern BluetoothController bleController;
 extern FlywheelService flywheelService;
 extern StrokeService strokeService;

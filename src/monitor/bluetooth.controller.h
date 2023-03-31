@@ -1,11 +1,13 @@
 #pragma once
 
 #include "bluetooth.service.h"
+#include "network.service.h"
 #include "utils/EEPROM.service.h"
 
 class BluetoothController
 {
     BluetoothService &bluetoothService;
+    NetworkService &networkService;
     EEPROMService &eepromService;
 
     static const unsigned int updateInterval = 1000;
@@ -22,7 +24,7 @@ class BluetoothController
     void notify() const;
 
 public:
-    BluetoothController(BluetoothService &_bluetoothService, EEPROMService &_eepromService);
+    BluetoothController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService);
 
     void begin();
     void update();
