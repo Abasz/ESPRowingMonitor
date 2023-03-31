@@ -58,8 +58,6 @@ class BluetoothService
     static unsigned short const softwareNumberSvcUuid = 0x2A28;
     static unsigned short const manufacturerNameSvcUuid = 0x2A29;
 
-    unsigned char ledState = HIGH;
-
     NimBLECharacteristic *batteryLevelCharacteristic = nullptr;
     NimBLECharacteristic *cscMeasurementCharacteristic = nullptr;
     NimBLECharacteristic *pscMeasurementCharacteristic = nullptr;
@@ -70,7 +68,6 @@ class BluetoothService
     NimBLEService *setupCscServices(NimBLEServer *server);
     NimBLEService *setupPscServices(NimBLEServer *server);
     void setupAdvertisement() const;
-    void setupConnectionIndicatorLed() const;
 
 public:
     explicit BluetoothService(EEPROMService &_eepromService);
@@ -83,5 +80,4 @@ public:
     void notifyPsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const;
     void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;
     static bool isAnyDeviceConnected();
-    void updateLed();
 };

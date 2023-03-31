@@ -12,7 +12,7 @@ void BluetoothController::update()
     auto now = millis();
     if (now - lastConnectedDeviceCheckTime > Settings::ledBlinkFrequency)
     {
-        bluetoothService.updateLed();
+        updateLed();
         lastConnectedDeviceCheckTime = now;
     }
 
@@ -28,11 +28,20 @@ void BluetoothController::begin()
     Log.infoln("Setting up BLE Controller");
     bluetoothService.setup();
     BluetoothService::startBLEServer();
+    setupConnectionIndicatorLed();
 }
 
 bool BluetoothController::isAnyDeviceConnected()
 {
     return BluetoothService::isAnyDeviceConnected();
+}
+
+void BluetoothController::updateLed()
+{
+    ledState = BluetoothController::isAnyDeviceConnected() ? HIGH : ledState == HIGH ? LOW
+                                                                                     : HIGH;
+
+    digitalWrite(GPIO_NUM_2, ledState);
 }
 
 void BluetoothController::notifyBattery(unsigned char batteryLevel) const
@@ -66,4 +75,9 @@ void BluetoothController::notifyDragFactor(unsigned char dragFactor) const
 {
     auto distance = pow(dragFactor / Settings::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
     bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
+}
+
+void BluetoothController::setupConnectionIndicatorLed() const
+{
+    pinMode(GPIO_NUM_2, OUTPUT);
 }

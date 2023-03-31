@@ -21,7 +21,11 @@ class BluetoothController
     unsigned short strokeCountData = 0;
     short avgStrokePowerData = 0;
 
+    unsigned char ledState = HIGH;
+
     void notify() const;
+    void updateLed();
+    void setupConnectionIndicatorLed() const;
 
 public:
     BluetoothController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService);

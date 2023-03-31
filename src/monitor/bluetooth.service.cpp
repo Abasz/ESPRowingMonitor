@@ -113,29 +113,9 @@ bool BluetoothService::isAnyDeviceConnected()
     return NimBLEDevice::getServer()->getConnectedCount() > 0;
 }
 
-void BluetoothService::updateLed()
-{
-    // execution time: 1-5 micro sec
-    // auto start = micros();
-    if (isAnyDeviceConnected())
-    {
-        ledState = HIGH;
-    }
-    else
-    {
-        ledState = ledState == HIGH ? LOW : HIGH;
-    }
-
-    digitalWrite(GPIO_NUM_2, ledState);
-    // auto end = micros();
-    // Serial.print("led: ");
-    // Serial.println(end - start);
-}
-
 void BluetoothService::setup()
 {
     setupBleDevice();
-    setupConnectionIndicatorLed();
 }
 
 void BluetoothService::startBLEServer()
@@ -362,9 +342,4 @@ void BluetoothService::setupAdvertisement() const
         pAdvertising->setAppearance(bleAppearanceCyclingSpeedCadence);
         pAdvertising->addServiceUUID(cyclingSpeedCadenceSvcUuid);
     }
-}
-
-void BluetoothService::setupConnectionIndicatorLed() const
-{
-    pinMode(GPIO_NUM_2, OUTPUT);
 }
