@@ -38,11 +38,11 @@ ExtraArgs:
   - -I.pio/libdeps/esp32/ArduinoLog
   - -I.pio/libdeps/esp32/NimBLE-Arduino/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/cores/esp32
-  - -I../../../../Documents/www/Embeded System Dev/ble-scs-sensor/.pio/libdeps/esp32/AsyncTCP-esphome/src
-  - -I../../../../Documents/www/Embeded System Dev/ble-scs-sensor/.pio/libdeps/esp32/ESPAsyncWebServer-esphome/src
+  - -I../../../../Documents/www/Embeded System Dev/esp-rowing-monitor/.pio/libdeps/esp32/AsyncTCP-esphome/src
+  - -I../../../../Documents/www/Embeded System Dev/esp-rowing-monitor/.pio/libdeps/esp32/ESPAsyncWebServer-esphome/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/WiFi/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/FS/src
-  # - -I../../../../Documents/www/Embeded System Dev/ble-scs-sensor/.pio/libdeps/esp32/AsyncTCP-esphome/src
+  # - -I../../../../Documents/www/Embeded System Dev/esp-rowing-monitor/.pio/libdeps/esp32/AsyncTCP-esphome/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/newlib/platform_include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/freertos/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/freertos/include/esp_additions/freertos

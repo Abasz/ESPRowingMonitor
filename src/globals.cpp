@@ -11,7 +11,7 @@ FlywheelService flywheelService;
 StrokeService strokeService;
 PowerManagerService powerManagerService;
 
-BluetoothController bleController(bleService, networkService, eepromService);
+PeripheralsController bleController(bleService, networkService, eepromService);
 StrokeController strokeController(strokeService, flywheelService);
 PowerManagerController powerManagerController(powerManagerService);
 

@@ -1,13 +1,13 @@
 #include "ArduinoLog.h"
 
-#include "bluetooth.controller.h"
+#include "peripherals.controller.h"
 #include "settings.h"
 
-BluetoothController::BluetoothController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService)
+PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService)
 {
 }
 
-void BluetoothController::update()
+void PeripheralsController::update()
 {
     networkService.update();
     auto now = millis();
@@ -24,7 +24,7 @@ void BluetoothController::update()
     }
 }
 
-void BluetoothController::begin()
+void PeripheralsController::begin()
 {
     Log.infoln("Setting up BLE Controller");
     NetworkService::setup();
@@ -33,12 +33,12 @@ void BluetoothController::begin()
     setupConnectionIndicatorLed();
 }
 
-bool BluetoothController::isAnyDeviceConnected()
+bool PeripheralsController::isAnyDeviceConnected()
 {
     return BluetoothService::isAnyDeviceConnected() || networkService.isAnyDeviceConnected();
 }
 
-void BluetoothController::updateLed()
+void PeripheralsController::updateLed()
 {
     ledState = isAnyDeviceConnected() ? HIGH : ledState == HIGH ? LOW
                                                                 : HIGH;
@@ -46,13 +46,13 @@ void BluetoothController::updateLed()
     digitalWrite(GPIO_NUM_2, ledState);
 }
 
-void BluetoothController::notifyBattery(unsigned char batteryLevel)
+void PeripheralsController::notifyBattery(unsigned char batteryLevel)
 {
     batteryLevelData = batteryLevel;
     bluetoothService.notifyBattery(batteryLevel);
 }
 
-void BluetoothController::updateData(RowingDataModels::RowingMetrics data)
+void PeripheralsController::updateData(RowingDataModels::RowingMetrics data)
 {
     const auto secInMicroSec = 1e6L;
     bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
@@ -64,7 +64,7 @@ void BluetoothController::updateData(RowingDataModels::RowingMetrics data)
     networkService.notifyClients(data, batteryLevelData, eepromService.getBleServiceFlag(), eepromService.getLogLevel());
 }
 
-void BluetoothController::notify() const
+void PeripheralsController::notify() const
 {
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
     {
@@ -76,13 +76,13 @@ void BluetoothController::notify() const
     }
 }
 
-void BluetoothController::notifyDragFactor(unsigned char dragFactor) const
+void PeripheralsController::notifyDragFactor(unsigned char dragFactor) const
 {
     auto distance = pow(dragFactor / Settings::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
     bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
 }
 
-void BluetoothController::setupConnectionIndicatorLed() const
+void PeripheralsController::setupConnectionIndicatorLed() const
 {
     pinMode(GPIO_NUM_2, OUTPUT);
 }

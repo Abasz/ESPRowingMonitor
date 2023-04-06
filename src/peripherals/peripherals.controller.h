@@ -4,7 +4,7 @@
 #include "network.service.h"
 #include "utils/EEPROM.service.h"
 
-class BluetoothController
+class PeripheralsController
 {
     BluetoothService &bluetoothService;
     NetworkService &networkService;
@@ -29,7 +29,7 @@ class BluetoothController
     void setupConnectionIndicatorLed() const;
 
 public:
-    BluetoothController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService);
+    PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService);
 
     void begin();
     void update();

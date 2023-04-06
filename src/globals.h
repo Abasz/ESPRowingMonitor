@@ -2,7 +2,7 @@
 
 #include "Preferences.h"
 
-#include "monitor/bluetooth.controller.h"
+#include "peripherals/peripherals.controller.h"
 #include "rower/stroke.controller.h"
 #include "utils/EEPROM.service.h"
 #include "utils/power-manager.controller.h"
@@ -18,7 +18,7 @@ extern Preferences preferences;
 extern EEPROMService eepromService;
 extern BluetoothService bleService;
 extern NetworkService networkService;
-extern BluetoothController bleController;
+extern PeripheralsController bleController;
 extern FlywheelService flywheelService;
 extern StrokeService strokeService;
 extern StrokeController strokeController;
