@@ -48,6 +48,7 @@ using std::string;
 #define PORT 80
 
 // Device power management settings
+#define BATTERY_PIN_NUMBER GPIO_NUM_4
 #define VOLTAGE_DIVIDER_RATIO 2
 #define BATTERY_VOLTAGE_MIN 3.3
 #define BATTERY_VOLTAGE_MAX 4.00
@@ -95,6 +96,7 @@ public:
     static unsigned char const port = PORT;
 
     // Device power management settings
+    static gpio_num_t const batteryPinNumber = BATTERY_PIN_NUMBER;
     static unsigned char const voltageDividerRatio = VOLTAGE_DIVIDER_RATIO;
     static double constexpr batteryVoltageMin = BATTERY_VOLTAGE_MIN / Settings::voltageDividerRatio;
     static double constexpr batteryVoltageMax = BATTERY_VOLTAGE_MAX / Settings::voltageDividerRatio;

@@ -72,7 +72,7 @@ unsigned char PowerManagerService::measureBattery()
 
 void PowerManagerService::setupBatteryMeasurement()
 {
-    pinMode(GPIO_NUM_4, INPUT);
+    pinMode(Settings::batteryPinNumber, INPUT);
 
     delay(500);
     for (unsigned char i = 0; i < Settings::initialBatteryLevelMeasurementCount; i++)
