@@ -11,7 +11,7 @@ FlywheelService flywheelService;
 StrokeService strokeService;
 PowerManagerService powerManagerService;
 
-PeripheralsController bleController(bleService, networkService, eepromService);
+PeripheralsController peripheralController(bleService, networkService, eepromService);
 StrokeController strokeController(strokeService, flywheelService);
 PowerManagerController powerManagerController(powerManagerService);
 

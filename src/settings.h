@@ -56,7 +56,26 @@ using std::string;
 #define INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT 10
 #define BATTERY_MEASUREMENT_FREQUENCY 10
 #define DEEP_SLEEP_TIMEOUT 4
+
+// Sanity checks and validations
+#if IMPULSE_DATA_ARRAY_LENGTH < 3
+    #error "IMPULSE_DATA_ARRAY_LENGTH should not be less than 3"
+#endif
+#if IMPULSE_DATA_ARRAY_LENGTH >= 12 && IMPULSE_DATA_ARRAY_LENGTH < 15
+    #warning "Consider changing doubles to float "
+#endif
+#if IMPULSE_DATA_ARRAY_LENGTH >= 15 && IMPULSE_DATA_ARRAY_LENGTH < 18
+    #error "Using too many data points will increase loop execution time. Using 15 and doubles would require approx. 7ms to complete calculation. Hence impulses may be missed. Change to floats to save on execution time (but potentially loose some precision)"
+#endif
+#if IMPULSE_DATA_ARRAY_LENGTH >= 18
+    #error "Using too many data points will increase loop execution time. It should not be more than 17"
+#endif
+#if (!defined(LOCAL_SSID) || !defined(PASSPHRASE))
+    #define DISABLE_WIFI_MONITOR
+    #error "Not provided SSID and/or Passphrase, disabling wifi monitor"
+#endif
 // NOLINTEND(cppcoreguidelines-macro-usage)
+
 class Settings
 {
 public:
@@ -105,21 +124,3 @@ public:
     static unsigned int const batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1000;
     static unsigned long const deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1000;
 };
-
-// Sanity checks
-#if IMPULSE_DATA_ARRAY_LENGTH < 3
-    #error "IMPULSE_DATA_ARRAY_LENGTH should not be less than 3"
-#endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 12 && IMPULSE_DATA_ARRAY_LENGTH < 15
-    #warning "Consider changing doubles to float "
-#endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 15 && IMPULSE_DATA_ARRAY_LENGTH < 18
-    #error "Using too many data points will increase loop execution time. Using 15 and doubles would require approx. 7ms to complete calculation. Hence impulses may be missed. Change to floats to save on execution time (but potentially loose some precision)"
-#endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 18
-    #error "Using too many data points will increase loop execution time. It should not be more than 17"
-#endif
-#if (!defined(LOCAL_SSID) || !defined(PASSPHRASE))
-    #define DISABLE_WIFI_MONITOR
-    #error "Not provided SSID and/or Passphrase, disabling wifi monitor"
-#endif

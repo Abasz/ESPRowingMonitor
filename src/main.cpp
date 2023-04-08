@@ -18,11 +18,11 @@ void setup()
     eepromService.setup();
     Log.setLevel(static_cast<int>(eepromService.getLogLevel()));
 
-    bleController.begin();
+    peripheralController.begin();
     StrokeController::begin();
     powerManagerController.begin();
 
-    bleController.notifyBattery(powerManagerController.getBatteryLevel());
+    peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
 }
 
 // execution time
@@ -33,8 +33,8 @@ void loop()
     // simulateRotation();
 
     strokeController.update();
-    bleController.update();
-    powerManagerController.update(strokeController.getRawImpulseTime(), bleController.isAnyDeviceConnected());
+    peripheralController.update();
+    powerManagerController.update(strokeController.getRawImpulseTime(), peripheralController.isAnyDeviceConnected());
 
     // auto start = micros();
 
@@ -46,7 +46,7 @@ void loop()
     const auto minUpdateInterval = 4000;
     if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount() || now - lastUpdateTime > minUpdateInterval)
     {
-        bleController.updateData(strokeController.getAllData());
+        peripheralController.updateData(strokeController.getAllData());
         lastUpdateTime = now;
     }
 
@@ -62,7 +62,7 @@ void loop()
         // - not connected: 173-200
         // - connected: 900-2700
         // auto start = micros();
-        bleController.notifyDragFactor(strokeController.getDragFactor());
+        peripheralController.notifyDragFactor(strokeController.getDragFactor());
         strokeController.setPreviousStrokeCount();
         // auto stop = micros();
         // Serial.print("notifyDragFactor: ");
@@ -72,7 +72,7 @@ void loop()
     if (powerManagerController.getBatteryLevel() != powerManagerController.getPreviousBatteryLevel())
     {
         Log.infoln("batteryLevel: %d", powerManagerController.getBatteryLevel());
-        bleController.notifyBattery(powerManagerController.getBatteryLevel());
+        peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
         powerManagerController.setPreviousBatteryLevel();
     }
     // auto stop = micros();

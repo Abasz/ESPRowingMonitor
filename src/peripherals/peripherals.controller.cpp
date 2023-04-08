@@ -1,7 +1,7 @@
 #include "ArduinoLog.h"
 
+#include "../settings.h"
 #include "peripherals.controller.h"
-#include "settings.h"
 
 PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService)
 {
@@ -29,7 +29,6 @@ void PeripheralsController::begin()
     Log.infoln("Setting up BLE Controller");
     NetworkService::setup();
     bluetoothService.setup();
-    BluetoothService::startBLEServer();
     setupConnectionIndicatorLed();
 }
 

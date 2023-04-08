@@ -3,8 +3,8 @@
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
+#include "../settings.h"
 #include "bluetooth.service.h"
-#include "settings.h"
 
 using std::array;
 using std::to_string;
@@ -116,6 +116,7 @@ bool BluetoothService::isAnyDeviceConnected()
 void BluetoothService::setup()
 {
     setupBleDevice();
+    BluetoothService::startBLEServer();
 }
 
 void BluetoothService::startBLEServer()
