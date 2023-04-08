@@ -10,47 +10,47 @@
 
 class StrokeService
 {
-    static double constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
-    static double constexpr sprocketRadius = Settings::sprocketRadius / 100;
+    static Settings::precision constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
+    static Settings::precision constexpr sprocketRadius = Settings::sprocketRadius / 100;
 
     // rower state
     CyclePhase cyclePhase = CyclePhase::Stopped;
     unsigned long long rowingTotalTime = 0ULL;
     unsigned long long rowingImpulseCount = 0UL;
-    double rowingTotalAngularDisplacement = 0;
+    Settings::precision rowingTotalAngularDisplacement = 0;
 
     // Drive related
     unsigned long long driveStartTime = 0ULL;
     unsigned int driveDuration = 0;
-    double driveStartAngularDisplacement = 0;
-    double driveTotalAngularDisplacement = 0;
+    Settings::precision driveStartAngularDisplacement = 0;
+    Settings::precision driveTotalAngularDisplacement = 0;
 
     // Recovery related
     unsigned long long recoveryStartTime = 0;
     unsigned int recoveryDuration = 0;
-    double recoveryStartAngularDisplacement = 0;
-    double recoveryTotalAngularDisplacement = 0;
-    double recoveryStartDistance = 0;
+    Settings::precision recoveryStartAngularDisplacement = 0;
+    Settings::precision recoveryTotalAngularDisplacement = 0;
+    Settings::precision recoveryStartDistance = 0;
 
     // metrics
-    double distancePerAngularDisplacement = 0;
-    double distance = 0;
+    Settings::precision distancePerAngularDisplacement = 0;
+    Settings::precision distance = 0;
     unsigned short strokeCount = 0;
     unsigned long long strokeTime = 0ULL;
     unsigned long long revTime = 0ULL;
-    double avgStrokePower = 0;
+    Settings::precision avgStrokePower = 0;
 
-    double dragCoefficient = 0;
+    Settings::precision dragCoefficient = 0;
 
-    std::array<double, Settings::dragCoefficientsArrayLength> dragCoefficients{};
+    std::array<Settings::precision, Settings::dragCoefficientsArrayLength> dragCoefficients{};
 
-    double totalAngularDisplacement = 0;
+    Settings::precision totalAngularDisplacement = 0;
 
     // advance metrics
-    double currentAngularVelocity = 0;
-    double currentAngularAcceleration = 0;
-    double currentTorque = 0;
-    vector<double> driveHandleForces{};
+    Settings::precision currentAngularVelocity = 0;
+    Settings::precision currentAngularAcceleration = 0;
+    Settings::precision currentTorque = 0;
+    vector<Settings::precision> driveHandleForces{};
 
     vector<Series> angularVelocityMatrix{};
     vector<Series> angularAccelerationMatrix{};

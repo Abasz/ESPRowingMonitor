@@ -67,12 +67,12 @@ unsigned long StrokeController::getRawImpulseTime() const
     return flywheelData.rawImpulseTime;
 }
 
-double StrokeController::getDriveDuration() const
+Settings::precision StrokeController::getDriveDuration() const
 {
     return rowerState.driveDuration / 1e6;
 }
 
-double StrokeController::getRecoveryDuration() const
+Settings::precision StrokeController::getRecoveryDuration() const
 {
     return rowerState.recoveryDuration / 1e6;
 }
@@ -82,7 +82,7 @@ short StrokeController::getAvgStrokePower() const
     return lround(rowerState.avgStrokePower);
 }
 
-double StrokeController::getDistance() const
+Settings::precision StrokeController::getDistance() const
 {
     return rowerState.distance;
 }

@@ -5,13 +5,13 @@
 
 class FlywheelService
 {
-    static double constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
+    static Settings::precision constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
 
     volatile unsigned long lastDeltaTime = 0;
     volatile unsigned long cleanDeltaTime = 0;
     volatile unsigned long lastRawImpulseTime = 0;
     volatile unsigned long lastCleanImpulseTime = 0;
-    volatile double totalAngularDisplacement = 0;
+    volatile Settings::precision totalAngularDisplacement = 0;
 
     volatile unsigned long impulseCount = 0UL;
     unsigned long long totalTime = 0ULL;

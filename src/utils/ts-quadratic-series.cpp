@@ -12,7 +12,7 @@ TSQuadraticSeries::TSQuadraticSeries(unsigned char _maxSeriesLength) : maxSeries
     }
 }
 
-double TSQuadraticSeries::firstDerivativeAtPosition(unsigned char position) const
+Settings::precision TSQuadraticSeries::firstDerivativeAtPosition(unsigned char position) const
 {
     if (seriesX.size() > 2 && position < seriesX.size())
     {
@@ -22,7 +22,7 @@ double TSQuadraticSeries::firstDerivativeAtPosition(unsigned char position) cons
     return 0;
 }
 
-double TSQuadraticSeries::secondDerivativeAtPosition(unsigned char position) const
+Settings::precision TSQuadraticSeries::secondDerivativeAtPosition(unsigned char position) const
 {
     if (seriesX.size() > 2 && position < seriesX.size())
     {
@@ -32,7 +32,7 @@ double TSQuadraticSeries::secondDerivativeAtPosition(unsigned char position) con
     return 0;
 }
 
-void TSQuadraticSeries::push(double pointX, double pointY)
+void TSQuadraticSeries::push(Settings::precision pointX, Settings::precision pointY)
 {
     TSLinearSeries linearResidue(maxSeriesLength);
 
@@ -88,7 +88,7 @@ void TSQuadraticSeries::push(double pointX, double pointY)
 }
 
 // EXEC_TIME_15: approx 2000us
-double TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char pointThree) const
+Settings::precision TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char pointThree) const
 {
     auto xPointOne = seriesX[pointOne];
     auto xPointThree = seriesX[pointThree];
@@ -126,11 +126,11 @@ double TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char point
 }
 
 // EXEC_TIME_15: approx 800us
-double TSQuadraticSeries::matrixMedian(vector<vector<double>> inputMatrix)
+Settings::precision TSQuadraticSeries::matrixMedian(vector<vector<Settings::precision>> inputMatrix)
 {
     if (inputMatrix.size() > 1)
     {
-        vector<double> flattened;
+        vector<Settings::precision> flattened;
 
         for (auto &input : inputMatrix)
         {

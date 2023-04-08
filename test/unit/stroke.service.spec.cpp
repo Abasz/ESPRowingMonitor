@@ -6,6 +6,7 @@
 #include "catch_amalgamated.hpp"
 
 #include "../../src/rower/stroke.service.h"
+#include "../../src/settings.h"
 
 using std::ifstream;
 using std::stod;
@@ -108,7 +109,7 @@ TEST_CASE("StrokeService")
         auto angularDisplacementPerImpulse = (2 * PI) / 3;
         auto rawImpulseCount = 0UL;
         auto totalTime = 0UL;
-        auto totalAngularDisplacement = 0.0;
+        Settings::precision totalAngularDisplacement = 0.0;
         RowingDataModels::RowingMetrics rowingMetrics;
         for (auto &deltaTime : deltaTimes)
         {

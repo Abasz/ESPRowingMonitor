@@ -67,7 +67,7 @@ void StrokeService::calculateDragCoefficient()
         }
         dragCoefficients[0] = rawNewDragCoefficient;
 
-        array<double, Settings::dragCoefficientsArrayLength> sortedArray{};
+        array<Settings::precision, Settings::dragCoefficientsArrayLength> sortedArray{};
 
         partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
         rawNewDragCoefficient = sortedArray[sortedArray.size() / 2];

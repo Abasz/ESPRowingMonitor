@@ -117,6 +117,12 @@ These are the most important settings for getting the stroke detection correct. 
 
 This setting determines how many consecutive impulses should be analyzed (used) for the stroke detection to consider a stroke to begin or end. The ORM [wiki]( https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/rower_settings.md#setting-flanklength-and-minimumstrokequality) include more details I recommend reviewing it in detail (`flankLength`).
 
+### FLOATING_POINT_PRECISION
+
+This setting controls whether double or float precision should be used in the algorithm. This is important from a performance perspective, as using too many data points will increase loop execution time. Using 14 and a precision of double would require around 7ms to complete calculations. Hence impulses may be missed. For more detail please refer to the README's [Limitations](../README.md#limitations) section.
+
+Generally, this setting is controlled by the compiler automatically based on the value of the `IMPULSE_DATA_ARRAY_LENGTH` (below 15 it is set to double, while 15 and above set to float) but may be overwritten by uncommenting it in `settings.h`. Please note that overwriting is ignored if `IMPULSE_DATA_ARRAY_LENGTH` is 15 or above.
+
 ### MINIMUM_POWERED_TORQUE
 
 The minimum torque that should be present on the handle before ESP Rowing Monitor will consider moving to the drive phase of the stroke. Setting it to a higher positive value makes it more conservative (i.e. requires more torque before considering moving to the drive phase).

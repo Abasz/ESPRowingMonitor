@@ -2,26 +2,27 @@
 
 #include <vector>
 
+#include "../settings.h"
 #include "series.h"
 
 class TSLinearSeries
 {
     unsigned char maxSeriesLength = 0;
-    double a = 0;
+    Settings::precision a = 0;
 
     Series seriesX;
     Series seriesY;
-    vector<vector<double>> slopes;
+    vector<vector<Settings::precision>> slopes;
 
-    double calculateSlope(unsigned char pointOne, unsigned char pointTwo) const;
+    Settings::precision calculateSlope(unsigned char pointOne, unsigned char pointTwo) const;
     void removeFirstRow();
 
 public:
     explicit TSLinearSeries(unsigned char _maxSeriesLength = 0);
 
-    double median() const;
-    double coefficientA() const;
+    Settings::precision median() const;
+    Settings::precision coefficientA() const;
 
-    void push(double pointX, double pointY);
+    void push(Settings::precision pointX, Settings::precision pointY);
     void reset();
 };

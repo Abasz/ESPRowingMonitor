@@ -16,7 +16,7 @@ void OLSLinearSeries::reset()
     sumXY.reset();
 }
 
-void OLSLinearSeries::push(double pointX, double pointY)
+void OLSLinearSeries::push(Settings::precision pointX, Settings::precision pointY)
 {
     sumX.push(pointX);
     sumXSquare.push(pointX * pointX);
@@ -25,30 +25,30 @@ void OLSLinearSeries::push(double pointX, double pointY)
     sumXY.push(pointX * pointY);
 }
 
-double OLSLinearSeries::yAtSeriesBegin() const
+Settings::precision OLSLinearSeries::yAtSeriesBegin() const
 {
     return sumY[0];
 }
 
-double OLSLinearSeries::slope() const
+Settings::precision OLSLinearSeries::slope() const
 {
     if (sumX.size() >= 2 && sumX.sum() > 0)
     {
-        return ((double)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((double)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
+        return ((Settings::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Settings::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
     }
 
     return 0.0;
 }
 
-double OLSLinearSeries::goodnessOfFit() const
+Settings::precision OLSLinearSeries::goodnessOfFit() const
 {
     // This function returns the R^2 as a goodness of fit indicator
     if (sumX.size() >= 2 && sumX.sum() > 0)
     {
-        auto slope = ((double)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((double)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
-        auto intercept = (sumY.sum() - (slope * sumX.sum())) / (double)sumX.size();
+        auto slope = ((Settings::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Settings::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
+        auto intercept = (sumY.sum() - (slope * sumX.sum())) / (Settings::precision)sumX.size();
         auto sse = sumYSquare.sum() - (intercept * sumY.sum()) - (slope * sumXY.sum());
-        auto sst = sumYSquare.sum() - (sumY.sum() * sumY.sum()) / (double)sumX.size();
+        auto sst = sumYSquare.sum() - (sumY.sum() * sumY.sum()) / (Settings::precision)sumX.size();
         return 1 - (sse / sst);
     }
 
