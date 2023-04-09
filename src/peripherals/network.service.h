@@ -4,7 +4,7 @@
 #include "ESPAsyncWebServer.h"
 
 #include "../rower/stroke.model.h"
-#include "../settings.h"
+#include "../utils/configuration.h"
 #include "../utils/EEPROM.service.h"
 #include "../utils/enums.h"
 

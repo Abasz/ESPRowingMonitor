@@ -20,8 +20,8 @@ using RowingDataModels::RowingMetrics;
 
 StrokeService::StrokeService()
 {
-    angularVelocityMatrix.reserve(Settings::impulseDataArrayLength);
-    angularAccelerationMatrix.reserve(Settings::impulseDataArrayLength);
+    angularVelocityMatrix.reserve(Configurations::impulseDataArrayLength);
+    angularAccelerationMatrix.reserve(Configurations::impulseDataArrayLength);
 
     deltaTimes.push(0, 0);
     angularDistances.push(0, 0);
@@ -29,37 +29,37 @@ StrokeService::StrokeService()
 
 bool StrokeService::isFlywheelUnpowered() const
 {
-    return currentTorque < Settings::minimumDragTorque || (deltaTimesSlopesSeries.size() >= Settings::impulseDataArrayLength && std::abs(deltaTimesSlopesSeries.average()) < Settings::minimumRecoverySlopeMargin);
+    return currentTorque < Configurations::minimumDragTorque || (deltaTimesSlopesSeries.size() >= Configurations::impulseDataArrayLength && std::abs(deltaTimesSlopesSeries.average()) < Configurations::minimumRecoverySlopeMargin);
 }
 
 bool StrokeService::isFlywheelPowered() const
 {
-    return currentTorque > Settings::minimumPoweredTorque && deltaTimes.slope() < 0;
+    return currentTorque > Configurations::minimumPoweredTorque && deltaTimes.slope() < 0;
 }
 
 void StrokeService::calculateDragCoefficient()
 {
-    if (recoveryDuration > Settings::maxDragFactorRecoveryPeriod || recoveryDeltaTimes.size() < Settings::impulseDataArrayLength)
+    if (recoveryDuration > Configurations::maxDragFactorRecoveryPeriod || recoveryDeltaTimes.size() < Configurations::impulseDataArrayLength)
     {
         return;
     }
 
-    if (recoveryDeltaTimes.goodnessOfFit() < Settings::goodnessOfFitThreshold)
+    if (recoveryDeltaTimes.goodnessOfFit() < Configurations::goodnessOfFitThreshold)
     {
         return;
     }
 
-    auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * Settings::flywheelInertia) / angularDisplacementPerImpulse;
+    auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * Configurations::flywheelInertia) / angularDisplacementPerImpulse;
 
-    if (rawNewDragCoefficient > Settings::upperDragFactorThreshold ||
-        rawNewDragCoefficient < Settings::lowerDragFactorThreshold)
+    if (rawNewDragCoefficient > Configurations::upperDragFactorThreshold ||
+        rawNewDragCoefficient < Configurations::lowerDragFactorThreshold)
     {
         return;
     }
 
-    if (Settings::dragCoefficientsArrayLength > 1)
+    if (Configurations::dragCoefficientsArrayLength > 1)
     {
-        char i = Settings::dragCoefficientsArrayLength - 1;
+        char i = Configurations::dragCoefficientsArrayLength - 1;
         while (i > 0)
         {
             dragCoefficients[i] = dragCoefficients[i - 1];
@@ -67,7 +67,7 @@ void StrokeService::calculateDragCoefficient()
         }
         dragCoefficients[0] = rawNewDragCoefficient;
 
-        array<Settings::precision, Settings::dragCoefficientsArrayLength> sortedArray{};
+        array<Configurations::precision, Configurations::dragCoefficientsArrayLength> sortedArray{};
 
         partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
         rawNewDragCoefficient = sortedArray[sortedArray.size() / 2];
@@ -135,7 +135,7 @@ void StrokeService::recoveryEnd()
     calculateDragCoefficient();
     calculateAvgStrokePower();
 
-    distancePerAngularDisplacement = pow((dragCoefficient * 1e6) / Settings::concept2MagicNumber, 1 / 3.0);
+    distancePerAngularDisplacement = pow((dragCoefficient * 1e6) / Configurations::concept2MagicNumber, 1 / 3.0);
     distance = recoveryStartDistance + distancePerAngularDisplacement * (distance == 0 ? rowingTotalAngularDisplacement : recoveryTotalAngularDisplacement);
     if (distance > 0)
     {
@@ -162,17 +162,17 @@ void StrokeService::processData(RowingDataModels::FlywheelData data)
     deltaTimes.push(data.totalTime, data.deltaTime);
     angularDistances.push(data.totalTime / 1e6, data.totalAngularDisplacement);
 
-    if (angularVelocityMatrix.size() >= Settings::impulseDataArrayLength)
+    if (angularVelocityMatrix.size() >= Configurations::impulseDataArrayLength)
     {
         angularVelocityMatrix.erase(angularVelocityMatrix.begin());
     }
-    if (angularAccelerationMatrix.size() >= Settings::impulseDataArrayLength)
+    if (angularAccelerationMatrix.size() >= Configurations::impulseDataArrayLength)
     {
         angularAccelerationMatrix.erase(angularAccelerationMatrix.begin());
     }
 
-    angularVelocityMatrix.push_back(Series(Settings::impulseDataArrayLength));
-    angularAccelerationMatrix.push_back(Series(Settings::impulseDataArrayLength));
+    angularVelocityMatrix.push_back(Series(Configurations::impulseDataArrayLength));
+    angularAccelerationMatrix.push_back(Series(Configurations::impulseDataArrayLength));
 
     unsigned char i = 0;
     while (i < angularVelocityMatrix.size())
@@ -185,10 +185,10 @@ void StrokeService::processData(RowingDataModels::FlywheelData data)
     currentAngularVelocity = angularVelocityMatrix[0].median();
     currentAngularAcceleration = angularAccelerationMatrix[0].median();
 
-    currentTorque = Settings::flywheelInertia * currentAngularAcceleration + dragCoefficient * pow(currentAngularVelocity, 2);
+    currentTorque = Configurations::flywheelInertia * currentAngularAcceleration + dragCoefficient * pow(currentAngularVelocity, 2);
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
-    if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > Settings::rowingStoppedThresholdPeriod)
+    if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > Configurations::rowingStoppedThresholdPeriod)
     {
         recoveryEnd();
         driveHandleForces.clear();
@@ -203,7 +203,7 @@ void StrokeService::processData(RowingDataModels::FlywheelData data)
     {
         // We are currently in the "Stopped" phase, as power was not applied for a long period of time or the device just started. Since rotation was detected we check if cleanDeltaTimes array is filled (i.e. whether we have sufficient data for determining the next phase) and whether power is being applied to the flywheel
         if (
-            deltaTimes.size() < Settings::impulseDataArrayLength || !isFlywheelPowered())
+            deltaTimes.size() < Configurations::impulseDataArrayLength || !isFlywheelPowered())
         {
             return;
         }
@@ -232,7 +232,7 @@ void StrokeService::processData(RowingDataModels::FlywheelData data)
     if (cyclePhase == CyclePhase::Drive)
     {
         // We are currently in the "Drive" phase, lets determine what the next phase is (if we come from "Stopped" phase )
-        if (rowingTotalTime - driveStartTime > Settings::strokeDebounceTime && isFlywheelUnpowered())
+        if (rowingTotalTime - driveStartTime > Configurations::strokeDebounceTime && isFlywheelUnpowered())
         {
             driveEnd();
             recoveryStart();
@@ -248,7 +248,7 @@ void StrokeService::processData(RowingDataModels::FlywheelData data)
     if (cyclePhase == CyclePhase::Recovery)
     {
         // We are currently in the "Recovery" phase, lets determine what the next phase is
-        if (rowingTotalTime - recoveryStartTime > Settings::strokeDebounceTime && isFlywheelPowered())
+        if (rowingTotalTime - recoveryStartTime > Configurations::strokeDebounceTime && isFlywheelPowered())
         {
             // Here we can conclude the "Recovery" phase (and the current stroke cycle) as drive to the flywheel is detected (e.g. calculating drag factor)
             recoveryEnd();

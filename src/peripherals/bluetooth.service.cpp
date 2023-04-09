@@ -3,7 +3,7 @@
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
-#include "../settings.h"
+#include "../utils/configuration.h"
 #include "bluetooth.service.h"
 
 using std::array;

@@ -1,6 +1,6 @@
 #include "ArduinoLog.h"
 
-#include "../settings.h"
+#include "configuration.h"
 #include "power-manager.controller.h"
 
 PowerManagerController::PowerManagerController(PowerManagerService &_powerManagerService) : powerManagerService(_powerManagerService)
@@ -17,12 +17,12 @@ void PowerManagerController::begin()
 void PowerManagerController::update(unsigned long lastRevTime, bool isDeviceConnected)
 {
     auto now = micros();
-    if (!isDeviceConnected && now - lastRevTime > Settings::deepSleepTimeout * 1000)
+    if (!isDeviceConnected && now - lastRevTime > Configurations::deepSleepTimeout * 1000)
     {
         PowerManagerService::goToSleep();
     }
 
-    if (now - lastBatteryMeasurementTime > Settings::batteryMeasurementFrequency * 1000)
+    if (now - lastBatteryMeasurementTime > Configurations::batteryMeasurementFrequency * 1000)
     {
         batteryLevel = powerManagerService.measureBattery();
         lastBatteryMeasurementTime = now;

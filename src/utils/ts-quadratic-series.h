@@ -2,26 +2,26 @@
 
 #include <vector>
 
-#include "../settings.h"
+#include "configuration.h"
 #include "series.h"
 
 using std::vector;
 
 class TSQuadraticSeries
 {
-    Settings::precision a = 0;
-    Settings::precision b = 0;
+    Configurations::precision a = 0;
+    Configurations::precision b = 0;
     unsigned char maxSeriesLength = 0;
-    vector<vector<Settings::precision>> seriesA;
+    vector<vector<Configurations::precision>> seriesA;
     Series seriesX;
     Series seriesY;
 
-    Settings::precision calculateA(unsigned char pointOne, unsigned char pointThree) const;
-    static Settings::precision matrixMedian(vector<vector<Settings::precision>> inputMatrix);
+    Configurations::precision calculateA(unsigned char pointOne, unsigned char pointThree) const;
+    static Configurations::precision matrixMedian(vector<vector<Configurations::precision>> inputMatrix);
 
 public:
     explicit TSQuadraticSeries(unsigned char _maxSeriesLength = 0);
-    Settings::precision firstDerivativeAtPosition(unsigned char position) const;
-    Settings::precision secondDerivativeAtPosition(unsigned char position) const;
-    void push(Settings::precision pointX, Settings::precision pointY);
+    Configurations::precision firstDerivativeAtPosition(unsigned char position) const;
+    Configurations::precision secondDerivativeAtPosition(unsigned char position) const;
+    void push(Configurations::precision pointX, Configurations::precision pointY);
 };

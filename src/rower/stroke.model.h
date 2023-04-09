@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../settings.h"
+#include "../utils/configuration.h"
 
 namespace RowingDataModels
 {
@@ -11,21 +11,21 @@ namespace RowingDataModels
         unsigned long rawImpulseCount;
         unsigned long deltaTime;
         unsigned long long totalTime;
-        Settings::precision totalAngularDisplacement;
+        Configurations::precision totalAngularDisplacement;
         unsigned long cleanImpulseTime;
         unsigned long rawImpulseTime;
     };
 
     struct RowingMetrics
     {
-        Settings::precision distance;
+        Configurations::precision distance;
         unsigned long long lastRevTime;
         unsigned long long lastStrokeTime;
         unsigned short strokeCount;
         unsigned int driveDuration;
         unsigned int recoveryDuration;
-        Settings::precision avgStrokePower;
-        Settings::precision dragCoefficient;
-        std::vector<Settings::precision> driveHandleForces;
+        Configurations::precision avgStrokePower;
+        Configurations::precision dragCoefficient;
+        std::vector<Configurations::precision> driveHandleForces;
     };
 }

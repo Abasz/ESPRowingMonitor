@@ -6,7 +6,7 @@
 #include "catch_amalgamated.hpp"
 
 #include "../../src/rower/stroke.service.h"
-#include "../../src/settings.h"
+#include "../../src/utils/configuration.h"
 
 using std::ifstream;
 using std::stod;
@@ -17,14 +17,14 @@ TEST_CASE("StrokeService")
 {
     SECTION("should have correct settings for test")
     {
-        CHECK(Settings::impulsesPerRevolution == 3);
-        CHECK(Settings::impulseDataArrayLength == 7);
-        CHECK(Settings::flywheelInertia == 0.073);
-        CHECK(Settings::dragCoefficientsArrayLength == 1);
-        CHECK(Settings::goodnessOfFitThreshold == 0.97);
-        CHECK(Settings::rotationDebounceTimeMin == 7000);
-        CHECK(Settings::sprocketRadius == 1.5);
-        CHECK(Settings::strokeDebounceTime == 300000);
+        CHECK(Configurations::impulsesPerRevolution == 3);
+        CHECK(Configurations::impulseDataArrayLength == 7);
+        CHECK(Configurations::flywheelInertia == 0.073);
+        CHECK(Configurations::dragCoefficientsArrayLength == 1);
+        CHECK(Configurations::goodnessOfFitThreshold == 0.97);
+        CHECK(Configurations::rotationDebounceTimeMin == 7000);
+        CHECK(Configurations::sprocketRadius == 1.5);
+        CHECK(Configurations::strokeDebounceTime == 300000);
     }
 
     ifstream deltaTimesStream("test/unit/stroke.service.spec.deltaTimes.txt");
@@ -109,7 +109,7 @@ TEST_CASE("StrokeService")
         auto angularDisplacementPerImpulse = (2 * PI) / 3;
         auto rawImpulseCount = 0UL;
         auto totalTime = 0UL;
-        Settings::precision totalAngularDisplacement = 0.0;
+        Configurations::precision totalAngularDisplacement = 0.0;
         RowingDataModels::RowingMetrics rowingMetrics;
         for (auto &deltaTime : deltaTimes)
         {

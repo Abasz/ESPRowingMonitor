@@ -10,7 +10,7 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_eepromService), server(Settings::port), webSocket("/ws") {}
+NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_eepromService), server(Configurations::port), webSocket("/ws") {}
 
 void NetworkService::update()
 {
@@ -54,8 +54,8 @@ void NetworkService::update()
 void NetworkService::setup()
 {
     WiFi.mode(WIFI_STA);
-    WiFi.begin(Settings::ssid.c_str(), Settings::passphrase.c_str());
-    Log.infoln("Connecting to wifi: %s", Settings::ssid.c_str());
+    WiFi.begin(Configurations::ssid.c_str(), Configurations::passphrase.c_str());
+    Log.infoln("Connecting to wifi: %s", Configurations::ssid.c_str());
 
     auto connectionTimeout = 20;
     Log.infoln(".");

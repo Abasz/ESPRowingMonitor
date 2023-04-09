@@ -10,7 +10,7 @@ Series::Series(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLengt
     }
 }
 
-Settings::precision const &Series::operator[](size_t index) const
+Configurations::precision const &Series::operator[](size_t index) const
 {
     return seriesArray[index];
 };
@@ -20,22 +20,22 @@ size_t Series::size() const
     return seriesArray.size();
 }
 
-Settings::precision Series::average() const
+Configurations::precision Series::average() const
 {
     if (!seriesArray.empty())
     {
-        return seriesSum / (Settings::precision)seriesArray.size();
+        return seriesSum / (Configurations::precision)seriesArray.size();
     }
 
     return 0.0;
 }
 
-Settings::precision Series::median() const
+Configurations::precision Series::median() const
 {
     if (!seriesArray.empty())
     {
         unsigned int mid = seriesArray.size() / 2;
-        vector<Settings::precision> sortedArray(seriesArray);
+        vector<Configurations::precision> sortedArray(seriesArray);
         partial_sort(begin(sortedArray), begin(sortedArray) + mid + 1, end(sortedArray));
 
         return seriesArray.size() % 2 != 0
@@ -46,7 +46,7 @@ Settings::precision Series::median() const
     return 0.0;
 }
 
-void Series::push(Settings::precision value)
+void Series::push(Configurations::precision value)
 {
     if (maxSeriesLength > 0 && seriesArray.size() >= maxSeriesLength)
     {
@@ -66,7 +66,7 @@ void Series::reset()
     seriesSum = 0;
 }
 
-Settings::precision Series::sum() const
+Configurations::precision Series::sum() const
 {
     return seriesSum;
 }

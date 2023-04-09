@@ -1,4 +1,4 @@
-#include "../settings.h"
+#include "../utils/configuration.h"
 #include "flywheel.service.h"
 #include "stroke.service.h"
 
@@ -19,7 +19,7 @@ class StrokeController
         0U,
         0.0,
         0.0,
-        std::vector<Settings::precision>{}};
+        std::vector<Configurations::precision>{}};
 
     RowingDataModels::FlywheelData flywheelData{
         0UL,
@@ -45,9 +45,9 @@ public:
     unsigned int getRevCount() const;
     unsigned long long getLastStrokeTime() const;
     unsigned short getStrokeCount() const;
-    Settings::precision getDistance() const;
-    Settings::precision getRecoveryDuration() const;
-    Settings::precision getDriveDuration() const;
+    Configurations::precision getDistance() const;
+    Configurations::precision getRecoveryDuration() const;
+    Configurations::precision getDriveDuration() const;
     short getAvgStrokePower() const;
     unsigned char getDragFactor() const;
 };

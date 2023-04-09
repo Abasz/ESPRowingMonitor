@@ -6,7 +6,7 @@
 
 #include "ArduinoLog.h"
 
-#include "../settings.h"
+#include "configuration.h"
 #include "power-manager.service.h"
 
 using std::accumulate;
@@ -26,8 +26,8 @@ void PowerManagerService::setup()
 void PowerManagerService::goToSleep()
 {
     Log.verboseln("Configure deep sleep mode");
-    esp_sleep_enable_ext0_wakeup(Settings::sensorPinNumber, digitalRead(Settings::sensorPinNumber) == HIGH ? LOW : HIGH);
-    gpio_hold_en(Settings::sensorPinNumber);
+    esp_sleep_enable_ext0_wakeup(Configurations::sensorPinNumber, digitalRead(Configurations::sensorPinNumber) == HIGH ? LOW : HIGH);
+    gpio_hold_en(Configurations::sensorPinNumber);
     Log.infoln("Going to sleep mode");
     Serial.flush();
     esp_deep_sleep_start();
@@ -37,15 +37,15 @@ unsigned char PowerManagerService::measureBattery()
 {
     // execution time: 460 micro sec
     // auto start = micros();
-    array<double, Settings::batteryLevelArrayLength> batteryLevels{};
+    array<double, Configurations::batteryLevelArrayLength> batteryLevels{};
 
-    for (unsigned char i = 0; i < Settings::batteryLevelArrayLength; i++)
+    for (unsigned char i = 0; i < Configurations::batteryLevelArrayLength; i++)
     {
         auto measurement = analogRead(GPIO_NUM_34);
 
         const auto espRefVolt = 3.3;
         const auto dacResolution = 4095;
-        auto rawNewBatteryLevel = ((measurement * espRefVolt / dacResolution) - Settings::batteryVoltageMin) / (Settings::batteryVoltageMax - Settings::batteryVoltageMin) * 100;
+        auto rawNewBatteryLevel = ((measurement * espRefVolt / dacResolution) - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
 
         if (rawNewBatteryLevel > 100)
         {
@@ -62,7 +62,7 @@ unsigned char PowerManagerService::measureBattery()
 
     sort(batteryLevels.begin(), batteryLevels.end());
 
-    batteryLevel = batteryLevel == 0 ? lround(batteryLevels[Settings::batteryLevelArrayLength / 2]) : lround((batteryLevels[Settings::batteryLevelArrayLength / 2] + batteryLevel) / 2);
+    batteryLevel = batteryLevel == 0 ? lround(batteryLevels[Configurations::batteryLevelArrayLength / 2]) : lround((batteryLevels[Configurations::batteryLevelArrayLength / 2] + batteryLevel) / 2);
 
     return batteryLevel;
     // auto stop = micros();
@@ -72,10 +72,10 @@ unsigned char PowerManagerService::measureBattery()
 
 void PowerManagerService::setupBatteryMeasurement()
 {
-    pinMode(Settings::batteryPinNumber, INPUT);
+    pinMode(Configurations::batteryPinNumber, INPUT);
 
     delay(500);
-    for (unsigned char i = 0; i < Settings::initialBatteryLevelMeasurementCount; i++)
+    for (unsigned char i = 0; i < Configurations::initialBatteryLevelMeasurementCount; i++)
     {
         measureBattery();
         delay(100);

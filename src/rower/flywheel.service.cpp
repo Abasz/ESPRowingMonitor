@@ -47,7 +47,7 @@ void FlywheelService::processRotation(unsigned long now)
 {
     auto currentRawImpulseDeltaTime = now - lastRawImpulseTime;
 
-    if (currentRawImpulseDeltaTime < Settings::rotationDebounceTimeMin )
+    if (currentRawImpulseDeltaTime < Configurations::rotationDebounceTimeMin )
     {
         return;
     }

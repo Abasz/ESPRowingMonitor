@@ -16,7 +16,7 @@ void OLSLinearSeries::reset()
     sumXY.reset();
 }
 
-void OLSLinearSeries::push(Settings::precision pointX, Settings::precision pointY)
+void OLSLinearSeries::push(Configurations::precision pointX, Configurations::precision pointY)
 {
     sumX.push(pointX);
     sumXSquare.push(pointX * pointX);
@@ -25,30 +25,30 @@ void OLSLinearSeries::push(Settings::precision pointX, Settings::precision point
     sumXY.push(pointX * pointY);
 }
 
-Settings::precision OLSLinearSeries::yAtSeriesBegin() const
+Configurations::precision OLSLinearSeries::yAtSeriesBegin() const
 {
     return sumY[0];
 }
 
-Settings::precision OLSLinearSeries::slope() const
+Configurations::precision OLSLinearSeries::slope() const
 {
     if (sumX.size() >= 2 && sumX.sum() > 0)
     {
-        return ((Settings::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Settings::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
+        return ((Configurations::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Configurations::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
     }
 
     return 0.0;
 }
 
-Settings::precision OLSLinearSeries::goodnessOfFit() const
+Configurations::precision OLSLinearSeries::goodnessOfFit() const
 {
     // This function returns the R^2 as a goodness of fit indicator
     if (sumX.size() >= 2 && sumX.sum() > 0)
     {
-        auto slope = ((Settings::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Settings::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
-        auto intercept = (sumY.sum() - (slope * sumX.sum())) / (Settings::precision)sumX.size();
+        auto slope = ((Configurations::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Configurations::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
+        auto intercept = (sumY.sum() - (slope * sumX.sum())) / (Configurations::precision)sumX.size();
         auto sse = sumYSquare.sum() - (intercept * sumY.sum()) - (slope * sumXY.sum());
-        auto sst = sumYSquare.sum() - (sumY.sum() * sumY.sum()) / (Settings::precision)sumX.size();
+        auto sst = sumYSquare.sum() - (sumY.sum() * sumY.sum()) / (Configurations::precision)sumX.size();
         return 1 - (sse / sst);
     }
 

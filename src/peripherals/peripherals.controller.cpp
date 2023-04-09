@@ -1,6 +1,6 @@
 #include "ArduinoLog.h"
 
-#include "../settings.h"
+#include "../utils/configuration.h"
 #include "peripherals.controller.h"
 
 PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService)
@@ -9,19 +9,19 @@ PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService
 
 void PeripheralsController::update()
 {
-    if constexpr (Settings::isWebsocketEnabled)
+    if constexpr (Configurations::isWebsocketEnabled)
     {
         networkService.update();
     }
 
     auto now = millis();
-    if (now - lastConnectedDeviceCheckTime > Settings::ledBlinkFrequency)
+    if (now - lastConnectedDeviceCheckTime > Configurations::ledBlinkFrequency)
     {
         updateLed();
         lastConnectedDeviceCheckTime = now;
     }
 
-    if constexpr (Settings::isBleSErviceEnabled)
+    if constexpr (Configurations::isBleSErviceEnabled)
     {
         if (now - lastBroadcastTime > updateInterval)
         {
@@ -35,12 +35,12 @@ void PeripheralsController::begin()
 {
     Log.infoln("Setting up BLE Controller");
 
-    if constexpr (Settings::isWebsocketEnabled)
+    if constexpr (Configurations::isWebsocketEnabled)
     {
         NetworkService::setup();
     }
 
-    if constexpr (Settings::isBleSErviceEnabled)
+    if constexpr (Configurations::isBleSErviceEnabled)
     {
         bluetoothService.setup();
     }
@@ -64,7 +64,7 @@ void PeripheralsController::updateLed()
 void PeripheralsController::notifyBattery(unsigned char batteryLevel)
 {
     batteryLevelData = batteryLevel;
-    if constexpr (Settings::isBleSErviceEnabled)
+    if constexpr (Configurations::isBleSErviceEnabled)
     {
         bluetoothService.notifyBattery(batteryLevel);
     }
@@ -79,7 +79,7 @@ void PeripheralsController::updateData(RowingDataModels::RowingMetrics data)
     bleStrokeCountData = data.strokeCount;
     bleAvgStrokePowerData = static_cast<short>(lround(data.avgStrokePower));
 
-    if constexpr (Settings::isWebsocketEnabled)
+    if constexpr (Configurations::isWebsocketEnabled)
     {
         networkService.notifyClients(data, batteryLevelData, eepromService.getBleServiceFlag(), eepromService.getLogLevel());
     }
@@ -99,9 +99,9 @@ void PeripheralsController::notify() const
 
 void PeripheralsController::notifyDragFactor(unsigned char dragFactor) const
 {
-    if constexpr (Settings::isBleSErviceEnabled)
+    if constexpr (Configurations::isBleSErviceEnabled)
     {
-        auto distance = pow(dragFactor / Settings::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
+        auto distance = pow(dragFactor / Configurations::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
         bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
     }
 }

@@ -4,7 +4,7 @@
 
 #include "ArduinoLog.h"
 
-#include "../settings.h"
+#include "configuration.h"
 #include "enums.h"
 
 class EEPROMService
@@ -14,8 +14,8 @@ class EEPROMService
     static constexpr char const *logLevelAddress = "logLevel";
     static constexpr char const *bleServiceFlagAddress = "bleService";
 
-    ArduinoLogLevel logLevel = Settings::defaultLogLevel;
-    BleServiceFlag bleServiceFlag = Settings::defaultBleServiceFlag;
+    ArduinoLogLevel logLevel = Configurations::defaultLogLevel;
+    BleServiceFlag bleServiceFlag = Configurations::defaultBleServiceFlag;
 
 public:
     explicit EEPROMService(Preferences &_preferences);

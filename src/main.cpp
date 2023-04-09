@@ -12,7 +12,7 @@ void setup()
     {
     }
 
-    Log.begin(static_cast<int>(Settings::defaultLogLevel), &Serial, false);
+    Log.begin(static_cast<int>(Configurations::defaultLogLevel), &Serial, false);
     Log.setPrefix(printPrefix);
 
     eepromService.setup();

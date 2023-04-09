@@ -12,7 +12,7 @@ TSQuadraticSeries::TSQuadraticSeries(unsigned char _maxSeriesLength) : maxSeries
     }
 }
 
-Settings::precision TSQuadraticSeries::firstDerivativeAtPosition(unsigned char position) const
+Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(unsigned char position) const
 {
     if (seriesX.size() > 2 && position < seriesX.size())
     {
@@ -22,7 +22,7 @@ Settings::precision TSQuadraticSeries::firstDerivativeAtPosition(unsigned char p
     return 0;
 }
 
-Settings::precision TSQuadraticSeries::secondDerivativeAtPosition(unsigned char position) const
+Configurations::precision TSQuadraticSeries::secondDerivativeAtPosition(unsigned char position) const
 {
     if (seriesX.size() > 2 && position < seriesX.size())
     {
@@ -32,7 +32,7 @@ Settings::precision TSQuadraticSeries::secondDerivativeAtPosition(unsigned char 
     return 0;
 }
 
-void TSQuadraticSeries::push(Settings::precision pointX, Settings::precision pointY)
+void TSQuadraticSeries::push(Configurations::precision pointX, Configurations::precision pointY)
 {
     TSLinearSeries linearResidue(maxSeriesLength);
 
@@ -88,7 +88,7 @@ void TSQuadraticSeries::push(Settings::precision pointX, Settings::precision poi
 }
 
 // EXEC_TIME_15: approx 2000us
-Settings::precision TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char pointThree) const
+Configurations::precision TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char pointThree) const
 {
     auto xPointOne = seriesX[pointOne];
     auto xPointThree = seriesX[pointThree];
@@ -126,11 +126,11 @@ Settings::precision TSQuadraticSeries::calculateA(unsigned char pointOne, unsign
 }
 
 // EXEC_TIME_15: approx 800us
-Settings::precision TSQuadraticSeries::matrixMedian(vector<vector<Settings::precision>> inputMatrix)
+Configurations::precision TSQuadraticSeries::matrixMedian(vector<vector<Configurations::precision>> inputMatrix)
 {
     if (inputMatrix.size() > 1)
     {
-        vector<Settings::precision> flattened;
+        vector<Configurations::precision> flattened;
 
         for (auto &input : inputMatrix)
         {

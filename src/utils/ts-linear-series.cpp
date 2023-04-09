@@ -12,7 +12,7 @@ TSLinearSeries::TSLinearSeries(unsigned char _maxSeriesLength) : maxSeriesLength
 }
 
 // EXEC_TIME_15: approx 450us
-Settings::precision TSLinearSeries::calculateSlope(unsigned char pointOne, unsigned char pointTwo) const
+Configurations::precision TSLinearSeries::calculateSlope(unsigned char pointOne, unsigned char pointTwo) const
 {
     auto seriesXPointOne = seriesX[pointOne];
     auto seriesXPointTwo = seriesX[pointTwo];
@@ -26,17 +26,17 @@ Settings::precision TSLinearSeries::calculateSlope(unsigned char pointOne, unsig
     return 0.0;
 }
 
-Settings::precision TSLinearSeries::coefficientA() const
+Configurations::precision TSLinearSeries::coefficientA() const
 {
     return a;
 }
 
 // EXEC_TIME_15: approx 1670us
-Settings::precision TSLinearSeries::median() const
+Configurations::precision TSLinearSeries::median() const
 {
     if (!slopes.empty())
     {
-        vector<Settings::precision> flattened;
+        vector<Configurations::precision> flattened;
 
         for (const auto &slope : slopes)
         {
@@ -54,7 +54,7 @@ Settings::precision TSLinearSeries::median() const
     return 0.0;
 }
 
-void TSLinearSeries::push(Settings::precision pointX, Settings::precision pointY)
+void TSLinearSeries::push(Configurations::precision pointX, Configurations::precision pointY)
 {
     seriesX.push(pointX);
     seriesY.push(pointY);
@@ -105,7 +105,7 @@ void TSLinearSeries::reset()
 {
     seriesX.reset();
     seriesY.reset();
-    vector<vector<Settings::precision>> clear;
+    vector<vector<Configurations::precision>> clear;
     slopes.swap(clear);
     a = 0;
 }

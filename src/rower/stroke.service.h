@@ -2,7 +2,7 @@
 
 #include <array>
 
-#include "../settings.h"
+#include "../utils/configuration.h"
 #include "../utils/ols-linear-series.h"
 #include "../utils/series.h"
 #include "../utils/ts-quadratic-series.h"
@@ -10,56 +10,56 @@
 
 class StrokeService
 {
-    static Settings::precision constexpr angularDisplacementPerImpulse = (2 * PI) / Settings::impulsesPerRevolution;
-    static Settings::precision constexpr sprocketRadius = Settings::sprocketRadius / 100;
+    static Configurations::precision constexpr angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
+    static Configurations::precision constexpr sprocketRadius = Configurations::sprocketRadius / 100;
 
     // rower state
     CyclePhase cyclePhase = CyclePhase::Stopped;
     unsigned long long rowingTotalTime = 0ULL;
     unsigned long long rowingImpulseCount = 0UL;
-    Settings::precision rowingTotalAngularDisplacement = 0;
+    Configurations::precision rowingTotalAngularDisplacement = 0;
 
     // Drive related
     unsigned long long driveStartTime = 0ULL;
     unsigned int driveDuration = 0;
-    Settings::precision driveStartAngularDisplacement = 0;
-    Settings::precision driveTotalAngularDisplacement = 0;
+    Configurations::precision driveStartAngularDisplacement = 0;
+    Configurations::precision driveTotalAngularDisplacement = 0;
 
     // Recovery related
     unsigned long long recoveryStartTime = 0;
     unsigned int recoveryDuration = 0;
-    Settings::precision recoveryStartAngularDisplacement = 0;
-    Settings::precision recoveryTotalAngularDisplacement = 0;
-    Settings::precision recoveryStartDistance = 0;
+    Configurations::precision recoveryStartAngularDisplacement = 0;
+    Configurations::precision recoveryTotalAngularDisplacement = 0;
+    Configurations::precision recoveryStartDistance = 0;
 
     // metrics
-    Settings::precision distancePerAngularDisplacement = 0;
-    Settings::precision distance = 0;
+    Configurations::precision distancePerAngularDisplacement = 0;
+    Configurations::precision distance = 0;
     unsigned short strokeCount = 0;
     unsigned long long strokeTime = 0ULL;
     unsigned long long revTime = 0ULL;
-    Settings::precision avgStrokePower = 0;
+    Configurations::precision avgStrokePower = 0;
 
-    Settings::precision dragCoefficient = 0;
+    Configurations::precision dragCoefficient = 0;
 
-    std::array<Settings::precision, Settings::dragCoefficientsArrayLength> dragCoefficients{};
+    std::array<Configurations::precision, Configurations::dragCoefficientsArrayLength> dragCoefficients{};
 
-    Settings::precision totalAngularDisplacement = 0;
+    Configurations::precision totalAngularDisplacement = 0;
 
     // advance metrics
-    Settings::precision currentAngularVelocity = 0;
-    Settings::precision currentAngularAcceleration = 0;
-    Settings::precision currentTorque = 0;
-    vector<Settings::precision> driveHandleForces{};
+    Configurations::precision currentAngularVelocity = 0;
+    Configurations::precision currentAngularAcceleration = 0;
+    Configurations::precision currentTorque = 0;
+    vector<Configurations::precision> driveHandleForces{};
 
     vector<Series> angularVelocityMatrix{};
     vector<Series> angularAccelerationMatrix{};
 
-    OLSLinearSeries deltaTimes = OLSLinearSeries(Settings::impulseDataArrayLength);
-    OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Settings::impulseDataArrayLength);
-    Series deltaTimesSlopesSeries = Series(Settings::impulseDataArrayLength);
+    OLSLinearSeries deltaTimes = OLSLinearSeries(Configurations::impulseDataArrayLength);
+    OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength);
+    Series deltaTimesSlopesSeries = Series(Configurations::impulseDataArrayLength);
     OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries();
-    TSQuadraticSeries angularDistances = TSQuadraticSeries(Settings::impulseDataArrayLength);
+    TSQuadraticSeries angularDistances = TSQuadraticSeries(Configurations::impulseDataArrayLength);
 
     bool isFlywheelUnpowered() const;
     bool isFlywheelPowered() const;

@@ -18,16 +18,16 @@ void EEPROMService::setup()
     if (!preferences.isKey(logLevelAddress))
     {
         Log.infoln("Setting LogLevel to default");
-        preferences.putUChar(logLevelAddress, static_cast<unsigned char>(Settings::defaultLogLevel));
+        preferences.putUChar(logLevelAddress, static_cast<unsigned char>(Configurations::defaultLogLevel));
     }
     if (!preferences.isKey(logLevelAddress))
     {
         Log.infoln("Setting BleServiceFlag to default");
-        preferences.putUChar(bleServiceFlagAddress, static_cast<unsigned char>(Settings::defaultBleServiceFlag));
+        preferences.putUChar(bleServiceFlagAddress, static_cast<unsigned char>(Configurations::defaultBleServiceFlag));
     }
 
-    logLevel = static_cast<ArduinoLogLevel>(preferences.getUChar(logLevelAddress, static_cast<unsigned char>(Settings::defaultLogLevel)));
-    bleServiceFlag = static_cast<BleServiceFlag>(preferences.getUChar(bleServiceFlagAddress, static_cast<unsigned char>(Settings::defaultBleServiceFlag)));
+    logLevel = static_cast<ArduinoLogLevel>(preferences.getUChar(logLevelAddress, static_cast<unsigned char>(Configurations::defaultLogLevel)));
+    bleServiceFlag = static_cast<BleServiceFlag>(preferences.getUChar(bleServiceFlagAddress, static_cast<unsigned char>(Configurations::defaultBleServiceFlag)));
 
     Log.verboseln("%s: %d", logLevelAddress, logLevel);
     Log.verboseln("%s: %d", bleServiceFlagAddress, bleServiceFlag);

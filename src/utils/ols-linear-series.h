@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../settings.h"
+#include "configuration.h"
 #include "series.h"
 
 using std::vector;
@@ -17,11 +17,11 @@ class OLSLinearSeries
 public:
     explicit OLSLinearSeries(unsigned char _maxSeriesLength = 0);
 
-    Settings::precision yAtSeriesBegin() const;
-    Settings::precision slope() const;
-    Settings::precision goodnessOfFit() const;
+    Configurations::precision yAtSeriesBegin() const;
+    Configurations::precision slope() const;
+    Configurations::precision goodnessOfFit() const;
     unsigned char size() const;
 
-    void push(Settings::precision pointX, Settings::precision pointY);
+    void push(Configurations::precision pointX, Configurations::precision pointY);
     void reset();
 };
