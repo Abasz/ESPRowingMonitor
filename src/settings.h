@@ -23,6 +23,7 @@ using std::string;
 
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
+#define ENABLE_WEBSOCKET_MONITOR true
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 // Hardware settings
@@ -77,8 +78,9 @@ using std::string;
     #error "Using too many data points will increase loop execution time. It should not be more than 17"
 #endif
 #if (!defined(LOCAL_SSID) || !defined(PASSPHRASE))
-    #define DISABLE_WIFI_MONITOR
-    #error "Not provided SSID and/or Passphrase, disabling wifi monitor"
+    #undef ENABLE_WEBSOCKET_MONITOR
+    #define ENABLE_WEBSOCKET_MONITOR false
+    #warning "Not provided SSID and/or Passphrase, disabling WebSocket monitor"
 #endif
 
 #if IMPULSE_DATA_ARRAY_LENGTH < 12
@@ -144,6 +146,7 @@ public:
     static inline string const ssid = TOSTRING(LOCAL_SSID);
     static inline string const passphrase = TOSTRING(PASSPHRASE);
     static unsigned char const port = PORT;
+    static bool const isWebsocketEnabled = ENABLE_WEBSOCKET_MONITOR;
 
     // Device power management settings
     static gpio_num_t const batteryPinNumber = BATTERY_PIN_NUMBER;

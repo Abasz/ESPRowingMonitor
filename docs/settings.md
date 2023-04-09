@@ -39,6 +39,10 @@ enum class BleServiceFlag : unsigned char
 };
 ```
 
+### ENABLE_WEBSOCKET_MONITOR
+
+Enables or disables WebSocket monitor. For more details please refer to the [Wi-Fi](#wi-fi-and-websocket-monitor) section. Default is true.
+
 ## Hardware settings
 
 These settings relate to the hardware used by ESP32 and the rowing machine
@@ -149,7 +153,7 @@ These settings are required for the websocket to work
 
 The port number that should be used by ESP32 MCU when creating the websocket server
 
-### Wi-Fi
+### Wi-Fi and WebSocket monitor
 
 The Wi-Fi credentials are set up in a way that it cannot be accidentally committed to GitHub. Hence it should be set in a separate file named `wifi-config.ini` as follows:
 
@@ -162,7 +166,7 @@ build_flags =
     '-D PASSPHRASE=MySecretPWD'
 ```
 
-File name is crucial as that is the name that platformio.ini includes when compiling.
+File name is critical as that is the name that platformio.ini includes when compiling. Please note if no wifi-config.ini is provided (or the `LOCAL_SSID` and/or `PASSPHRASE` is not provided as a macro variable) WebSocket monitor will be disabled by the compiler.
 
 ## Device power management settings
 

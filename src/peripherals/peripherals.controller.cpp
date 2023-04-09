@@ -9,7 +9,11 @@ PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService
 
 void PeripheralsController::update()
 {
-    networkService.update();
+    if constexpr (Settings::isWebsocketEnabled)
+    {
+        networkService.update();
+    }
+
     auto now = millis();
     if (now - lastConnectedDeviceCheckTime > Settings::ledBlinkFrequency)
     {
@@ -27,7 +31,12 @@ void PeripheralsController::update()
 void PeripheralsController::begin()
 {
     Log.infoln("Setting up BLE Controller");
-    NetworkService::setup();
+
+    if constexpr (Settings::isWebsocketEnabled)
+    {
+        NetworkService::setup();
+    }
+
     bluetoothService.setup();
     setupConnectionIndicatorLed();
 }
@@ -60,7 +69,10 @@ void PeripheralsController::updateData(RowingDataModels::RowingMetrics data)
     bleStrokeCountData = data.strokeCount;
     bleAvgStrokePowerData = static_cast<short>(lround(data.avgStrokePower));
 
-    networkService.notifyClients(data, batteryLevelData, eepromService.getBleServiceFlag(), eepromService.getLogLevel());
+    if constexpr (Settings::isWebsocketEnabled)
+    {
+        networkService.notifyClients(data, batteryLevelData, eepromService.getBleServiceFlag(), eepromService.getLogLevel());
+    }
 }
 
 void PeripheralsController::notify() const
