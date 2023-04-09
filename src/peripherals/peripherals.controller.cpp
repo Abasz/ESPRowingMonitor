@@ -21,10 +21,13 @@ void PeripheralsController::update()
         lastConnectedDeviceCheckTime = now;
     }
 
-    if (now - lastBroadcastTime > updateInterval)
+    if constexpr (Settings::isBleSErviceEnabled)
     {
-        notify();
-        lastBroadcastTime = now;
+        if (now - lastBroadcastTime > updateInterval)
+        {
+            notify();
+            lastBroadcastTime = now;
+        }
     }
 }
 
@@ -37,7 +40,11 @@ void PeripheralsController::begin()
         NetworkService::setup();
     }
 
-    bluetoothService.setup();
+    if constexpr (Settings::isBleSErviceEnabled)
+    {
+        bluetoothService.setup();
+    }
+
     setupConnectionIndicatorLed();
 }
 
@@ -57,7 +64,10 @@ void PeripheralsController::updateLed()
 void PeripheralsController::notifyBattery(unsigned char batteryLevel)
 {
     batteryLevelData = batteryLevel;
-    bluetoothService.notifyBattery(batteryLevel);
+    if constexpr (Settings::isBleSErviceEnabled)
+    {
+        bluetoothService.notifyBattery(batteryLevel);
+    }
 }
 
 void PeripheralsController::updateData(RowingDataModels::RowingMetrics data)
@@ -89,8 +99,11 @@ void PeripheralsController::notify() const
 
 void PeripheralsController::notifyDragFactor(unsigned char dragFactor) const
 {
-    auto distance = pow(dragFactor / Settings::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
-    bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
+    if constexpr (Settings::isBleSErviceEnabled)
+    {
+        auto distance = pow(dragFactor / Settings::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
+        bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
+    }
 }
 
 void PeripheralsController::setupConnectionIndicatorLed() const

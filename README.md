@@ -171,7 +171,6 @@ The ESP Rowing Monitor exposes BLE Cycling Power Profile and Cycling Speed and C
 
 - Make WebGUI served up by ESP Rowing Monitor - In progress
 - Need to improve and extend validation of settings on compiling
-- Enable disabling peripherals with compiler flags
 
 ## Attribution
 

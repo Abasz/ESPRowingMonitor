@@ -43,6 +43,10 @@ enum class BleServiceFlag : unsigned char
 
 Enables or disables WebSocket monitor. For more details please refer to the [Wi-Fi](#wi-fi-and-websocket-monitor) section. Default is true.
 
+### ENABLE_BLE_SERVICE
+
+Enables or disables the BLE service to broadcast data. Default is true.
+
 ## Hardware settings
 
 These settings relate to the hardware used by ESP32 and the rowing machine

@@ -24,6 +24,7 @@ using std::string;
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
 #define ENABLE_WEBSOCKET_MONITOR true
+#define ENABLE_BLE_SERVICE true
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 // Hardware settings
@@ -113,6 +114,7 @@ class Settings
 public:
     static ArduinoLogLevel const defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
     static BleServiceFlag const defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
+    static bool const isBleSErviceEnabled = ENABLE_BLE_SERVICE;
 
     // Hardware settings
     static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;
