@@ -6,7 +6,7 @@
 
 void setup()
 {
-    const auto baudRate = 115200;
+    auto const baudRate = 115200;
     Serial.begin(baudRate);
     while (!Serial && !(bool)Serial.available())
     {
@@ -42,8 +42,8 @@ void loop()
     // - not connected 20-30 microsec
     // - connected 1900-2200 microsec
     // auto start = micros();
-    const auto now = millis();
-    const auto minUpdateInterval = 4000;
+    auto const now = millis();
+    auto const minUpdateInterval = 4000;
     if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount() || now - lastUpdateTime > minUpdateInterval)
     {
         peripheralController.updateData(strokeController.getAllData());

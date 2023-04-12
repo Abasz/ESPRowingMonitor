@@ -41,10 +41,10 @@ unsigned char PowerManagerService::measureBattery()
 
     for (unsigned char i = 0; i < Configurations::batteryLevelArrayLength; i++)
     {
-        auto measurement = analogRead(GPIO_NUM_34);
+        auto const measurement = analogRead(GPIO_NUM_34);
 
-        const auto espRefVolt = 3.3;
-        const auto dacResolution = 4095;
+        auto const espRefVolt = 3.3;
+        auto const dacResolution = 4095;
         auto rawNewBatteryLevel = ((measurement * espRefVolt / dacResolution) - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
 
         if (rawNewBatteryLevel > 100)
@@ -84,7 +84,7 @@ void PowerManagerService::setupBatteryMeasurement()
 
 void PowerManagerService::printWakeupReason()
 {
-    auto wakeup_reason = esp_sleep_get_wakeup_cause();
+    auto const wakeup_reason = esp_sleep_get_wakeup_cause();
 
     switch (wakeup_reason)
     {

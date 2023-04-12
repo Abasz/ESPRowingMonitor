@@ -115,33 +115,33 @@ I conducted some high-level tests and measured the execution times, which are sh
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:----------------:|
-|18                       |10319.02324       |
-|15                       |7238.056122       |
-|12                       |5032.933107       |
-|9                        |3252.230726       |
-|8                        |2656.080499       |
-|7                        |2248.905896       |
-|6                        |1903.043651       |
-|5                        |1556.085034       |
-|3                        |987.0181406       |
+|18                       |10011.98696       |
+|15                       |6990.030045       |
+|12                       |4862.352041       |
+|9                        |3149.800454       |
+|8                        |2604.280045       |
+|7                        |2209.195578       |
+|6                        |1818.681973       |
+|5                        |1473.622449       |
+|3                        |878.8015873       |
 
-The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is more than 10ms. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 and gives a warning at 12.
+The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is more than 10ms if double precision is used. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 (and double precision) and gives a warning at 12.
 
 As an example, on my setup, I use 3 impulses per rotation. Based on my experience, the delta times cannot dip below 10ms. So with an `IMPULSE_DATA_ARRAY_LENGTH` size of 7 (execution time with double is approximately 2.2ms), this should be pretty much fine.
 
-If, for some reason, testing shows that a higher value for the `IMPULSE_DATA_ARRAY_LENGTH` size is necessary, the execution time can be reduced to some extent if variable types float are used instead of double:
+If, for some reason, testing shows that a higher value for the `IMPULSE_DATA_ARRAY_LENGTH` size is necessary, the execution time can be reduced to some extent if float precision is used instead of double. This is due to the fact that on the 32bit ESP32 MCU doubles are emulated hence, performance suffers:
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:-----------------:|
-|18                       |6943.947846        |
-|15                       |5101.781746        |
-|12                       |3706.609977        |
-|9                        |2543.750567        |
-|8                        |2152.922336        |
-|7                        |1848.677438        |
-|6                        |1602.282313        |
-|5                        |1350.632653        |
-|3                        |899.649093         |
+|18                       |6537.856009        |
+|15                       |4800.871315        |
+|12                       |3604.821429        |
+|9                        |2512.559524        |
+|8                        |2116.856576        |
+|7                        |1798.734694        |
+|6                        |1478.391156        |
+|5                        |1217.497166        |
+|3                        |770.6655329        |
 
 Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times. I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
 

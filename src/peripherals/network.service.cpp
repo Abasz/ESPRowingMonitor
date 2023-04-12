@@ -14,8 +14,8 @@ NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_e
 
 void NetworkService::update()
 {
-    auto now = millis();
-    const auto cleanupInterval = 5000;
+    auto const now = millis();
+    auto const cleanupInterval = 5000;
     if (now - lastCleanupTime > cleanupInterval)
     {
         lastCleanupTime = now;
@@ -105,7 +105,7 @@ void NetworkService::notifyClients(RowingDataModels::RowingMetrics rowingMetrics
     response.append(",\"dragFactor\":" + to_string(rowingMetrics.dragCoefficient * 1e6));
     response.append(",\"handleForces\": [");
 
-    for (const auto &handleForce : rowingMetrics.driveHandleForces)
+    for (auto const &handleForce : rowingMetrics.driveHandleForces)
     {
         response.append(to_string(handleForce) + ",");
     }
@@ -121,7 +121,7 @@ void NetworkService::notifyClients(RowingDataModels::RowingMetrics rowingMetrics
 
 void NetworkService::handleWebSocketMessage(void *arg, uint8_t *data, size_t len) const
 {
-    auto *info = static_cast<AwsFrameInfo *>(arg);
+    auto const *info = static_cast<AwsFrameInfo *>(arg);
     if (static_cast<bool>(info->final) && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
     {
         // NOLINTBEGIN
@@ -134,11 +134,11 @@ void NetworkService::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
             Log.traceln("Invalid request: %s", request.c_str());
         }
 
-        auto requestOpCommand = request.substr(1, request.size() - 2);
+        auto const requestOpCommand = request.substr(1, request.size() - 2);
 
         Log.infoln("Incoming WS message");
 
-        auto opCommand = parseOpCode(requestOpCommand);
+        auto const opCommand = parseOpCode(requestOpCommand);
 
         if (opCommand.size() != 2)
         {
@@ -154,12 +154,10 @@ void NetworkService::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
         {
             Log.infoln("Set LogLevel OpCode");
 
-            auto response = PSCResponseOpCodes::InvalidParameter;
             if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 6)
             {
                 Log.infoln("New LogLevel: %d", opCommand[1]);
                 eepromService.setLogLevel(static_cast<ArduinoLogLevel>(opCommand[1]));
-                response = PSCResponseOpCodes::Successful;
 
                 return;
             }

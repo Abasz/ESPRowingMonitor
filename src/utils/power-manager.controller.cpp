@@ -16,7 +16,7 @@ void PowerManagerController::begin()
 
 void PowerManagerController::update(unsigned long lastRevTime, bool isDeviceConnected)
 {
-    auto now = micros();
+    auto const now = micros();
     if (!isDeviceConnected && now - lastRevTime > Configurations::deepSleepTimeout * 1000)
     {
         PowerManagerService::goToSleep();

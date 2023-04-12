@@ -43,7 +43,7 @@ TEST_CASE("StrokeService")
     REQUIRE(dragFactorStream.good());
 
     vector<unsigned long> deltaTimes;
-    const auto arraySize = 1764;
+    auto const arraySize = 1764;
     deltaTimes.reserve(arraySize);
     vector<double> slopes;
     slopes.reserve(arraySize - 1);
@@ -106,12 +106,12 @@ TEST_CASE("StrokeService")
     SECTION("processData method should correctly determine")
     {
         StrokeService strokeService;
-        auto angularDisplacementPerImpulse = (2 * PI) / 3;
+        auto const angularDisplacementPerImpulse = (2 * PI) / 3;
         auto rawImpulseCount = 0UL;
         auto totalTime = 0UL;
         Configurations::precision totalAngularDisplacement = 0.0;
         RowingDataModels::RowingMetrics rowingMetrics;
-        for (auto &deltaTime : deltaTimes)
+        for (auto const &deltaTime : deltaTimes)
         {
             totalAngularDisplacement += angularDisplacementPerImpulse;
             totalTime += deltaTime;
@@ -125,7 +125,7 @@ TEST_CASE("StrokeService")
                 .rawImpulseTime = totalTime};
 
             strokeService.processData(data);
-            auto prevStrokeCount = rowingMetrics.strokeCount;
+            auto const prevStrokeCount = rowingMetrics.strokeCount;
             rowingMetrics = strokeService.getData();
 
             if (rowingMetrics.strokeCount > prevStrokeCount)
@@ -144,7 +144,7 @@ TEST_CASE("StrokeService")
         {
             REQUIRE(rowingMetrics.strokeCount == 10);
             REQUIRE(rowingMetrics.lastStrokeTime == 32679715);
-            const auto expectedDistance = 9307.2041350242;
+            auto const expectedDistance = 9307.2041350242;
             REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(expectedDistance, 0.0000001));
             REQUIRE(rowingMetrics.lastRevTime == 39707220);
         }

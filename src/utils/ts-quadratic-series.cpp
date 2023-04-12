@@ -72,7 +72,7 @@ void TSQuadraticSeries::push(Configurations::precision pointX, Configurations::p
         i = 0;
         while (i < seriesX.size() - 1U)
         {
-            auto seriesXPointI = seriesX[i];
+            auto const seriesXPointI = seriesX[i];
             linearResidue.push(
                 seriesXPointI,
                 seriesY[i] - a * (seriesXPointI * seriesXPointI));
@@ -90,15 +90,15 @@ void TSQuadraticSeries::push(Configurations::precision pointX, Configurations::p
 // EXEC_TIME_15: approx 2000us
 Configurations::precision TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char pointThree) const
 {
-    auto xPointOne = seriesX[pointOne];
-    auto xPointThree = seriesX[pointThree];
+    auto const xPointOne = seriesX[pointOne];
+    auto const xPointThree = seriesX[pointThree];
 
     if (pointOne + 1 < pointThree && xPointOne != xPointThree)
     {
         Series results(maxSeriesLength);
         auto pointTwo = pointOne + 1;
 
-        auto xPointTwo = seriesX[pointTwo];
+        auto const xPointTwo = seriesX[pointTwo];
 
         while (
             pointOne < pointTwo &&
@@ -107,9 +107,9 @@ Configurations::precision TSQuadraticSeries::calculateA(unsigned char pointOne, 
             xPointTwo != xPointThree)
         {
             // for the underlying math, see https://www.quora.com/How-do-I-find-a-quadratic-equation-from-points/answer/Robert-Paxson
-            auto xPointTwo = seriesX[pointTwo];
-            auto yPointThree = seriesY[pointThree];
-            auto yPointTwo = seriesY[pointTwo];
+            auto const xPointTwo = seriesX[pointTwo];
+            auto const yPointThree = seriesY[pointThree];
+            auto const yPointTwo = seriesY[pointTwo];
 
             results.push(
                 (xPointOne * (yPointThree - yPointTwo) +

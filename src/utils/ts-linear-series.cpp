@@ -14,8 +14,8 @@ TSLinearSeries::TSLinearSeries(unsigned char _maxSeriesLength) : maxSeriesLength
 // EXEC_TIME_15: approx 450us
 Configurations::precision TSLinearSeries::calculateSlope(unsigned char pointOne, unsigned char pointTwo) const
 {
-    auto seriesXPointOne = seriesX[pointOne];
-    auto seriesXPointTwo = seriesX[pointTwo];
+    auto const seriesXPointOne = seriesX[pointOne];
+    auto const seriesXPointTwo = seriesX[pointTwo];
 
     if (pointOne != pointTwo && seriesXPointOne != seriesXPointTwo)
     {
@@ -38,7 +38,7 @@ Configurations::precision TSLinearSeries::median() const
     {
         vector<Configurations::precision> flattened;
 
-        for (const auto &slope : slopes)
+        for (auto const &slope : slopes)
         {
             flattened.insert(end(flattened), begin(slope), end(slope));
         }
@@ -75,10 +75,9 @@ void TSLinearSeries::push(Configurations::precision pointX, Configurations::prec
     {
         // there are at least two points in the X and Y arrays, so let's add the new datapoint
         auto i = 0U;
-        auto result = 0.0;
         while (i < slopes.size())
         {
-            result = calculateSlope(i, slopes.size());
+            auto const result = calculateSlope(i, slopes.size());
             slopes[i].push_back(result);
             i++;
         }

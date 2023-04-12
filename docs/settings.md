@@ -164,6 +164,7 @@ The Wi-Fi credentials are set up in a way that it cannot be accidentally committ
 ```ini
 [env:esp32]
 build_flags = 
+ -O2
  -std=c++2a
  -std=gnu++2a
     '-D LOCAL_SSID=My SSID'

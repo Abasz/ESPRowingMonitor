@@ -33,12 +33,12 @@ void loop(unsigned long now)
 
 int main(int argc, const char *argv[])
 {
-    auto args = std::span(argv, size_t(argc));
+    auto const args = std::span(argv, size_t(argc));
 
     unsigned long now = 0;
     if (argc < 2 || string(args[1]).empty())
     {
-        for (auto &deltaTime : testDeltaTimes)
+        for (auto const &deltaTime : testDeltaTimes)
         {
             now += deltaTime;
             loop(now);

@@ -14,7 +14,7 @@ void PeripheralsController::update()
         networkService.update();
     }
 
-    auto now = millis();
+    auto const now = millis();
     if (now - lastConnectedDeviceCheckTime > Configurations::ledBlinkFrequency)
     {
         updateLed();
@@ -72,7 +72,7 @@ void PeripheralsController::notifyBattery(unsigned char batteryLevel)
 
 void PeripheralsController::updateData(RowingDataModels::RowingMetrics data)
 {
-    const auto secInMicroSec = 1e6L;
+    auto const secInMicroSec = 1e6L;
     bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
     bleRevCountData = lround(data.distance);
     bleStrokeTimeData = lroundl((data.lastStrokeTime / secInMicroSec) * 1024) % USHRT_MAX;
@@ -101,7 +101,7 @@ void PeripheralsController::notifyDragFactor(unsigned char dragFactor) const
 {
     if constexpr (Configurations::isBleSErviceEnabled)
     {
-        auto distance = pow(dragFactor / Configurations::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
+        auto const distance = pow(dragFactor / Configurations::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
         bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
     }
 }
