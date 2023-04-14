@@ -1,8 +1,10 @@
+#include <ctime>
 #include <string>
 #include <vector>
 
 #include "Arduino.h"
 #include "ArduinoLog.h"
+#include "LittleFS.h"
 
 #include "network.service.h"
 
@@ -46,6 +48,17 @@ void NetworkService::update()
             } });
 
         server.addHandler(&webSocket);
+
+        if (LittleFS.begin())
+        {
+            Log.traceln("Serving up static Web GUI page");
+            auto const lastModified = LittleFS.open("/www/index.html").getLastWrite();
+            string formattedDate = "Thu, 01 Jan 1970 00:00:00 GMT";
+            std::strftime(formattedDate.data(), 29, "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&lastModified));
+            server.serveStatic("/", LittleFS, "/www/")
+                .setLastModified(formattedDate.c_str())
+                .setDefaultFile("index.html");
+        }
         server.begin();
         isWifiConnected = true;
     }

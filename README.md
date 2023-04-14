@@ -70,7 +70,9 @@ ESP Rowing Monitor includes a WebSocket server that sends calculated metrics to 
 
 Due to resource constraints of the ESP32 MCU, data is only sent on every stroke or every 4 seconds, whichever occurs earlier. This is not a significant issue, as most of the metrics are only available at certain known states of the rowing cycle (e.g. end of drive, end of recovery, etc.).
 
-Currently, a simple WebGUI is being developed using Angular. The related repository can be found [here](https://github.com/Abasz/ESPRowingMonitor-WebGUI). Instructions on how to use/install the WebGUI can be found in the repository's readme.
+Currently, a simple WebGUI is being developed using Angular. The related repository can be found [here](https://github.com/Abasz/ESPRowingMonitor-WebGUI). Instructions on how to use/install the WebGUI can be found in the repository's readme. This WebGUI can be served up by the ESP32 micro controller and accessed over HTTP on the ESP32s IP Address.
+
+Please note that the filesystem of the ESP32 is rather slow, so the first load of the WebGUI may take up to half a minute. However, after the initial load, unless the files are modified, it will load instantly (potential reloading is controlled automatically via HTTP Last-Modified header).
 
 ### Logging
 
@@ -169,7 +171,6 @@ The ESP Rowing Monitor exposes BLE Cycling Power Profile and Cycling Speed and C
 
 ## Backlog
 
-- Make WebGUI served up by ESP Rowing Monitor - In progress
 - Need to improve and extend validation of settings on compiling
 
 ## Attribution

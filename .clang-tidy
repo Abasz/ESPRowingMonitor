@@ -42,6 +42,10 @@ ExtraArgs:
   - -I../../../../Documents/www/Embeded System Dev/esp-rowing-monitor/.pio/libdeps/esp32/ESPAsyncWebServer-esphome/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/WiFi/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/FS/src
+  - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/LittleFS/src
+  - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/esp_littlefs/include
+  # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/SPIFFS/src
+  # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/spiffs/include
   # - -I../../../../Documents/www/Embeded System Dev/esp-rowing-monitor/.pio/libdeps/esp32/AsyncTCP-esphome/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/newlib/platform_include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/freertos/include
@@ -175,7 +179,6 @@ ExtraArgs:
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/mqtt/esp-mqtt/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/openssl/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/perfmon/include
-  # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/spiffs/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/ulp/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/wifi_provisioning/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/rmaker_common/include
@@ -215,7 +218,6 @@ ExtraArgs:
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/esp-dsp/modules/common/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/esp-dsp/modules/kalman/ekf/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/esp-dsp/modules/kalman/ekf_imu13states/include
-  # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/esp_littlefs/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/esp-dl/include
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/esp-dl/include/tool
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/tools/sdk/esp32/include/esp-dl/include/typedef
@@ -250,13 +252,11 @@ ExtraArgs:
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/HTTPUpdateServer/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/I2S/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/Insights/src
-  # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/LittleFS/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/NetBIOS/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/RainMaker/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/SD/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/SD_MMC/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/SPI/src
-  # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/SPIFFS/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/SimpleBLE/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/Ticker/src
   # - -I../../../../.platformio/packages/framework-arduinoespressif32@src-e36c2260a49b9bf6768237494cebb35d/libraries/USB/src
