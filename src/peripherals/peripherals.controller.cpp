@@ -61,7 +61,7 @@ void PeripheralsController::updateLed()
     digitalWrite(GPIO_NUM_2, ledState);
 }
 
-void PeripheralsController::notifyBattery(unsigned char batteryLevel)
+void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
 {
     batteryLevelData = batteryLevel;
     if constexpr (Configurations::isBleSErviceEnabled)
@@ -70,7 +70,7 @@ void PeripheralsController::notifyBattery(unsigned char batteryLevel)
     }
 }
 
-void PeripheralsController::updateData(RowingDataModels::RowingMetrics data)
+void PeripheralsController::updateData(const RowingDataModels::RowingMetrics data)
 {
     auto const secInMicroSec = 1e6L;
     bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
@@ -97,7 +97,7 @@ void PeripheralsController::notify() const
     }
 }
 
-void PeripheralsController::notifyDragFactor(unsigned char dragFactor) const
+void PeripheralsController::notifyDragFactor(const unsigned char dragFactor) const
 {
     if constexpr (Configurations::isBleSErviceEnabled)
     {

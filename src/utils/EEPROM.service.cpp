@@ -56,6 +56,7 @@ void EEPROMService::setBleServiceFlag(BleServiceFlag newServiceFlag)
         return;
     }
 
+    bleServiceFlag = newServiceFlag;
     preferences.putUChar(bleServiceFlagAddress, intBleServiceFlag);
 }
 

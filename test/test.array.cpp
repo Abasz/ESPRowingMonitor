@@ -2,7 +2,7 @@
 
 #include "globals.h"
 
-void simulateRotation(unsigned long now)
+void simulateRotation(const unsigned long now)
 {
     flywheelService.processRotation(now);
 }

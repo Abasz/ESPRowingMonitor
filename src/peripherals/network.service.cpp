@@ -102,7 +102,7 @@ bool NetworkService::isAnyDeviceConnected() const
     return isWifiConnected && webSocket.count() > 0;
 }
 
-void NetworkService::notifyClients(RowingDataModels::RowingMetrics rowingMetrics, unsigned char batteryLevel, BleServiceFlag bleServiceFlag, ArduinoLogLevel logLevel)
+void NetworkService::notifyClients(const RowingDataModels::RowingMetrics rowingMetrics, const unsigned char batteryLevel, const BleServiceFlag bleServiceFlag, const ArduinoLogLevel logLevel)
 {
     string response;
     response.append("{\"batteryLevel\":" + to_string(batteryLevel));
@@ -132,14 +132,14 @@ void NetworkService::notifyClients(RowingDataModels::RowingMetrics rowingMetrics
     webSocket.textAll(response.c_str());
 }
 
-void NetworkService::handleWebSocketMessage(void *arg, uint8_t *data, size_t len) const
+void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *const data, const size_t len) const
 {
-    auto const *info = static_cast<AwsFrameInfo *>(arg);
+    auto const *const info = static_cast<const AwsFrameInfo *>(arg);
     if (static_cast<bool>(info->final) && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
     {
         // NOLINTBEGIN
         data[len] = 0;
-        string request(reinterpret_cast<char *>(data));
+        string const request(reinterpret_cast<char *>(data));
         // NOLINTEND
 
         if (request.size() < 3)

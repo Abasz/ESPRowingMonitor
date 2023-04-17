@@ -4,8 +4,8 @@
 #include "ESPAsyncWebServer.h"
 
 #include "../rower/stroke.model.h"
-#include "../utils/configuration.h"
 #include "../utils/EEPROM.service.h"
+#include "../utils/configuration.h"
 #include "../utils/enums.h"
 
 class NetworkService
@@ -18,7 +18,7 @@ class NetworkService
     bool isWifiConnected = false;
     unsigned long lastCleanupTime = 0UL;
 
-    void handleWebSocketMessage(void *arg, uint8_t *data, size_t len) const;
+    void handleWebSocketMessage(const void *arg, uint8_t *data, size_t len) const;
     static std::vector<unsigned char> parseOpCode(std::string requestOpCommand);
 
 public:

@@ -2,7 +2,7 @@
 
 #include "series.h"
 
-Series::Series(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength)
+Series::Series(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength)
 {
     if (_maxSeriesLength > 0)
     {
@@ -34,7 +34,7 @@ Configurations::precision Series::median() const
 {
     if (!seriesArray.empty())
     {
-        unsigned int mid = seriesArray.size() / 2;
+        unsigned int const mid = seriesArray.size() / 2;
         vector<Configurations::precision> sortedArray(seriesArray);
         partial_sort(begin(sortedArray), begin(sortedArray) + mid + 1, end(sortedArray));
 
@@ -46,7 +46,7 @@ Configurations::precision Series::median() const
     return 0.0;
 }
 
-void Series::push(Configurations::precision value)
+void Series::push(const Configurations::precision value)
 {
     if (maxSeriesLength > 0 && seriesArray.size() >= maxSeriesLength)
     {

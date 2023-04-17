@@ -157,7 +157,7 @@ RowingDataModels::RowingMetrics StrokeService::getData()
         .driveHandleForces = driveHandleForces};
 }
 
-void StrokeService::processData(RowingDataModels::FlywheelData data)
+void StrokeService::processData(const RowingDataModels::FlywheelData data)
 {
     deltaTimes.push(data.totalTime, data.deltaTime);
     angularDistances.push(data.totalTime / 1e6, data.totalAngularDisplacement);

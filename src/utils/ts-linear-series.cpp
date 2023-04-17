@@ -3,7 +3,7 @@
 
 #include "ts-linear-series.h"
 
-TSLinearSeries::TSLinearSeries(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
+TSLinearSeries::TSLinearSeries(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
 {
     if (_maxSeriesLength > 0)
     {
@@ -12,7 +12,7 @@ TSLinearSeries::TSLinearSeries(unsigned char _maxSeriesLength) : maxSeriesLength
 }
 
 // EXEC_TIME_15: approx 450us
-Configurations::precision TSLinearSeries::calculateSlope(unsigned char pointOne, unsigned char pointTwo) const
+Configurations::precision TSLinearSeries::calculateSlope(const unsigned char pointOne, const unsigned char pointTwo) const
 {
     auto const seriesXPointOne = seriesX[pointOne];
     auto const seriesXPointTwo = seriesX[pointTwo];
@@ -54,7 +54,7 @@ Configurations::precision TSLinearSeries::median() const
     return 0.0;
 }
 
-void TSLinearSeries::push(Configurations::precision pointX, Configurations::precision pointY)
+void TSLinearSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)
 {
     seriesX.push(pointX);
     seriesY.push(pointY);

@@ -4,7 +4,7 @@
 #include "ts-linear-series.h"
 #include "ts-quadratic-series.h"
 
-TSQuadraticSeries::TSQuadraticSeries(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
+TSQuadraticSeries::TSQuadraticSeries(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
 {
     if (_maxSeriesLength > 0)
     {
@@ -12,7 +12,7 @@ TSQuadraticSeries::TSQuadraticSeries(unsigned char _maxSeriesLength) : maxSeries
     }
 }
 
-Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(unsigned char position) const
+Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(const unsigned char position) const
 {
     if (seriesX.size() > 2 && position < seriesX.size())
     {
@@ -22,7 +22,7 @@ Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(unsigned 
     return 0;
 }
 
-Configurations::precision TSQuadraticSeries::secondDerivativeAtPosition(unsigned char position) const
+Configurations::precision TSQuadraticSeries::secondDerivativeAtPosition(const unsigned char position) const
 {
     if (seriesX.size() > 2 && position < seriesX.size())
     {
@@ -32,7 +32,7 @@ Configurations::precision TSQuadraticSeries::secondDerivativeAtPosition(unsigned
     return 0;
 }
 
-void TSQuadraticSeries::push(Configurations::precision pointX, Configurations::precision pointY)
+void TSQuadraticSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)
 {
     TSLinearSeries linearResidue(maxSeriesLength);
 
@@ -88,7 +88,7 @@ void TSQuadraticSeries::push(Configurations::precision pointX, Configurations::p
 }
 
 // EXEC_TIME_15: approx 2000us
-Configurations::precision TSQuadraticSeries::calculateA(unsigned char pointOne, unsigned char pointThree) const
+Configurations::precision TSQuadraticSeries::calculateA(const unsigned char pointOne, const unsigned char pointThree) const
 {
     auto const xPointOne = seriesX[pointOne];
     auto const xPointThree = seriesX[pointThree];
@@ -126,7 +126,7 @@ Configurations::precision TSQuadraticSeries::calculateA(unsigned char pointOne, 
 }
 
 // EXEC_TIME_15: approx 800us
-Configurations::precision TSQuadraticSeries::matrixMedian(vector<vector<Configurations::precision>> inputMatrix)
+Configurations::precision TSQuadraticSeries::matrixMedian(const vector<vector<Configurations::precision>> inputMatrix)
 {
     if (inputMatrix.size() > 1)
     {

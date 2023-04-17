@@ -11,7 +11,7 @@ using std::to_string;
 
 BluetoothService::ControlPointCallbacks::ControlPointCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
 
-void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *pCharacteristic)
+void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic)
 {
     NimBLEAttValue message = pCharacteristic->getValue();
 
@@ -130,7 +130,7 @@ void BluetoothService::stopServer()
     NimBLEDevice::getAdvertising()->stop();
 }
 
-void BluetoothService::notifyBattery(unsigned char batteryLevel) const
+void BluetoothService::notifyBattery(const unsigned char batteryLevel) const
 {
     batteryLevelCharacteristic->setValue(batteryLevel);
     if (batteryLevelCharacteristic->getSubscribedCount() > 0)
@@ -139,7 +139,7 @@ void BluetoothService::notifyBattery(unsigned char batteryLevel) const
     }
 }
 
-void BluetoothService::notifyDragFactor(unsigned short distance, unsigned char dragFactor) const
+void BluetoothService::notifyDragFactor(const unsigned short distance, const unsigned char dragFactor) const
 {
     std::string value = "DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance);
     dragFactorCharacteristic->setValue(value);
@@ -149,7 +149,7 @@ void BluetoothService::notifyDragFactor(unsigned short distance, unsigned char d
     }
 }
 
-void BluetoothService::notifyCsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount) const
+void BluetoothService::notifyCsc(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount) const
 {
     if (cscMeasurementCharacteristic->getSubscribedCount() > 0)
     {
@@ -191,7 +191,7 @@ void BluetoothService::notifyCsc(unsigned short revTime, unsigned int revCount, 
     }
 }
 
-void BluetoothService::notifyPsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const
+void BluetoothService::notifyPsc(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower) const
 {
     if (pscMeasurementCharacteristic->getSubscribedCount() > 0)
     {
@@ -287,7 +287,7 @@ void BluetoothService::setupServices()
     server->start();
 }
 
-NimBLEService *BluetoothService::setupCscServices(NimBLEServer *server)
+NimBLEService *BluetoothService::setupCscServices(NimBLEServer *const server)
 {
     Log.infoln("Setting up Cycling Speed and Cadence Profile");
 
@@ -309,7 +309,7 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *server)
     return cscService;
 }
 
-NimBLEService *BluetoothService::setupPscServices(NimBLEServer *server)
+NimBLEService *BluetoothService::setupPscServices(NimBLEServer *const server)
 {
     Log.infoln("Setting up Cycling Power Profile");
     auto *pscService = server->createService(cyclingPowerSvcUuid);

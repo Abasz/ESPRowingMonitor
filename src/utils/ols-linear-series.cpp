@@ -1,11 +1,11 @@
 #include "ols-linear-series.h"
 
-OLSLinearSeries::OLSLinearSeries(unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength),
-                                                                   sumX(_maxSeriesLength),
-                                                                   sumXSquare(_maxSeriesLength),
-                                                                   sumY(_maxSeriesLength),
-                                                                   sumYSquare(_maxSeriesLength),
-                                                                   sumXY(_maxSeriesLength) {}
+OLSLinearSeries::OLSLinearSeries(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength),
+                                                                         sumX(_maxSeriesLength),
+                                                                         sumXSquare(_maxSeriesLength),
+                                                                         sumY(_maxSeriesLength),
+                                                                         sumYSquare(_maxSeriesLength),
+                                                                         sumXY(_maxSeriesLength) {}
 
 void OLSLinearSeries::reset()
 {
@@ -16,7 +16,7 @@ void OLSLinearSeries::reset()
     sumXY.reset();
 }
 
-void OLSLinearSeries::push(Configurations::precision pointX, Configurations::precision pointY)
+void OLSLinearSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)
 {
     sumX.push(pointX);
     sumXSquare.push(pointX * pointX);

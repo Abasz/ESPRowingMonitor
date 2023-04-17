@@ -43,7 +43,7 @@ bool FlywheelService::hasDataChanged() const
     return isDataChanged;
 }
 
-void FlywheelService::processRotation(unsigned long now)
+void FlywheelService::processRotation(const unsigned long now)
 {
     auto const currentRawImpulseDeltaTime = now - lastRawImpulseTime;
 

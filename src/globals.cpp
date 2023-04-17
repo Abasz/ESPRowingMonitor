@@ -36,13 +36,13 @@ void detachRotationInterrupt()
     detachInterrupt(digitalPinToInterrupt(Configurations::sensorPinNumber));
 }
 
-void printPrefix(Print *_logOutput, int logLevel)
+void printPrefix(Print *const _logOutput, int logLevel)
 {
     printTimestamp(_logOutput);
     printLogLevel(_logOutput, logLevel);
 }
 
-void printTimestamp(Print *_logOutput)
+void printTimestamp(Print *const _logOutput)
 {
     unsigned long const msecs = micros();
     unsigned long const secs = msecs / msecsPerSec;
@@ -58,7 +58,7 @@ void printTimestamp(Print *_logOutput)
     // NOLINTEND
 }
 
-void printLogLevel(Print *_logOutput, int logLevel)
+void printLogLevel(Print *const _logOutput, const int logLevel)
 {
     switch (logLevel)
     {
