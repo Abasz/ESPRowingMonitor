@@ -1,10 +1,15 @@
 #pragma once
 
 #include "../settings.h"
+#include "enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define PRECISION_FLOAT 0
 #define PRECISION_DOUBLE 1
+#define STROKE_DETECTION_TORQUE 0
+#define STROKE_DETECTION_SLOPE 1
+#define STROKE_DETECTION_BOTH 2
+
 #define CONCAT2(A, B) A##B
 #define CONCAT2_DEFERRED(A, B) CONCAT2(A, B)
 #define IF_0(true_case, false_case) false_case
@@ -13,6 +18,14 @@
 #define VAL(str) #str
 #define TOSTRING(str) VAL(str)
 #define EMPTY(...) (true __VA_OPT__(&&false))
+
+#if STROKE_DETECTION_TYPE == STROKE_DETECTION_BOTH
+    #define STROKE_DETECTION StrokeDetectionType::Both
+#elif STROKE_DETECTION_TYPE == STROKE_DETECTION_SLOPE
+    #define STROKE_DETECTION StrokeDetectionType::Slope
+#else
+    #define STROKE_DETECTION StrokeDetectionType::Torque
+#endif
 
 // Sanity checks and validations
 

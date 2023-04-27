@@ -37,9 +37,11 @@ public:
 
     // Stroke phase detection filter settings
     typedef PRECISION precision;
+    static StrokeDetectionType constexpr strokeDetectionType = STROKE_DETECTION;
     static double constexpr minimumPoweredTorque = MINIMUM_POWERED_TORQUE;
     static double constexpr minimumDragTorque = MINIMUM_DRAG_TORQUE;
     static double constexpr minimumRecoverySlopeMargin = MINIMUM_RECOVERY_SLOPE_MARGIN / 1e6;
+    static double constexpr minimumRecoverySlope = MINIMUM_RECOVERY_SLOPE;
     static unsigned int const strokeDebounceTime = STROKE_DEBOUNCE_TIME * 1000;
     static unsigned char const impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
     // static unsigned char const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;

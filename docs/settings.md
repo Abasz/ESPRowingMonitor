@@ -137,13 +137,31 @@ The minimum torque that should be present on the handle before ESP Rowing Monito
 
 ### MINIMUM_DRAG_TORQUE
 
-The minimum torque that should be present on the handle before ESP Rowing Monitor will consider moving to the recovery phase of the stroke. If this is set to a positive ESP Rowing Monitor will trigger recovery phase quicker (potentially when there is still force to the handle). Setting it to a negative value will make the stroke detection algorithm more conservative (requiring a stronger counter drag force from the air/water/magnet).
+The minimum torque that should be present on the handle before ESP Rowing Monitor will consider moving to the recovery phase of the stroke. If this is set to a positive ESP Rowing Monitor will trigger recovery phase quicker (potentially when there is still force to the handle). Setting it to a negative value will make the stroke detection algorithm more conservative (requiring a stronger counter drag force from the air/water/magnet). Only relevant if STROKE_DETECTION_TYPE is either BOTH or TORQUE
 
 Please note: **MINIMUM_POWERED_TORQUE and MINIMUM_DRAG_TORQUE are the essence of the stroke detection algorithm for ESP Rowing Monitor. Depending on the amount of noise these settings may be critical, but for instance on air rowers both may be left as zero**
+
+### STROKE_DETECTION_TYPE
+
+By default ESP Rowing Monitor uses a torque based stroke detection algorithm with a slope of slope fall backup method. However, on certain machines that produces only a hand full impulses on the recovery phase this method may be hard to tune in consistently (due to the lack of useful data points). Therefore, the user can opt out this more advanced algorithm and fall back to the traditional (acceleration and deceleration based) stroke detection algorithm.
+
+There are three options in this respect:
+
+- _STROKE_DETECTION_TORQUE_: the more advanced torque based with the slope of slope as secondary algorithm (recommended for machines capable of producing several impulses per rotation),
+- _STROKE_DETECTION_SLOPE_: the slope based (that is basically the traditional acceleration and deceleration base method), or
+- _STROKE_DETECTION_BOTH_: use both at the same time
 
 ### MINIMUM_RECOVERY_SLOPE_MARGIN
 
 This setting controls the fall back algorithm for detecting recovery. This value is basically the allowed absolute deviation that the slope of the recovery slopes within the last `IMPULSE_DATA_ARRAY_LENGTH` can be from a completely flat (i.e. zero) slope. Setting this to a very small number makes the algorithm conservative while higher values would require less flat slope (i.e. more likely to detect recovery). I recommend starting with a rather small value and if there are missed strokes starting incremental increase while looking at the handle force values to see whether torque detection for the drive works correctly. If for instance recovery is not detected because the torque never goes below a certain value it may be better to set _MINIMUM_DRAG_TORQUE_ instead of increasing this setting. Based on my experience on air rower (with limited noise I might add) this is useful if the damper is set on the fly as it creates certain undesired issues that throws off torque based detection. So the fall back is needed to compensate for the stroke which had the damper setting movement. After which it all goes back to the normal track.
+
+Only relevant if STROKE_DETECTION_TYPE is either BOTH or TORQUE
+
+### MINIMUM_RECOVERY_SLOPE
+
+This is the minimum recovery slope. This setting corresponds to the [minimumRecoverySlope](https://github.com/JaapvanEkris/openrowingmonitor/blob/v1beta_updates/docs/rower_settings.md#setting-flanklength-and-minimumstrokequality) settings in ORM with the difference that there is no check for the slope quality. Setting this to 0 would mean that a stroke is detected as soon as the slope of the flanks becomes positive (i.e. flywheel is decelerating).
+
+Only relevant if STROKE_DETECTION_TYPE is either BOTH or SLOPE
 
 ### STROKE_DEBOUNCE_TIME
 

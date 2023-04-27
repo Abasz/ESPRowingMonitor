@@ -29,7 +29,23 @@ StrokeService::StrokeService()
 
 bool StrokeService::isFlywheelUnpowered() const
 {
-    return currentTorque < Configurations::minimumDragTorque || (deltaTimesSlopesSeries.size() >= Configurations::impulseDataArrayLength && std::abs(deltaTimesSlopesSeries.average()) < Configurations::minimumRecoverySlopeMargin);
+    if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
+    {
+        if (currentTorque < Configurations::minimumDragTorque || (deltaTimesSlopesSeries.size() >= Configurations::impulseDataArrayLength && std::abs(deltaTimesSlopesSeries.average()) < Configurations::minimumRecoverySlopeMargin))
+        {
+            return true;
+        }
+    }
+
+    if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Torque)
+    {
+        if (deltaTimes.slope() > Configurations::minimumRecoverySlope)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool StrokeService::isFlywheelPowered() const
@@ -90,17 +106,23 @@ void StrokeService::driveStart()
     driveHandleForces.clear();
     driveHandleForces.push_back(currentTorque / sprocketRadius);
 
-    deltaTimesSlopes.reset();
-    deltaTimesSlopesSeries.reset();
-    deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
-    deltaTimesSlopesSeries.push(deltaTimesSlopes.slope());
+    if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
+    {
+        deltaTimesSlopes.reset();
+        deltaTimesSlopesSeries.reset();
+        deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
+        deltaTimesSlopesSeries.push(deltaTimesSlopes.slope());
+    }
 }
 
 void StrokeService::driveUpdate()
 {
     driveHandleForces.push_back(currentTorque / sprocketRadius);
-    deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
-    deltaTimesSlopesSeries.push(deltaTimesSlopes.slope());
+    if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
+    {
+        deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
+        deltaTimesSlopesSeries.push(deltaTimesSlopes.slope());
+    }
 }
 
 void StrokeService::driveEnd()

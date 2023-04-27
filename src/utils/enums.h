@@ -1,5 +1,12 @@
 #pragma once
 
+enum class StrokeDetectionType : unsigned char
+{
+    Torque,
+    Slope,
+    Both
+};
+
 enum class CyclePhase : unsigned char
 {
     Stopped,
