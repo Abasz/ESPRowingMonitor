@@ -11,6 +11,7 @@ FlywheelService::FlywheelService() {}
 
 void FlywheelService::setup()
 {
+    pinMode(Configurations::sensorPinNumber, INPUT_PULLUP);
     Log.verboseln("Attach interrupt");
     attachRotationInterrupt();
 }
