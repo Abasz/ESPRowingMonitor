@@ -1,6 +1,10 @@
 #pragma once
 
-#include "../settings.h"
+#ifdef UNIT_TEST
+    #include "../../test/unit/test-settings.h"
+#else
+    #include "../settings.h"
+#endif
 #include "enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)

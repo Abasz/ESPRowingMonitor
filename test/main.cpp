@@ -34,8 +34,43 @@ void loop(unsigned long now)
 int main(int argc, const char *argv[])
 {
     auto const args = std::span(argv, size_t(argc));
-
     unsigned long now = 0;
+
+    if (args[1] == string("simulate"))
+    {
+        auto const minTimeThreshold = 40000UL;
+        auto const maxTimeThreshold = 45000UL;
+        unsigned long timeThreshold = maxTimeThreshold;
+        const size_t impulseCount = 20000;
+        bool direction = false;
+        for (size_t i = 0; i < impulseCount; i++)
+        {
+            now += timeThreshold;
+
+            loop(now);
+
+            if (direction)
+            {
+                timeThreshold += 1000;
+            }
+            if (!direction)
+            {
+                timeThreshold -= 1000;
+            }
+            if (timeThreshold == minTimeThreshold)
+            {
+                direction = true;
+            }
+
+            if (timeThreshold == maxTimeThreshold)
+            {
+                direction = false;
+            }
+        }
+
+        return 0;
+    }
+
     if (argc < 2 || string(args[1]).empty())
     {
         for (auto const &deltaTime : testDeltaTimes)
@@ -51,7 +86,6 @@ int main(int argc, const char *argv[])
 
     std::ifstream deltaTimeStream(args[1]);
     printf("Running external file: %s\n", args[1]);
-
     while (deltaTimeStream >> deltaTime)
     {
         now += deltaTime;

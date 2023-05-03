@@ -4,6 +4,7 @@
 //
 // Documentation: https://docs.platformio.org/page/plus/debugging.html
 // Configuration: https://docs.platformio.org/page/projectconf/section_env_debug.html
+
 {
     "version": "0.2.0",
     "configurations": [
@@ -11,7 +12,7 @@
             "name": "C++ Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/run_e2e_test.out",
+            "program": "${workspaceFolder}/build/e2e/run_e2e_test.out",
             "args": [
                 "threshold.txt"
             ],
@@ -39,7 +40,7 @@
             "name": "C++ Test Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/tests.out",
+            "program": "${workspaceFolder}/build/unit/tests.out",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
@@ -60,6 +61,38 @@
                     "ignoreFailures": true
                 }
             ]
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug",
+            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/esp32/firmware.elf",
+            "projectEnvName": "esp32",
+            "toolchainBinDir": "${userHome}/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "preLaunchTask": {
+                "type": "PlatformIO",
+                "task": "Pre-Debug"
+            }
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (skip Pre-Debug)",
+            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/esp32/firmware.elf",
+            "projectEnvName": "esp32",
+            "toolchainBinDir": "${userHome}/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "platformio-debug",
+            "request": "launch",
+            "name": "PIO Debug (without uploading)",
+            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/esp32/firmware.elf",
+            "projectEnvName": "esp32",
+            "toolchainBinDir": "${userHome}/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
+            "internalConsoleOptions": "openOnSessionStart",
+            "loadMode": "manual"
         }
     ]
 }

@@ -5,8 +5,6 @@
 
 #include "Arduino.h"
 
-#include "ArduinoLog.h"
-
 #include "globals.h"
 #include "stroke.service.h"
 

@@ -4,7 +4,6 @@
 
 #include "Arduino.h"
 
-#include "../settings.h"
 #include "macros.h"
 
 using std::string;
