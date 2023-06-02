@@ -37,7 +37,7 @@ void PeripheralsController::begin()
 
     if constexpr (Configurations::isWebsocketEnabled)
     {
-        NetworkService::setup();
+        networkService.setup();
     }
 
     if constexpr (Configurations::isBleSErviceEnabled)

@@ -66,6 +66,8 @@ void NetworkService::update()
 
 void NetworkService::setup()
 {
+    auto const deviceName = Configurations::deviceName + "-(" + string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
+    WiFi.setHostname(deviceName.c_str());
     WiFi.mode(WIFI_STA);
     WiFi.begin(Configurations::ssid.c_str(), Configurations::passphrase.c_str());
     Log.infoln("Connecting to wifi: %s", Configurations::ssid.c_str());

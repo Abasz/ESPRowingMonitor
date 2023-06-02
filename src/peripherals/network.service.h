@@ -23,7 +23,7 @@ class NetworkService
 
 public:
     explicit NetworkService(EEPROMService &_eepromService);
-    static void setup();
+    void setup();
     void update();
     void stopServer();
 

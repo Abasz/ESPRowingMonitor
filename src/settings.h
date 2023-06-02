@@ -8,6 +8,7 @@
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
 #define ENABLE_WEBSOCKET_MONITOR true
 #define ENABLE_BLE_SERVICE true
+#define DEVICE_NAME Concept2
 
 // Hardware settings
 #define SENSOR_PIN_NUMBER GPIO_NUM_26

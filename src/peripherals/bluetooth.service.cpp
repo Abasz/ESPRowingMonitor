@@ -241,7 +241,7 @@ void BluetoothService::setupBleDevice()
 {
     Log.verboseln("Initializing BLE device");
 
-    auto const deviceName = "Concept2 (" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
+    auto const deviceName = Configurations::deviceName + "(" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
     NimBLEDevice::init(deviceName);
     NimBLEDevice::setPower(ESP_PWR_LVL_N6);
 
