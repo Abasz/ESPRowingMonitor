@@ -26,7 +26,7 @@ This project by default uses the same [Theil Sen Quadratic Regression](https://g
 
 The default secondary algorithm looks for the moment when the slope of slopes flatlines (again, within a margin set by the user).
 
-Nevertheless, for certain machinces (based on experience where only 1 or 2 impulses per rotation is present), the user can select the traditional stroke detection algorithm. There are three options in this respect:
+Nevertheless, for certain machines (based on experience where only 1 or 2 impulses per rotation is present), the user can select the traditional stroke detection algorithm. There are three options in this respect:
 
 1) the more advanced torque based with the slope of slope as secondary algorithm (recommended for machines capable of producing several impulses per rotation),
 2) the slope based (that is basically the traditional acceleration and deceleration base method), or

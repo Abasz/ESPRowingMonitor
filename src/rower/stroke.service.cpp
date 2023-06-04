@@ -29,7 +29,7 @@ bool StrokeService::isFlywheelUnpowered() const
 {
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
-        if (currentTorque < Configurations::minimumDragTorque || (deltaTimesSlopesSeries.size() >= Configurations::impulseDataArrayLength && std::abs(deltaTimesSlopesSeries.average()) < Configurations::minimumRecoverySlopeMargin))
+        if (currentTorque < Configurations::minimumDragTorque || (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin))
         {
             return true;
         }
@@ -107,9 +107,7 @@ void StrokeService::driveStart()
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
         deltaTimesSlopes.reset();
-        deltaTimesSlopesSeries.reset();
         deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
-        deltaTimesSlopesSeries.push(deltaTimesSlopes.slope());
     }
 }
 
@@ -119,7 +117,6 @@ void StrokeService::driveUpdate()
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
         deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
-        deltaTimesSlopesSeries.push(deltaTimesSlopes.slope());
     }
 }
 

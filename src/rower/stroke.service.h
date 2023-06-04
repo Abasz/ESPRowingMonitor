@@ -57,7 +57,6 @@ class StrokeService
 
     OLSLinearSeries deltaTimes = OLSLinearSeries(Configurations::impulseDataArrayLength);
     OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength);
-    Series deltaTimesSlopesSeries = Series(Configurations::impulseDataArrayLength);
     OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries();
     TSQuadraticSeries angularDistances = TSQuadraticSeries(Configurations::impulseDataArrayLength);
 
