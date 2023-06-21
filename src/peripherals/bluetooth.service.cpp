@@ -274,10 +274,10 @@ void BluetoothService::setupServices()
         ->setValue("AR-C2");
     deviceInfoService
         ->createCharacteristic(serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue("20220104");
+        ->setValue("20230621");
     deviceInfoService
         ->createCharacteristic(softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue("0.1.0");
+        ->setValue("4.1.0");
 
     Log.verboseln("Starting BLE Service");
 
