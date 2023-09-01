@@ -42,10 +42,21 @@
 #if IMPULSE_DATA_ARRAY_LENGTH >= 18
     #error "Using too many data points will increase loop execution time. It should not be more than 17"
 #endif
-#if (!defined(LOCAL_SSID) || !defined(PASSPHRASE))
+
+#if (ENABLE_WEBGUI == true && ENABLE_WEBSOCKET_MONITOR == false)
+    #undef ENABLE_WEBSOCKET_MONITOR
+    #define ENABLE_WEBSOCKET_MONITOR true
+    #warning "WebGui requires WebSocket, so enabling it"
+#endif
+#if ((!defined(LOCAL_SSID) || !defined(PASSPHRASE)) && (ENABLE_WEBGUI == true || ENABLE_WEBSOCKET_MONITOR == true))
     #undef ENABLE_WEBSOCKET_MONITOR
     #define ENABLE_WEBSOCKET_MONITOR false
-    #warning "Not provided SSID and/or Passphrase, disabling WebSocket monitor"
+    #undef ENABLE_WEBGUI
+    #define ENABLE_WEBGUI false
+    #warning "Not provided SSID and/or Passphrase, disabling WebSocket monitor and WebGUI"
+#endif
+#if (ENABLE_WEBGUI == true)
+    #warning "WebGUI is enabled, so a filesystem image needs to be uploaded, please refer to the docs: https://github.com/Abasz/ESPRowingMonitor/blob/master/docs/settings.md#enable_webgui"
 #endif
 
 #if IMPULSE_DATA_ARRAY_LENGTH < 12

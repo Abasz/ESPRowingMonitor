@@ -43,6 +43,10 @@ enum class BleServiceFlag : unsigned char
 
 Enables or disables WebSocket monitor. For more details please refer to the [Wi-Fi](#wi-fi-and-websocket-monitor) section. Default is true.
 
+### ENABLE_WEBGUI
+
+Enables or disables the WebGUI. ESP Rowing Monitor is capable os serving a WebGUI that communicates to the monitor via WebSocket. It requires `ENABLE_WEBSOCKET_MONITOR` to be true. Furthermore a filesystem image with the static resources is required. The WebGUI can be found under a separate repository [ESP Rowing Monitor WEbGUI](https://github.com/Abasz/ESPRowingMonitor-WebGUI), please refer to the [Build/Install](https://github.com/Abasz/ESPRowingMonitor-WebGUI#buildinstall) section. Default is false.
+
 ### ENABLE_BLE_SERVICE
 
 Enables or disables the BLE service to broadcast data. Default is true.

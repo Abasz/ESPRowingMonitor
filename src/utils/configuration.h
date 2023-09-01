@@ -51,6 +51,7 @@ public:
     static inline string const passphrase = TOSTRING(PASSPHRASE);
     static unsigned char const port = PORT;
     static bool const isWebsocketEnabled = ENABLE_WEBSOCKET_MONITOR;
+    static bool const isWebGUIEnabled = ENABLE_WEBGUI;
 
     // Device power management settings
     static gpio_num_t const batteryPinNumber = BATTERY_PIN_NUMBER;

@@ -49,15 +49,18 @@ void NetworkService::update()
 
         server.addHandler(&webSocket);
 
-        if (LittleFS.begin())
+        if constexpr (Configurations::isWebGUIEnabled)
         {
-            Log.traceln("Serving up static Web GUI page");
-            auto const lastModified = LittleFS.open("/www/index.html").getLastWrite();
-            string formattedDate = "Thu, 01 Jan 1970 00:00:00 GMT";
-            std::strftime(formattedDate.data(), 29, "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&lastModified));
-            server.serveStatic("/", LittleFS, "/www/")
-                .setLastModified(formattedDate.c_str())
-                .setDefaultFile("index.html");
+            if (LittleFS.begin())
+            {
+                Log.traceln("Serving up static Web GUI page");
+                auto const lastModified = LittleFS.open("/www/index.html").getLastWrite();
+                string formattedDate = "Thu, 01 Jan 1970 00:00:00 GMT";
+                std::strftime(formattedDate.data(), 29, "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&lastModified));
+                server.serveStatic("/", LittleFS, "/www/")
+                    .setLastModified(formattedDate.c_str())
+                    .setDefaultFile("index.html");
+            }
         }
         server.begin();
         isWifiConnected = true;
