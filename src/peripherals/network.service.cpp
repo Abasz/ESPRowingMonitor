@@ -216,7 +216,7 @@ vector<unsigned char> NetworkService::parseOpCode(string requestOpCommand)
     auto opCommand = vector<unsigned char>();
 
     string parsed;
-    while (requestOpCommand.empty())
+    while (!requestOpCommand.empty())
     {
         auto position = requestOpCommand.find(",");
         if (position == string::npos)
