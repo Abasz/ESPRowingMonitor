@@ -69,6 +69,12 @@ void NetworkService::setup()
     auto const deviceName = Configurations::deviceName + "-(" + string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
     WiFi.setHostname(deviceName.c_str());
     WiFi.mode(WIFI_STA);
+    WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info)
+                 {
+        	Log.traceln("Wifi disconnected, trying to reconnect");
+            WiFi.reconnect();
+            isWifiConnected = true; },
+                 WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
     WiFi.begin(Configurations::ssid.c_str(), Configurations::passphrase.c_str());
     Log.infoln("Connecting to wifi: %s", Configurations::ssid.c_str());
 
