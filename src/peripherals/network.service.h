@@ -15,7 +15,7 @@ class NetworkService
     AsyncWebServer server;
     AsyncWebSocket webSocket;
 
-    bool isWifiConnected = false;
+    bool isServerStarted = false;
     unsigned long lastCleanupTime = 0UL;
 
     void handleWebSocketMessage(const void *arg, uint8_t *data, size_t len) const;
@@ -27,6 +27,6 @@ public:
     void update();
     void stopServer();
 
-    void notifyClients(RowingDataModels::RowingMetrics rowingMetrics, unsigned char batteryLevel, BleServiceFlag bleServiceFlag, ArduinoLogLevel logLevel);
+    void notifyClients(const RowingDataModels::RowingMetrics rowingMetrics, unsigned char batteryLevel, BleServiceFlag bleServiceFlag, ArduinoLogLevel logLevel);
     bool isAnyDeviceConnected() const;
 };

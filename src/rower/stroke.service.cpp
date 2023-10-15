@@ -4,6 +4,7 @@
 #include <numeric>
 
 #include "Arduino.h"
+#include "ArduinoLog.h"
 
 #include "globals.h"
 #include "stroke.service.h"
@@ -113,6 +114,11 @@ void StrokeService::driveStart()
 
 void StrokeService::driveUpdate()
 {
+    if (driveHandleForces.size() > driveHandleForcesMaxCapacity)
+    {
+        driveHandleForces.clear();
+        Log.warningln("driveHandleForces variable data point size exceeded max capacity indicating an extremely long drive phase. With plausible stroke detection settings this should not happen. Resetting variable to avoid crash...");
+    }
     driveHandleForces.push_back(currentTorque / sprocketRadius);
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {

@@ -24,7 +24,7 @@ void NetworkService::update()
         webSocket.cleanupClients(2);
     }
 
-    if (!isWifiConnected && WiFiClass::status() == WL_CONNECTED)
+    if (!isServerStarted && WiFiClass::status() == WL_CONNECTED)
     {
         Log.infoln("Connected to the WiFi network");
         Log.infoln("Local ESP32 IP:  %p", WiFi.localIP());
@@ -63,7 +63,7 @@ void NetworkService::update()
             }
         }
         server.begin();
-        isWifiConnected = true;
+        isServerStarted = true;
     }
 }
 
@@ -75,8 +75,7 @@ void NetworkService::setup()
     WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info)
                  {
         	Log.traceln("Wifi disconnected, trying to reconnect");
-            WiFi.reconnect();
-            isWifiConnected = true; },
+            WiFi.reconnect(); },
                  WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
     WiFi.begin(Configurations::ssid.c_str(), Configurations::passphrase.c_str());
     Log.infoln("Connecting to wifi: %s", Configurations::ssid.c_str());
@@ -110,7 +109,7 @@ void NetworkService::stopServer()
 
 bool NetworkService::isAnyDeviceConnected() const
 {
-    return isWifiConnected && webSocket.count() > 0;
+    return isServerStarted && webSocket.count() > 0;
 }
 
 void NetworkService::notifyClients(const RowingDataModels::RowingMetrics rowingMetrics, const unsigned char batteryLevel, const BleServiceFlag bleServiceFlag, const ArduinoLogLevel logLevel)

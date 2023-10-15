@@ -12,6 +12,7 @@ class StrokeService
 {
     static Configurations::precision constexpr angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
     static Configurations::precision constexpr sprocketRadius = Configurations::sprocketRadius / 100;
+    static const unsigned char driveHandleForcesMaxCapacity = UCHAR_MAX;
 
     // rower state
     CyclePhase cyclePhase = CyclePhase::Stopped;
