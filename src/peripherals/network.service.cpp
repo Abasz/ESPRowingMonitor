@@ -90,7 +90,7 @@ void NetworkService::setup()
         if (connectionTimeout == 0)
         {
             Serial.print("\n");
-            Log.infoln("Was not able to connect to the Wifi retrying in the background");
+            Log.info("Was not able to connect to the Wifi retrying in the background");
             break;
         }
 

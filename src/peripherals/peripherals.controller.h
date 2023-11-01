@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 
 #include "bluetooth.service.h"
 #include "network.service.h"
@@ -34,7 +35,7 @@ public:
     void begin();
     void update();
     void notifyBattery(unsigned char batteryLevel);
-    void updateData(const RowingDataModels::RowingMetrics data);
+    void updateData(RowingDataModels::RowingMetrics data);
     void notifyDragFactor(unsigned char dragFactor) const;
     bool isAnyDeviceConnected();
 };
