@@ -6,8 +6,7 @@
 
 void setup()
 {
-    auto const baudRate = 115200;
-    Serial.begin(baudRate);
+    Serial.begin(static_cast<int>(Configurations::baudRate));
     while (!Serial && !(bool)Serial.available())
     {
     }

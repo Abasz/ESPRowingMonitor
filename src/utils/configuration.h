@@ -17,6 +17,7 @@ public:
     static inline string const deviceName = TOSTRING(DEVICE_NAME);
 
     // Hardware settings
+    static BaudRates const baudRate = BAUD_RATE;
     static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;
     static gpio_num_t const ledPin = static_cast<gpio_num_t>(LED_PIN);
     static bool const isRgb = Configurations::ledPin == GPIO_NUM_NC ? false : IS_RGB;

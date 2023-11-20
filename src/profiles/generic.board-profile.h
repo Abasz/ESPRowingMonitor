@@ -4,6 +4,9 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
+// General settings
+#define BAUD_RATE BaudRates::Baud115200
+
 // LED settings
 #define LED_BLINK_FREQUENCY 1000
 #define LED_PIN LED_BUILTIN // Use GPIO_NUM_NC if no led is available
