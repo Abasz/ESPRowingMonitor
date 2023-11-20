@@ -7,7 +7,7 @@ PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService
 {
 }
 
-void PeripheralsController::update()
+void PeripheralsController::update(unsigned char batteryLevel)
 {
     if constexpr (Configurations::isWebsocketEnabled)
     {
@@ -19,7 +19,18 @@ void PeripheralsController::update()
     {
         if (now - lastConnectedDeviceCheckTime > Configurations::ledBlinkFrequency)
         {
-            updateLed();
+            auto ledColor = CRGB::Blue;
+            const auto minBattLevel = 30;
+            if (batteryLevel < minBattLevel)
+            {
+                ledColor = CRGB::Red;
+            }
+            const auto maxBattLevel = 80;
+            if (batteryLevel > maxBattLevel)
+            {
+                ledColor = CRGB::Green;
+            }
+            updateLed(ledColor);
             lastConnectedDeviceCheckTime = now;
         }
     }
@@ -59,12 +70,22 @@ bool PeripheralsController::isAnyDeviceConnected()
     return BluetoothService::isAnyDeviceConnected() || networkService.isAnyDeviceConnected();
 }
 
-void PeripheralsController::updateLed()
+void PeripheralsController::updateLed(CRGB::HTMLColorCode newLedColor)
 {
-    ledState = isAnyDeviceConnected() ? HIGH : ledState == HIGH ? LOW
-                                                                : HIGH;
+    if constexpr (Configurations::isRgb)
+    {
+        ledColor = isAnyDeviceConnected() ? newLedColor : ledColor == CRGB::Black ? newLedColor
+                                                                                  : CRGB::Black;
+        leds[0] = ledColor;
+        FastLED.show();
+    }
+    else
+    {
+        ledState = isAnyDeviceConnected() ? HIGH : ledState == HIGH ? LOW
+                                                                    : HIGH;
 
-    digitalWrite(Configurations::ledPin, ledState);
+        digitalWrite(Configurations::ledPin, ledState);
+    }
 }
 
 void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
@@ -112,7 +133,14 @@ void PeripheralsController::notifyDragFactor(const unsigned char dragFactor) con
     }
 }
 
-void PeripheralsController::setupConnectionIndicatorLed() const
+void PeripheralsController::setupConnectionIndicatorLed()
 {
-    pinMode(Configurations::ledPin, OUTPUT);
+    if constexpr (Configurations::isRgb)
+    {
+        FastLED.addLeds<WS2812, static_cast<unsigned char>(Configurations::ledPin), GRB>(leds.data(), 1);
+    }
+    else
+    {
+        pinMode(Configurations::ledPin, OUTPUT);
+    }
 }

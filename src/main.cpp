@@ -33,7 +33,7 @@ void loop()
     // simulateRotation();
 
     strokeController.update();
-    peripheralController.update();
+    peripheralController.update(powerManagerController.getBatteryLevel());
     powerManagerController.update(strokeController.getRawImpulseTime(), peripheralController.isAnyDeviceConnected());
 
     // auto start = micros();

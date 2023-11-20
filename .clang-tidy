@@ -36,6 +36,7 @@ ExtraArgs:
   - -Isrc
   - -I../../../../.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src
   - -I.pio/libdeps/esp32/ArduinoLog
+  - -I.pio/libdeps/esp32/FastLED/src
   - -I.pio/libdeps/esp32/NimBLE-Arduino/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32/cores/esp32
   - -I../../../../Documents/www/Embeded System Dev/esp-rowing-monitor/.pio/libdeps/esp32/AsyncTCP-esphome/src

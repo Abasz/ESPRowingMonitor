@@ -19,6 +19,7 @@ public:
     // Hardware settings
     static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;
     static gpio_num_t const ledPin = static_cast<gpio_num_t>(LED_PIN);
+    static bool const isRgb = Configurations::ledPin == GPIO_NUM_NC ? false : IS_RGB;
     static unsigned char const impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
     static double constexpr flywheelInertia = FLYWHEEL_INERTIA;
     static unsigned short const ledBlinkFrequency = LED_BLINK_FREQUENCY;

@@ -5,6 +5,7 @@
 #include "Arduino.h"
 
 #include "ArduinoLog.h"
+#include "FastLED.h"
 
 #include "configuration.h"
 #include "power-manager.service.h"
@@ -29,6 +30,10 @@ void PowerManagerService::goToSleep()
     esp_sleep_enable_ext0_wakeup(Configurations::sensorPinNumber, digitalRead(Configurations::sensorPinNumber) == HIGH ? LOW : HIGH);
     gpio_hold_en(Configurations::sensorPinNumber);
     Log.infoln("Going to sleep mode");
+    if constexpr (Configurations::isRgb)
+    {
+        FastLED.clear(true);
+    }
     Serial.flush();
     esp_deep_sleep_start();
 }
