@@ -42,7 +42,8 @@ public:
     static double constexpr minimumDragTorque = MINIMUM_DRAG_TORQUE;
     static double constexpr minimumRecoverySlopeMargin = MINIMUM_RECOVERY_SLOPE_MARGIN / 1e6;
     static double constexpr minimumRecoverySlope = MINIMUM_RECOVERY_SLOPE;
-    static unsigned int const strokeDebounceTime = STROKE_DEBOUNCE_TIME * 1000;
+    static unsigned int const minimumRecoveryTime = MINIMUM_RECOVERY_TIME * 1000;
+    static unsigned int const minimumDriveTime = MINIMUM_DRIVE_TIME * 1000;
     static unsigned char const impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
     // static unsigned char const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;
 

@@ -255,7 +255,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     if (cyclePhase == CyclePhase::Drive)
     {
         // We are currently in the "Drive" phase, lets determine what the next phase is (if we come from "Stopped" phase )
-        if (rowingTotalTime - driveStartTime > Configurations::strokeDebounceTime && isFlywheelUnpowered())
+        if (rowingTotalTime - driveStartTime > Configurations::minimumDriveTime && isFlywheelUnpowered())
         {
             driveEnd();
             recoveryStart();
@@ -271,7 +271,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     if (cyclePhase == CyclePhase::Recovery)
     {
         // We are currently in the "Recovery" phase, lets determine what the next phase is
-        if (rowingTotalTime - recoveryStartTime > Configurations::strokeDebounceTime && isFlywheelPowered())
+        if (rowingTotalTime - recoveryStartTime > Configurations::minimumRecoveryTime && isFlywheelPowered())
         {
             // Here we can conclude the "Recovery" phase (and the current stroke cycle) as drive to the flywheel is detected (e.g. calculating drag factor)
             recoveryEnd();

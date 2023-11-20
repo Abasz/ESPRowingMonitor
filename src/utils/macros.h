@@ -32,6 +32,15 @@
 #endif
 
 // Sanity checks and validations
+#if defined(STROKE_DEBOUNCE_TIME)
+    #warning "STROKE_DEBOUNCE_TIME" setting is deprecated and will be removed in future versions. Please use "MINIMUM_RECOVERY_TIME" and "MINIMUM_DRIVE_TIME" instead
+    #if !defined(MINIMUM_RECOVERY_TIME)
+        #define MINIMUM_RECOVERY_TIME STROKE_DEBOUNCE_TIME
+    #endif
+    #if !defined(MINIMUM_DRIVE_TIME)
+        #define MINIMUM_DRIVE_TIME STROKE_DEBOUNCE_TIME
+    #endif
+#endif
 
 #if defined(FLOATING_POINT_PRECISION) && FLOATING_POINT_PRECISION != PRECISION_DOUBLE && FLOATING_POINT_PRECISION != PRECISION_FLOAT
     #error "Invalid floating point precision setting"

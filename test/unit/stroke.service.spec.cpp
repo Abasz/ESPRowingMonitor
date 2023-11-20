@@ -24,7 +24,8 @@ TEST_CASE("StrokeService")
         CHECK(Configurations::goodnessOfFitThreshold == 0.97);
         CHECK(Configurations::rotationDebounceTimeMin == 7000);
         CHECK(Configurations::sprocketRadius == 1.5);
-        CHECK(Configurations::strokeDebounceTime == 300000);
+        CHECK(Configurations::minimumDriveTime == 300000);
+        CHECK(Configurations::minimumRecoveryTime == 300000);
     }
 
     ifstream deltaTimesStream("test/unit/stroke.service.spec.deltaTimes.txt");
