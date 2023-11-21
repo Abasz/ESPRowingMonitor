@@ -15,6 +15,7 @@ class NetworkService
     AsyncWebServer server;
     AsyncWebSocket webSocket;
 
+    bool isDisconnectNotified = true;
     bool isServerStarted = false;
     unsigned long lastCleanupTime = 0UL;
 

@@ -24,13 +24,23 @@ void NetworkService::update()
         webSocket.cleanupClients(2);
     }
 
-    if (!isServerStarted && WiFiClass::status() == WL_CONNECTED)
+    if (WiFiClass::status() != WL_CONNECTED)
     {
-        Log.infoln("Connected to the WiFi network");
-        Log.infoln("Local ESP32 IP:  %p", WiFi.localIP());
+        return;
+    }
 
-        webSocket.onEvent([&](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
-                          {
+    isDisconnectNotified = false;
+
+    if (isServerStarted)
+    {
+        return;
+    }
+
+    Log.infoln("Connected to the WiFi network");
+    Log.infoln("Local ESP32 IP:  %p", WiFi.localIP());
+
+    webSocket.onEvent([&](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
+                      {
             switch (type)
             {
             case WS_EVT_CONNECT:
@@ -47,24 +57,23 @@ void NetworkService::update()
                 break;
             } });
 
-        server.addHandler(&webSocket);
+    server.addHandler(&webSocket);
 
-        if constexpr (Configurations::isWebGUIEnabled)
+    if constexpr (Configurations::isWebGUIEnabled)
+    {
+        if (LittleFS.begin())
         {
-            if (LittleFS.begin())
-            {
-                Log.traceln("Serving up static Web GUI page");
-                auto const lastModified = LittleFS.open("/www/index.html").getLastWrite();
-                string formattedDate = "Thu, 01 Jan 1970 00:00:00 GMT";
-                std::strftime(formattedDate.data(), 29, "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&lastModified));
-                server.serveStatic("/", LittleFS, "/www/")
-                    .setLastModified(formattedDate.c_str())
-                    .setDefaultFile("index.html");
-            }
+            Log.traceln("Serving up static Web GUI page");
+            auto const lastModified = LittleFS.open("/www/index.html").getLastWrite();
+            string formattedDate = "Thu, 01 Jan 1970 00:00:00 GMT";
+            std::strftime(formattedDate.data(), 29, "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&lastModified));
+            server.serveStatic("/", LittleFS, "/www/")
+                .setLastModified(formattedDate.c_str())
+                .setDefaultFile("index.html");
         }
-        server.begin();
-        isServerStarted = true;
     }
+    server.begin();
+    isServerStarted = true;
 }
 
 void NetworkService::setup()
@@ -72,16 +81,11 @@ void NetworkService::setup()
     auto const deviceName = Configurations::deviceName + "-(" + string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
     WiFi.setHostname(deviceName.c_str());
     WiFi.mode(WIFI_STA);
-    WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info)
-                 {
-        	Log.traceln("Wifi disconnected, trying to reconnect");
-            WiFi.reconnect(); },
-                 WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
     WiFi.begin(Configurations::ssid.c_str(), Configurations::passphrase.c_str());
     Log.infoln("Connecting to wifi: %s", Configurations::ssid.c_str());
 
     auto connectionTimeout = 20;
-    Log.infoln(".");
+    Log.info(".");
     while (WiFiClass::status() != WL_CONNECTED)
     {
         Serial.print(".");
@@ -97,6 +101,18 @@ void NetworkService::setup()
         connectionTimeout--;
     }
     Serial.print("\n");
+    WiFi.onEvent([&](WiFiEvent_t event, WiFiEventInfo_t info)
+                 { 
+                    if (WiFiClass::status() == WL_CONNECT_FAILED)
+                    {
+                        WiFi.reconnect();
+                    }
+
+                    if (!isDisconnectNotified){
+                        Log.infoln("Wifi disconnected, reconnect is %s", WiFi.getAutoReconnect() ? "enabled" : "disabled");
+                        isDisconnectNotified = true;
+                  } },
+                 WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
 }
 
 void NetworkService::stopServer()
