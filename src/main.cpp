@@ -18,8 +18,8 @@ void setup()
     Log.setLevel(static_cast<int>(eepromService.getLogLevel()));
 
     peripheralController.begin();
-    StrokeController::begin();
     powerManagerController.begin();
+    StrokeController::begin();
 
     peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
 }

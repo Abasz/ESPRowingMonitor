@@ -25,6 +25,26 @@
 		},
 		{
 			"type": "cppbuild",
+			"label": "calibrate",
+			"command": "mingw32-make",
+			"args": [
+				"calibrate",
+				"TARGET_ENVIRONMENT=${command:platformio-ide.activeEnvironment}"
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "compiler: mingw32-make"
+		},
+		{
+			"type": "cppbuild",
 			"label": "catch test file",
 			"command": "mingw32-make",
 			"args": [

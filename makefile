@@ -1,6 +1,6 @@
 CC:=g++
 CPP_FLAGS:=-ggdb -Og -Wall -std=c++20 -std=gnu++20
-.PHONY: e2e test clean
+.PHONY: e2e test clean calibrate
 .DEFAULT_GOAL:=e2e
 
 LIB_DIR:=src
@@ -9,10 +9,13 @@ UNIT_TEST_DIR:=$(TEST_DIR)/unit
 BUILD_DIR:=build
 RMDIR_COMMAND=rm -f -r
 MK_BUILD_DIR_COMMAND=mkdir -p $(dir $<)
+MAKE=make
+TARGET_ENVIRONMENT=generic
 
 ifeq ($(OS), Windows_NT)
 	RMDIR_COMMAND=if exist $(BUILD_DIR) rmdir /q /s
 	MK_BUILD_DIR_COMMAND=if not exist $(subst /,\,$(BUILD_DIR))\$(subst /,\,$(dir $<)) mkdir $(subst /,\,$(BUILD_DIR))\$(subst /,\,$(dir $<))
+	MAKE=mingw32-make
 endif
 
 INCLUDES:=-include test/Arduino.h -Itest
@@ -44,6 +47,15 @@ $(BUILD_DIR)/test/%.o: %.cpp
 $(BUILD_DIR)/e2e/%.o: %.cpp
 	@$(MK_BUILD_DIR_COMMAND)
 	@$(CC) $(CPP_FLAGS) $(INCLUDES) $(DEFINES) -c $< -o $@ $(DEPFLAGS)
+
+calibrate:
+ifeq ("$(wildcard $(BUILD_DIR)\e2e\$(TARGET_ENVIRONMENT))","")
+	@echo Calibrateing new environment: $(TARGET_ENVIRONMENT)
+	@echo Cleaning...
+	@$(RMDIR_COMMAND) $(BUILD_DIR)
+endif
+	@test/calibration/$(TARGET_ENVIRONMENT)/run-test.bat
+	@echo > $(BUILD_DIR)\e2e\$(TARGET_ENVIRONMENT)
 
 clean:
 	$(RMDIR_COMMAND) $(BUILD_DIR)
