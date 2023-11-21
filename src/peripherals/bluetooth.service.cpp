@@ -268,16 +268,16 @@ void BluetoothService::setupServices()
 
     deviceInfoService
         ->createCharacteristic(manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue("ZOCO BODY FIT");
+        ->setValue(Configurations::deviceName);
     deviceInfoService
         ->createCharacteristic(modelNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue("AR-C2");
+        ->setValue(Configurations::modelNumber);
     deviceInfoService
         ->createCharacteristic(serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue("20230621");
+        ->setValue(Configurations::serialNumber);
     deviceInfoService
         ->createCharacteristic(softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue("4.1.0");
+        ->setValue(Configurations::softwareVersion);
 
     Log.verboseln("Starting BLE Service");
 

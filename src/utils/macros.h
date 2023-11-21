@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #if defined(UNIT_TEST)
     #include "../../test/unit/test.settings.h"
 #elif defined(USE_CUSTOM_SETTINGS)
@@ -10,6 +12,24 @@
 #include "enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+constexpr unsigned int compileYear = (__DATE__[7] - '0') * 1000 + (__DATE__[8] - '0') * 100 + (__DATE__[9] - '0') * 10 + (__DATE__[10] - '0');
+constexpr unsigned int monthNumber = (int)__DATE__[0] + (int)__DATE__[1] + (int)__DATE__[2];
+constexpr unsigned int compileMonth = monthNumber == 281   ? 1
+                                      : monthNumber == 269 ? 2
+                                      : monthNumber == 288 ? 3
+                                      : monthNumber == 291 ? 4
+                                      : monthNumber == 295 ? 5
+                                      : monthNumber == 301 ? 6
+                                      : monthNumber == 299 ? 7
+                                      : monthNumber == 285 ? 8
+                                      : monthNumber == 296 ? 9
+                                      : monthNumber == 294 ? 10
+                                      : monthNumber == 307 ? 11
+                                      : monthNumber == 268 ? 12
+                                                           : 0;
+constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') : (__DATE__[4] - '0') * 10 + (__DATE__[5] - '0');
+
 #define PRECISION_FLOAT 0
 #define PRECISION_DOUBLE 1
 #define STROKE_DETECTION_TORQUE 0
@@ -39,6 +59,10 @@
     #else
         #define LED_PIN GPIO_NUM_NC
     #endif
+#endif
+
+#if !defined(SERIAL_NUMBER)
+    #define SERIAL_NUMBER "03172022/1"
 #endif
 
 // Sanity checks and validations

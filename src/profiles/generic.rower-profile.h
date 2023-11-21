@@ -4,6 +4,8 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #define DEVICE_NAME Concept2
+#define MODEL_NUMBER Model D
+#define SERIAL_NUMBER "03172022/1"
 
 // Machine settings
 #define IMPULSES_PER_REVOLUTION 3

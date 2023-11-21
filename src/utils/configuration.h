@@ -15,6 +15,10 @@ public:
     static BleServiceFlag const defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
     static bool const isBleServiceEnabled = ENABLE_BLE_SERVICE;
     static inline string const deviceName = TOSTRING(DEVICE_NAME);
+    static inline string const modelNumber = TOSTRING(MODEL_NUMBER);
+    static inline string const serialNumber = SERIAL_NUMBER;
+    static inline string const softwareVersion = std::to_string(compileYear) + std::to_string(compileMonth) + std::to_string(compileDay);
+    ;
 
     // Hardware settings
     static BaudRates const baudRate = BAUD_RATE;
