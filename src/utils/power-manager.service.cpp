@@ -21,14 +21,40 @@ PowerManagerService::PowerManagerService()
 void PowerManagerService::setup()
 {
     printWakeupReason();
+    if constexpr (Configurations::hasSensorOnSwitchPinNumber)
+    {
+        powerSensorOn();
+    }
     setupBatteryMeasurement();
+}
+
+void PowerManagerService::powerSensorOn()
+{
+    pinMode(Configurations::sensorOnSwitchPinNumber, OUTPUT);
+    digitalWrite(Configurations::sensorOnSwitchPinNumber, HIGH);
 }
 
 void PowerManagerService::goToSleep()
 {
     Log.verboseln("Configure deep sleep mode");
-    esp_sleep_enable_ext0_wakeup(Configurations::sensorPinNumber, digitalRead(Configurations::sensorPinNumber) == HIGH ? LOW : HIGH);
-    gpio_hold_en(Configurations::sensorPinNumber);
+
+    if constexpr (Configurations::hasWakeupPinNumber)
+    {
+        pinMode(Configurations::wakeupPinNumber, INPUT_PULLUP);
+    }
+
+    if constexpr (Configurations::hasSensorOnSwitchPinNumber)
+    {
+        digitalWrite(Configurations::sensorOnSwitchPinNumber, LOW);
+    }
+
+    auto const wakeupPin = Configurations::hasWakeupPinNumber ? Configurations::wakeupPinNumber : Configurations::sensorPinNumber;
+    auto const pinState = digitalRead(wakeupPin);
+
+    Log.verboseln("Wake up pin status: %s", pinState == HIGH ? "HIGH" : "LOW");
+
+    esp_sleep_enable_ext0_wakeup(wakeupPin, pinState == HIGH ? LOW : HIGH);
+
     Log.infoln("Going to sleep mode");
     if constexpr (Configurations::isRgb)
     {

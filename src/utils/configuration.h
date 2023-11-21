@@ -23,6 +23,10 @@ public:
     // Hardware settings
     static BaudRates const baudRate = BAUD_RATE;
     static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;
+    static gpio_num_t const wakeupPinNumber = WAKEUP_SENSOR_PIN_NUMBER;
+    static bool const hasWakeupPinNumber = Configurations::wakeupPinNumber != GPIO_NUM_NC;
+    static gpio_num_t const sensorOnSwitchPinNumber = SENSOR_ON_SWITCH_PIN_NUMBER;
+    static bool const hasSensorOnSwitchPinNumber = Configurations::sensorOnSwitchPinNumber != GPIO_NUM_NC;
     static gpio_num_t const ledPin = static_cast<gpio_num_t>(LED_PIN);
     static bool const isRgb = Configurations::ledPin == GPIO_NUM_NC ? false : IS_RGB;
     static unsigned char const impulsesPerRevolution = IMPULSES_PER_REVOLUTION;

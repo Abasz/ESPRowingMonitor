@@ -6,6 +6,7 @@ class PowerManagerService
 
     void setupBatteryMeasurement();
     static void printWakeupReason();
+    static void powerSensorOn();
 
 public:
     PowerManagerService();

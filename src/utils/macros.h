@@ -65,6 +65,14 @@ constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') :
     #define SERIAL_NUMBER "03172022/1"
 #endif
 
+#if !defined(SENSOR_ON_SWITCH_PIN_NUMBER)
+    #define SENSOR_ON_SWITCH_PIN_NUMBER GPIO_NUM_NC
+#endif
+
+#if !defined(WAKEUP_SENSOR_PIN_NUMBER)
+    #define WAKEUP_SENSOR_PIN_NUMBER GPIO_NUM_NC
+#endif
+
 // Sanity checks and validations
 #if defined(STROKE_DEBOUNCE_TIME)
     #warning "STROKE_DEBOUNCE_TIME" setting is deprecated and will be removed in future versions. Please use "MINIMUM_RECOVERY_TIME" and "MINIMUM_DRIVE_TIME" instead

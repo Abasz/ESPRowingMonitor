@@ -14,6 +14,8 @@
 
 // Hardware settings
 #define SENSOR_PIN_NUMBER GPIO_NUM_26
+#define SENSOR_ON_SWITCH_PIN_NUMBER GPIO_NUM_NC // Use GPIO_NUM_NC if no sensor switch is available
+#define WAKEUP_SENSOR_PIN_NUMBER GPIO_NUM_NC    // Use GPIO_NUM_NC if no separate wakeup pin is available
 
 // Device power management settings
 #define BATTERY_PIN_NUMBER GPIO_NUM_34
