@@ -41,7 +41,7 @@ unsigned char PowerManagerService::measureBattery()
 
     for (unsigned char i = 0; i < Configurations::batteryLevelArrayLength; i++)
     {
-        auto const measurement = analogRead(GPIO_NUM_34);
+        auto const measurement = analogRead(Configurations::batteryPinNumber);
 
         auto const espRefVolt = 3.3;
         auto const dacResolution = 4095;

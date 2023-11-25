@@ -16,7 +16,7 @@ ifeq ($(OS), Windows_NT)
 endif
 
 INCLUDES:=-include test/Arduino.h -Itest
-DEFINES:=-D LOCAL_SSID=testSSID -D PASSPHRASE=testPhrase
+override DEFINES+=-D LOCAL_SSID=testSSID -D PASSPHRASE=testPhrase
 
 DEPFLAGS=-MT $@ -MMD -MP -MF $(BUILD_DIR)/$*.d
 

@@ -8,6 +8,7 @@
 #define LOW 0x00
 #define HIGH 0x01
 #define PI 3.1415926535897932384626433832795
+#define LED_BUILTIN GPIO_NUM_2
 
 inline void pinMode(unsigned char pin, unsigned char mode) {}
 inline void digitalWrite(unsigned char pin, unsigned char val) {}

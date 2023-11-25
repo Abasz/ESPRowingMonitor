@@ -15,13 +15,16 @@ void PeripheralsController::update()
     }
 
     auto const now = millis();
-    if (now - lastConnectedDeviceCheckTime > Configurations::ledBlinkFrequency)
+    if constexpr (Configurations::ledPin != GPIO_NUM_NC)
     {
-        updateLed();
-        lastConnectedDeviceCheckTime = now;
+        if (now - lastConnectedDeviceCheckTime > Configurations::ledBlinkFrequency)
+        {
+            updateLed();
+            lastConnectedDeviceCheckTime = now;
+        }
     }
 
-    if constexpr (Configurations::isBleSErviceEnabled)
+    if constexpr (Configurations::isBleServiceEnabled)
     {
         if (now - lastBroadcastTime > updateInterval)
         {
@@ -40,12 +43,15 @@ void PeripheralsController::begin()
         networkService.setup();
     }
 
-    if constexpr (Configurations::isBleSErviceEnabled)
+    if constexpr (Configurations::isBleServiceEnabled)
     {
         bluetoothService.setup();
     }
 
-    setupConnectionIndicatorLed();
+    if constexpr (Configurations::ledPin != GPIO_NUM_NC)
+    {
+        setupConnectionIndicatorLed();
+    }
 }
 
 bool PeripheralsController::isAnyDeviceConnected()
@@ -58,13 +64,13 @@ void PeripheralsController::updateLed()
     ledState = isAnyDeviceConnected() ? HIGH : ledState == HIGH ? LOW
                                                                 : HIGH;
 
-    digitalWrite(GPIO_NUM_2, ledState);
+    digitalWrite(Configurations::ledPin, ledState);
 }
 
 void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
 {
     batteryLevelData = batteryLevel;
-    if constexpr (Configurations::isBleSErviceEnabled)
+    if constexpr (Configurations::isBleServiceEnabled)
     {
         bluetoothService.notifyBattery(batteryLevel);
     }
@@ -99,7 +105,7 @@ void PeripheralsController::notify() const
 
 void PeripheralsController::notifyDragFactor(const unsigned char dragFactor) const
 {
-    if constexpr (Configurations::isBleSErviceEnabled)
+    if constexpr (Configurations::isBleServiceEnabled)
     {
         auto const distance = pow(dragFactor / Configurations::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
         bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
@@ -108,5 +114,5 @@ void PeripheralsController::notifyDragFactor(const unsigned char dragFactor) con
 
 void PeripheralsController::setupConnectionIndicatorLed() const
 {
-    pinMode(GPIO_NUM_2, OUTPUT);
+    pinMode(Configurations::ledPin, OUTPUT);
 }

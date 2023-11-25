@@ -13,11 +13,12 @@ class Configurations
 public:
     static ArduinoLogLevel const defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
     static BleServiceFlag const defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
-    static bool const isBleSErviceEnabled = ENABLE_BLE_SERVICE;
+    static bool const isBleServiceEnabled = ENABLE_BLE_SERVICE;
     static inline string const deviceName = TOSTRING(DEVICE_NAME);
 
     // Hardware settings
     static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;
+    static gpio_num_t const ledPin = static_cast<gpio_num_t>(LED_PIN);
     static unsigned char const impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
     static double constexpr flywheelInertia = FLYWHEEL_INERTIA;
     static unsigned short const ledBlinkFrequency = LED_BLINK_FREQUENCY;
@@ -45,7 +46,6 @@ public:
     static unsigned int const minimumRecoveryTime = MINIMUM_RECOVERY_TIME * 1000;
     static unsigned int const minimumDriveTime = MINIMUM_DRIVE_TIME * 1000;
     static unsigned char const impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
-    // static unsigned char const rotationSmoothingFactor = ROTATION_SMOOTHING_FACTOR;
 
     // Network settings
     static inline string const ssid = TOSTRING(LOCAL_SSID);

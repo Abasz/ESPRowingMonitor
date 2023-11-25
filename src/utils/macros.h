@@ -1,9 +1,11 @@
 #pragma once
 
-#ifdef UNIT_TEST
-    #include "../../test/unit/test-settings.h"
+#if defined(UNIT_TEST)
+    #include "../../test/unit/test.settings.h"
+#elif defined(USE_CUSTOM_SETTINGS)
+    #include "../custom.settings.h"
 #else
-    #include "../settings.h"
+    #include "../default.settings.h"
 #endif
 #include "enums.h"
 
@@ -29,6 +31,14 @@
     #define STROKE_DETECTION StrokeDetectionType::Slope
 #else
     #define STROKE_DETECTION StrokeDetectionType::Torque
+#endif
+
+#if !defined(LED_PIN)
+    #if defined(LED_BUILTIN)
+        #define LED_PIN LED_BUILTIN
+    #else
+        #define LED_PIN GPIO_NUM_NC
+    #endif
 #endif
 
 // Sanity checks and validations

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../src/profiles/generic.board-profile.h"
+
 #include "../src/utils/enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
@@ -9,12 +11,13 @@
 #define ENABLE_WEBSOCKET_MONITOR true
 #define ENABLE_WEBGUI false
 #define ENABLE_BLE_SERVICE true
+#define PORT 80
 
-// Hardware settings
-#define SENSOR_PIN_NUMBER GPIO_NUM_26
+#undef BAUD_RATE
+#define BAUD_RATE BaudRates::Baud1500000
+// Machine settings
 #define IMPULSES_PER_REVOLUTION 3
 #define FLYWHEEL_INERTIA 0.073
-#define LED_BLINK_FREQUENCY 1000
 #define SPROCKET_RADIUS 1.50
 #define CONCEPT_2_MAGIC_NUMBER 2.8
 
@@ -39,18 +42,5 @@
 #define MINIMUM_DRIVE_TIME 300
 #define IMPULSE_DATA_ARRAY_LENGTH 7
 // #define FLOATING_POINT_PRECISION PRECISION_DOUBLE
-
-// Network settings
-#define PORT 80
-
-// Device power management settings
-#define BATTERY_PIN_NUMBER GPIO_NUM_4
-#define VOLTAGE_DIVIDER_RATIO 2
-#define BATTERY_VOLTAGE_MIN 3.3
-#define BATTERY_VOLTAGE_MAX 4.00
-#define BATTERY_LEVEL_ARRAY_LENGTH 5
-#define INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT 10
-#define BATTERY_MEASUREMENT_FREQUENCY 10
-#define DEEP_SLEEP_TIMEOUT 4
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
