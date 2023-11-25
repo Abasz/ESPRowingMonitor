@@ -30,7 +30,7 @@ bool StrokeService::isFlywheelUnpowered() const
 {
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
-        if (currentTorque < Configurations::minimumDragTorque || (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin))
+        if (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && (currentTorque < Configurations::minimumDragTorque || std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin))
         {
             return true;
         }
