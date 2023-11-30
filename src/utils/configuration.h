@@ -14,6 +14,7 @@ public:
     static ArduinoLogLevel const defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
     static BleServiceFlag const defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
     static bool const isBleServiceEnabled = ENABLE_BLE_SERVICE;
+    static BleSignalStrength const bleSignalStrength = BLE_SIGNAL_STRENGTH;
     static inline string const deviceName = TOSTRING(DEVICE_NAME);
     static inline string const modelNumber = TOSTRING(MODEL_NUMBER);
     static inline string const serialNumber = SERIAL_NUMBER;

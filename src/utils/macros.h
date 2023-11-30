@@ -73,6 +73,10 @@ constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') :
     #define WAKEUP_SENSOR_PIN_NUMBER GPIO_NUM_NC
 #endif
 
+#if !defined(BLE_SIGNAL_STRENGTH)
+    #define BLE_SIGNAL_STRENGTH BleSignalStrength::Default
+#endif
+
 // Sanity checks and validations
 #if defined(STROKE_DEBOUNCE_TIME)
     #warning "STROKE_DEBOUNCE_TIME" setting is deprecated and will be removed in future versions. Please use "MINIMUM_RECOVERY_TIME" and "MINIMUM_DRIVE_TIME" instead

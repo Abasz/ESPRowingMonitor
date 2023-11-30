@@ -243,7 +243,8 @@ void BluetoothService::setupBleDevice()
 
     auto const deviceName = Configurations::deviceName + "(" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
     NimBLEDevice::init(deviceName);
-    NimBLEDevice::setPower(ESP_PWR_LVL_N6);
+    NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_ADV);
+    NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_DEFAULT);
 
     Log.verboseln("Setting up Server");
 

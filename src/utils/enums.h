@@ -1,5 +1,7 @@
 #pragma once
 
+#include "NimBLEDevice.h"
+
 enum class StrokeDetectionType : unsigned char
 {
     Torque,
@@ -18,6 +20,13 @@ enum class BleServiceFlag : unsigned char
 {
     CpsService,
     CscService
+};
+
+enum class BleSignalStrength : unsigned char
+{
+    PowerSaver = ESP_PWR_LVL_N12,
+    Default = ESP_PWR_LVL_N0,
+    MaxPower = ESP_PWR_LVL_P9,
 };
 
 enum class ArduinoLogLevel : unsigned char
