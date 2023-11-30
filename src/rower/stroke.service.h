@@ -73,6 +73,9 @@ class StrokeService
     void recoveryUpdate();
     void recoveryEnd();
 
+    void logSlopeMarginDetection() const;
+    void logNewStrokeData() const;
+
 public:
     StrokeService();
 

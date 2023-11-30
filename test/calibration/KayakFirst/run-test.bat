@@ -1,7 +1,7 @@
 @echo off
-echo [34m[4mRunning command[0m: mingw32-make e2e DEFINES+="-D USE_CUSTOM_SETTINGS -D 'BOARD_PROFILE "profiles/devkit.board-profile.h"' -D 'ROWER_PROFILE "profiles/kayakfirst.rower-profile.h"
+echo [34m[4mRunning command[0m: mingw32-make e2e DEFINES+="-D LOG_CALIBRATION -D USE_CUSTOM_SETTINGS -D 'BOARD_PROFILE "profiles/devkit.board-profile.h"' -D 'ROWER_PROFILE "profiles/kayakfirst.rower-profile.h"
 
-mingw32-make --no-print-directory e2e DEFINES+="-D USE_CUSTOM_SETTINGS -D 'BOARD_PROFILE=\""profiles/devkit.board-profile.h\""' -D 'ROWER_PROFILE=\""profiles/kayakfirst.rower-profile.h\""'" || exit /b
+mingw32-make --no-print-directory e2e DEFINES+="-D LOG_CALIBRATION -D USE_CUSTOM_SETTINGS -D 'BOARD_PROFILE=\""profiles/devkit.board-profile.h\""' -D 'ROWER_PROFILE=\""profiles/kayakfirst.rower-profile.h\""'" || exit /b
 
 setlocal enabledelayedexpansion
 

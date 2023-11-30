@@ -73,6 +73,10 @@ constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') :
     #define WAKEUP_SENSOR_PIN_NUMBER GPIO_NUM_NC
 #endif
 
+#if !defined(LOG_CALIBRATION)
+    #define LOG_CALIBRATION false
+#endif
+
 #if !defined(BLE_SIGNAL_STRENGTH)
     #define BLE_SIGNAL_STRENGTH BleSignalStrength::Default
 #endif

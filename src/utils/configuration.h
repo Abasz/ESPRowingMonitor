@@ -11,6 +11,7 @@ using std::string;
 class Configurations
 {
 public:
+    static bool const logCalibration = LOG_CALIBRATION;
     static ArduinoLogLevel const defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
     static BleServiceFlag const defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
     static bool const isBleServiceEnabled = ENABLE_BLE_SERVICE;

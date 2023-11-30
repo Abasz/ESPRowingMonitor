@@ -32,6 +32,11 @@ bool StrokeService::isFlywheelUnpowered() const
     {
         if (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && (currentTorque < Configurations::minimumDragTorque || std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin))
         {
+            if constexpr (Configurations::logCalibration)
+            {
+                logSlopeMarginDetection();
+            }
+
             return true;
         }
     }
@@ -134,6 +139,11 @@ void StrokeService::driveEnd()
     driveTotalAngularDisplacement = rowingTotalAngularDisplacement - driveStartAngularDisplacement;
     strokeCount++;
     strokeTime = rowingTotalTime;
+
+    if constexpr (Configurations::logCalibration)
+    {
+        logNewStrokeData();
+    }
 }
 
 void StrokeService::recoveryStart()
@@ -282,4 +292,34 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
         recoveryUpdate();
         return;
     }
+}
+
+void StrokeService::logSlopeMarginDetection() const
+{
+    if (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && currentTorque > Configurations::minimumDragTorque && std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin)
+    {
+        Log.infoln("slope margin detect");
+    }
+}
+
+void StrokeService::logNewStrokeData() const
+{
+    Log.infoln("deltaTime: %d", strokeCount);
+
+    string response;
+
+    response.append("[");
+
+    for (auto const &handleForce : driveHandleForces)
+    {
+        response.append(std::to_string(handleForce) + ",");
+    }
+
+    if (driveHandleForces.size() > 0)
+    {
+        response.pop_back();
+    }
+    response.append("]}");
+
+    Log.infoln("handleForces: %s", response.c_str());
 }
