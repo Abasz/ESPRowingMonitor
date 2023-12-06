@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 #include "../utils/configuration.h"
 #include "../utils/ols-linear-series.h"
 #include "../utils/series.h"
@@ -43,7 +41,7 @@ class StrokeService
 
     Configurations::precision dragCoefficient = 0;
 
-    std::array<Configurations::precision, Configurations::dragCoefficientsArrayLength> dragCoefficients{};
+    vector<Configurations::precision> dragCoefficients;
 
     Configurations::precision totalAngularDisplacement = 0;
 

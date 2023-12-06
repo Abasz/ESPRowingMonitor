@@ -77,7 +77,7 @@ void StrokeService::calculateDragCoefficient()
         return;
     }
 
-    if (Configurations::dragCoefficientsArrayLength > 1)
+    if constexpr (Configurations::dragCoefficientsArrayLength > 1)
     {
         char i = Configurations::dragCoefficientsArrayLength - 1;
         while (i > 0)
@@ -87,10 +87,11 @@ void StrokeService::calculateDragCoefficient()
         }
         dragCoefficients[0] = rawNewDragCoefficient;
 
-        array<Configurations::precision, Configurations::dragCoefficientsArrayLength> sortedArray{};
+        vector<Configurations::precision> sortedArray(dragCoefficients);
+        unsigned short mid = dragCoefficients.size() / 2;
+        partial_sort(begin(sortedArray), begin(sortedArray) + mid + 1, end(sortedArray));
 
-        partial_sort_copy(dragCoefficients.cbegin(), dragCoefficients.cend(), sortedArray.begin(), sortedArray.end());
-        rawNewDragCoefficient = sortedArray[sortedArray.size() / 2];
+        rawNewDragCoefficient = sortedArray.size() % 2 != 0 ? sortedArray[mid] : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
     }
 
     dragCoefficient = rawNewDragCoefficient;
