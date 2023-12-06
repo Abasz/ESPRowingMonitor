@@ -11,8 +11,8 @@ class EEPROMService
 {
     Preferences &preferences;
 
-    static constexpr char const *logLevelAddress = "logLevel";
-    static constexpr char const *bleServiceFlagAddress = "bleService";
+    static constexpr const char *logLevelAddress = "logLevel";
+    static constexpr const char *bleServiceFlagAddress = "bleService";
 
     ArduinoLogLevel logLevel = Configurations::defaultLogLevel;
     BleServiceFlag bleServiceFlag = Configurations::defaultBleServiceFlag;

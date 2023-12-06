@@ -2,9 +2,9 @@
 
 using std::array;
 
-auto const testMaxSize = 7U;
+const auto testMaxSize = 7U;
 
-auto const testCases = {
+const auto testCases = {
     array<double, 3U>{5331447, 5331447, 2.09439510239319},
     array<double, 3U>{5646535, 315088, 4.18879020478638},
     array<double, 3U>{5801441, 154906, 6.28318530717957},

@@ -46,7 +46,7 @@ bool FlywheelService::hasDataChanged() const
 
 void FlywheelService::processRotation(const unsigned long now)
 {
-    auto const currentRawImpulseDeltaTime = now - lastRawImpulseTime;
+    const auto currentRawImpulseDeltaTime = now - lastRawImpulseTime;
 
     if (currentRawImpulseDeltaTime < Configurations::rotationDebounceTimeMin)
     {
@@ -57,7 +57,7 @@ void FlywheelService::processRotation(const unsigned long now)
 
     lastRawImpulseTime = now;
 
-    auto const currentDeltaTime = now - lastCleanImpulseTime;
+    const auto currentDeltaTime = now - lastCleanImpulseTime;
 
     // auto deltaTimeDiffPair = minmax<volatile unsigned long>(currentDeltaTime, lastDeltaTime);
     // auto deltaImpulseTimeDiff = deltaTimeDiffPair.second - deltaTimeDiffPair.first;
@@ -72,5 +72,5 @@ void FlywheelService::processRotation(const unsigned long now)
     totalTime += cleanDeltaTime;
     impulseCount = impulseCount + 1;
     lastCleanImpulseTime = now;
-    totalAngularDisplacement = totalAngularDisplacement + angularDisplacementPerImpulse;
+    totalAngularDisplacement = totalAngularDisplacement + Configurations::angularDisplacementPerImpulse;
 }

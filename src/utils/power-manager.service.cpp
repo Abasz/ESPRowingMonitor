@@ -12,7 +12,6 @@
 
 using std::accumulate;
 using std::array;
-using std::sort;
 
 PowerManagerService::PowerManagerService()
 {
@@ -48,8 +47,8 @@ void PowerManagerService::goToSleep()
         digitalWrite(Configurations::sensorOnSwitchPinNumber, LOW);
     }
 
-    auto const wakeupPin = Configurations::hasWakeupPinNumber ? Configurations::wakeupPinNumber : Configurations::sensorPinNumber;
-    auto const pinState = digitalRead(wakeupPin);
+    const auto wakeupPin = Configurations::hasWakeupPinNumber ? Configurations::wakeupPinNumber : Configurations::sensorPinNumber;
+    const auto pinState = digitalRead(wakeupPin);
 
     Log.verboseln("Wake up pin status: %s", pinState == HIGH ? "HIGH" : "LOW");
 
@@ -72,10 +71,10 @@ unsigned char PowerManagerService::measureBattery()
 
     for (unsigned char i = 0; i < Configurations::batteryLevelArrayLength; i++)
     {
-        auto const measurement = analogRead(Configurations::batteryPinNumber);
+        const auto measurement = analogRead(Configurations::batteryPinNumber);
 
-        auto const espRefVolt = 3.3;
-        auto const dacResolution = 4095;
+        const auto espRefVolt = 3.3;
+        const auto dacResolution = 4095;
         auto rawNewBatteryLevel = ((measurement * espRefVolt / dacResolution) - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
 
         if (rawNewBatteryLevel > 100)
@@ -88,12 +87,15 @@ unsigned char PowerManagerService::measureBattery()
             rawNewBatteryLevel = 0;
         }
 
-        batteryLevels[i] = accumulate(batteryLevels.cbegin(), batteryLevels.cbegin() + i, rawNewBatteryLevel) / (i + 1);
+        batteryLevels[i] = accumulate(cbegin(batteryLevels), cbegin(batteryLevels) + i, rawNewBatteryLevel) / (i + 1);
     }
+    const unsigned char mid = Configurations::batteryLevelArrayLength / 2;
+    std::partial_sort(begin(batteryLevels), begin(batteryLevels) + mid + 1, end(batteryLevels));
+    const unsigned char median = batteryLevels.size() % 2 != 0
+                                     ? lround(batteryLevels[mid])
+                                     : lround((batteryLevels[mid - 1] + batteryLevels[mid]) / 2);
 
-    sort(batteryLevels.begin(), batteryLevels.end());
-
-    batteryLevel = batteryLevel == 0 ? lround(batteryLevels[Configurations::batteryLevelArrayLength / 2]) : lround((batteryLevels[Configurations::batteryLevelArrayLength / 2] + batteryLevel) / 2);
+    batteryLevel = batteryLevel == 0 ? median : lround((median + batteryLevel) / 2);
 
     return batteryLevel;
     // auto stop = micros();
@@ -115,7 +117,7 @@ void PowerManagerService::setupBatteryMeasurement()
 
 void PowerManagerService::printWakeupReason()
 {
-    auto const wakeup_reason = esp_sleep_get_wakeup_cause();
+    const auto wakeup_reason = esp_sleep_get_wakeup_cause();
 
     switch (wakeup_reason)
     {

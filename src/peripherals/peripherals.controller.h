@@ -13,8 +13,6 @@ class PeripheralsController
     NetworkService &networkService;
     EEPROMService &eepromService;
 
-    static const unsigned int updateInterval = 1000;
-
     unsigned int lastConnectedDeviceCheckTime = 0;
     unsigned int lastBroadcastTime = 0UL;
 

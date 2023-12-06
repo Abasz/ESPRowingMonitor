@@ -156,7 +156,7 @@ void BluetoothService::notifyCsc(const unsigned short revTime, const unsigned in
         // execution time: 0-1 microsec
         // auto start = micros();
         array<uint8_t, 11> temp = {
-            cscMeasurementFeaturesFlag,
+            CSCSensorBleFlags::cscMeasurementFeaturesFlag,
 
             static_cast<unsigned char>(revCount),
             static_cast<unsigned char>(revCount >> 8),
@@ -198,8 +198,8 @@ void BluetoothService::notifyPsc(const unsigned short revTime, const unsigned in
         // execution time: 0-1 microsec
         // auto start = micros();
         array<uint8_t, 14> temp = {
-            static_cast<unsigned char>(pscMeasurementFeaturesFlag),
-            static_cast<unsigned char>(pscMeasurementFeaturesFlag >> 8),
+            static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
+            static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
 
             static_cast<unsigned char>(avgStrokePower),
             static_cast<unsigned char>(avgStrokePower >> 8),
@@ -241,7 +241,7 @@ void BluetoothService::setupBleDevice()
 {
     Log.verboseln("Initializing BLE device");
 
-    auto const deviceName = Configurations::deviceName + "(" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
+    const auto deviceName = Configurations::deviceName + "(" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
     NimBLEDevice::init(deviceName);
     NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_ADV);
     NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_DEFAULT);
@@ -258,26 +258,26 @@ void BluetoothService::setupServices()
 {
     Log.verboseln("Setting up BLE Services");
     auto *server = NimBLEDevice::getServer();
-    auto *batteryService = server->createService(batterySvcUuid);
-    auto *deviceInfoService = server->createService(deviceInfoSvcUuid);
+    auto *batteryService = server->createService(CommonBleFlags::batterySvcUuid);
+    auto *deviceInfoService = server->createService(CommonBleFlags::deviceInfoSvcUuid);
 
     auto *measurementService = eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? setupCscServices(server) : setupPscServices(server);
 
     Log.verboseln("Setting up BLE Characteristics");
 
-    batteryLevelCharacteristic = batteryService->createCharacteristic(batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+    batteryLevelCharacteristic = batteryService->createCharacteristic(CommonBleFlags::batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
     deviceInfoService
-        ->createCharacteristic(manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(CommonBleFlags::manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue(Configurations::deviceName);
     deviceInfoService
-        ->createCharacteristic(modelNumberSvcUuid, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(CommonBleFlags::modelNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue(Configurations::modelNumber);
     deviceInfoService
-        ->createCharacteristic(serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(CommonBleFlags::serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue(Configurations::serialNumber);
     deviceInfoService
-        ->createCharacteristic(softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(CommonBleFlags::softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue(Configurations::softwareVersion);
 
     Log.verboseln("Starting BLE Service");
@@ -292,20 +292,20 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *const server)
 {
     Log.infoln("Setting up Cycling Speed and Cadence Profile");
 
-    auto *cscService = server->createService(cyclingSpeedCadenceSvcUuid);
-    cscMeasurementCharacteristic = cscService->createCharacteristic(cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
+    auto *cscService = server->createService(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
+    cscMeasurementCharacteristic = cscService->createCharacteristic(CSCSensorBleFlags::cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
-    dragFactorCharacteristic = cscService->createCharacteristic(dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
-
-    cscService
-        ->createCharacteristic(cscFeatureUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(cscFeaturesFlag);
+    dragFactorCharacteristic = cscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     cscService
-        ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(sensorLocationFlag);
+        ->createCharacteristic(CSCSensorBleFlags::cscFeatureUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(CSCSensorBleFlags::cscFeaturesFlag);
 
-    cscService->createCharacteristic(cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
+    cscService
+        ->createCharacteristic(CommonBleFlags::sensorLocationUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(CommonBleFlags::sensorLocationFlag);
+
+    cscService->createCharacteristic(CSCSensorBleFlags::cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
     return cscService;
 }
@@ -313,20 +313,20 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *const server)
 NimBLEService *BluetoothService::setupPscServices(NimBLEServer *const server)
 {
     Log.infoln("Setting up Cycling Power Profile");
-    auto *pscService = server->createService(cyclingPowerSvcUuid);
-    pscMeasurementCharacteristic = pscService->createCharacteristic(pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
+    auto *pscService = server->createService(PSCSensorBleFlags::cyclingPowerSvcUuid);
+    pscMeasurementCharacteristic = pscService->createCharacteristic(PSCSensorBleFlags::pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
-    dragFactorCharacteristic = pscService->createCharacteristic(dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
-
-    pscService
-        ->createCharacteristic(pscFeatureUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(pscFeaturesFlag);
+    dragFactorCharacteristic = pscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     pscService
-        ->createCharacteristic(sensorLocationUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(sensorLocationFlag);
+        ->createCharacteristic(PSCSensorBleFlags::pscFeatureUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(PSCSensorBleFlags::pscFeaturesFlag);
 
-    pscService->createCharacteristic(pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
+    pscService
+        ->createCharacteristic(CommonBleFlags::sensorLocationUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(CommonBleFlags::sensorLocationFlag);
+
+    pscService->createCharacteristic(PSCSensorBleFlags::pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
     return pscService;
 }
@@ -336,12 +336,12 @@ void BluetoothService::setupAdvertisement() const
     auto *pAdvertising = NimBLEDevice::getAdvertising();
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
     {
-        pAdvertising->setAppearance(bleAppearanceCyclingPower);
-        pAdvertising->addServiceUUID(cyclingPowerSvcUuid);
+        pAdvertising->setAppearance(PSCSensorBleFlags::bleAppearanceCyclingPower);
+        pAdvertising->addServiceUUID(PSCSensorBleFlags::cyclingPowerSvcUuid);
     }
     if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
     {
-        pAdvertising->setAppearance(bleAppearanceCyclingSpeedCadence);
-        pAdvertising->addServiceUUID(cyclingSpeedCadenceSvcUuid);
+        pAdvertising->setAppearance(CSCSensorBleFlags::bleAppearanceCyclingSpeedCadence);
+        pAdvertising->addServiceUUID(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
     }
 }

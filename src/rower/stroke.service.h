@@ -8,10 +8,6 @@
 
 class StrokeService
 {
-    static Configurations::precision constexpr angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
-    static Configurations::precision constexpr sprocketRadius = Configurations::sprocketRadius / 100;
-    static const unsigned char driveHandleForcesMaxCapacity = UCHAR_MAX;
-
     // rower state
     CyclePhase cyclePhase = CyclePhase::Stopped;
     unsigned long long rowingTotalTime = 0ULL;
@@ -49,10 +45,10 @@ class StrokeService
     Configurations::precision currentAngularVelocity = 0;
     Configurations::precision currentAngularAcceleration = 0;
     Configurations::precision currentTorque = 0;
-    vector<Configurations::precision> driveHandleForces{};
+    vector<Configurations::precision> driveHandleForces;
 
-    vector<Series> angularVelocityMatrix{};
-    vector<Series> angularAccelerationMatrix{};
+    vector<Series> angularVelocityMatrix;
+    vector<Series> angularAccelerationMatrix;
 
     OLSLinearSeries deltaTimes = OLSLinearSeries(Configurations::impulseDataArrayLength);
     OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength);

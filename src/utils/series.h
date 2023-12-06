@@ -9,14 +9,14 @@ using std::vector;
 
 class Series
 {
-    unsigned char maxSeriesLength = 0UL;
+    unsigned char maxSeriesLength = 0;
     Configurations::precision seriesSum = 0;
     vector<Configurations::precision> seriesArray;
 
 public:
     explicit Series(unsigned char _maxSeriesLength = 0);
 
-    Configurations::precision const &operator[](size_t index) const;
+    const Configurations::precision &operator[](size_t index) const;
 
     size_t size() const;
     Configurations::precision average() const;

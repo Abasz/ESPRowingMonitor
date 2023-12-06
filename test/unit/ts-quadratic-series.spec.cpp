@@ -9,7 +9,7 @@ TEST_CASE("Theil Sen Quadratic Regression", "[regression]")
 {
     TSQuadraticSeries tsQuad(testMaxSize);
 
-    for (auto const &testCase : testCases)
+    for (const auto &testCase : testCases)
     {
         tsQuad.push(testCase[0] / 1e6, testCase[2]);
     }
@@ -29,7 +29,7 @@ TEST_CASE("Theil Sen Quadratic Regression", "[regression]")
 
     SECTION("secondDerivativeAtPosition should return correct values")
     {
-        auto const secondDerExpected = 36.30125477962745;
+        const auto secondDerExpected = 36.30125477962745;
         CHECK(tsQuad.secondDerivativeAtPosition(0) == secondDerExpected);
         CHECK(tsQuad.secondDerivativeAtPosition(1) == secondDerExpected);
         CHECK(tsQuad.secondDerivativeAtPosition(2) == secondDerExpected);

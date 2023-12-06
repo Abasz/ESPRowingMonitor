@@ -10,7 +10,7 @@ Series::Series(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSerie
     }
 }
 
-Configurations::precision const &Series::operator[](size_t index) const
+const Configurations::precision &Series::operator[](size_t index) const
 {
     return seriesArray[index];
 };
@@ -34,7 +34,7 @@ Configurations::precision Series::median() const
 {
     if (!seriesArray.empty())
     {
-        unsigned int const mid = seriesArray.size() / 2;
+        const unsigned int mid = seriesArray.size() / 2;
         vector<Configurations::precision> sortedArray(seriesArray);
         partial_sort(begin(sortedArray), begin(sortedArray) + mid + 1, end(sortedArray));
 
@@ -53,7 +53,7 @@ void Series::push(const Configurations::precision value)
         // the maximum of the array has been reached, we have to create room by removing the first
         // value from the array
         seriesSum -= seriesArray[0];
-        seriesArray.erase(seriesArray.begin());
+        seriesArray.erase(begin(seriesArray));
     }
 
     seriesArray.push_back(value);

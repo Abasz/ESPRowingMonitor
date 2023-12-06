@@ -13,7 +13,6 @@ using std::accumulate;
 using std::any_of;
 using std::array;
 using std::minmax;
-using std::partial_sort_copy;
 
 using RowingDataModels::RowingMetrics;
 
@@ -69,7 +68,7 @@ void StrokeService::calculateDragCoefficient()
         return;
     }
 
-    auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * Configurations::flywheelInertia) / angularDisplacementPerImpulse;
+    auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * Configurations::flywheelInertia) / Configurations::angularDisplacementPerImpulse;
 
     if (rawNewDragCoefficient > Configurations::upperDragFactorThreshold ||
         rawNewDragCoefficient < Configurations::lowerDragFactorThreshold)
@@ -109,7 +108,7 @@ void StrokeService::driveStart()
     driveStartAngularDisplacement = rowingTotalAngularDisplacement;
 
     driveHandleForces.clear();
-    driveHandleForces.push_back(currentTorque / sprocketRadius);
+    driveHandleForces.push_back(currentTorque / Configurations::sprocketRadius);
 
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
@@ -120,12 +119,13 @@ void StrokeService::driveStart()
 
 void StrokeService::driveUpdate()
 {
+    const unsigned char driveHandleForcesMaxCapacity = UCHAR_MAX;
     if (driveHandleForces.size() > driveHandleForcesMaxCapacity)
     {
         driveHandleForces.clear();
         Log.warningln("driveHandleForces variable data point size exceeded max capacity indicating an extremely long drive phase. With plausible stroke detection settings this should not happen. Resetting variable to avoid crash...");
     }
-    driveHandleForces.push_back(currentTorque / sprocketRadius);
+    driveHandleForces.push_back(currentTorque / Configurations::sprocketRadius);
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
         deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
@@ -198,11 +198,11 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
 
     if (angularVelocityMatrix.size() >= Configurations::impulseDataArrayLength)
     {
-        angularVelocityMatrix.erase(angularVelocityMatrix.begin());
+        angularVelocityMatrix.erase(begin(angularVelocityMatrix));
     }
     if (angularAccelerationMatrix.size() >= Configurations::impulseDataArrayLength)
     {
-        angularAccelerationMatrix.erase(angularAccelerationMatrix.begin());
+        angularAccelerationMatrix.erase(begin(angularAccelerationMatrix));
     }
 
     angularVelocityMatrix.push_back(Series(Configurations::impulseDataArrayLength));
@@ -245,7 +245,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
         rowingImpulseCount++;
         rowingTotalTime += deltaTimes.yAtSeriesBegin();
         revTime = rowingTotalTime;
-        rowingTotalAngularDisplacement += angularDisplacementPerImpulse;
+        rowingTotalAngularDisplacement += Configurations::angularDisplacementPerImpulse;
 
         // Since we detected power, setting to "Drive" phase and increasing rotation count and registering rotation time
         driveStart();
@@ -255,9 +255,9 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
 
     rowingImpulseCount++;
     rowingTotalTime += deltaTimes.yAtSeriesBegin();
-    rowingTotalAngularDisplacement += angularDisplacementPerImpulse;
+    rowingTotalAngularDisplacement += Configurations::angularDisplacementPerImpulse;
 
-    distance += distancePerAngularDisplacement * (distance == 0 ? rowingTotalAngularDisplacement : angularDisplacementPerImpulse);
+    distance += distancePerAngularDisplacement * (distance == 0 ? rowingTotalAngularDisplacement : Configurations::angularDisplacementPerImpulse);
     if (distance > 0)
     {
         revTime = rowingTotalTime;
@@ -311,7 +311,7 @@ void StrokeService::logNewStrokeData() const
 
     response.append("[");
 
-    for (auto const &handleForce : driveHandleForces)
+    for (const auto &handleForce : driveHandleForces)
     {
         response.append(std::to_string(handleForce) + ",");
     }

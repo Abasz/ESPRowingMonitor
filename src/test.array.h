@@ -1788,12 +1788,12 @@ void simulateRotation()
 
     lastTestRevTime = micros();
     i++;
-    auto now = elapsedTime + accumulate(test.begin(), test.begin() + i, 0);
+    auto now = elapsedTime + accumulate(begin(test), begin(test) + i, 0);
     flywheelService.processRotation(now);
     if (i >= std::size(test))
     {
         Log.infoln("Going to sleep. Processed number of rotations: %d", i);
-        elapsedTime += accumulate(test.begin(), test.begin() + i, 0);
+        elapsedTime += accumulate(begin(test), begin(test) + i, 0);
         i = 0;
         i2++;
     }

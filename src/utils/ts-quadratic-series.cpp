@@ -43,7 +43,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     {
         // the maximum of the array has been reached, we have to create room
         // in the 2D array by removing the first row from the A-table
-        seriesA.erase(seriesA.begin());
+        seriesA.erase(begin(seriesA));
     }
 
     // invariant: the indices of the X and Y array now match up with the
@@ -62,17 +62,17 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     {
         // there are at least two points in the X and Y arrays, so let's add the new datapoint
         auto i = 0U;
-        while (i < seriesX.size() - 2U)
+        while (i < seriesX.size() - 2)
         {
             seriesA[seriesX.size() - 1].push_back(calculateA(i, seriesX.size() - 1));
             i++;
         }
-        a = matrixMedian(seriesA);
+        a = seriesAMedian();
 
         i = 0;
-        while (i < seriesX.size() - 1U)
+        while (i < seriesX.size() - 1)
         {
-            auto const seriesXPointI = seriesX[i];
+            const auto seriesXPointI = seriesX[i];
             linearResidue.push(
                 seriesXPointI,
                 seriesY[i] - a * (seriesXPointI * seriesXPointI));
@@ -90,15 +90,15 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
 // EXEC_TIME_15: approx 2000us
 Configurations::precision TSQuadraticSeries::calculateA(const unsigned char pointOne, const unsigned char pointThree) const
 {
-    auto const xPointOne = seriesX[pointOne];
-    auto const xPointThree = seriesX[pointThree];
+    const auto xPointOne = seriesX[pointOne];
+    const auto xPointThree = seriesX[pointThree];
 
     if (pointOne + 1 < pointThree && xPointOne != xPointThree)
     {
         Series results(maxSeriesLength);
         auto pointTwo = pointOne + 1;
 
-        auto const xPointTwo = seriesX[pointTwo];
+        const auto xPointTwo = seriesX[pointTwo];
 
         while (
             pointOne < pointTwo &&
@@ -107,16 +107,16 @@ Configurations::precision TSQuadraticSeries::calculateA(const unsigned char poin
             xPointTwo != xPointThree)
         {
             // for the underlying math, see https://www.quora.com/How-do-I-find-a-quadratic-equation-from-points/answer/Robert-Paxson
-            auto const xPointTwo = seriesX[pointTwo];
-            auto const yPointThree = seriesY[pointThree];
-            auto const yPointTwo = seriesY[pointTwo];
+            const auto xPointTwo = seriesX[pointTwo];
+            const auto yPointThree = seriesY[pointThree];
+            const auto yPointTwo = seriesY[pointTwo];
 
             results.push(
                 (xPointOne * (yPointThree - yPointTwo) +
                  seriesY[pointOne] * (xPointTwo - xPointThree) +
                  (xPointThree * yPointTwo - xPointTwo * yPointThree)) /
                 ((xPointOne - xPointTwo) * (xPointOne - xPointThree) * (xPointTwo - xPointThree)));
-            pointTwo += 1;
+            pointTwo++;
         }
 
         return results.median();
@@ -126,18 +126,18 @@ Configurations::precision TSQuadraticSeries::calculateA(const unsigned char poin
 }
 
 // EXEC_TIME_15: approx 800us
-Configurations::precision TSQuadraticSeries::matrixMedian(const vector<vector<Configurations::precision>> inputMatrix)
+Configurations::precision TSQuadraticSeries::seriesAMedian() const
 {
-    if (inputMatrix.size() > 1)
+    if (seriesA.size() > 1)
     {
         vector<Configurations::precision> flattened;
 
-        for (auto &input : inputMatrix)
+        for (const auto &input : seriesA)
         {
             flattened.insert(end(flattened), begin(input), end(input));
         }
 
-        unsigned int mid = flattened.size() / 2;
+        const unsigned short mid = flattened.size() / 2;
         partial_sort(begin(flattened), begin(flattened) + mid + 1, end(flattened));
 
         return flattened.size() % 2 != 0

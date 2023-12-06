@@ -14,8 +14,8 @@ TSLinearSeries::TSLinearSeries(const unsigned char _maxSeriesLength) : maxSeries
 // EXEC_TIME_15: approx 450us
 Configurations::precision TSLinearSeries::calculateSlope(const unsigned char pointOne, const unsigned char pointTwo) const
 {
-    auto const seriesXPointOne = seriesX[pointOne];
-    auto const seriesXPointTwo = seriesX[pointTwo];
+    const auto seriesXPointOne = seriesX[pointOne];
+    const auto seriesXPointTwo = seriesX[pointTwo];
 
     if (pointOne != pointTwo && seriesXPointOne != seriesXPointTwo)
     {
@@ -38,12 +38,12 @@ Configurations::precision TSLinearSeries::median() const
     {
         vector<Configurations::precision> flattened;
 
-        for (auto const &slope : slopes)
+        for (const auto &slope : slopes)
         {
             flattened.insert(end(flattened), begin(slope), end(slope));
         }
 
-        unsigned int mid = flattened.size() / 2;
+        const unsigned short mid = flattened.size() / 2;
         partial_sort(begin(flattened), begin(flattened) + mid + 1, end(flattened));
 
         return flattened.size() % 2 != 0
@@ -63,7 +63,7 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
     {
         // the maximum of the array has been reached, we have to create room
         // in the 2D array by removing the first row from the table
-        removeFirstRow();
+        slopes.erase(begin(slopes));
     }
 
     // invariant: the indices of the X and Y array now match up with the
@@ -77,7 +77,7 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
         auto i = 0U;
         while (i < slopes.size())
         {
-            auto const result = calculateSlope(i, slopes.size());
+            const auto result = calculateSlope(i, slopes.size());
             slopes[i].push_back(result);
             i++;
         }
@@ -93,11 +93,6 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
     {
         a = median();
     }
-}
-
-void TSLinearSeries::removeFirstRow()
-{
-    slopes.erase(slopes.begin());
 }
 
 void TSLinearSeries::reset()

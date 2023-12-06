@@ -15,7 +15,6 @@ class TSLinearSeries
     vector<vector<Configurations::precision>> slopes;
 
     Configurations::precision calculateSlope(unsigned char pointOne, unsigned char pointTwo) const;
-    void removeFirstRow();
 
 public:
     explicit TSLinearSeries(unsigned char _maxSeriesLength = 0);

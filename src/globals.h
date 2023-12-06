@@ -9,10 +9,10 @@
 
 static unsigned long lastUpdateTime = 0UL;
 
-static unsigned long const msecsPerSec = 1000000;
-static unsigned long const secsPerMin = 60;
-static unsigned long const secsPerHour = 3600;
-static unsigned long const secsPerDay = 86400;
+static const unsigned long msecsPerSec = 1000000;
+static const unsigned long secsPerMin = 60;
+static const unsigned long secsPerHour = 3600;
+static const unsigned long secsPerDay = 86400;
 
 extern Preferences preferences;
 extern EEPROMService eepromService;

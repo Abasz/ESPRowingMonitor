@@ -41,8 +41,8 @@ void loop()
     // - not connected 20-30 microsec
     // - connected 1900-2200 microsec
     // auto start = micros();
-    auto const now = millis();
-    auto const minUpdateInterval = 4000;
+    const auto now = millis();
+    const auto minUpdateInterval = 4000;
     if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount() || now - lastUpdateTime > minUpdateInterval)
     {
         peripheralController.updateData(strokeController.getAllData());

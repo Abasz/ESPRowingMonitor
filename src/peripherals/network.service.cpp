@@ -16,8 +16,8 @@ NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_e
 
 void NetworkService::update()
 {
-    auto const now = millis();
-    auto const cleanupInterval = 5000;
+    const auto now = millis();
+    const auto cleanupInterval = 5000;
     if (now - lastCleanupTime > cleanupInterval)
     {
         lastCleanupTime = now;
@@ -64,7 +64,7 @@ void NetworkService::update()
         if (LittleFS.begin())
         {
             Log.traceln("Serving up static Web GUI page");
-            auto const lastModified = LittleFS.open("/www/index.html").getLastWrite();
+            const auto lastModified = LittleFS.open("/www/index.html").getLastWrite();
             string formattedDate = "Thu, 01 Jan 1970 00:00:00 GMT";
             std::strftime(formattedDate.data(), 29, "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&lastModified));
             server.serveStatic("/", LittleFS, "/www/")
@@ -78,7 +78,7 @@ void NetworkService::update()
 
 void NetworkService::setup()
 {
-    auto const deviceName = Configurations::deviceName + "-(" + string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
+    const auto deviceName = Configurations::deviceName + "-(" + string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
     WiFi.setHostname(deviceName.c_str());
     WiFi.mode(WIFI_STA);
     WiFi.begin(Configurations::ssid.c_str(), Configurations::passphrase.c_str());
@@ -144,7 +144,7 @@ void NetworkService::notifyClients(const RowingDataModels::RowingMetrics rowingM
     response.append(",\"dragFactor\":" + to_string(rowingMetrics.dragCoefficient * 1e6));
     response.append(",\"handleForces\": [");
 
-    for (auto const &handleForce : rowingMetrics.driveHandleForces)
+    for (const auto &handleForce : rowingMetrics.driveHandleForces)
     {
         response.append(to_string(handleForce) + ",");
     }
@@ -160,12 +160,12 @@ void NetworkService::notifyClients(const RowingDataModels::RowingMetrics rowingM
 
 void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *const data, const size_t len) const
 {
-    auto const *const info = static_cast<const AwsFrameInfo *>(arg);
+    const auto *const info = static_cast<const AwsFrameInfo *>(arg);
     if (static_cast<bool>(info->final) && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
     {
         // NOLINTBEGIN
         data[len] = 0;
-        string const request(reinterpret_cast<char *>(data));
+        const string request(reinterpret_cast<char *>(data));
         // NOLINTEND
 
         if (request.size() < 3)
@@ -173,11 +173,11 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
             Log.traceln("Invalid request: %s", request.c_str());
         }
 
-        auto const requestOpCommand = request.substr(1, request.size() - 2);
+        const auto requestOpCommand = request.substr(1, request.size() - 2);
 
         Log.infoln("Incoming WS message");
 
-        auto const opCommand = parseOpCode(requestOpCommand);
+        const auto opCommand = parseOpCode(requestOpCommand);
 
         if (opCommand.size() != 2)
         {
@@ -249,7 +249,7 @@ vector<unsigned char> NetworkService::parseOpCode(string requestOpCommand)
         }
         parsed = requestOpCommand.substr(0, position);
         requestOpCommand.erase(0, position + 1);
-        if (std::any_of(parsed.begin(), parsed.end(), [](unsigned char character)
+        if (std::any_of(begin(parsed), end(parsed), [](unsigned char character)
                         { return !(bool)std::isdigit(character); }))
         {
             Log.traceln("Invalid opCode: %s", parsed.c_str());

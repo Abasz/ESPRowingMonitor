@@ -5,17 +5,17 @@
 
 TEST_CASE("Theil Sen Linear Regression", "[regression]")
 {
-    auto const testMaxSize = 7U;
+    const auto testMaxSize = 7U;
     TSLinearSeries tsReg(testMaxSize);
 
-    for (auto const &testCase : testCases)
+    for (const auto &testCase : testCases)
     {
         tsReg.push(testCase[1] / 1e6, testCase[0] / 1e6);
     }
 
     SECTION("should correctly calculate Median")
     {
-        auto const expectedMedian = -39.37665713543009;
+        const auto expectedMedian = -39.37665713543009;
         REQUIRE(tsReg.median() == expectedMedian);
     }
     SECTION("should assign the median to coefficientA")

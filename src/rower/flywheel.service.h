@@ -5,8 +5,6 @@
 
 class FlywheelService
 {
-    static Configurations::precision constexpr angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
-
     volatile unsigned long lastDeltaTime = 0;
     volatile unsigned long cleanDeltaTime = 0;
     volatile unsigned long lastRawImpulseTime = 0;

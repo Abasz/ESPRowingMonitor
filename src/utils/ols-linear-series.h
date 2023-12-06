@@ -3,8 +3,6 @@
 #include "configuration.h"
 #include "series.h"
 
-using std::vector;
-
 class OLSLinearSeries
 {
     unsigned char maxSeriesLength = 0;

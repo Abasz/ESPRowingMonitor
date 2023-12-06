@@ -10,7 +10,7 @@
 
 using std::string;
 
-void loop(unsigned long now)
+void loop(const unsigned long now)
 {
     simulateRotation(now);
     strokeController.update();
@@ -33,13 +33,13 @@ void loop(unsigned long now)
 
 int main(int argc, const char *argv[])
 {
-    auto const args = std::span(argv, size_t(argc));
+    const auto args = std::span(argv, size_t(argc));
     unsigned long now = 0;
 
     if (args[1] == string("simulate"))
     {
-        auto const minTimeThreshold = 40000UL;
-        auto const maxTimeThreshold = 45000UL;
+        const auto minTimeThreshold = 40000UL;
+        const auto maxTimeThreshold = 45000UL;
         unsigned long timeThreshold = maxTimeThreshold;
         const size_t impulseCount = 20000;
         bool direction = false;
@@ -73,7 +73,7 @@ int main(int argc, const char *argv[])
 
     if (argc < 2 || string(args[1]).empty())
     {
-        for (auto const &deltaTime : testDeltaTimes)
+        for (const auto &deltaTime : testDeltaTimes)
         {
             now += deltaTime;
             loop(now);

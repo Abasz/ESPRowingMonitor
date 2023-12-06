@@ -44,12 +44,12 @@ void printPrefix(Print *const _logOutput, int logLevel)
 
 void printTimestamp(Print *const _logOutput)
 {
-    unsigned long const msecs = micros();
-    unsigned long const secs = msecs / msecsPerSec;
-    unsigned long const microSeconds = msecs % msecsPerSec;
-    unsigned long const seconds = secs % secsPerMin;
-    unsigned long const minutes = (secs / secsPerMin) % secsPerMin;
-    unsigned long const hours = (secs % secsPerDay) / secsPerHour;
+    const unsigned long msecs = micros();
+    const unsigned long secs = msecs / msecsPerSec;
+    const unsigned long microSeconds = msecs % msecsPerSec;
+    const unsigned long seconds = secs % secsPerMin;
+    const unsigned long minutes = (secs / secsPerMin) % secsPerMin;
+    const unsigned long hours = (secs % secsPerDay) / secsPerHour;
 
     // NOLINTBEGIN
     char timestamp[20];

@@ -11,68 +11,71 @@ using std::string;
 class Configurations
 {
 public:
-    static bool const logCalibration = LOG_CALIBRATION;
-    static ArduinoLogLevel const defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
-    static BleServiceFlag const defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
-    static bool const isBleServiceEnabled = ENABLE_BLE_SERVICE;
-    static BleSignalStrength const bleSignalStrength = BLE_SIGNAL_STRENGTH;
-    static inline string const deviceName = TOSTRING(DEVICE_NAME);
-    static inline string const modelNumber = TOSTRING(MODEL_NUMBER);
-    static inline string const serialNumber = SERIAL_NUMBER;
-    static inline string const softwareVersion = std::to_string(compileYear) + std::to_string(compileMonth) + std::to_string(compileDay);
-    ;
+    typedef PRECISION precision;
+
+    static const bool logCalibration = LOG_CALIBRATION;
+    static const ArduinoLogLevel defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
+    static const BleServiceFlag defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
+    static const bool isBleServiceEnabled = ENABLE_BLE_SERVICE;
+    static const BleSignalStrength bleSignalStrength = BLE_SIGNAL_STRENGTH;
+
+    inline static const string deviceName = TOSTRING(DEVICE_NAME);
+    inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
+    inline static const string serialNumber = SERIAL_NUMBER;
+    inline static const string softwareVersion = std::to_string(compileYear) + std::to_string(compileMonth) + std::to_string(compileDay);
 
     // Hardware settings
-    static BaudRates const baudRate = BAUD_RATE;
-    static gpio_num_t const sensorPinNumber = SENSOR_PIN_NUMBER;
-    static gpio_num_t const wakeupPinNumber = WAKEUP_SENSOR_PIN_NUMBER;
-    static bool const hasWakeupPinNumber = Configurations::wakeupPinNumber != GPIO_NUM_NC;
-    static gpio_num_t const sensorOnSwitchPinNumber = SENSOR_ON_SWITCH_PIN_NUMBER;
-    static bool const hasSensorOnSwitchPinNumber = Configurations::sensorOnSwitchPinNumber != GPIO_NUM_NC;
-    static gpio_num_t const ledPin = static_cast<gpio_num_t>(LED_PIN);
-    static bool const isRgb = Configurations::ledPin == GPIO_NUM_NC ? false : IS_RGB;
-    static unsigned char const impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
-    static double constexpr flywheelInertia = FLYWHEEL_INERTIA;
-    static unsigned short const ledBlinkFrequency = LED_BLINK_FREQUENCY;
-    static double constexpr sprocketRadius = SPROCKET_RADIUS;
-    static double constexpr concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
+    static const BaudRates baudRate = BAUD_RATE;
+    static const gpio_num_t sensorPinNumber = SENSOR_PIN_NUMBER;
+    static const gpio_num_t wakeupPinNumber = WAKEUP_SENSOR_PIN_NUMBER;
+    static const bool hasWakeupPinNumber = Configurations::wakeupPinNumber != GPIO_NUM_NC;
+    static const gpio_num_t sensorOnSwitchPinNumber = SENSOR_ON_SWITCH_PIN_NUMBER;
+    static const bool hasSensorOnSwitchPinNumber = Configurations::sensorOnSwitchPinNumber != GPIO_NUM_NC;
+    static const gpio_num_t ledPin = static_cast<gpio_num_t>(LED_PIN);
+    static const bool isRgb = Configurations::ledPin == GPIO_NUM_NC ? false : IS_RGB;
+    static const unsigned char impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
+    static constexpr double flywheelInertia = FLYWHEEL_INERTIA;
+    static const unsigned short ledBlinkFrequency = LED_BLINK_FREQUENCY;
+    static constexpr double sprocketRadius = SPROCKET_RADIUS / 100;
+    static constexpr double concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
+
+    static constexpr Configurations::precision angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
 
     // Sensor signal filter settings
-    static unsigned short const rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN * 1000;
-    static unsigned int const rowingStoppedThresholdPeriod = ROWING_STOPPED_THRESHOLD_PERIOD * 1000;
+    static const unsigned short rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN * 1000;
+    static const unsigned int rowingStoppedThresholdPeriod = ROWING_STOPPED_THRESHOLD_PERIOD * 1000;
 
     // Drag factor filter settings
-    static double constexpr goodnessOfFitThreshold = GOODNESS_OF_FIT_THRESHOLD;
-    static unsigned int const maxDragFactorRecoveryPeriod = MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000;
-    static double constexpr lowerDragFactorThreshold = LOWER_DRAG_FACTOR_THRESHOLD / 1e6;
-    static double constexpr upperDragFactorThreshold = UPPER_DRAG_FACTOR_THRESHOLD / 1e6;
-    static unsigned char const dragCoefficientsArrayLength = DRAG_COEFFICIENTS_ARRAY_LENGTH;
+    static constexpr double goodnessOfFitThreshold = GOODNESS_OF_FIT_THRESHOLD;
+    static const unsigned int maxDragFactorRecoveryPeriod = MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000;
+    static constexpr double lowerDragFactorThreshold = LOWER_DRAG_FACTOR_THRESHOLD / 1e6;
+    static constexpr double upperDragFactorThreshold = UPPER_DRAG_FACTOR_THRESHOLD / 1e6;
+    static const unsigned char dragCoefficientsArrayLength = DRAG_COEFFICIENTS_ARRAY_LENGTH;
 
     // Stroke phase detection filter settings
-    typedef PRECISION precision;
-    static StrokeDetectionType constexpr strokeDetectionType = STROKE_DETECTION;
-    static double constexpr minimumPoweredTorque = MINIMUM_POWERED_TORQUE;
-    static double constexpr minimumDragTorque = MINIMUM_DRAG_TORQUE;
-    static double constexpr minimumRecoverySlopeMargin = MINIMUM_RECOVERY_SLOPE_MARGIN / 1e6;
-    static double constexpr minimumRecoverySlope = MINIMUM_RECOVERY_SLOPE;
-    static unsigned int const minimumRecoveryTime = MINIMUM_RECOVERY_TIME * 1000;
-    static unsigned int const minimumDriveTime = MINIMUM_DRIVE_TIME * 1000;
-    static unsigned char const impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
+    static constexpr StrokeDetectionType strokeDetectionType = STROKE_DETECTION;
+    static constexpr double minimumPoweredTorque = MINIMUM_POWERED_TORQUE;
+    static constexpr double minimumDragTorque = MINIMUM_DRAG_TORQUE;
+    static constexpr double minimumRecoverySlopeMargin = MINIMUM_RECOVERY_SLOPE_MARGIN / 1e6;
+    static constexpr double minimumRecoverySlope = MINIMUM_RECOVERY_SLOPE;
+    static const unsigned int minimumRecoveryTime = MINIMUM_RECOVERY_TIME * 1000;
+    static const unsigned int minimumDriveTime = MINIMUM_DRIVE_TIME * 1000;
+    static const unsigned char impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
 
     // Network settings
-    static inline string const ssid = TOSTRING(LOCAL_SSID);
-    static inline string const passphrase = TOSTRING(PASSPHRASE);
-    static unsigned char const port = PORT;
-    static bool const isWebsocketEnabled = ENABLE_WEBSOCKET_MONITOR;
-    static bool const isWebGUIEnabled = ENABLE_WEBGUI;
+    inline static const string ssid = TOSTRING(LOCAL_SSID);
+    inline static const string passphrase = TOSTRING(PASSPHRASE);
+    static const unsigned char port = PORT;
+    static const bool isWebsocketEnabled = ENABLE_WEBSOCKET_MONITOR;
+    static const bool isWebGUIEnabled = ENABLE_WEBGUI;
 
     // Device power management settings
-    static gpio_num_t const batteryPinNumber = BATTERY_PIN_NUMBER;
-    static unsigned char const voltageDividerRatio = VOLTAGE_DIVIDER_RATIO;
-    static double constexpr batteryVoltageMin = BATTERY_VOLTAGE_MIN / Configurations::voltageDividerRatio;
-    static double constexpr batteryVoltageMax = BATTERY_VOLTAGE_MAX / Configurations::voltageDividerRatio;
-    static unsigned char const batteryLevelArrayLength = BATTERY_LEVEL_ARRAY_LENGTH;
-    static unsigned char const initialBatteryLevelMeasurementCount = INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT;
-    static unsigned int const batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1000;
-    static unsigned long const deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1000;
+    static const gpio_num_t batteryPinNumber = BATTERY_PIN_NUMBER;
+    static const unsigned char voltageDividerRatio = VOLTAGE_DIVIDER_RATIO;
+    static constexpr double batteryVoltageMin = BATTERY_VOLTAGE_MIN / Configurations::voltageDividerRatio;
+    static constexpr double batteryVoltageMax = BATTERY_VOLTAGE_MAX / Configurations::voltageDividerRatio;
+    static const unsigned char batteryLevelArrayLength = BATTERY_LEVEL_ARRAY_LENGTH;
+    static const unsigned char initialBatteryLevelMeasurementCount = INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT;
+    static const unsigned int batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1000;
+    static const unsigned long deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1000;
 };

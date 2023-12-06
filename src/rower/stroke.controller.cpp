@@ -18,7 +18,7 @@ void StrokeController::update()
 {
     if (flywheelService.hasDataChanged())
     {
-        auto const lastFlywheelData = flywheelData;
+        const auto lastFlywheelData = flywheelData;
         flywheelData = flywheelService.getData();
         if (lastFlywheelData.rawImpulseTime != flywheelData.rawImpulseTime)
         {

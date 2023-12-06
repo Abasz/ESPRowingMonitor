@@ -10,3 +10,5 @@ AccessModifierOffset: -4
 NamespaceIndentation: All
 FixNamespaceComments: false
 IndentPPDirectives: BeforeHash
+QualifierAlignment: Custom
+QualifierOrder: ["inline", "static", "volatile", "constexpr", "const", "type"]

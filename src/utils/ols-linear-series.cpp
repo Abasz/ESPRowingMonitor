@@ -45,10 +45,10 @@ Configurations::precision OLSLinearSeries::goodnessOfFit() const
     // This function returns the R^2 as a goodness of fit indicator
     if (sumX.size() >= 2 && sumX.sum() > 0)
     {
-        auto const slope = ((Configurations::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Configurations::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
-        auto const intercept = (sumY.sum() - (slope * sumX.sum())) / (Configurations::precision)sumX.size();
-        auto const sse = sumYSquare.sum() - (intercept * sumY.sum()) - (slope * sumXY.sum());
-        auto const sst = sumYSquare.sum() - (sumY.sum() * sumY.sum()) / (Configurations::precision)sumX.size();
+        const auto slope = ((Configurations::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Configurations::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
+        const auto intercept = (sumY.sum() - (slope * sumX.sum())) / (Configurations::precision)sumX.size();
+        const auto sse = sumYSquare.sum() - (intercept * sumY.sum()) - (slope * sumXY.sum());
+        const auto sst = sumYSquare.sum() - (sumY.sum() * sumY.sum()) / (Configurations::precision)sumX.size();
         return 1 - (sse / sst);
     }
 

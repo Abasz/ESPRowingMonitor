@@ -23,7 +23,7 @@ TEST_CASE("StrokeService")
         CHECK(Configurations::dragCoefficientsArrayLength == 1);
         CHECK(Configurations::goodnessOfFitThreshold == 0.97);
         CHECK(Configurations::rotationDebounceTimeMin == 7000);
-        CHECK(Configurations::sprocketRadius == 1.5);
+        CHECK(Configurations::sprocketRadius == 1.5 / 100);
         CHECK(Configurations::minimumDriveTime == 300000);
         CHECK(Configurations::minimumRecoveryTime == 300000);
     }
@@ -44,7 +44,7 @@ TEST_CASE("StrokeService")
     REQUIRE(dragFactorStream.good());
 
     vector<unsigned long> deltaTimes;
-    auto const arraySize = 1764;
+    const auto arraySize = 1764;
     deltaTimes.reserve(arraySize);
     vector<double> slopes;
     slopes.reserve(arraySize - 1);
@@ -107,12 +107,12 @@ TEST_CASE("StrokeService")
     SECTION("processData method should correctly determine")
     {
         StrokeService strokeService;
-        auto const angularDisplacementPerImpulse = (2 * PI) / 3;
+        const auto angularDisplacementPerImpulse = (2 * PI) / 3;
         auto rawImpulseCount = 0UL;
         auto totalTime = 0UL;
         Configurations::precision totalAngularDisplacement = 0.0;
         RowingDataModels::RowingMetrics rowingMetrics;
-        for (auto const &deltaTime : deltaTimes)
+        for (const auto &deltaTime : deltaTimes)
         {
             totalAngularDisplacement += angularDisplacementPerImpulse;
             totalTime += deltaTime;
@@ -126,7 +126,7 @@ TEST_CASE("StrokeService")
                 .rawImpulseTime = totalTime};
 
             strokeService.processData(data);
-            auto const prevStrokeCount = rowingMetrics.strokeCount;
+            const auto prevStrokeCount = rowingMetrics.strokeCount;
             rowingMetrics = strokeService.getData();
 
             if (rowingMetrics.strokeCount > prevStrokeCount)
@@ -145,7 +145,7 @@ TEST_CASE("StrokeService")
         {
             REQUIRE(rowingMetrics.strokeCount == 10);
             REQUIRE(rowingMetrics.lastStrokeTime == 32679715);
-            auto const expectedDistance = 9307.2041350242;
+            const auto expectedDistance = 9307.2041350242;
             REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(expectedDistance, 0.0000001));
             REQUIRE(rowingMetrics.lastRevTime == 39707220);
         }
