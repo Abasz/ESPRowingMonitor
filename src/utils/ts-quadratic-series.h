@@ -10,15 +10,18 @@ using std::vector;
 class TSQuadraticSeries
 {
     unsigned char maxSeriesLength = 0;
+    unsigned short maxSeriesAInnerLength = 0;
     unsigned short maxSeriesALength = 0;
+
     Configurations::precision a = 0;
     Configurations::precision b = 0;
     vector<vector<Configurations::precision>> seriesA;
     Series seriesX;
     Series seriesY;
 
-    Configurations::precision calculateA(unsigned char pointOne, unsigned char pointThree) const;
+    Configurations::precision calculateA(unsigned char pointOne, unsigned char pointTwo, unsigned char pointThree) const;
     Configurations::precision seriesAMedian() const;
+    constexpr unsigned short calculateMaxSeriesALength() const;
 
 public:
     explicit TSQuadraticSeries(unsigned char _maxSeriesLength = 0);
