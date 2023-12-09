@@ -40,6 +40,7 @@ public:
     static constexpr double concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
 
     static constexpr Configurations::precision angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
+    static const unsigned char driveHandleForcesMaxCapacity = UCHAR_MAX;
 
     // Sensor signal filter settings
     static const unsigned short rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN * 1000;

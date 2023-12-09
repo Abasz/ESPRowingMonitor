@@ -8,6 +8,7 @@
 class TSLinearSeries
 {
     unsigned char maxSeriesLength = 0;
+    unsigned short maxSlopeSeriesLength = 0;
     Configurations::precision a = 0;
 
     Series seriesX;

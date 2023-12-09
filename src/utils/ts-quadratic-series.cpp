@@ -4,7 +4,7 @@
 #include "ts-linear-series.h"
 #include "ts-quadratic-series.h"
 
-TSQuadraticSeries::TSQuadraticSeries(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
+TSQuadraticSeries::TSQuadraticSeries(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), maxSeriesALength((_maxSeriesLength - 2) * _maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
 {
     if (_maxSeriesLength > 0)
     {
@@ -34,8 +34,6 @@ Configurations::precision TSQuadraticSeries::secondDerivativeAtPosition(const un
 
 void TSQuadraticSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)
 {
-    TSLinearSeries linearResidue(maxSeriesLength);
-
     seriesX.push(pointX);
     seriesY.push(pointY);
 
@@ -54,7 +52,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     seriesA.push_back({});
     if (maxSeriesLength > 0)
     {
-        seriesA[seriesA.size() - 1].reserve(maxSeriesLength);
+        seriesA[seriesA.size() - 1].reserve(maxSeriesLength - 2);
     }
 
     // calculate the coefficients of this new point
@@ -69,6 +67,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
         }
         a = seriesAMedian();
 
+        TSLinearSeries linearResidue(maxSeriesLength);
         i = 0;
         while (i < seriesX.size() - 1)
         {
@@ -87,7 +86,6 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     }
 }
 
-// EXEC_TIME_15: approx 2000us
 Configurations::precision TSQuadraticSeries::calculateA(const unsigned char pointOne, const unsigned char pointThree) const
 {
     const auto xPointOne = seriesX[pointOne];
@@ -125,24 +123,31 @@ Configurations::precision TSQuadraticSeries::calculateA(const unsigned char poin
     return 0.0;
 }
 
-// EXEC_TIME_15: approx 800us
 Configurations::precision TSQuadraticSeries::seriesAMedian() const
 {
     if (seriesA.size() > 1)
     {
         vector<Configurations::precision> flattened;
+        if (maxSeriesALength > 0)
+        {
+            flattened.reserve(maxSeriesALength);
+        }
 
         for (const auto &input : seriesA)
         {
             flattened.insert(end(flattened), begin(input), end(input));
         }
 
-        const unsigned short mid = flattened.size() / 2;
-        partial_sort(begin(flattened), begin(flattened) + mid + 1, end(flattened));
+        const unsigned int mid = flattened.size() / 2;
 
-        return flattened.size() % 2 != 0
-                   ? flattened[mid]
-                   : (flattened[mid - 1] + flattened[mid]) / 2;
+        std::nth_element(begin(flattened), begin(flattened) + mid, end(flattened));
+
+        if (flattened.size() % 2 != 0)
+        {
+            return flattened[mid];
+        }
+
+        return (flattened[mid] + *std::max_element(begin(flattened), begin(flattened) + mid)) / 2;
     }
 
     return 0.0;

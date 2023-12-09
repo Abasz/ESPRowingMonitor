@@ -20,6 +20,7 @@ StrokeService::StrokeService()
 {
     angularVelocityMatrix.reserve(Configurations::impulseDataArrayLength);
     angularAccelerationMatrix.reserve(Configurations::impulseDataArrayLength);
+    driveHandleForces.reserve(Configurations::driveHandleForcesMaxCapacity);
 
     deltaTimes.push(0, 0);
     angularDistances.push(0, 0);
@@ -119,8 +120,7 @@ void StrokeService::driveStart()
 
 void StrokeService::driveUpdate()
 {
-    const unsigned char driveHandleForcesMaxCapacity = UCHAR_MAX;
-    if (driveHandleForces.size() > driveHandleForcesMaxCapacity)
+    if (driveHandleForces.size() > Configurations::driveHandleForcesMaxCapacity)
     {
         driveHandleForces.clear();
         Log.warningln("driveHandleForces variable data point size exceeded max capacity indicating an extremely long drive phase. With plausible stroke detection settings this should not happen. Resetting variable to avoid crash...");
@@ -224,8 +224,8 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
     if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > Configurations::rowingStoppedThresholdPeriod)
     {
-        recoveryEnd();
         driveHandleForces.clear();
+        recoveryEnd();
         cyclePhase = CyclePhase::Stopped;
         driveDuration = 0;
         avgStrokePower = 0;

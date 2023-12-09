@@ -3,7 +3,7 @@
 
 #include "ts-linear-series.h"
 
-TSLinearSeries::TSLinearSeries(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
+TSLinearSeries::TSLinearSeries(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), maxSlopeSeriesLength(((_maxSeriesLength - 2) * (_maxSeriesLength - 1)) / 2), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
 {
     if (_maxSeriesLength > 0)
     {
@@ -11,7 +11,6 @@ TSLinearSeries::TSLinearSeries(const unsigned char _maxSeriesLength) : maxSeries
     }
 }
 
-// EXEC_TIME_15: approx 450us
 Configurations::precision TSLinearSeries::calculateSlope(const unsigned char pointOne, const unsigned char pointTwo) const
 {
     const auto seriesXPointOne = seriesX[pointOne];
@@ -31,24 +30,31 @@ Configurations::precision TSLinearSeries::coefficientA() const
     return a;
 }
 
-// EXEC_TIME_15: approx 1670us
 Configurations::precision TSLinearSeries::median() const
 {
     if (!slopes.empty())
     {
         vector<Configurations::precision> flattened;
+        if (maxSlopeSeriesLength > 0)
+        {
+            flattened.reserve(maxSlopeSeriesLength);
+        }
 
         for (const auto &slope : slopes)
         {
             flattened.insert(end(flattened), begin(slope), end(slope));
         }
 
-        const unsigned short mid = flattened.size() / 2;
-        partial_sort(begin(flattened), begin(flattened) + mid + 1, end(flattened));
+        const unsigned int mid = flattened.size() / 2;
 
-        return flattened.size() % 2 != 0
-                   ? flattened[mid]
-                   : (flattened[mid - 1] + flattened[mid]) / 2;
+        std::nth_element(begin(flattened), begin(flattened) + mid, end(flattened));
+
+        if (flattened.size() % 2 != 0)
+        {
+            return flattened[mid];
+        }
+
+        return (flattened[mid] + *std::max_element(begin(flattened), begin(flattened) + mid)) / 2;
     }
 
     return 0.0;
@@ -81,17 +87,13 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
             slopes[i].push_back(result);
             i++;
         }
+        a = median();
     }
     // add an empty array at the end to store futurs results for the most recent points
     slopes.push_back({});
     if (maxSeriesLength > 0)
     {
-        slopes[slopes.size() - 1].reserve(maxSeriesLength);
-    }
-    // calculate the median of the slopes
-    if (seriesX.size() > 1)
-    {
-        a = median();
+        slopes[slopes.size() - 1].reserve(maxSeriesLength - 2);
     }
 }
 
@@ -99,7 +101,10 @@ void TSLinearSeries::reset()
 {
     seriesX.reset();
     seriesY.reset();
+
     vector<vector<Configurations::precision>> clear;
+    clear.reserve(maxSeriesLength > 0 ? maxSeriesLength : slopes.size());
     slopes.swap(clear);
+
     a = 0;
 }
