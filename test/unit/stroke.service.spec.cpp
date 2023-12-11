@@ -131,9 +131,9 @@ TEST_CASE("StrokeService")
 
             if (rowingMetrics.strokeCount > prevStrokeCount)
             {
-                SECTION("force curves on new strokes")
+                SECTION("force curves on new stroke (" + std::to_string(rowingMetrics.strokeCount) + ")")
                 {
-                    INFO("deltaTime: " << deltaTime);
+                    INFO("deltaTime: " << deltaTime << ", stroke number: " << rowingMetrics.strokeCount);
                     REQUIRE_THAT(rowingMetrics.driveHandleForces, Catch::Matchers::RangeEquals(forceCurves[rowingMetrics.strokeCount - 1], [](double a, double b)
                                                                                                { return std::abs(a - b) < 0.0000001; }));
                     REQUIRE_THAT(rowingMetrics.dragCoefficient * 1e6, Catch::Matchers::WithinRel(dragFactors[rowingMetrics.strokeCount - 1], 0.0000001));

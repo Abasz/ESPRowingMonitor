@@ -4,7 +4,6 @@
 //
 // Documentation: https://docs.platformio.org/page/plus/debugging.html
 // Configuration: https://docs.platformio.org/page/projectconf/section_env_debug.html
-
 {
     "version": "0.2.0",
     "configurations": [
@@ -40,7 +39,7 @@
             "name": "C++ Test Debug",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/unit/tests.out",
+            "program": "${workspaceFolder}/build/test/tests.out",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
