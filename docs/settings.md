@@ -128,7 +128,7 @@ These settings are less critical (basically optional), it is used for measuring 
 
 #### BATTERY_PIN_NUMBER
 
-The GPIO Pin on which the battery level can be measured.
+The GPIO Pin on which the battery level can be measured. If no battery pin is available use `GPIO_NUM_NC`.
 
 #### VOLTAGE_DIVIDER_RATIO
 
