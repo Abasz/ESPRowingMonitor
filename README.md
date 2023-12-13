@@ -1,8 +1,9 @@
+
 # ESP32 Rowing Monitor
 
 ## Aim of the project
 
-The purpose of this project is to provide capabilities similar to the [Open Rowing Monitor Project](https://github.com/laberning/openrowingmonitor)(ORM) but with the ESP32 microcontroller. The math and algorithm used in ESP Rowing Monitor are based on the approach developed by JaapvanEkris that improves the stroke detection algorithm of the original ORM.
+The purpose of this project is to provide capabilities similar to the [Open Rowing Monitor Project](https://github.com/laberning/openrowingmonitor) (ORM) but with the ESP32 microcontroller. The math and algorithm used in ESP Rowing Monitor are based on the approach developed by JaapvanEkris that improves the stroke detection algorithm of the original ORM.
 
 The choice to the ESP32 was made instead of the Rpi due to its smaller size, its operability completely from battery, its very low cost, and easy accessibility.
 
@@ -84,7 +85,7 @@ Please note that the filesystem of the ESP32 is rather slow, so the first load o
 
 ESP Rowing Monitor implements a logging mechanism with different log levels (e.g. silent, error, info, trace, verbose, etc.). These logs are sent via serial (UART0) only, so the ESP32 MCU should be connected via USB to view the logs. The log level (0-6) can be set via the WebSocket or BLE Control Point using OpCode 17.
 
-T-race level logging is useful during the initial calibration process as it prints the delta times that can be used for replay. Further details can be found in the [Calibration](docs/settings.md#calibration)
+Trace level logging is useful during the initial calibration process as it prints the delta times that can be used for replay. Further details can be found in the [Calibration](docs/settings.md#calibration)
 
 ### Metrics
 
@@ -119,39 +120,43 @@ The ESP32 chip is available in a single core or dual core version with a clock s
 
 The algorithm used for calculating the necessary data for stroke detection can become rather CPU hungry. In a nutshell, the issue is that the Theil-Sen Quadratic Regression is O(N&#178;), which means that as the size of the `IMPULSE_DATA_ARRAY_LENGTH` increases, the time required to complete the calculations increases exponentially (for more information, please see [this explanation](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/physics_openrowingmonitor.md#use-of-quadratic-theil-senn-regression-for-determining-%CE%B1-and-%CF%89-based-on-time-and-%CE%B8)).
 
+As part of the version 5 update there has been significant work done to improve the execution time of the main loop and to better support higher value of `IMPULSE_DATA_ARRAY_LENGTH`. Through various optimizations in the algorithm there has been an approx. 40% improvement in this area leading when using double types to for instance an execution time of 4ms of a 15 data point set (compared to the original 7ms) and for float type for higher data point length over 50% (e.g. execution time is 2.2ms for a 15 data point set compared to the original 4.8).
+
 I conducted some high-level tests and measured the execution times, which are shown in the table below:
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
-|:-----------------------:|:----------------:|
-|18                       |10011.98696       |
-|15                       |6990.030045       |
-|12                       |4862.352041       |
-|9                        |3149.800454       |
-|8                        |2604.280045       |
-|7                        |2209.195578       |
-|6                        |1818.681973       |
-|5                        |1473.622449       |
-|3                        |878.8015873       |
+|:-----------------------:|:-----------------:|
+|18                       |5858               |
+|15                       |4042               |
+|12                       |2783               |
+|9                        |1788               |
+|8                        |1544               |
+|7                        |1256               |
+|6                        |1072               |
+|5                        |957                |
+|3                        |516                |
 
-The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is more than 10ms if double precision is used. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 (and double precision) and gives a warning at 12.
+The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is almost 6ms if double precision is used. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 (and double precision) and gives a warning at 12.
 
-As an example, on my setup, I use 3 impulses per rotation. Based on my experience, the delta times cannot dip below 10ms. So with an `IMPULSE_DATA_ARRAY_LENGTH` size of 7 (execution time with double is approximately 2.2ms), this should be pretty much fine.
+As an example, on my setup, I use 3 impulses per rotation. Based on my experience, the delta times cannot dip below 10ms. So with an `IMPULSE_DATA_ARRAY_LENGTH` size of 7 (execution time with double is approximately 1.2ms), this should be pretty much fine.
+
+On other machine where 6 impulse per rotation happens thanks to the more efficient algorithm for an `IMPULSE_DATA_ARRAY_LENGTH` size of 12 double precision can be used safely as the delta times should not dip below 5ms, giving sufficient time for WebSocket and BLE updates to run.
 
 If, for some reason, testing shows that a higher value for the `IMPULSE_DATA_ARRAY_LENGTH` size is necessary, the execution time can be reduced to some extent if float precision is used instead of double. This is due to the fact that on the 32bit ESP32 MCU doubles are emulated hence, performance suffers:
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:-----------------:|
-|18                       |6537.856009        |
-|15                       |4800.871315        |
-|12                       |3604.821429        |
-|9                        |2512.559524        |
-|8                        |2116.856576        |
-|7                        |1798.734694        |
-|6                        |1478.391156        |
-|5                        |1217.497166        |
-|3                        |770.6655329        |
+|18                       |2906               |
+|15                       |2223               |
+|12                       |1694               |
+|9                        |1257               |
+|8                        |1179               |
+|7                        |1047               |
+|6                        |930                |
+|5                        |618                |
+|3                        |549                |
 
-Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times. I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
+Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times significantly (notice the 2.9ms compared 5.8 for 18 data point). I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
 
 The below picture shows that the blue chart cuts some corners but generally follows the same curve (which does not mean that in certain edge cases the reduced precision does not create errors).
 
@@ -169,7 +174,7 @@ Please see [Sensor signal filter settings](docs/settings.md#sensor-signal-filter
 
 ### BLE and connectivity
 
-The ESP Rowing Monitor does not support heart rate monitors directly, but it may be possible to add heart rate monitor capabilities through the WebGUI using the browser BLE API. However, it may not make much sense to do so.
+The ESP Rowing Monitor does not support heart rate monitors directly, but it is possible to add heart rate monitor capabilities through the WebGUI (with some limitations) using the browser BLE API.
 
 The ESP Rowing Monitor is unlikely to support ANT+ protocol, as setting up the necessary hardware (ANT+ radio) has proven to be challenging and no success has been achieved in loading the ANT network processor firmware on tested chips.
 

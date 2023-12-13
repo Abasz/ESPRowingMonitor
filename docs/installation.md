@@ -1,3 +1,4 @@
+
 # Installation
 
 This project uses Platformio to compile the firmware for ESP32 boards under VSCode. Please note that installing this program and loading it onto the ESP32 board is slightly more complicated than the install process of ORM. Hence I recommend this only for those that have the basic understanding and experience for embedded systems programming, Arduino and/or Platformio. This may prove to be rather challenging for a complete beginner. There are several tutorials on YouTube as well as on the [Platformio main page](https://platformio.org/).
@@ -10,11 +11,18 @@ Once platformio.ini is set up, upload can be performed with the VSCode platformi
 
 Basically any ESP32 development board can be used, but this project was developed and tested on the [Firebeetle 2 Dev Board](https://www.dfrobot.com/product-2231.html).
 
-The general master branch should work with any ESP32 board (as it does not have any board specific code or feature). Please note that the sensor pin needs to be set in settings.h to the pin that is used (default is `GPIO_NUM_26`). Also if battery level measurement is used the pin that is connected to the battery (potentially via a voltage divider) should be configured. The device goes to deep sleep if no peripheral is connected and the last impulse was was since `DEEP_SLEEP_TIMEOUT`. There before entering deepsleep mode the sensor pin is set as wakeup source (taking advantage of interrupt based wakeup) so the devices starts up on starting a session automatically.
+As of version 5 a new more flexible board and other setting management schema is introduced that does not require keeping changes in separate branches. Basically board specific settings (like sensor pin, LED pin etc.) can be set in the `src/profiles`. Please see [Settings](docs/settings.md) page for more details on how-tos.
 
-### FireBeetle 2 board
+The generic board profile should work with any ESP32 board (as it does not have any board specific code or feature). In this case the default sensor pin is `GPIO_NUM_26`, if this needs changing I recommend creating a new board profile so it does not get overwritten on updates. Also if battery level measurement is used the pin that is connected to the battery (potentially via a voltage divider) should be configured. The device goes to deep sleep if no peripheral is connected and the last impulse was was since `DEEP_SLEEP_TIMEOUT`. There before entering deepsleep mode the sensor pin is set as wakeup source (taking advantage of interrupt based wakeup) so the devices starts up on starting a session automatically.
 
-There is a specific branch (FireBeetle) for this board to take advantage of its internal connection between the battery and the ADC pin to measure battery level without additional circuitry and the RGB LED that changes color based on the measured battery level. There are additional features on this branch such as a digital switch (using a transistor) for the hall sensor power so battery consumption in deepsleep is minimal. To wake the device up a wakeup interrupt is set to a separate pin (on my machine this is connected to a reed switch on the handle chain sprocket).
+### Other already supported boards
+
+Currently there are two specific boards that are set up and upported:
+
+1. Firebeetle 2
+2. ESP32 Devkit 1.0
+
+The FireBeetle board takes advantage of its internal connection between the battery and the ADC pin to measure battery level without additional circuitry and the RGB LED that changes color based on the measured battery level as well as uses features such as a digital switch (using a transistor) for the hall sensor power so battery consumption in deepsleep is minimal. To wake the device up a wakeup interrupt is set to a separate pin (on my machine this is connected to a reed switch on the handle chain sprocket). These settings can be enabled in the board profile (please refer to the [Settings](docs/settings.md) page).
 
 Also for the this board I designed a [3D printable box](https://www.printables.com/model/441912-firebeetle-2-esp32-e-box-for-esp-rowing-monitor). You can find some pictures of the setup below.
 
@@ -30,3 +38,10 @@ The monitor provided with this rower was not very capable especially as it did n
 
 ![Manget holder 1](imgs/magnet-holder-bracket-1.jpg)
 ![Manget holder 2](imgs/magnet-holder-bracket-2.jpg)
+
+### Further machines
+
+Currently there are rower profiles for two KayakFirst machines:
+
+1. Standard KayakFirst rower profile is for the old orange kayak first machine that I have fitted with a 3 magnet holder bracket
+2. Newer, blue KayakFirst machine that has 6 magnet built in (the profile for the latter is still in development so slight changes will happen).
