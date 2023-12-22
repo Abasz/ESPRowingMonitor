@@ -21,7 +21,10 @@ void setup()
     powerManagerController.begin();
     StrokeController::begin();
 
-    peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
+    if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
+    {
+        peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
+    }
 }
 
 // execution time
@@ -68,11 +71,14 @@ void loop()
         // Serial.println(stop - start);
     }
 
-    if (powerManagerController.getBatteryLevel() != powerManagerController.getPreviousBatteryLevel())
+    if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
     {
-        Log.infoln("batteryLevel: %d", powerManagerController.getBatteryLevel());
-        peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
-        powerManagerController.setPreviousBatteryLevel();
+        if (powerManagerController.getBatteryLevel() != powerManagerController.getPreviousBatteryLevel())
+        {
+            Log.infoln("batteryLevel: %d", powerManagerController.getBatteryLevel());
+            peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
+            powerManagerController.setPreviousBatteryLevel();
+        }
     }
     // auto stop = micros();
     // if (stop - start > 10)

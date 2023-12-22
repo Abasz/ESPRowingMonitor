@@ -258,14 +258,20 @@ void BluetoothService::setupServices()
 {
     Log.verboseln("Setting up BLE Services");
     auto *server = NimBLEDevice::getServer();
-    auto *batteryService = server->createService(CommonBleFlags::batterySvcUuid);
+
+    if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
+    {
+        auto *batteryService = server->createService(CommonBleFlags::batterySvcUuid);
+
+        batteryLevelCharacteristic = batteryService->createCharacteristic(CommonBleFlags::batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+        batteryService->start();
+    }
+
     auto *deviceInfoService = server->createService(CommonBleFlags::deviceInfoSvcUuid);
 
     auto *measurementService = eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? setupCscServices(server) : setupPscServices(server);
 
     Log.verboseln("Setting up BLE Characteristics");
-
-    batteryLevelCharacteristic = batteryService->createCharacteristic(CommonBleFlags::batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
     deviceInfoService
         ->createCharacteristic(CommonBleFlags::manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)
@@ -282,7 +288,6 @@ void BluetoothService::setupServices()
 
     Log.verboseln("Starting BLE Service");
 
-    batteryService->start();
     measurementService->start();
     deviceInfoService->start();
     server->start();

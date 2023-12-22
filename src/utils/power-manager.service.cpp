@@ -24,7 +24,10 @@ void PowerManagerService::setup()
     {
         powerSensorOn();
     }
-    setupBatteryMeasurement();
+    if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
+    {
+        setupBatteryMeasurement();
+    }
 }
 
 void PowerManagerService::powerSensorOn()

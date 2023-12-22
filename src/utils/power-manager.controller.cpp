@@ -11,7 +11,10 @@ void PowerManagerController::begin()
 {
     Log.infoln("Setting up power manager controller");
     powerManagerService.setup();
-    batteryLevel = powerManagerService.measureBattery();
+    if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
+    {
+        batteryLevel = powerManagerService.measureBattery();
+    }
 }
 
 void PowerManagerController::update(const unsigned long lastRevTime, const bool isDeviceConnected)
@@ -22,10 +25,13 @@ void PowerManagerController::update(const unsigned long lastRevTime, const bool 
         PowerManagerService::goToSleep();
     }
 
-    if (now - lastBatteryMeasurementTime > Configurations::batteryMeasurementFrequency * 1000)
+    if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
     {
-        batteryLevel = powerManagerService.measureBattery();
-        lastBatteryMeasurementTime = now;
+        if (now - lastBatteryMeasurementTime > Configurations::batteryMeasurementFrequency * 1000)
+        {
+            batteryLevel = powerManagerService.measureBattery();
+            lastBatteryMeasurementTime = now;
+        }
     }
 }
 
