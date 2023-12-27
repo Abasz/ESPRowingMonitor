@@ -19,6 +19,7 @@ class NetworkService
     struct MetricsTaskParameters
     {
         // AsyncWebSocket &webSocket;
+        PsychicWebSocketHandler &webSocket;
         RowingDataModels::RowingMetrics rowingMetrics;
         vector<unsigned long> deltaTimes;
     } metricTaskParameters;
@@ -26,20 +27,20 @@ class NetworkService
     struct SettingsTaskParameters
     {
         // AsyncWebSocket &webSocket;
+        PsychicWebSocketHandler &webSocket;
         const EEPROMService &eepromService;
         const SdCardService &sdCardService;
         unsigned char batteryLevel = 0;
     } settingsTaskParameters;
 
     PsychicHttpsServer server;
-    // AsyncWebSocket webSocket;
+    PsychicWebSocketHandler webSocket;
 
     bool isDisconnectNotified = true;
     bool isServerStarted = false;
     unsigned long lastCleanupTime = 0UL;
     unsigned char batteryLevel = 0;
 
-    void handleWebSocketMessage(const void *arg, uint8_t *data, size_t len);
     static void broadcastSettingsTask(void *parameters);
     static void broadcastMetricsTask(void *parameters);
     static vector<unsigned char> parseOpCode(std::string requestOpCommand);
