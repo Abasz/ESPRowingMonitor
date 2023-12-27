@@ -10,9 +10,9 @@ EEPROMService::EEPROMService(Preferences &_preferences) : preferences(_preferenc
 void EEPROMService::setup()
 {
     Log.infoln("Setup EEPROM Data store");
-    if (!preferences.begin("bikeSettings"))
+    if (!preferences.begin("monitorSettings"))
     {
-        Log.warningln("Error opening EEPROM using default bike settings");
+        Log.warningln("Error opening EEPROM using default ESP Rowing Monitor settings");
     }
 
     if (!preferences.isKey(logLevelAddress))
@@ -20,7 +20,7 @@ void EEPROMService::setup()
         Log.infoln("Setting LogLevel to default");
         preferences.putUChar(logLevelAddress, static_cast<unsigned char>(Configurations::defaultLogLevel));
     }
-    if (!preferences.isKey(logLevelAddress))
+    if (!preferences.isKey(bleServiceFlagAddress))
     {
         Log.infoln("Setting BleServiceFlag to default");
         preferences.putUChar(bleServiceFlagAddress, static_cast<unsigned char>(Configurations::defaultBleServiceFlag));
