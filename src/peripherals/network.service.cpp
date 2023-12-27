@@ -5,13 +5,14 @@
 #include "Arduino.h"
 #include "ArduinoLog.h"
 #include "LittleFS.h"
+#include "WiFi.h"
 
 #include "network.service.h"
 
 using std::string;
 using std::to_string;
 
-NetworkService::NetworkService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), server(Configurations::port), webSocket("/ws"), metricTaskParameters{webSocket, {}, {}}, settingsTaskParameters{webSocket, _eepromService, _sdCardService, 0} {}
+NetworkService::NetworkService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), /* server(Configurations::port), webSocket(),*/ metricTaskParameters{/* webSocket,  */ {}, {}}, settingsTaskParameters{/* webSocket,  */ _eepromService, _sdCardService, 0} {}
 
 void NetworkService::update()
 {
@@ -20,7 +21,7 @@ void NetworkService::update()
     if (now - lastCleanupTime > cleanupInterval)
     {
         lastCleanupTime = now;
-        webSocket.cleanupClients(2);
+        // webSocket.cleanupClients(2);
     }
 
     if (WiFiClass::status() != WL_CONNECTED)
@@ -38,52 +39,64 @@ void NetworkService::update()
     Log.infoln("Connected to the WiFi network");
     Log.infoln("Local ESP32 IP:  %p", WiFi.localIP());
 
-    webSocket.onEvent([&](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
-                      {
-            switch (type)
-            {
-            case WS_EVT_CONNECT:
-            {
-                Log.traceln("WebSocket client #%u connected from %p", client->id(), client->remoteIP());
-                
-                const auto stackCoreSize = 2'048;
-                xTaskCreatePinnedToCore(
-                    broadcastSettingsTask,
-                    "broadcastSettingsTask",
-                    stackCoreSize,
-                    &settingsTaskParameters,
-                    1,
-                    NULL,
-                    0);
-                break;
-            }
-            case WS_EVT_DISCONNECT:
-                Log.traceln("WebSocket client #%u disconnected", client->id());
-                break;
-            case WS_EVT_DATA:
-                handleWebSocketMessage(arg, data, len);
-                break;
-            case WS_EVT_PONG:
-            case WS_EVT_ERROR:
-                break;
-            } });
+    // webSocket.onEvent([&](AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len)
+    //                   {
+    //         switch (type)
+    //         {
+    //         case WS_EVT_CONNECT:
+    //         {
+    //             Log.traceln("WebSocket client #%u connected from %p", client->id(), client->remoteIP());
 
-    server.addHandler(&webSocket);
+    //             const auto stackCoreSize = 2'048;
+    //             xTaskCreatePinnedToCore(
+    //                 broadcastSettingsTask,
+    //                 "broadcastSettingsTask",
+    //                 stackCoreSize,
+    //                 &settingsTaskParameters,
+    //                 1,
+    //                 NULL,
+    //                 0);
+    //             break;
+    //         }
+    //         case WS_EVT_DISCONNECT:
+    //             Log.traceln("WebSocket client #%u disconnected", client->id());
+    //             break;
+    //         case WS_EVT_DATA:
+    //             handleWebSocketMessage(arg, data, len);
+    //             break;
+    //         case WS_EVT_PONG:
+    //         case WS_EVT_ERROR:
+    //             break;
+    //         } });
+
+    // server.addHandler(&webSocket);
 
     if constexpr (Configurations::isWebGUIEnabled)
     {
         if (LittleFS.begin())
         {
+
+            File keyFile = LittleFS.open("/server.key");
+            File certFile = LittleFS.open("/server.crt");
+            Serial.println("Reading certificate from LittleFS.");
+
+            if (server.listen(443, certFile.readString().c_str(), keyFile.readString().c_str()) != ESP_OK)
+            {
+                Log.infoln("errors tarting https, falling back to http");
+                server.listen(80);
+            }
+
             Log.traceln("Serving up static Web GUI page");
             const auto lastModified = LittleFS.open("/www/index.html").getLastWrite();
             string formattedDate = "Thu, 01 Jan 1970 00:00:00 GMT";
             std::strftime(formattedDate.data(), 29, "%a, %d %b %Y %H:%M:%S GMT", std::localtime(&lastModified));
             server.serveStatic("/", LittleFS, "/www/")
-                .setLastModified(formattedDate.c_str())
-                .setDefaultFile("index.html");
+                ->setIsDir(true)
+                .setDefaultFile("index.html")
+                .setLastModified(formattedDate.c_str());
+            ESP_LOGI(PH_TAG, "core network: %d", xPortGetCoreID());
         }
     }
-    server.begin();
     isServerStarted = true;
 }
 
@@ -129,14 +142,14 @@ void NetworkService::setup()
 void NetworkService::stopServer()
 {
     Log.traceln("Stopping web server and Wifi");
-    webSocket.closeAll();
-    server.end();
+    // webSocket.closeAll();
+    // server.end();
     WiFi.disconnect(true);
 }
 
 bool NetworkService::isAnyDeviceConnected() const
 {
-    return isServerStarted && webSocket.count() > 0;
+    return isServerStarted /* && webSocket.count() > 0 */;
 }
 
 void NetworkService::notifyBatteryLevel(const unsigned char newBatteryLevel)
@@ -160,61 +173,61 @@ void NetworkService::notifyBatteryLevel(const unsigned char newBatteryLevel)
 void NetworkService::broadcastMetricsTask(void *parameters)
 {
     {
-        const auto *const params = static_cast<const NetworkService::MetricsTaskParameters *>(parameters);
+        // const auto *const params = static_cast<const NetworkService::MetricsTaskParameters *>(parameters);
 
-        string response;
+        // string response;
 
-        const auto emptyResponseSize = 70;
-        auto responseSize = emptyResponseSize;
-        responseSize += params->rowingMetrics.driveHandleForces.size() * 4;
-        if (!params->deltaTimes.empty())
-        {
-            const auto digitCountOfLast = static_cast<int>(std::log10(params->deltaTimes.back())) + 1;
-            responseSize += params->deltaTimes.size() * (digitCountOfLast - 4);
-        }
-        response.reserve(responseSize);
+        // const auto emptyResponseSize = 70;
+        // auto responseSize = emptyResponseSize;
+        // responseSize += params->rowingMetrics.driveHandleForces.size() * 4;
+        // if (!params->deltaTimes.empty())
+        // {
+        //     const auto digitCountOfLast = static_cast<int>(std::log10(params->deltaTimes.back())) + 1;
+        //     responseSize += params->deltaTimes.size() * (digitCountOfLast - 4);
+        // }
+        // response.reserve(responseSize);
 
-        response.append("{\"data\":[" + to_string(params->rowingMetrics.lastRevTime));
-        response.append("," + to_string(lround(params->rowingMetrics.distance)));
-        response.append("," + to_string(params->rowingMetrics.lastStrokeTime));
-        response.append("," + to_string(params->rowingMetrics.strokeCount));
-        response.append("," + to_string(lround(params->rowingMetrics.avgStrokePower)));
-        response.append("," + to_string(params->rowingMetrics.driveDuration));
-        response.append("," + to_string(params->rowingMetrics.recoveryDuration));
-        response.append("," + to_string(lround(params->rowingMetrics.dragCoefficient * 1e6)));
+        // response.append("{\"data\":[" + to_string(params->rowingMetrics.lastRevTime));
+        // response.append("," + to_string(lround(params->rowingMetrics.distance)));
+        // response.append("," + to_string(params->rowingMetrics.lastStrokeTime));
+        // response.append("," + to_string(params->rowingMetrics.strokeCount));
+        // response.append("," + to_string(lround(params->rowingMetrics.avgStrokePower)));
+        // response.append("," + to_string(params->rowingMetrics.driveDuration));
+        // response.append("," + to_string(params->rowingMetrics.recoveryDuration));
+        // response.append("," + to_string(lround(params->rowingMetrics.dragCoefficient * 1e6)));
 
-        response.append(",[");
-        if (!params->rowingMetrics.driveHandleForces.empty())
-        {
-            for (const auto &driveHandleForce : params->rowingMetrics.driveHandleForces)
-            {
-                const auto wholeNumber = static_cast<unsigned short>(std::abs(driveHandleForce));
-                const auto decimalPlaces = 3;
-                const auto maxSize = static_cast<unsigned char>(std::log10(wholeNumber)) + 2 + decimalPlaces + (driveHandleForce < 0 ? 1 : 0);
-                string buffer(" ", maxSize);
-                dtostrf(driveHandleForce, maxSize, decimalPlaces, buffer.data());
-                response.append(buffer + ",");
-            }
-            response.pop_back();
-        }
+        // response.append(",[");
+        // if (!params->rowingMetrics.driveHandleForces.empty())
+        // {
+        //     for (const auto &driveHandleForce : params->rowingMetrics.driveHandleForces)
+        //     {
+        //         const auto wholeNumber = static_cast<unsigned short>(std::abs(driveHandleForce));
+        //         const auto decimalPlaces = 3;
+        //         const auto maxSize = static_cast<unsigned char>(std::log10(wholeNumber)) + 2 + decimalPlaces + (driveHandleForce < 0 ? 1 : 0);
+        //         string buffer(" ", maxSize);
+        //         dtostrf(driveHandleForce, maxSize, decimalPlaces, buffer.data());
+        //         response.append(buffer + ",");
+        //     }
+        //     response.pop_back();
+        // }
 
-        response.append("],[");
+        // response.append("],[");
 
-        if (!params->deltaTimes.empty())
-        {
-            for (const auto &deltaTime : params->deltaTimes)
-            {
-                const auto maxSize = static_cast<unsigned char>(std::log10(deltaTime)) + 1;
-                string buffer(" ", maxSize);
-                ultoa(deltaTime, buffer.data(), 10);
-                response.append(buffer + ",");
-            }
-            response.pop_back();
-        }
+        // if (!params->deltaTimes.empty())
+        // {
+        //     for (const auto &deltaTime : params->deltaTimes)
+        //     {
+        //         const auto maxSize = static_cast<unsigned char>(std::log10(deltaTime)) + 1;
+        //         string buffer(" ", maxSize);
+        //         ultoa(deltaTime, buffer.data(), 10);
+        //         response.append(buffer + ",");
+        //     }
+        //     response.pop_back();
+        // }
 
-        response.append("]]}");
+        // response.append("]]}");
 
-        params->webSocket.binaryAll(response.data(), response.size());
+        // params->webSocket.binaryAll(response.data(), response.size());
     }
     vTaskDelete(nullptr);
 }
@@ -255,20 +268,20 @@ void NetworkService::notifyClients(const RowingDataModels::RowingMetrics &rowing
 void NetworkService::broadcastSettingsTask(void *parameters)
 {
     {
-        const auto *const params = static_cast<const NetworkService::SettingsTaskParameters *>(parameters);
+        // const auto *const params = static_cast<const NetworkService::SettingsTaskParameters *>(parameters);
 
-        string response;
-        const auto stringDataLength = 105;
-        response.reserve(stringDataLength);
-        response.append("{\"batteryLevel\":" + to_string(params->batteryLevel));
-        response.append(",\"bleServiceFlag\":" + to_string(static_cast<unsigned char>(params->eepromService.getBleServiceFlag())));
-        response.append(",\"logLevel\":" + to_string(static_cast<unsigned char>(params->eepromService.getLogLevel())));
-        response.append(",\"logToWebSocket\":" + (Configurations::enableWebSocketDeltaTimeLogging ? to_string(static_cast<unsigned char>(params->eepromService.getLogToWebsocket())) : "null"));
-        response.append(",\"logToSdCard\":" + (Configurations::supportSdCardLogging && params->sdCardService.isLogFileOpen() ? to_string(static_cast<unsigned char>(params->eepromService.getLogToSdCard())) : "null"));
+        // string response;
+        // const auto stringDataLength = 105;
+        // response.reserve(stringDataLength);
+        // response.append("{\"batteryLevel\":" + to_string(params->batteryLevel));
+        // response.append(",\"bleServiceFlag\":" + to_string(static_cast<unsigned char>(params->eepromService.getBleServiceFlag())));
+        // response.append(",\"logLevel\":" + to_string(static_cast<unsigned char>(params->eepromService.getLogLevel())));
+        // response.append(",\"logToWebSocket\":" + (Configurations::enableWebSocketDeltaTimeLogging ? to_string(static_cast<unsigned char>(params->eepromService.getLogToWebsocket())) : "null"));
+        // response.append(",\"logToSdCard\":" + (Configurations::supportSdCardLogging && params->sdCardService.isLogFileOpen() ? to_string(static_cast<unsigned char>(params->eepromService.getLogToSdCard())) : "null"));
 
-        response.append("}");
+        // response.append("}");
 
-        params->webSocket.binaryAll(response.c_str(), response.size());
+        // params->webSocket.binaryAll(response.c_str(), response.size());
     }
 
     vTaskDelete(nullptr);
@@ -276,138 +289,138 @@ void NetworkService::broadcastSettingsTask(void *parameters)
 
 void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *const data, const size_t len)
 {
-    const auto *const info = static_cast<const AwsFrameInfo *>(arg);
-    if (!static_cast<bool>(info->final) || info->index != 0 || info->len != len || info->opcode != WS_TEXT)
-    {
-        return;
-    }
+    // const auto *const info = static_cast<const AwsFrameInfo *>(arg);
+    // if (!static_cast<bool>(info->final) || info->index != 0 || info->len != len || info->opcode != WS_TEXT)
+    // {
+    //     return;
+    // }
 
-    // NOLINTBEGIN
-    data[len] = 0;
-    const string request(reinterpret_cast<char *>(data));
-    // NOLINTEND
+    // // NOLINTBEGIN
+    // data[len] = 0;
+    // const string request(reinterpret_cast<char *>(data));
+    // // NOLINTEND
 
-    const auto requestOpCommand = request.substr(1, request.size() - 2);
+    // const auto requestOpCommand = request.substr(1, request.size() - 2);
 
-    Log.infoln("Incoming WS message");
+    // Log.infoln("Incoming WS message");
 
-    const auto opCommand = parseOpCode(requestOpCommand);
+    // const auto opCommand = parseOpCode(requestOpCommand);
 
-    if (opCommand.size() != 2)
-    {
-        Log.traceln("Invalid request: %s", request.c_str());
-        return;
-    }
+    // if (opCommand.size() != 2)
+    // {
+    //     Log.traceln("Invalid request: %s", request.c_str());
+    //     return;
+    // }
 
-    Log.infoln("Op Code: %d; Length: %d", opCommand[0], opCommand.size());
+    // Log.infoln("Op Code: %d; Length: %d", opCommand[0], opCommand.size());
 
-    switch (opCommand[0])
-    {
-    case static_cast<int>(PSCOpCodes::SetLogLevel):
-    {
-        Log.infoln("Set LogLevel OpCode");
+    // switch (opCommand[0])
+    // {
+    // case static_cast<int>(PSCOpCodes::SetLogLevel):
+    // {
+    //     Log.infoln("Set LogLevel OpCode");
 
-        if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 6)
-        {
-            Log.infoln("New LogLevel: %d", opCommand[1]);
-            eepromService.setLogLevel(static_cast<ArduinoLogLevel>(opCommand[1]));
+    //     if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 6)
+    //     {
+    //         Log.infoln("New LogLevel: %d", opCommand[1]);
+    //         eepromService.setLogLevel(static_cast<ArduinoLogLevel>(opCommand[1]));
 
-            const auto stackCoreSize = 2'048;
-            xTaskCreatePinnedToCore(
-                broadcastSettingsTask,
-                "broadcastSettingsTask",
-                stackCoreSize,
-                &settingsTaskParameters,
-                1,
-                NULL,
-                0);
+    //         const auto stackCoreSize = 2'048;
+    //         xTaskCreatePinnedToCore(
+    //             broadcastSettingsTask,
+    //             "broadcastSettingsTask",
+    //             stackCoreSize,
+    //             &settingsTaskParameters,
+    //             1,
+    //             NULL,
+    //             0);
 
-            return;
-        }
+    //         return;
+    //     }
 
-        Log.infoln("Invalid log level: %d", opCommand[1]);
-    }
-    break;
+    //     Log.infoln("Invalid log level: %d", opCommand[1]);
+    // }
+    // break;
 
-    case static_cast<int>(PSCOpCodes::ChangeBleService):
-    {
-        Log.infoln("Change BLE Service");
+    // case static_cast<int>(PSCOpCodes::ChangeBleService):
+    // {
+    //     Log.infoln("Change BLE Service");
 
-        if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
-        {
-            Log.infoln("New BLE Service: %s", opCommand[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
-            eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(opCommand[1]));
+    //     if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
+    //     {
+    //         Log.infoln("New BLE Service: %s", opCommand[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
+    //         eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(opCommand[1]));
 
-            Log.verboseln("Restarting device");
-            Serial.flush();
-            esp_sleep_enable_timer_wakeup(1);
-            esp_deep_sleep_start();
+    //         Log.verboseln("Restarting device");
+    //         Serial.flush();
+    //         esp_sleep_enable_timer_wakeup(1);
+    //         esp_deep_sleep_start();
 
-            return;
-        }
+    //         return;
+    //     }
 
-        Log.infoln("Invalid BLE service flag: %d", opCommand[1]);
-    }
-    break;
+    //     Log.infoln("Invalid BLE service flag: %d", opCommand[1]);
+    // }
+    // break;
 
-    case static_cast<int>(PSCOpCodes::SetWebSocketDeltaTimeLogging):
-    {
-        Log.infoln("Change WebSocket Logging");
+    // case static_cast<int>(PSCOpCodes::SetWebSocketDeltaTimeLogging):
+    // {
+    //     Log.infoln("Change WebSocket Logging");
 
-        if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
-        {
-            Log.infoln("%s WebSocket deltaTime logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
-            eepromService.setLogToWebsocket(static_cast<bool>(opCommand[1]));
+    //     if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
+    //     {
+    //         Log.infoln("%s WebSocket deltaTime logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
+    //         eepromService.setLogToWebsocket(static_cast<bool>(opCommand[1]));
 
-            const auto stackCoreSize = 2'048;
-            xTaskCreatePinnedToCore(
-                broadcastSettingsTask,
-                "broadcastSettingsTask",
-                stackCoreSize,
-                &settingsTaskParameters,
-                1,
-                NULL,
-                0);
+    //         const auto stackCoreSize = 2'048;
+    //         xTaskCreatePinnedToCore(
+    //             broadcastSettingsTask,
+    //             "broadcastSettingsTask",
+    //             stackCoreSize,
+    //             &settingsTaskParameters,
+    //             1,
+    //             NULL,
+    //             0);
 
-            return;
-        }
+    //         return;
+    //     }
 
-        Log.infoln("Invalid OP command for setting WebSocket deltaTime logging, this should be a bool: %d", opCommand[1]);
-    }
-    break;
+    //     Log.infoln("Invalid OP command for setting WebSocket deltaTime logging, this should be a bool: %d", opCommand[1]);
+    // }
+    // break;
 
-    case static_cast<int>(PSCOpCodes::SetSdCardLogging):
-    {
-        Log.infoln("Change Sd Card Logging");
+    // case static_cast<int>(PSCOpCodes::SetSdCardLogging):
+    // {
+    //     Log.infoln("Change Sd Card Logging");
 
-        if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
-        {
-            Log.infoln("%s SdCard logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
-            eepromService.setLogToSdCard(static_cast<bool>(opCommand[1]));
+    //     if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
+    //     {
+    //         Log.infoln("%s SdCard logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
+    //         eepromService.setLogToSdCard(static_cast<bool>(opCommand[1]));
 
-            const auto stackCoreSize = 2'048;
-            xTaskCreatePinnedToCore(
-                broadcastSettingsTask,
-                "broadcastSettingsTask",
-                stackCoreSize,
-                &settingsTaskParameters,
-                1,
-                NULL,
-                0);
+    //         const auto stackCoreSize = 2'048;
+    //         xTaskCreatePinnedToCore(
+    //             broadcastSettingsTask,
+    //             "broadcastSettingsTask",
+    //             stackCoreSize,
+    //             &settingsTaskParameters,
+    //             1,
+    //             NULL,
+    //             0);
 
-            return;
-        }
+    //         return;
+    //     }
 
-        Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", opCommand[1]);
-    }
-    break;
+    //     Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", opCommand[1]);
+    // }
+    // break;
 
-    default:
-    {
-        Log.infoln("Not Supported Op Code: %d", opCommand[0]);
-    }
-    break;
-    }
+    // default:
+    // {
+    //     Log.infoln("Not Supported Op Code: %d", opCommand[0]);
+    // }
+    // break;
+    // }
 }
 
 vector<unsigned char> NetworkService::parseOpCode(string requestOpCommand)

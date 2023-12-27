@@ -1,7 +1,7 @@
 #include <string>
 
-#include "AsyncTCP.h"
-#include "ESPAsyncWebServer.h"
+#include "PsychicHttpsServer.h"
+#include <PsychicHttp.h>
 
 #include "../rower/stroke.model.h"
 #include "../utils/EEPROM.service.h"
@@ -18,21 +18,21 @@ class NetworkService
 
     struct MetricsTaskParameters
     {
-        AsyncWebSocket &webSocket;
+        // AsyncWebSocket &webSocket;
         RowingDataModels::RowingMetrics rowingMetrics;
         vector<unsigned long> deltaTimes;
     } metricTaskParameters;
 
     struct SettingsTaskParameters
     {
-        AsyncWebSocket &webSocket;
+        // AsyncWebSocket &webSocket;
         const EEPROMService &eepromService;
         const SdCardService &sdCardService;
         unsigned char batteryLevel = 0;
     } settingsTaskParameters;
 
-    AsyncWebServer server;
-    AsyncWebSocket webSocket;
+    PsychicHttpsServer server;
+    // AsyncWebSocket webSocket;
 
     bool isDisconnectNotified = true;
     bool isServerStarted = false;
