@@ -68,7 +68,8 @@ void PeripheralsController::begin()
 
 bool PeripheralsController::isAnyDeviceConnected()
 {
-    return BluetoothService::isAnyDeviceConnected() || networkService.isAnyDeviceConnected();
+    return (Configurations::isBleServiceEnabled && BluetoothService::isAnyDeviceConnected()) ||
+           (Configurations::isWebsocketEnabled && networkService.isAnyDeviceConnected());
 }
 
 void PeripheralsController::updateLed(CRGB::HTMLColorCode newLedColor)
