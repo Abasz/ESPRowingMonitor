@@ -107,6 +107,22 @@ Currently, a simple WebGUI is being developed using Angular. The related reposit
 
 Please note that the filesystem of the ESP32 is rather slow, so the first load of the WebGUI may take up to half a minute. However, after the initial load, unless the files are modified, it will load instantly (potential reloading is controlled automatically via HTTP Last-Modified header).
 
+Note on HTTPS server
+
+It requires significant amount of memory (a single ssl connection requires approx 45kb of heap) which the ESP32 lacks when BLE is enabled. Tests showed that it could work, but the application becomes unstable (as heap runs, out application crashes). This could occur especially when reloading the webGui page as memory can get to as low as 10kb. The crash occurs when stroke recovery is long and there are a lot of data points, resulting in a potentially big vector requiring significant amount of heap.
+
+Also the GUI needs to be uploaded as a bundled single HTML file, otherwise it will not load due to the lack of available memory for the ssl handshakes. This can be done easily.
+
+Basically memory is between 45kb and 57kb when one websocket is connected and everything works (this should be in general sufficient). But on page reload this could go down as 10kb that can cause an instable application state when something needs memory quickly.
+
+One option is to disable BLE as that would increase the available heap allowing safe operations (starting free memory would be 120kb and approx. 70kb with one websocket connection generally with minimum of approx. 55kb). Leaving plenty of memory for the rest of application. Nevertheless, even in this case sometimes reloading the GUI is only done after 2-3 retries.
+
+Finally the need for ssl certificates (potentially self-signed) that are not trusted by the browser (disabling the use of cache and Last-Modified header in Chrome) also adds a layer of complexity.
+
+Considering that using proxy it is more stable, simpler and safer as well as having a simple web server that serves up the GUI (on any platform) is significantly less problematic, https server will most probably not make a stable release.
+
+This experimental implementation will remain as a separate branch (potentially maintained to some extent via merging new elements from main) to be flashed by more advanced users.
+
 ### Logging
 
 ESP Rowing Monitor implements a logging mechanism with different log levels (e.g. silent, error, info, trace, verbose, etc.). These logs are sent via serial (UART0) only, so the ESP32 MCU should be connected via USB to view the logs. The log level (0-6) can be set via the WebSocket or BLE Control Point using OpCode 17.
