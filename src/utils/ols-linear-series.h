@@ -18,7 +18,7 @@ public:
     Configurations::precision yAtSeriesBegin() const;
     Configurations::precision slope() const;
     Configurations::precision goodnessOfFit() const;
-    unsigned char size() const;
+    size_t size() const;
 
     void push(Configurations::precision pointX, Configurations::precision pointY);
     void reset();

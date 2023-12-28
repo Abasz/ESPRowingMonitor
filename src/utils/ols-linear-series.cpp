@@ -55,7 +55,7 @@ Configurations::precision OLSLinearSeries::goodnessOfFit() const
     return 0;
 }
 
-unsigned char OLSLinearSeries::size() const
+size_t OLSLinearSeries::size() const
 {
     return sumY.size();
 }
