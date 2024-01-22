@@ -39,7 +39,6 @@ public:
     void setPreviousRevCount();
     unsigned int getPreviousStrokeCount() const;
     void setPreviousStrokeCount();
-    unsigned long getRawImpulseTime() const;
 
     unsigned long long getLastRevTime() const;
     unsigned int getRevCount() const;

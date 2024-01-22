@@ -62,11 +62,6 @@ unsigned short StrokeController::getStrokeCount() const
     return rowerState.strokeCount;
 }
 
-unsigned long StrokeController::getRawImpulseTime() const
-{
-    return flywheelData.rawImpulseTime;
-}
-
 Configurations::precision StrokeController::getDriveDuration() const
 {
     return rowerState.driveDuration / 1e6;

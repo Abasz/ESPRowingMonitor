@@ -36,7 +36,7 @@ void loop()
 
     strokeController.update();
     peripheralController.update(powerManagerController.getBatteryLevel());
-    powerManagerController.update(strokeController.getRawImpulseTime(), peripheralController.isAnyDeviceConnected());
+    powerManagerController.update(strokeController.getLastRevTime(), peripheralController.isAnyDeviceConnected());
 
     // auto start = micros();
 
