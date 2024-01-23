@@ -37,7 +37,7 @@ public:
     void begin();
     void update(unsigned char batteryLevel);
     void notifyBattery(unsigned char batteryLevel);
-    void updateData(RowingDataModels::RowingMetrics data);
+    void updateData(const RowingDataModels::RowingMetrics &data);
     void notifyDragFactor(unsigned char dragFactor) const;
     bool isAnyDeviceConnected();
 };

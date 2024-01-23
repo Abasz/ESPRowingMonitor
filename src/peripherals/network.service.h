@@ -28,6 +28,6 @@ public:
     void update();
     void stopServer();
 
-    void notifyClients(RowingDataModels::RowingMetrics rowingMetrics, unsigned char batteryLevel, BleServiceFlag bleServiceFlag, ArduinoLogLevel logLevel);
+    void notifyClients(const RowingDataModels::RowingMetrics &rowingMetrics, unsigned char batteryLevel, BleServiceFlag bleServiceFlag, ArduinoLogLevel logLevel);
     bool isAnyDeviceConnected() const;
 };

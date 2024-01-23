@@ -128,7 +128,7 @@ bool NetworkService::isAnyDeviceConnected() const
     return isServerStarted && webSocket.count() > 0;
 }
 
-void NetworkService::notifyClients(const RowingDataModels::RowingMetrics rowingMetrics, const unsigned char batteryLevel, const BleServiceFlag bleServiceFlag, const ArduinoLogLevel logLevel)
+void NetworkService::notifyClients(const RowingDataModels::RowingMetrics &rowingMetrics, const unsigned char batteryLevel, const BleServiceFlag bleServiceFlag, const ArduinoLogLevel logLevel)
 {
     string response;
     response.append("{\"batteryLevel\":" + to_string(batteryLevel));
@@ -142,7 +142,7 @@ void NetworkService::notifyClients(const RowingDataModels::RowingMetrics rowingM
     response.append(",\"driveDuration\":" + to_string(rowingMetrics.driveDuration));
     response.append(",\"recoveryDuration\":" + to_string(rowingMetrics.recoveryDuration));
     response.append(",\"dragFactor\":" + to_string(rowingMetrics.dragCoefficient * 1e6));
-    response.append(",\"handleForces\": [");
+    response.append(",\"handleForces\":[");
 
     for (const auto &handleForce : rowingMetrics.driveHandleForces)
     {

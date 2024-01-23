@@ -37,7 +37,7 @@ void StrokeController::update()
     }
 }
 
-RowingDataModels::RowingMetrics StrokeController::getAllData() const
+const RowingDataModels::RowingMetrics &StrokeController::getAllData() const
 {
     return rowerState;
 }

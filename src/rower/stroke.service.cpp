@@ -153,13 +153,15 @@ void StrokeService::recoveryStart()
     recoveryStartTime = rowingTotalTime;
     recoveryStartAngularDisplacement = rowingTotalAngularDisplacement;
     recoveryStartDistance = distance;
-    recoveryDeltaTimes.reset();
     recoveryDeltaTimes.push(rowingTotalTime, deltaTimes.yAtSeriesBegin());
 }
 
 void StrokeService::recoveryUpdate()
 {
-    recoveryDeltaTimes.push(rowingTotalTime, deltaTimes.yAtSeriesBegin());
+    if (rowingTotalTime - recoveryStartTime < Configurations::maxDragFactorRecoveryPeriod)
+    {
+        recoveryDeltaTimes.push(rowingTotalTime, deltaTimes.yAtSeriesBegin());
+    }
 }
 
 void StrokeService::recoveryEnd()
@@ -167,6 +169,7 @@ void StrokeService::recoveryEnd()
     recoveryDuration = rowingTotalTime - recoveryStartTime;
     recoveryTotalAngularDisplacement = rowingTotalAngularDisplacement - recoveryStartAngularDisplacement;
     calculateDragCoefficient();
+    recoveryDeltaTimes.reset();
     calculateAvgStrokePower();
 
     distancePerAngularDisplacement = pow((dragCoefficient * 1e6) / Configurations::concept2MagicNumber, 1 / 3.0);

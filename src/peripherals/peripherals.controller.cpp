@@ -99,7 +99,7 @@ void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
     }
 }
 
-void PeripheralsController::updateData(const RowingDataModels::RowingMetrics data)
+void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &data)
 {
     const auto secInMicroSec = 1e6L;
     bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
