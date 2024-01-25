@@ -120,7 +120,7 @@ void StrokeService::driveStart()
 
 void StrokeService::driveUpdate()
 {
-    if (driveHandleForces.size() > Configurations::driveHandleForcesMaxCapacity)
+    if (driveHandleForces.size() >= Configurations::driveHandleForcesMaxCapacity)
     {
         driveHandleForces.clear();
         Log.warningln("driveHandleForces variable data point size exceeded max capacity indicating an extremely long drive phase. With plausible stroke detection settings this should not happen. Resetting variable to avoid crash...");

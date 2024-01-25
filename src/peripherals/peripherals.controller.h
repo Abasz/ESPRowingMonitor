@@ -16,7 +16,6 @@ class PeripheralsController
     unsigned int lastConnectedDeviceCheckTime = 0;
     unsigned int lastBroadcastTime = 0UL;
 
-    unsigned char batteryLevelData = 0;
     unsigned short bleRevTimeData = 0;
     unsigned int bleRevCountData = 0;
     unsigned short bleStrokeTimeData = 0;

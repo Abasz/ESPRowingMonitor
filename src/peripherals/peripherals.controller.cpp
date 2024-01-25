@@ -3,9 +3,7 @@
 #include "../utils/configuration.h"
 #include "peripherals.controller.h"
 
-PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService)
-{
-}
+PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService) {}
 
 void PeripheralsController::update(unsigned char batteryLevel)
 {
@@ -92,10 +90,14 @@ void PeripheralsController::updateLed(CRGB::HTMLColorCode newLedColor)
 
 void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
 {
-    batteryLevelData = batteryLevel;
     if constexpr (Configurations::isBleServiceEnabled)
     {
         bluetoothService.notifyBattery(batteryLevel);
+    }
+
+    if constexpr (Configurations::isWebsocketEnabled)
+    {
+        networkService.notifyBatteryLevel(batteryLevel);
     }
 }
 
@@ -110,7 +112,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
 
     if constexpr (Configurations::isWebsocketEnabled)
     {
-        networkService.notifyClients(data, batteryLevelData, eepromService.getBleServiceFlag(), eepromService.getLogLevel());
+        networkService.notifyClients(data);
     }
 }
 

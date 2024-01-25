@@ -12,7 +12,7 @@ class FlywheelService
     volatile Configurations::precision totalAngularDisplacement = 0;
 
     volatile unsigned long impulseCount = 0UL;
-    unsigned long long totalTime = 0ULL;
+    volatile unsigned long long totalTime = 0ULL;
 
     volatile bool isDataChanged = false;
 

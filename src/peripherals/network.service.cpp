@@ -12,7 +12,7 @@ using std::string;
 using std::to_string;
 using std::vector;
 
-NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_eepromService), server(Configurations::port), webSocket("/ws") {}
+NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_eepromService), server(Configurations::port), webSocket("/ws"), metricTaskParameters{webSocket, {}}, settingsTaskParameters{webSocket, _eepromService, 0} {}
 
 void NetworkService::update()
 {
@@ -44,8 +44,20 @@ void NetworkService::update()
             switch (type)
             {
             case WS_EVT_CONNECT:
+            {
                 Log.traceln("WebSocket client #%u connected from %p", client->id(), client->remoteIP());
+                
+                const auto stackCoreSize = 2048;
+                xTaskCreatePinnedToCore(
+                    broadcastSettingsTask,
+                    "broadcastSettingsTask",
+                    stackCoreSize,
+                    &settingsTaskParameters,
+                    1,
+                    NULL,
+                    0);
                 break;
+            }
             case WS_EVT_DISCONNECT:
                 Log.traceln("WebSocket client #%u disconnected", client->id());
                 break;
@@ -128,37 +140,108 @@ bool NetworkService::isAnyDeviceConnected() const
     return isServerStarted && webSocket.count() > 0;
 }
 
-void NetworkService::notifyClients(const RowingDataModels::RowingMetrics &rowingMetrics, const unsigned char batteryLevel, const BleServiceFlag bleServiceFlag, const ArduinoLogLevel logLevel)
+void NetworkService::notifyBatteryLevel(const unsigned char newBatteryLevel)
 {
-    string response;
-    response.append("{\"batteryLevel\":" + to_string(batteryLevel));
-    response.append(",\"bleServiceFlag\":" + to_string(static_cast<unsigned char>(bleServiceFlag)));
-    response.append(",\"logLevel\":" + to_string(static_cast<unsigned char>(logLevel)));
-    response.append(",\"revTime\":" + to_string(rowingMetrics.lastRevTime));
-    response.append(",\"distance\":" + to_string(rowingMetrics.distance));
-    response.append(",\"strokeTime\":" + to_string(rowingMetrics.lastStrokeTime));
-    response.append(",\"strokeCount\":" + to_string(rowingMetrics.strokeCount));
-    response.append(",\"avgStrokePower\":" + to_string(rowingMetrics.avgStrokePower));
-    response.append(",\"driveDuration\":" + to_string(rowingMetrics.driveDuration));
-    response.append(",\"recoveryDuration\":" + to_string(rowingMetrics.recoveryDuration));
-    response.append(",\"dragFactor\":" + to_string(rowingMetrics.dragCoefficient * 1e6));
-    response.append(",\"handleForces\":[");
-
-    for (const auto &handleForce : rowingMetrics.driveHandleForces)
+    settingsTaskParameters.batteryLevel = newBatteryLevel;
+    if (!isAnyDeviceConnected())
     {
-        response.append(to_string(handleForce) + ",");
+        return;
     }
-
-    if (rowingMetrics.driveHandleForces.size() > 0)
-    {
-        response.pop_back();
-    }
-    response.append("]}");
-
-    webSocket.textAll(response.c_str());
+    const auto stackCoreSize = 2048;
+    xTaskCreatePinnedToCore(
+        broadcastSettingsTask,
+        "broadcastSettingsTask",
+        stackCoreSize,
+        &settingsTaskParameters,
+        1,
+        NULL,
+        0);
 }
 
-void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *const data, const size_t len) const
+void NetworkService::broadcastMetricsTask(void *parameters)
+{
+    {
+        const auto *const params = static_cast<const NetworkService::MetricsTaskParameters *>(parameters);
+
+        string response;
+
+        const auto emptyResponseSize = 70;
+        response.reserve(params->rowingMetrics.driveHandleForces.size() * 4 + emptyResponseSize);
+        response.append("{\"data\":[" + to_string(params->rowingMetrics.lastRevTime));
+        response.append("," + to_string(lround(params->rowingMetrics.distance)));
+        response.append("," + to_string(params->rowingMetrics.lastStrokeTime));
+        response.append("," + to_string(params->rowingMetrics.strokeCount));
+        response.append("," + to_string(lround(params->rowingMetrics.avgStrokePower)));
+        response.append("," + to_string(params->rowingMetrics.driveDuration));
+        response.append("," + to_string(params->rowingMetrics.recoveryDuration));
+        response.append("," + to_string(lround(params->rowingMetrics.dragCoefficient * 1e6)));
+
+        response.append(",[");
+        if (!params->rowingMetrics.driveHandleForces.empty())
+        {
+            for (const auto &driveHandleForce : params->rowingMetrics.driveHandleForces)
+            {
+                const auto wholeNumber = static_cast<unsigned short>(std::abs(driveHandleForce));
+                const auto decimalPlaces = 3;
+                const auto maxSize = static_cast<unsigned char>(std::log10(wholeNumber)) + 2 + decimalPlaces + (driveHandleForce < 0 ? 1 : 0);
+                string buffer(" ", maxSize);
+                dtostrf(driveHandleForce, maxSize, decimalPlaces, buffer.data());
+                response.append(buffer + ",");
+            }
+            response.pop_back();
+        }
+        response.append("]]}");
+
+        params->webSocket.binaryAll(response.data(), response.size());
+    }
+    // Terminate the task
+    vTaskDelete(nullptr);
+}
+
+void NetworkService::notifyClients(const RowingDataModels::RowingMetrics &rowingMetrics)
+{
+    if (!isAnyDeviceConnected())
+    {
+        return;
+    }
+
+    metricTaskParameters.rowingMetrics = rowingMetrics;
+
+    const auto stackCoreSize = 2048;
+
+    // The size of stack depends on the length of the string to be created within the task (that depends on the variable sized metrics). Calculate the potential stack size needed dynamically (with some margins) to avoid the task running out of free heep but not using more than it actually necessary potentially starving other parts of the app (that may cause crash).
+    const auto calculatedStackSize = rowingMetrics.driveHandleForces.size() * 4 + stackCoreSize;
+
+    xTaskCreatePinnedToCore(
+        broadcastMetricsTask,
+        "broadcastMetricsTask",
+        calculatedStackSize,
+        &metricTaskParameters,
+        1,
+        NULL,
+        0);
+}
+
+void NetworkService::broadcastSettingsTask(void *parameters)
+{
+    {
+        const auto *const params = static_cast<const NetworkService::SettingsTaskParameters *>(parameters);
+
+        string response;
+        const auto stringDataLength = 70;
+        response.reserve(stringDataLength);
+        response.append("{\"batteryLevel\":" + to_string(params->batteryLevel));
+        response.append(",\"bleServiceFlag\":" + to_string(static_cast<unsigned char>(params->eepromService.getBleServiceFlag())));
+        response.append(",\"logLevel\":" + to_string(static_cast<unsigned char>(params->eepromService.getLogLevel())));
+        response.append("}");
+
+        params->webSocket.binaryAll(response.c_str(), response.size());
+    }
+
+    vTaskDelete(nullptr);
+}
+
+void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *const data, const size_t len)
 {
     const auto *const info = static_cast<const AwsFrameInfo *>(arg);
     if (static_cast<bool>(info->final) && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
@@ -197,6 +280,16 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
             {
                 Log.infoln("New LogLevel: %d", opCommand[1]);
                 eepromService.setLogLevel(static_cast<ArduinoLogLevel>(opCommand[1]));
+
+                const auto stackCoreSize = 2048;
+                xTaskCreatePinnedToCore(
+                    broadcastSettingsTask,
+                    "broadcastSettingsTask",
+                    stackCoreSize,
+                    &settingsTaskParameters,
+                    1,
+                    NULL,
+                    0);
 
                 return;
             }
