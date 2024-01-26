@@ -25,6 +25,10 @@ void setup()
     {
         peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
     }
+
+#if defined(SIMULATE_FILE)
+    setupFileSimulation();
+#endif
 }
 
 // execution time
@@ -32,7 +36,9 @@ void setup()
 // - connected  microsec 2000-4900
 void loop()
 {
-    // simulateRotation();
+#if defined(SIMULATE_ROTATION)
+    simulateRotation();
+#endif
 
     strokeController.update();
     peripheralController.update(powerManagerController.getBatteryLevel());

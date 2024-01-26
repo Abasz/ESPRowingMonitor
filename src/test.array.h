@@ -2,6 +2,7 @@
 #include <numeric>
 
 #include "Arduino.h"
+#include "LittleFS.h"
 
 #include "globals.h"
 
@@ -1776,24 +1777,61 @@ const std::array test{
 
 auto i = 1U;
 auto lastTestRevTime = 0UL;
-auto elapsedTime = 0UL;
 auto i2 = 0U;
+auto now = 0ULL;
+auto lastDelta = 0UL;
+
+#if defined(SIMULATE_FILE) && !defined(SIMULATE_ROTATION)
+    #define SIMULATE_ROTATION
+#endif
+
+#if defined(SIMULATE_FILE)
+File simulationFile;
+
+void setupFileSimulation()
+{
+    if (LittleFS.begin())
+    {
+        simulationFile = LittleFS.open(SIMULATE_FILE);
+    }
+}
+#endif
 
 void simulateRotation()
 {
-    if (micros() - lastTestRevTime < test[i] || i2 == 3)
+    const auto repeatCount = 30;
+    if (micros() - lastTestRevTime < lastDelta || i2 == repeatCount)
     {
         return;
     }
 
+#if defined(SIMULATE_FILE)
+    if (!simulationFile && simulationFile.position() == 0)
+    {
+        Serial.println("File is not available");
+        return;
+    }
+    lastDelta = simulationFile.parseInt();
+#else
+    lastDelta = test[i];
+#endif
+
     lastTestRevTime = micros();
     i++;
-    auto now = elapsedTime + accumulate(begin(test), begin(test) + i, 0);
+
+    now += lastDelta;
+
     flywheelService.processRotation(now);
+
+#if defined(SIMULATE_FILE)
+    if ((simulationFile.available() == 0 && simulationFile.position() > 0))
+    {
+        simulationFile.seek(0);
+#else
     if (i >= std::size(test))
     {
-        Log.infoln("Going to sleep. Processed number of rotations: %d", i);
-        elapsedTime += accumulate(begin(test), begin(test) + i, 0);
+#endif
+        Serial.printf("Going to sleep. Processed number of rotations: %d\n", i);
         i = 0;
         i2++;
     }
