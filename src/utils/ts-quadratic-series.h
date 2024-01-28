@@ -12,6 +12,7 @@ class TSQuadraticSeries
     unsigned char maxSeriesLength = 0;
     unsigned short maxSeriesAInnerLength = 0;
     unsigned short maxSeriesALength = 0;
+    unsigned short maxAllocationCapacity = 1000U;
 
     Configurations::precision a = 0;
     Configurations::precision b = 0;
@@ -24,7 +25,7 @@ class TSQuadraticSeries
     constexpr unsigned short calculateMaxSeriesALength() const;
 
 public:
-    explicit TSQuadraticSeries(unsigned char _maxSeriesLength = 0);
+    explicit TSQuadraticSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1000);
     Configurations::precision firstDerivativeAtPosition(unsigned char position) const;
     Configurations::precision secondDerivativeAtPosition(unsigned char position) const;
     void push(Configurations::precision pointX, Configurations::precision pointY);

@@ -52,7 +52,7 @@ class StrokeService
 
     OLSLinearSeries deltaTimes = OLSLinearSeries(Configurations::impulseDataArrayLength);
     OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength);
-    OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries();
+    OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries(0, Configurations::maxDragFactorRecoveryPeriod / Configurations::rotationDebounceTimeMin / 2);
     TSQuadraticSeries angularDistances = TSQuadraticSeries(Configurations::impulseDataArrayLength);
 
     bool isFlywheelUnpowered() const;

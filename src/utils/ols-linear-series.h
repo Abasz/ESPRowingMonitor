@@ -13,7 +13,7 @@ class OLSLinearSeries
     Series sumXY;
 
 public:
-    explicit OLSLinearSeries(unsigned char _maxSeriesLength = 0);
+    explicit OLSLinearSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1000);
 
     Configurations::precision yAtSeriesBegin() const;
     Configurations::precision slope() const;

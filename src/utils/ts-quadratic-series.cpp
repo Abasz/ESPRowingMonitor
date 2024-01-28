@@ -4,7 +4,7 @@
 #include "ts-linear-series.h"
 #include "ts-quadratic-series.h"
 
-TSQuadraticSeries::TSQuadraticSeries(const unsigned char _maxSeriesLength) : maxSeriesLength(_maxSeriesLength), maxSeriesAInnerLength(((_maxSeriesLength - 2) * (_maxSeriesLength - 1)) / 2), maxSeriesALength(calculateMaxSeriesALength()), seriesX(_maxSeriesLength), seriesY(_maxSeriesLength)
+TSQuadraticSeries::TSQuadraticSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxSeriesAInnerLength(((_maxSeriesLength - 2) * (_maxSeriesLength - 1)) / 2), maxSeriesALength(calculateMaxSeriesALength()), maxAllocationCapacity(_maxAllocationCapacity), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity)
 {
     if (_maxSeriesLength > 0)
     {
@@ -73,7 +73,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
         }
         a = seriesAMedian();
 
-        TSLinearSeries linearResidue(maxSeriesLength);
+        TSLinearSeries linearResidue(maxSeriesLength, maxAllocationCapacity);
         i = 0;
         while (i < seriesX.size() - 1)
         {

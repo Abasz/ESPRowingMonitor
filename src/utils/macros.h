@@ -86,6 +86,12 @@ constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') :
 #endif
 
 // Sanity checks and validations
+#if (MAX_DRAG_FACTOR_RECOVERY_PERIOD) / (ROTATION_DEBOUNCE_TIME_MIN) > 1250
+    #error "Theoretically the recovery may end up creating a vector with a max of 1250 data points (which amount in reality would depend on, among others, the drag) that would use up too much memory and crash the application. Please reduce the MAX_DRAG_FACTOR_RECOVERY_PERIOD property to avoid this. Please see docs for further information"
+#elif (MAX_DRAG_FACTOR_RECOVERY_PERIOD) / (ROTATION_DEBOUNCE_TIME_MIN) > 1000
+    #warning "Theoretically the recovery may end up creating a vector with a max of 1000 data points (which amount reality would depend on, among others, the drag). This vector size would use up a considerable amount of memory and can cause instability and crash. Please consider reducing the MAX_DRAG_FACTOR_RECOVERY_PERIOD property to avoid this. Please see docs for further information"
+#endif
+
 #if defined(STROKE_DEBOUNCE_TIME)
     #warning "STROKE_DEBOUNCE_TIME" setting is deprecated and will be removed in future versions. Please use "MINIMUM_RECOVERY_TIME" and "MINIMUM_DRIVE_TIME" instead
     #if !defined(MINIMUM_RECOVERY_TIME)
