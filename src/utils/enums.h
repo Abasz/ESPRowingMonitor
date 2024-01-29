@@ -61,6 +61,7 @@ enum class PSCOpCodes : unsigned char
     StartEnhancedOffsetCompensation = 16U,
     SetLogLevel = 17U,
     ChangeBleService = 18U,
+    SetWebSocketDeltaTimeLogging = 19U,
     ResponseCode = 32U
 };
 
@@ -172,7 +173,8 @@ public:
     static const unsigned short OffsetCompensationIndicator = (0x01U << 12U);
 };
 
-class CSCSensorBleFlags{
+class CSCSensorBleFlags
+{
 public:
     static constexpr unsigned short cscFeaturesFlag = CSCFeaturesFlags::CrankRevolutionDataSupported |
                                                       CSCFeaturesFlags::WheelRevolutionDataSupported;
@@ -184,9 +186,10 @@ public:
     static const unsigned short bleAppearanceCyclingSpeedCadence = 1157;
 };
 
-class PSCSensorBleFlags {
+class PSCSensorBleFlags
+{
 public:
-static const unsigned short pscMeasurementFeaturesFlag =
+    static const unsigned short pscMeasurementFeaturesFlag =
         PSCMeasurementFeaturesFlags::CrankRevolutionDataPresent |
         PSCMeasurementFeaturesFlags::WheelRevolutionDataPresent;
     static constexpr unsigned int pscFeaturesFlag =
@@ -199,11 +202,10 @@ static const unsigned short pscMeasurementFeaturesFlag =
     static const unsigned short bleAppearanceCyclingPower = 1156;
 };
 
-class CommonBleFlags {
-    public:
-
+class CommonBleFlags
+{
+public:
     static constexpr unsigned char sensorLocationFlag = SensorLocations::Other;
-    
 
     static const unsigned short sensorLocationUuid = 0x2A5D;
     inline static const std::string dragFactorUuid = "CE060031-43E5-11E4-916C-0800200C9A66";

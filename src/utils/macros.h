@@ -85,6 +85,14 @@ constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') :
     #define BLE_SIGNAL_STRENGTH BleSignalStrength::Default
 #endif
 
+#if defined(DISABLE_WEBSOCKET_DELTA_TIME_LOGGING)
+    #undef DISABLE_WEBSOCKET_DELTA_TIME_LOGGING
+    #define DISABLE_WEBSOCKET_DELTA_TIME_LOGGING true
+#else
+    #undef DISABLE_WEBSOCKET_DELTA_TIME_LOGGING
+    #define DISABLE_WEBSOCKET_DELTA_TIME_LOGGING false
+#endif
+
 // Sanity checks and validations
 #if (MAX_DRAG_FACTOR_RECOVERY_PERIOD) / (ROTATION_DEBOUNCE_TIME_MIN) > 1250
     #error "Theoretically the recovery may end up creating a vector with a max of 1250 data points (which amount in reality would depend on, among others, the drag) that would use up too much memory and crash the application. Please reduce the MAX_DRAG_FACTOR_RECOVERY_PERIOD property to avoid this. Please see docs for further information"

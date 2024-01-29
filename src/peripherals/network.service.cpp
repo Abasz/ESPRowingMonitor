@@ -10,9 +10,8 @@
 
 using std::string;
 using std::to_string;
-using std::vector;
 
-NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_eepromService), server(Configurations::port), webSocket("/ws"), metricTaskParameters{webSocket, {}}, settingsTaskParameters{webSocket, _eepromService, 0} {}
+NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_eepromService), server(Configurations::port), webSocket("/ws"), metricTaskParameters{webSocket, {}, {}}, settingsTaskParameters{webSocket, _eepromService, 0} {}
 
 void NetworkService::update()
 {
@@ -166,7 +165,15 @@ void NetworkService::broadcastMetricsTask(void *parameters)
         string response;
 
         const auto emptyResponseSize = 70;
-        response.reserve(params->rowingMetrics.driveHandleForces.size() * 4 + emptyResponseSize);
+        auto responseSize = emptyResponseSize;
+        responseSize += params->rowingMetrics.driveHandleForces.size() * 4;
+        if (!params->deltaTimes.empty())
+        {
+            const auto digitCountOfLast = static_cast<int>(std::log10(params->deltaTimes.back())) + 1;
+            responseSize += params->deltaTimes.size() * (digitCountOfLast - 4);
+        }
+        response.reserve(responseSize);
+
         response.append("{\"data\":[" + to_string(params->rowingMetrics.lastRevTime));
         response.append("," + to_string(lround(params->rowingMetrics.distance)));
         response.append("," + to_string(params->rowingMetrics.lastStrokeTime));
@@ -190,6 +197,21 @@ void NetworkService::broadcastMetricsTask(void *parameters)
             }
             response.pop_back();
         }
+
+        response.append("],[");
+
+        if (!params->deltaTimes.empty())
+        {
+            for (const auto &deltaTime : params->deltaTimes)
+            {
+                const auto maxSize = static_cast<unsigned char>(std::log10(deltaTime)) + 1;
+                string buffer(" ", maxSize);
+                ultoa(deltaTime, buffer.data(), 10);
+                response.append(buffer + ",");
+            }
+            response.pop_back();
+        }
+
         response.append("]]}");
 
         params->webSocket.binaryAll(response.data(), response.size());
@@ -198,7 +220,7 @@ void NetworkService::broadcastMetricsTask(void *parameters)
     vTaskDelete(nullptr);
 }
 
-void NetworkService::notifyClients(const RowingDataModels::RowingMetrics &rowingMetrics)
+void NetworkService::notifyClients(const RowingDataModels::RowingMetrics &rowingMetrics, const vector<unsigned long> &deltaTimes)
 {
     if (!isAnyDeviceConnected())
     {
@@ -206,16 +228,25 @@ void NetworkService::notifyClients(const RowingDataModels::RowingMetrics &rowing
     }
 
     metricTaskParameters.rowingMetrics = rowingMetrics;
+    metricTaskParameters.deltaTimes = deltaTimes;
 
-    const auto stackCoreSize = 2048;
+    const auto coreStackSize = 2048U;
+    auto stackSize = coreStackSize;
+    stackSize += rowingMetrics.driveHandleForces.size() * 4;
+    if (!deltaTimes.empty())
+    {
+        const auto digitCountOfLast = static_cast<unsigned char>(std::log10(deltaTimes.back())) + 1;
+        const auto digitCountOfFirst = static_cast<unsigned char>(std::log10(deltaTimes.front())) + 1;
+
+        stackSize += deltaTimes.size() * (digitCountOfLast - 4 + std::abs(digitCountOfLast - digitCountOfFirst));
+    }
 
     // The size of stack depends on the length of the string to be created within the task (that depends on the variable sized metrics). Calculate the potential stack size needed dynamically (with some margins) to avoid the task running out of free heep but not using more than it actually necessary potentially starving other parts of the app (that may cause crash).
-    const auto calculatedStackSize = rowingMetrics.driveHandleForces.size() * 4 + stackCoreSize;
 
     xTaskCreatePinnedToCore(
         broadcastMetricsTask,
         "broadcastMetricsTask",
-        calculatedStackSize,
+        stackSize,
         &metricTaskParameters,
         1,
         NULL,
@@ -233,6 +264,7 @@ void NetworkService::broadcastSettingsTask(void *parameters)
         response.append("{\"batteryLevel\":" + to_string(params->batteryLevel));
         response.append(",\"bleServiceFlag\":" + to_string(static_cast<unsigned char>(params->eepromService.getBleServiceFlag())));
         response.append(",\"logLevel\":" + to_string(static_cast<unsigned char>(params->eepromService.getLogLevel())));
+        response.append(",\"logToWebSocket\":" + to_string(static_cast<unsigned char>(params->eepromService.getLogToWebsocket())));
         response.append("}");
 
         params->webSocket.binaryAll(response.c_str(), response.size());
@@ -316,6 +348,32 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
             }
 
             Log.infoln("Invalid BLE service flag: %d", opCommand[1]);
+        }
+        break;
+
+        case static_cast<int>(PSCOpCodes::SetWebSocketDeltaTimeLogging):
+        {
+            Log.infoln("Change WebSocket Logging");
+
+            if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
+            {
+                Log.infoln("%s WebSocket deltaTime logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
+                eepromService.setLogToWebsocket(static_cast<bool>(opCommand[1]));
+
+                const auto stackCoreSize = 2048;
+                xTaskCreatePinnedToCore(
+                    broadcastSettingsTask,
+                    "broadcastSettingsTask",
+                    stackCoreSize,
+                    &settingsTaskParameters,
+                    1,
+                    NULL,
+                    0);
+
+                return;
+            }
+
+            Log.infoln("Invalid OP command for setting WebSocket deltaTime logging, this should be a bool: %d", opCommand[1]);
         }
         break;
 

@@ -69,6 +69,7 @@ public:
     static const unsigned char port = PORT;
     static const bool isWebsocketEnabled = ENABLE_WEBSOCKET_MONITOR;
     static const bool isWebGUIEnabled = ENABLE_WEBGUI;
+    static const bool enableWebSocketDeltaTimeLogging = DISABLE_WEBSOCKET_DELTA_TIME_LOGGING ? false : isWebsocketEnabled;
 
     // Device power management settings
     static const gpio_num_t batteryPinNumber = BATTERY_PIN_NUMBER;

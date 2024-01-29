@@ -8,6 +8,8 @@
 #include "../utils/configuration.h"
 #include "../utils/enums.h"
 
+using std::vector;
+
 class NetworkService
 {
     EEPROMService &eepromService;
@@ -16,6 +18,7 @@ class NetworkService
     {
         AsyncWebSocket &webSocket;
         RowingDataModels::RowingMetrics rowingMetrics;
+        vector<unsigned long> deltaTimes;
     } metricTaskParameters;
 
     struct SettingsTaskParameters
@@ -36,7 +39,7 @@ class NetworkService
     void handleWebSocketMessage(const void *arg, uint8_t *data, size_t len);
     static void broadcastSettingsTask(void *parameters);
     static void broadcastMetricsTask(void *parameters);
-    static std::vector<unsigned char> parseOpCode(std::string requestOpCommand);
+    static vector<unsigned char> parseOpCode(std::string requestOpCommand);
 
 public:
     explicit NetworkService(EEPROMService &_eepromService);
@@ -45,6 +48,6 @@ public:
     void stopServer();
 
     void notifyBatteryLevel(unsigned char newBatteryLevel);
-    void notifyClients(const RowingDataModels::RowingMetrics &rowingMetrics);
+    void notifyClients(const RowingDataModels::RowingMetrics &rowingMetrics, const vector<unsigned long> &deltaTimes);
     bool isAnyDeviceConnected() const;
 };

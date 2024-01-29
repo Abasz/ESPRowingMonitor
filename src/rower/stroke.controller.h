@@ -9,6 +9,7 @@ class StrokeController
 
     unsigned int previousRevCount = 0;
     unsigned int previousStrokeCount = 0U;
+    unsigned long previousRawImpulseCount = 0U;
 
     RowingDataModels::RowingMetrics rowerState{
         0.0,
@@ -40,6 +41,11 @@ public:
     unsigned int getPreviousStrokeCount() const;
     void setPreviousStrokeCount();
 
+    unsigned long getPreviousRawImpulseCount() const;
+    void setPreviousRawImpulseCount();
+    unsigned long getRawImpulseCount() const;
+    
+    unsigned long getDeltaTime() const;
     unsigned long long getLastRevTime() const;
     unsigned int getRevCount() const;
     unsigned long long getLastStrokeTime() const;

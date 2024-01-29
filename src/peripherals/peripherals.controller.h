@@ -22,6 +22,8 @@ class PeripheralsController
     unsigned short bleStrokeCountData = 0;
     short bleAvgStrokePowerData = 0;
 
+    std::vector<unsigned long> deltaTimes;
+
     unsigned char ledState = HIGH;
     CRGB::HTMLColorCode ledColor = CRGB::Black;
     inline static std::array<CRGB, 1> leds;
@@ -37,6 +39,7 @@ public:
     void update(unsigned char batteryLevel);
     void notifyBattery(unsigned char batteryLevel);
     void updateData(const RowingDataModels::RowingMetrics &data);
+    void updateDeltaTime(unsigned long deltaTime);
     void notifyDragFactor(unsigned char dragFactor) const;
     bool isAnyDeviceConnected();
 };

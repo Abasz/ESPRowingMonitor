@@ -3,7 +3,13 @@
 #include "../utils/configuration.h"
 #include "peripherals.controller.h"
 
-PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService) {}
+PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), eepromService(_eepromService)
+{
+    if constexpr (Configurations::enableWebSocketDeltaTimeLogging)
+    {
+        deltaTimes.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
+    }
+}
 
 void PeripheralsController::update(unsigned char batteryLevel)
 {
@@ -101,6 +107,17 @@ void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
     }
 }
 
+void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
+{
+    if constexpr (Configurations::enableWebSocketDeltaTimeLogging)
+    {
+        if (eepromService.getLogToWebsocket() && networkService.isAnyDeviceConnected())
+        {
+            deltaTimes.push_back(deltaTime);
+        }
+    }
+}
+
 void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &data)
 {
     const auto secInMicroSec = 1e6L;
@@ -112,7 +129,14 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
 
     if constexpr (Configurations::isWebsocketEnabled)
     {
-        networkService.notifyClients(data);
+        networkService.notifyClients(data, Configurations::enableWebSocketDeltaTimeLogging ? deltaTimes : vector<unsigned long>{});
+
+        if (deltaTimes.size() > 0)
+        {
+            vector<unsigned long> clear;
+            clear.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
+            deltaTimes.swap(clear);
+        }
     }
 }
 

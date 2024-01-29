@@ -44,6 +44,12 @@ void loop()
     peripheralController.update(powerManagerController.getBatteryLevel());
     powerManagerController.update(strokeController.getLastRevTime(), peripheralController.isAnyDeviceConnected());
 
+    if (strokeController.getRawImpulseCount() != strokeController.getPreviousRawImpulseCount())
+    {
+        peripheralController.updateDeltaTime(strokeController.getDeltaTime());
+        strokeController.setPreviousRawImpulseCount();
+    }
+
     // auto start = micros();
 
     // execution time

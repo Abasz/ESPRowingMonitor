@@ -62,6 +62,16 @@ unsigned short StrokeController::getStrokeCount() const
     return rowerState.strokeCount;
 }
 
+unsigned long StrokeController::getRawImpulseCount() const
+{
+    return flywheelData.rawImpulseCount;
+}
+
+unsigned long StrokeController::getDeltaTime() const
+{
+    return flywheelData.deltaTime;
+}
+
 Configurations::precision StrokeController::getDriveDuration() const
 {
     return rowerState.driveDuration / 1e6;
@@ -97,6 +107,11 @@ unsigned int StrokeController::getPreviousStrokeCount() const
     return previousStrokeCount;
 }
 
+unsigned long StrokeController::getPreviousRawImpulseCount() const
+{
+    return previousRawImpulseCount;
+}
+
 void StrokeController::setPreviousRevCount()
 {
     previousRevCount = lround(rowerState.distance);
@@ -105,4 +120,9 @@ void StrokeController::setPreviousRevCount()
 void StrokeController::setPreviousStrokeCount()
 {
     previousStrokeCount = rowerState.strokeCount;
+}
+
+void StrokeController::setPreviousRawImpulseCount()
+{
+    previousRawImpulseCount = flywheelData.rawImpulseCount;
 }
