@@ -37,6 +37,17 @@ void EEPROMService::setup()
         Log.verboseln("%s: %d", websocketDeltaTimeLoggingAddress, logToWebsocket);
     }
 
+    if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
+    {
+        if (!preferences.isKey(sdCardLoggingAddress))
+        {
+            Log.infoln("Setting Sd Card log location");
+            preferences.putBool(sdCardLoggingAddress, false);
+        }
+        logToSdCard = preferences.getBool(sdCardLoggingAddress, false);
+        Log.verboseln("%s: %d", sdCardLoggingAddress, logToSdCard);
+    }
+
     logLevel = static_cast<ArduinoLogLevel>(preferences.getUChar(logLevelAddress, static_cast<unsigned char>(Configurations::defaultLogLevel)));
     bleServiceFlag = static_cast<BleServiceFlag>(preferences.getUChar(bleServiceFlagAddress, static_cast<unsigned char>(Configurations::defaultBleServiceFlag)));
 
@@ -70,6 +81,26 @@ void EEPROMService::setLogToWebsocket(bool shouldLogToWebSocket)
     logToWebsocket = shouldLogToWebSocket;
 }
 
+void EEPROMService::setLogToSdCard(bool shouldLogToSdCard)
+{
+    if constexpr (!Configurations::supportSdCardLogging)
+    {
+        Log.warningln("Not able to change Sd card logging as the feature is disabled");
+
+        return;
+    }
+
+    if constexpr (Configurations::sdCardChipSelectPin == GPIO_NUM_NC)
+    {
+        Log.warningln("Not able to change Sd card logging as the chip select pin is not provided");
+
+        return;
+    }
+
+    preferences.putBool(sdCardLoggingAddress, shouldLogToSdCard);
+    logToSdCard = shouldLogToSdCard;
+}
+
 void EEPROMService::setBleServiceFlag(BleServiceFlag newServiceFlag)
 {
     int intBleServiceFlag = static_cast<int>(newServiceFlag);
@@ -96,4 +127,9 @@ ArduinoLogLevel EEPROMService::getLogLevel() const
 bool EEPROMService::getLogToWebsocket() const
 {
     return logToWebsocket;
+}
+
+bool EEPROMService::getLogToSdCard() const
+{
+    return logToSdCard;
 }

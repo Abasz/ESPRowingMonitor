@@ -18,14 +18,16 @@ public:
     static const BleServiceFlag defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
     static const bool isBleServiceEnabled = ENABLE_BLE_SERVICE;
     static const BleSignalStrength bleSignalStrength = BLE_SIGNAL_STRENGTH;
+    static const bool supportSdCardLogging = SUPPORT_SD_CARD_LOGGING;
 
     inline static const string deviceName = TOSTRING(DEVICE_NAME);
     inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
     inline static const string serialNumber = SERIAL_NUMBER;
-    inline static const string softwareVersion = std::to_string(compileYear) + std::to_string(compileMonth) + std::to_string(compileDay);
+    inline static const string softwareVersion = std::to_string(compileDateYear) + std::to_string(compileDateMonth) + std::to_string(compileDateDay);
 
     // Hardware settings
     static const BaudRates baudRate = BAUD_RATE;
+    static const gpio_num_t sdCardChipSelectPin = SD_CARD_CHIP_SELECT_PIN;
     static const gpio_num_t sensorPinNumber = SENSOR_PIN_NUMBER;
     static const gpio_num_t wakeupPinNumber = WAKEUP_SENSOR_PIN_NUMBER;
     static const bool hasWakeupPinNumber = Configurations::wakeupPinNumber != GPIO_NUM_NC;

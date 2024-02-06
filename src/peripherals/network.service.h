@@ -7,12 +7,14 @@
 #include "../utils/EEPROM.service.h"
 #include "../utils/configuration.h"
 #include "../utils/enums.h"
+#include "./sd-card.service.h"
 
 using std::vector;
 
 class NetworkService
 {
     EEPROMService &eepromService;
+    SdCardService &sdCardService;
 
     struct MetricsTaskParameters
     {
@@ -25,6 +27,7 @@ class NetworkService
     {
         AsyncWebSocket &webSocket;
         const EEPROMService &eepromService;
+        const SdCardService &sdCardService;
         unsigned char batteryLevel = 0;
     } settingsTaskParameters;
 
@@ -42,7 +45,7 @@ class NetworkService
     static vector<unsigned char> parseOpCode(std::string requestOpCommand);
 
 public:
-    explicit NetworkService(EEPROMService &_eepromService);
+    explicit NetworkService(EEPROMService &_eepromService, SdCardService &_sdCardService);
     void setup();
     void update();
     void stopServer();

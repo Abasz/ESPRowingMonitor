@@ -11,7 +11,7 @@
 using std::string;
 using std::to_string;
 
-NetworkService::NetworkService(EEPROMService &_eepromService) : eepromService(_eepromService), server(Configurations::port), webSocket("/ws"), metricTaskParameters{webSocket, {}, {}}, settingsTaskParameters{webSocket, _eepromService, 0} {}
+NetworkService::NetworkService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), server(Configurations::port), webSocket("/ws"), metricTaskParameters{webSocket, {}, {}}, settingsTaskParameters{webSocket, _eepromService, _sdCardService, 0} {}
 
 void NetworkService::update()
 {
@@ -259,12 +259,14 @@ void NetworkService::broadcastSettingsTask(void *parameters)
         const auto *const params = static_cast<const NetworkService::SettingsTaskParameters *>(parameters);
 
         string response;
-        const auto stringDataLength = 70;
+        const auto stringDataLength = 105;
         response.reserve(stringDataLength);
         response.append("{\"batteryLevel\":" + to_string(params->batteryLevel));
         response.append(",\"bleServiceFlag\":" + to_string(static_cast<unsigned char>(params->eepromService.getBleServiceFlag())));
         response.append(",\"logLevel\":" + to_string(static_cast<unsigned char>(params->eepromService.getLogLevel())));
-        response.append(",\"logToWebSocket\":" + to_string(static_cast<unsigned char>(params->eepromService.getLogToWebsocket())));
+        response.append(",\"logToWebSocket\":" + (Configurations::enableWebSocketDeltaTimeLogging ? to_string(static_cast<unsigned char>(params->eepromService.getLogToWebsocket())) : "null"));
+        response.append(",\"logToSdCard\":" + (Configurations::supportSdCardLogging && params->sdCardService.isLogFileOpen() ? to_string(static_cast<unsigned char>(params->eepromService.getLogToSdCard())) : "null"));
+
         response.append("}");
 
         params->webSocket.binaryAll(response.c_str(), response.size());
@@ -374,6 +376,32 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
             }
 
             Log.infoln("Invalid OP command for setting WebSocket deltaTime logging, this should be a bool: %d", opCommand[1]);
+        }
+        break;
+
+        case static_cast<int>(PSCOpCodes::SetSdCardLogging):
+        {
+            Log.infoln("Change Sd Card Logging");
+
+            if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
+            {
+                Log.infoln("%s SdCard logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
+                eepromService.setLogToSdCard(static_cast<bool>(opCommand[1]));
+
+                const auto stackCoreSize = 2048;
+                xTaskCreatePinnedToCore(
+                    broadcastSettingsTask,
+                    "broadcastSettingsTask",
+                    stackCoreSize,
+                    &settingsTaskParameters,
+                    1,
+                    NULL,
+                    0);
+
+                return;
+            }
+
+            Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", opCommand[1]);
         }
         break;
 

@@ -5,12 +5,14 @@
 
 #include "bluetooth.service.h"
 #include "network.service.h"
+#include "sd-card.service.h"
 #include "utils/EEPROM.service.h"
 
 class PeripheralsController
 {
     BluetoothService &bluetoothService;
     NetworkService &networkService;
+    SdCardService &sdCardService;
     EEPROMService &eepromService;
 
     unsigned int lastConnectedDeviceCheckTime = 0;
@@ -33,7 +35,7 @@ class PeripheralsController
     static void setupConnectionIndicatorLed();
 
 public:
-    PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, EEPROMService &_eepromService);
+    PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, SdCardService &sdCardService, EEPROMService &_eepromService);
 
     void begin();
     void update(unsigned char batteryLevel);

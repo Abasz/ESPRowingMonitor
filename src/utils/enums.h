@@ -62,6 +62,7 @@ enum class PSCOpCodes : unsigned char
     SetLogLevel = 17U,
     ChangeBleService = 18U,
     SetWebSocketDeltaTimeLogging = 19U,
+    SetSdCardLogging = 20U,
     ResponseCode = 32U
 };
 

@@ -13,22 +13,22 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-constexpr unsigned int compileYear = (__DATE__[7] - '0') * 1000 + (__DATE__[8] - '0') * 100 + (__DATE__[9] - '0') * 10 + (__DATE__[10] - '0');
-constexpr unsigned int monthNumber = (int)__DATE__[0] + (int)__DATE__[1] + (int)__DATE__[2];
-constexpr unsigned int compileMonth = monthNumber == 281   ? 1
-                                      : monthNumber == 269 ? 2
-                                      : monthNumber == 288 ? 3
-                                      : monthNumber == 291 ? 4
-                                      : monthNumber == 295 ? 5
-                                      : monthNumber == 301 ? 6
-                                      : monthNumber == 299 ? 7
-                                      : monthNumber == 285 ? 8
-                                      : monthNumber == 296 ? 9
-                                      : monthNumber == 294 ? 10
-                                      : monthNumber == 307 ? 11
-                                      : monthNumber == 268 ? 12
-                                                           : 0;
-constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') : (__DATE__[4] - '0') * 10 + (__DATE__[5] - '0');
+constexpr unsigned int compileDateYear = (__DATE__[7] - '0') * 1000 + (__DATE__[8] - '0') * 100 + (__DATE__[9] - '0') * 10 + (__DATE__[10] - '0');
+constexpr unsigned int compileDateMonthNumber = (int)__DATE__[0] + (int)__DATE__[1] + (int)__DATE__[2];
+constexpr unsigned int compileDateMonth = compileDateMonthNumber == 281   ? 1
+                                          : compileDateMonthNumber == 269 ? 2
+                                          : compileDateMonthNumber == 288 ? 3
+                                          : compileDateMonthNumber == 291 ? 4
+                                          : compileDateMonthNumber == 295 ? 5
+                                          : compileDateMonthNumber == 301 ? 6
+                                          : compileDateMonthNumber == 299 ? 7
+                                          : compileDateMonthNumber == 285 ? 8
+                                          : compileDateMonthNumber == 296 ? 9
+                                          : compileDateMonthNumber == 294 ? 10
+                                          : compileDateMonthNumber == 307 ? 11
+                                          : compileDateMonthNumber == 268 ? 12
+                                                                          : 0;
+constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') : (__DATE__[4] - '0') * 10 + (__DATE__[5] - '0');
 
 #define PRECISION_FLOAT 0
 #define PRECISION_DOUBLE 1
@@ -73,6 +73,10 @@ constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') :
     #define SENSOR_ON_SWITCH_PIN_NUMBER GPIO_NUM_NC
 #endif
 
+#if !defined(SD_CARD_CHIP_SELECT_PIN)
+    #define SD_CARD_CHIP_SELECT_PIN GPIO_NUM_NC
+#endif
+
 #if !defined(WAKEUP_SENSOR_PIN_NUMBER)
     #define WAKEUP_SENSOR_PIN_NUMBER GPIO_NUM_NC
 #endif
@@ -93,7 +97,13 @@ constexpr unsigned int compileDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') :
     #define DISABLE_WEBSOCKET_DELTA_TIME_LOGGING false
 #endif
 
+#if !defined(SUPPORT_SD_CARD_LOGGING)
+    #define SUPPORT_SD_CARD_LOGGING false
+#endif
+
 // Sanity checks and validations
+static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == true && SD_CARD_CHIP_SELECT_PIN != GPIO_NUM_NC), "SD Card chip select pin is not provided. Please define 'SD_CARD_CHIP_SELECT_PIN' with the GPIO to which chip select is connected");
+
 #if (MAX_DRAG_FACTOR_RECOVERY_PERIOD) / (ROTATION_DEBOUNCE_TIME_MIN) > 1250
     #error "Theoretically the recovery may end up creating a vector with a max of 1250 data points (which amount in reality would depend on, among others, the drag) that would use up too much memory and crash the application. Please reduce the MAX_DRAG_FACTOR_RECOVERY_PERIOD property to avoid this. Please see docs for further information"
 #elif (MAX_DRAG_FACTOR_RECOVERY_PERIOD) / (ROTATION_DEBOUNCE_TIME_MIN) > 1000
