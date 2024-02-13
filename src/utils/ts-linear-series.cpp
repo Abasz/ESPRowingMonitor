@@ -16,13 +16,13 @@ Configurations::precision TSLinearSeries::calculateSlope(const unsigned char poi
     const auto seriesXPointOne = seriesX[pointOne];
     const auto seriesXPointTwo = seriesX[pointTwo];
 
-    if (pointOne != pointTwo && seriesXPointOne != seriesXPointTwo)
+    if (pointOne == pointTwo || seriesXPointOne == seriesXPointTwo)
     {
-        return (seriesY[pointTwo] - seriesY[pointOne]) /
-               (seriesXPointTwo - seriesXPointOne);
+        return 0.0;
     }
 
-    return 0.0;
+    return (seriesY[pointTwo] - seriesY[pointOne]) /
+           (seriesXPointTwo - seriesXPointOne);
 }
 
 Configurations::precision TSLinearSeries::coefficientA() const
@@ -32,32 +32,32 @@ Configurations::precision TSLinearSeries::coefficientA() const
 
 Configurations::precision TSLinearSeries::median() const
 {
-    if (!slopes.empty())
+    if (slopes.empty())
     {
-        vector<Configurations::precision> flattened;
-        if (maxSlopeSeriesLength > 0)
-        {
-            flattened.reserve(maxSlopeSeriesLength);
-        }
-
-        for (const auto &slope : slopes)
-        {
-            flattened.insert(end(flattened), begin(slope), end(slope));
-        }
-
-        const unsigned int mid = flattened.size() / 2;
-
-        std::nth_element(begin(flattened), begin(flattened) + mid, end(flattened));
-
-        if (flattened.size() % 2 != 0)
-        {
-            return flattened[mid];
-        }
-
-        return (flattened[mid] + *std::max_element(begin(flattened), begin(flattened) + mid)) / 2;
+        return 0.0;
     }
 
-    return 0.0;
+    vector<Configurations::precision> flattened;
+    if (maxSlopeSeriesLength > 0)
+    {
+        flattened.reserve(maxSlopeSeriesLength);
+    }
+
+    for (const auto &slope : slopes)
+    {
+        flattened.insert(end(flattened), begin(slope), end(slope));
+    }
+
+    const unsigned int mid = flattened.size() / 2;
+
+    std::nth_element(begin(flattened), begin(flattened) + mid, end(flattened));
+
+    if (flattened.size() % 2 != 0)
+    {
+        return flattened[mid];
+    }
+
+    return (flattened[mid] + *std::max_element(begin(flattened), begin(flattened) + mid)) / 2;
 }
 
 void TSLinearSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)

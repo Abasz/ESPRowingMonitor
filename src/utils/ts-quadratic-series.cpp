@@ -14,22 +14,22 @@ TSQuadraticSeries::TSQuadraticSeries(const unsigned char _maxSeriesLength, unsig
 
 Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(const unsigned char position) const
 {
-    if (seriesX.size() > 2 && position < seriesX.size())
+    if (seriesX.size() < 3 || position >= seriesX.size())
     {
-        return a * 2 * seriesX[position] + b;
+        return 0;
     }
 
-    return 0;
+    return a * 2 * seriesX[position] + b;
 }
 
 Configurations::precision TSQuadraticSeries::secondDerivativeAtPosition(const unsigned char position) const
 {
-    if (seriesX.size() > 2 && position < seriesX.size())
+    if (seriesX.size() < 3 || position >= seriesX.size())
     {
-        return a * 2;
+        return 0;
     }
 
-    return 0;
+    return a * 2;
 }
 
 void TSQuadraticSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)
@@ -48,48 +48,48 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     // row numbers of the A array. So, the A of (X[0],Y[0]) and (X[1],Y[1]
     // will be stored in A[0][.].
 
-    // calculate the coefficients of this new point
-    if (seriesX.size() > 2)
-    {
-        seriesA.push_back({});
-        if (maxSeriesAInnerLength > 0)
-        {
-            seriesA[seriesA.size() - 1].reserve(maxSeriesAInnerLength);
-        }
-
-        // there are at least two points in the X and Y arrays, so let's add the new datapoint
-        auto i = 0U;
-        auto j = 0U;
-
-        while (i < seriesX.size() - 2)
-        {
-            j = i + 1;
-            while (j < seriesX.size() - 1)
-            {
-                seriesA[i].push_back(calculateA(i, j, seriesX.size() - 1));
-                j++;
-            }
-            i++;
-        }
-        a = seriesAMedian();
-
-        TSLinearSeries linearResidue(maxSeriesLength, maxAllocationCapacity);
-        i = 0;
-        while (i < seriesX.size() - 1)
-        {
-            const auto seriesXPointI = seriesX[i];
-            linearResidue.push(
-                seriesXPointI,
-                seriesY[i] - a * (seriesXPointI * seriesXPointI));
-            i++;
-        }
-        b = linearResidue.coefficientA();
-    }
-    else
+    if (seriesX.size() < 3)
     {
         a = 0;
         b = 0;
+
+        return;
     }
+
+    // calculate the coefficients of this new point
+    seriesA.push_back({});
+    if (maxSeriesAInnerLength > 0)
+    {
+        seriesA[seriesA.size() - 1].reserve(maxSeriesAInnerLength);
+    }
+
+    // there are at least two points in the X and Y arrays, so let's add the new datapoint
+    auto i = 0U;
+    auto j = 0U;
+
+    while (i < seriesX.size() - 2)
+    {
+        j = i + 1;
+        while (j < seriesX.size() - 1)
+        {
+            seriesA[i].push_back(calculateA(i, j, seriesX.size() - 1));
+            j++;
+        }
+        i++;
+    }
+    a = seriesAMedian();
+
+    TSLinearSeries linearResidue(maxSeriesLength, maxAllocationCapacity);
+    i = 0;
+    while (i < seriesX.size() - 1)
+    {
+        const auto seriesXPointI = seriesX[i];
+        linearResidue.push(
+            seriesXPointI,
+            seriesY[i] - a * (seriesXPointI * seriesXPointI));
+        i++;
+    }
+    b = linearResidue.coefficientA();
 }
 
 Configurations::precision TSQuadraticSeries::calculateA(const unsigned char pointOne, const unsigned char pointTwo, const unsigned char pointThree) const
@@ -98,18 +98,18 @@ Configurations::precision TSQuadraticSeries::calculateA(const unsigned char poin
     const auto xPointTwo = seriesX[pointTwo];
     const auto xPointThree = seriesX[pointThree];
 
-    if (xPointOne != xPointTwo && xPointOne != xPointThree && xPointTwo != xPointThree)
+    if (xPointOne == xPointTwo || xPointOne == xPointThree || xPointTwo == xPointThree)
     {
-        const auto yPointThree = seriesY[pointThree];
-        const auto yPointTwo = seriesY[pointTwo];
-
-        return (xPointOne * (yPointThree - yPointTwo) +
-                seriesY[pointOne] * (xPointTwo - xPointThree) +
-                (xPointThree * yPointTwo - xPointTwo * yPointThree)) /
-               ((xPointOne - xPointTwo) * (xPointOne - xPointThree) * (xPointTwo - xPointThree));
+        return 0.0;
     }
 
-    return 0.0;
+    const auto yPointThree = seriesY[pointThree];
+    const auto yPointTwo = seriesY[pointTwo];
+
+    return (xPointOne * (yPointThree - yPointTwo) +
+            seriesY[pointOne] * (xPointTwo - xPointThree) +
+            (xPointThree * yPointTwo - xPointTwo * yPointThree)) /
+           ((xPointOne - xPointTwo) * (xPointOne - xPointThree) * (xPointTwo - xPointThree));
 }
 
 Configurations::precision TSQuadraticSeries::seriesAMedian() const

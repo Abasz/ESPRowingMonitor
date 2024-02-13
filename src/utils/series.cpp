@@ -4,7 +4,7 @@
 
 Series::Series(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxAllocationCapacity(_maxAllocationCapacity)
 {
-    seriesArray.reserve(_maxSeriesLength == 0 ? Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin : _maxSeriesLength);
+    seriesArray.reserve(_maxSeriesLength > 0 ? _maxSeriesLength : Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin);
 }
 
 const Configurations::precision &Series::operator[](size_t index) const
@@ -24,29 +24,29 @@ size_t Series::capacity() const
 
 Configurations::precision Series::average() const
 {
-    if (!seriesArray.empty())
+    if (seriesArray.empty())
     {
-        return seriesSum / (Configurations::precision)seriesArray.size();
+        return 0.0;
     }
 
-    return 0.0;
+    return seriesSum / (Configurations::precision)seriesArray.size();
 }
 
 Configurations::precision Series::median() const
 {
-    if (!seriesArray.empty())
+    if (seriesArray.empty())
     {
-        const unsigned int mid = seriesArray.size() / 2;
-        vector<Configurations::precision> sortedArray(mid + 1);
-        // Note: it has been tested that partial_sort_copy implementation performs better than nth_element in any constellation for this situation. I assume it is the copying to the new array that cost more than O(n) time complexity of nth_element brings to the table
-        partial_sort_copy(begin(seriesArray), end(seriesArray), begin(sortedArray), end(sortedArray));
-
-        return seriesArray.size() % 2 != 0
-                   ? sortedArray[mid]
-                   : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
+        return 0.0;
     }
 
-    return 0.0;
+    const unsigned int mid = seriesArray.size() / 2;
+    vector<Configurations::precision> sortedArray(mid + 1);
+    // Note: it has been tested that partial_sort_copy implementation performs better than nth_element in any constellation for this situation. I assume it is the copying to the new array that cost more than O(n) time complexity of nth_element brings to the table
+    partial_sort_copy(begin(seriesArray), end(seriesArray), begin(sortedArray), end(sortedArray));
+
+    return seriesArray.size() % 2 != 0
+               ? sortedArray[mid]
+               : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
 }
 
 void Series::push(const Configurations::precision value)
@@ -77,9 +77,8 @@ void Series::push(const Configurations::precision value)
 void Series::reset()
 {
     vector<Configurations::precision> clear;
-    const auto maxCapacity = maxAllocationCapacity;
 
-    clear.reserve(maxSeriesLength == 0 ? std::min<unsigned int>(seriesArray.size(), maxCapacity) : maxSeriesLength);
+    clear.reserve(maxSeriesLength > 0 ? maxSeriesLength : std::min<unsigned int>(seriesArray.size(), maxAllocationCapacity));
     seriesArray.swap(clear);
 
     seriesSum = 0;

@@ -278,139 +278,136 @@ void NetworkService::broadcastSettingsTask(void *parameters)
 void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *const data, const size_t len)
 {
     const auto *const info = static_cast<const AwsFrameInfo *>(arg);
-    if (static_cast<bool>(info->final) && info->index == 0 && info->len == len && info->opcode == WS_TEXT)
+    if (!static_cast<bool>(info->final) || info->index != 0 || info->len != len || info->opcode != WS_TEXT)
     {
-        // NOLINTBEGIN
-        data[len] = 0;
-        const string request(reinterpret_cast<char *>(data));
-        // NOLINTEND
+        return;
+    }
 
-        if (request.size() < 3)
+    // NOLINTBEGIN
+    data[len] = 0;
+    const string request(reinterpret_cast<char *>(data));
+    // NOLINTEND
+
+    const auto requestOpCommand = request.substr(1, request.size() - 2);
+
+    Log.infoln("Incoming WS message");
+
+    const auto opCommand = parseOpCode(requestOpCommand);
+
+    if (opCommand.size() != 2)
+    {
+        Log.traceln("Invalid request: %s", request.c_str());
+        return;
+    }
+
+    Log.infoln("Op Code: %d; Length: %d", opCommand[0], opCommand.size());
+
+    switch (opCommand[0])
+    {
+    case static_cast<int>(PSCOpCodes::SetLogLevel):
+    {
+        Log.infoln("Set LogLevel OpCode");
+
+        if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 6)
         {
-            Log.traceln("Invalid request: %s", request.c_str());
-        }
+            Log.infoln("New LogLevel: %d", opCommand[1]);
+            eepromService.setLogLevel(static_cast<ArduinoLogLevel>(opCommand[1]));
 
-        const auto requestOpCommand = request.substr(1, request.size() - 2);
+            const auto stackCoreSize = 2048;
+            xTaskCreatePinnedToCore(
+                broadcastSettingsTask,
+                "broadcastSettingsTask",
+                stackCoreSize,
+                &settingsTaskParameters,
+                1,
+                NULL,
+                0);
 
-        Log.infoln("Incoming WS message");
-
-        const auto opCommand = parseOpCode(requestOpCommand);
-
-        if (opCommand.size() != 2)
-        {
-            Log.traceln("Invalid request: %s", request.c_str());
             return;
         }
 
-        Log.infoln("Op Code: %d; Length: %d", opCommand[0], opCommand.size());
+        Log.infoln("Invalid log level: %d", opCommand[1]);
+    }
+    break;
 
-        switch (opCommand[0])
+    case static_cast<int>(PSCOpCodes::ChangeBleService):
+    {
+        Log.infoln("Change BLE Service");
+
+        if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
         {
-        case static_cast<int>(PSCOpCodes::SetLogLevel):
+            Log.infoln("New BLE Service: %s", opCommand[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
+            eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(opCommand[1]));
+
+            Log.verboseln("Restarting device");
+            Serial.flush();
+            esp_sleep_enable_timer_wakeup(1);
+            esp_deep_sleep_start();
+
+            return;
+        }
+
+        Log.infoln("Invalid BLE service flag: %d", opCommand[1]);
+    }
+    break;
+
+    case static_cast<int>(PSCOpCodes::SetWebSocketDeltaTimeLogging):
+    {
+        Log.infoln("Change WebSocket Logging");
+
+        if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
         {
-            Log.infoln("Set LogLevel OpCode");
+            Log.infoln("%s WebSocket deltaTime logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
+            eepromService.setLogToWebsocket(static_cast<bool>(opCommand[1]));
 
-            if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 6)
-            {
-                Log.infoln("New LogLevel: %d", opCommand[1]);
-                eepromService.setLogLevel(static_cast<ArduinoLogLevel>(opCommand[1]));
+            const auto stackCoreSize = 2048;
+            xTaskCreatePinnedToCore(
+                broadcastSettingsTask,
+                "broadcastSettingsTask",
+                stackCoreSize,
+                &settingsTaskParameters,
+                1,
+                NULL,
+                0);
 
-                const auto stackCoreSize = 2048;
-                xTaskCreatePinnedToCore(
-                    broadcastSettingsTask,
-                    "broadcastSettingsTask",
-                    stackCoreSize,
-                    &settingsTaskParameters,
-                    1,
-                    NULL,
-                    0);
-
-                return;
-            }
-
-            Log.infoln("Invalid log level: %d", opCommand[1]);
+            return;
         }
-        break;
 
-        case static_cast<int>(PSCOpCodes::ChangeBleService):
+        Log.infoln("Invalid OP command for setting WebSocket deltaTime logging, this should be a bool: %d", opCommand[1]);
+    }
+    break;
+
+    case static_cast<int>(PSCOpCodes::SetSdCardLogging):
+    {
+        Log.infoln("Change Sd Card Logging");
+
+        if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
         {
-            Log.infoln("Change BLE Service");
+            Log.infoln("%s SdCard logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
+            eepromService.setLogToSdCard(static_cast<bool>(opCommand[1]));
 
-            if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
-            {
-                Log.infoln("New BLE Service: %s", opCommand[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
-                eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(opCommand[1]));
+            const auto stackCoreSize = 2048;
+            xTaskCreatePinnedToCore(
+                broadcastSettingsTask,
+                "broadcastSettingsTask",
+                stackCoreSize,
+                &settingsTaskParameters,
+                1,
+                NULL,
+                0);
 
-                Log.verboseln("Restarting device");
-                Serial.flush();
-                esp_sleep_enable_timer_wakeup(1);
-                esp_deep_sleep_start();
-
-                return;
-            }
-
-            Log.infoln("Invalid BLE service flag: %d", opCommand[1]);
+            return;
         }
-        break;
 
-        case static_cast<int>(PSCOpCodes::SetWebSocketDeltaTimeLogging):
-        {
-            Log.infoln("Change WebSocket Logging");
+        Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", opCommand[1]);
+    }
+    break;
 
-            if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
-            {
-                Log.infoln("%s WebSocket deltaTime logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
-                eepromService.setLogToWebsocket(static_cast<bool>(opCommand[1]));
-
-                const auto stackCoreSize = 2048;
-                xTaskCreatePinnedToCore(
-                    broadcastSettingsTask,
-                    "broadcastSettingsTask",
-                    stackCoreSize,
-                    &settingsTaskParameters,
-                    1,
-                    NULL,
-                    0);
-
-                return;
-            }
-
-            Log.infoln("Invalid OP command for setting WebSocket deltaTime logging, this should be a bool: %d", opCommand[1]);
-        }
-        break;
-
-        case static_cast<int>(PSCOpCodes::SetSdCardLogging):
-        {
-            Log.infoln("Change Sd Card Logging");
-
-            if (opCommand.size() == 2 && opCommand[1] >= 0 && opCommand[1] <= 1)
-            {
-                Log.infoln("%s SdCard logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
-                eepromService.setLogToSdCard(static_cast<bool>(opCommand[1]));
-
-                const auto stackCoreSize = 2048;
-                xTaskCreatePinnedToCore(
-                    broadcastSettingsTask,
-                    "broadcastSettingsTask",
-                    stackCoreSize,
-                    &settingsTaskParameters,
-                    1,
-                    NULL,
-                    0);
-
-                return;
-            }
-
-            Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", opCommand[1]);
-        }
-        break;
-
-        default:
-        {
-            Log.infoln("Not Supported Op Code: %d", opCommand[0]);
-        }
-        break;
-        }
+    default:
+    {
+        Log.infoln("Not Supported Op Code: %d", opCommand[0]);
+    }
+    break;
     }
 }
 
