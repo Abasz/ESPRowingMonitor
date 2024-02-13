@@ -18,9 +18,21 @@ TEST_CASE("Theil Sen Linear Regression", "[regression]")
         const auto expectedMedian = -39.37665713543009;
         REQUIRE(tsReg.median() == expectedMedian);
     }
+
     SECTION("should assign the median to coefficientA")
     {
         REQUIRE(tsReg.median() == tsReg.coefficientA());
+    }
+
+    SECTION("should calculate coefficientB correctly")
+    {
+        TSLinearSeries tsRegCoeffB(testMaxSize);
+
+        for (const auto &testCase : testCases)
+        {
+            tsRegCoeffB.push(testCase[1] / 1e6, testCase[0] / 1e6);
+            REQUIRE(tsRegCoeffB.coefficientB() == testCase[3]);
+        }
     }
 
     SECTION("should be empty after reset")

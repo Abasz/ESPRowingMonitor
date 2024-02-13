@@ -2,8 +2,9 @@
 
 #include "../utils/configuration.h"
 #include "../utils/ols-linear-series.h"
-#include "../utils/series.h"
 #include "../utils/ts-quadratic-series.h"
+#include "../utils/weighted-average-series.h"
+
 #include "stroke.model.h"
 
 class StrokeService
@@ -47,8 +48,8 @@ class StrokeService
     Configurations::precision currentTorque = 0;
     vector<Configurations::precision> driveHandleForces;
 
-    vector<Series> angularVelocityMatrix;
-    vector<Series> angularAccelerationMatrix;
+    vector<WeightedAverageSeries> angularVelocityMatrix;
+    vector<WeightedAverageSeries> angularAccelerationMatrix;
 
     OLSLinearSeries deltaTimes = OLSLinearSeries(Configurations::impulseDataArrayLength);
     OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength);

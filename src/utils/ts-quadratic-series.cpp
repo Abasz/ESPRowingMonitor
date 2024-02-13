@@ -52,11 +52,13 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     {
         a = 0;
         b = 0;
+        c = 0;
 
         return;
     }
 
-    // calculate the coefficients of this new point
+    // calculate the coefficients of this new point if we have three or more points in the series
+
     seriesA.push_back({});
     if (maxSeriesAInnerLength > 0)
     {
@@ -81,7 +83,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
 
     TSLinearSeries linearResidue(maxSeriesLength, maxAllocationCapacity);
     i = 0;
-    while (i < seriesX.size() - 1)
+    while (i < seriesX.size())
     {
         const auto seriesXPointI = seriesX[i];
         linearResidue.push(
@@ -90,6 +92,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
         i++;
     }
     b = linearResidue.coefficientA();
+    c = linearResidue.coefficientB();
 }
 
 Configurations::precision TSQuadraticSeries::calculateA(const unsigned char pointOne, const unsigned char pointTwo, const unsigned char pointThree) const
@@ -135,6 +138,50 @@ Configurations::precision TSQuadraticSeries::seriesAMedian() const
     }
 
     return (flattened[mid] + *std::max_element(begin(flattened), begin(flattened) + mid)) / 2;
+}
+
+Configurations::precision TSQuadraticSeries::goodnessOfFit() const
+{
+    // This function returns the R^2 as a goodness of fit indicator
+    if (seriesX.size() < 3)
+    {
+        return 0.0;
+    }
+
+    auto i = 0U;
+    Configurations::precision sse = 0.0;
+    Configurations::precision sst = 0.0;
+
+    while (i < seriesX.size())
+    {
+        const auto projectedX = projectX(seriesX[i]);
+        sse += (seriesY[i] - projectedX) * (seriesY[i] - projectedX);
+        const auto averageY = seriesY.average();
+        sst += (seriesY[i] - averageY) * (seriesY[i] - averageY);
+        i++;
+    }
+
+    if (sst == 0 || sse > sst)
+    {
+        return 0;
+    }
+
+    if (sse == 0)
+    {
+        return 1;
+    }
+
+    return 1 - (sse / sst);
+}
+
+Configurations::precision TSQuadraticSeries::projectX(Configurations::precision valueX) const
+{
+    if (seriesX.size() < 3)
+    {
+        return 0.0;
+    }
+
+    return ((a * valueX * valueX) + (b * valueX) + c);
 }
 
 constexpr unsigned short TSQuadraticSeries::calculateMaxSeriesALength() const

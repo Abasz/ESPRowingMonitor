@@ -26,7 +26,7 @@ TEST_CASE("Series")
             const auto extremeHighMaxCapacity = 1200;
             Series seriesMaxCapacity(0, extremeHighMaxCapacity);
 
-            for (auto i = 0; i < 999; i++)
+            for (auto i = 0U; i < 999; i++)
             {
                 seriesMaxCapacity.push(0.1);
             }

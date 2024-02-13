@@ -145,7 +145,7 @@ TEST_CASE("StrokeService")
         {
             REQUIRE(rowingMetrics.strokeCount == 10);
             REQUIRE(rowingMetrics.lastStrokeTime == 32573215);
-            const auto expectedDistance = 9283.8839625828;
+            const auto expectedDistance = 9283.9722092293;
             REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(expectedDistance, 0.0000001));
             REQUIRE(rowingMetrics.lastRevTime == 39577207);
         }

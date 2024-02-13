@@ -30,6 +30,11 @@ Configurations::precision TSLinearSeries::coefficientA() const
     return a;
 }
 
+Configurations::precision TSLinearSeries::coefficientB() const
+{
+    return b;
+}
+
 Configurations::precision TSLinearSeries::median() const
 {
     if (slopes.empty())
@@ -81,14 +86,24 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
     {
         // there are at least two points in the X and Y arrays, so let's add the new datapoint
         auto i = 0U;
-        while (i < slopes.size())
+        while (i < seriesX.size() - 1)
         {
             const auto result = calculateSlope(i, slopes.size());
             slopes[i].push_back(result);
             i++;
         }
         a = median();
+
+        i = 0U;
+        Series intercepts(maxSeriesLength, seriesX.size() - 1);
+        while (i < seriesX.size() - 1)
+        {
+            intercepts.push((seriesY[i] - (a * seriesX[i])));
+            i++;
+        }
+        b = intercepts.median();
     }
+
     // add an empty array at the end to store futurs results for the most recent points
     slopes.push_back({});
     if (maxSeriesLength > 0)

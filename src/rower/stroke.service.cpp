@@ -208,19 +208,20 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
         angularAccelerationMatrix.erase(begin(angularAccelerationMatrix));
     }
 
-    angularVelocityMatrix.push_back(Series(Configurations::impulseDataArrayLength));
-    angularAccelerationMatrix.push_back(Series(Configurations::impulseDataArrayLength));
+    angularVelocityMatrix.push_back(WeightedAverageSeries(Configurations::impulseDataArrayLength));
+    angularAccelerationMatrix.push_back(WeightedAverageSeries(Configurations::impulseDataArrayLength));
 
     unsigned char i = 0;
+    const auto angularGoodnessOfFit = angularDistances.goodnessOfFit();
     while (i < angularVelocityMatrix.size())
     {
-        angularVelocityMatrix[i].push(angularDistances.firstDerivativeAtPosition(i));
-        angularAccelerationMatrix[i].push(angularDistances.secondDerivativeAtPosition(i));
+        angularVelocityMatrix[i].push(angularDistances.firstDerivativeAtPosition(i), angularGoodnessOfFit);
+        angularAccelerationMatrix[i].push(angularDistances.secondDerivativeAtPosition(i), angularGoodnessOfFit);
         i++;
     }
 
-    currentAngularVelocity = angularVelocityMatrix[0].median();
-    currentAngularAcceleration = angularAccelerationMatrix[0].median();
+    currentAngularVelocity = angularVelocityMatrix[0].average();
+    currentAngularAcceleration = angularAccelerationMatrix[0].average();
 
     currentTorque = Configurations::flywheelInertia * currentAngularAcceleration + dragCoefficient * pow(currentAngularVelocity, 2);
 
