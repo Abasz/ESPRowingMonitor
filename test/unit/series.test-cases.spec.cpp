@@ -23,7 +23,7 @@ TEST_CASE("Series")
 
         SECTION("should cap maxCapacity at 1000")
         {
-            const auto extremeHighMaxCapacity = 1200;
+            const auto extremeHighMaxCapacity = 1'200;
             Series seriesMaxCapacity(0, extremeHighMaxCapacity);
 
             for (auto i = 0U; i < 999; i++)
@@ -31,7 +31,7 @@ TEST_CASE("Series")
                 seriesMaxCapacity.push(0.1);
             }
 
-            REQUIRE(seriesMaxCapacity.capacity() == 1000);
+            REQUIRE(seriesMaxCapacity.capacity() == 1'000);
         }
 
         SECTION("should set maxCapacity to maxAllocationCapacity when that is below 1000")

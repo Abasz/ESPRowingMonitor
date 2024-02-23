@@ -41,7 +41,7 @@ void PeripheralsController::update(const unsigned char batteryLevel)
 
     if constexpr (Configurations::isBleServiceEnabled)
     {
-        const unsigned int bleUpdateInterval = 1000;
+        const unsigned int bleUpdateInterval = 1'000;
         if (now - lastBroadcastTime > bleUpdateInterval)
         {
             notify();
@@ -129,9 +129,9 @@ void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
 void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &data)
 {
     const auto secInMicroSec = 1e6L;
-    bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2048 : 1024)) % USHRT_MAX;
+    bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2'048 : 1'024)) % USHRT_MAX;
     bleRevCountData = lround(data.distance);
-    bleStrokeTimeData = lroundl((data.lastStrokeTime / secInMicroSec) * 1024) % USHRT_MAX;
+    bleStrokeTimeData = lroundl((data.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
     bleStrokeCountData = data.strokeCount;
     bleAvgStrokePowerData = static_cast<short>(lround(data.avgStrokePower));
 

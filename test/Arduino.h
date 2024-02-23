@@ -31,7 +31,7 @@ inline esp_sleep_wakeup_cause_t esp_sleep_get_wakeup_cause()
 class HardwareSerial
 {
 public:
-    inline void begin(unsigned long baud, unsigned int config, char rxPin = -1, char txPin = -1, bool invert = false, unsigned long timeout_ms = 20000UL, unsigned char rxfifo_full_thrhd = 112){};
+    inline void begin(unsigned long baud, unsigned int config, char rxPin = -1, char txPin = -1, bool invert = false, unsigned long timeout_ms = 20'000UL, unsigned char rxfifo_full_thrhd = 112){};
     inline void end(bool fullyTerminate = true){};
     inline void updateBaudRate(unsigned long baud){};
     inline int available(void) { return 1; };

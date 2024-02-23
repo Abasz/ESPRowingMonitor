@@ -22,10 +22,10 @@ TEST_CASE("StrokeService")
         CHECK(Configurations::flywheelInertia == 0.073);
         CHECK(Configurations::dragCoefficientsArrayLength == 1);
         CHECK(Configurations::goodnessOfFitThreshold == 0.97);
-        CHECK(Configurations::rotationDebounceTimeMin == 7000);
+        CHECK(Configurations::rotationDebounceTimeMin == 7'000);
         CHECK(Configurations::sprocketRadius == 1.5 / 100);
-        CHECK(Configurations::minimumDriveTime == 300000);
-        CHECK(Configurations::minimumRecoveryTime == 300000);
+        CHECK(Configurations::minimumDriveTime == 300'000);
+        CHECK(Configurations::minimumRecoveryTime == 300'000);
     }
 
     ifstream deltaTimesStream("test/unit/stroke.service.spec.deltaTimes.txt");
@@ -44,7 +44,7 @@ TEST_CASE("StrokeService")
     REQUIRE(dragFactorStream.good());
 
     vector<unsigned long> deltaTimes;
-    const auto arraySize = 1764;
+    const auto arraySize = 1'764;
     deltaTimes.reserve(arraySize);
     vector<double> slopes;
     slopes.reserve(arraySize - 1);
@@ -144,10 +144,10 @@ TEST_CASE("StrokeService")
         SECTION("total rowing metrics")
         {
             REQUIRE(rowingMetrics.strokeCount == 10);
-            REQUIRE(rowingMetrics.lastStrokeTime == 32573215);
-            const auto expectedDistance = 9283.9722092293;
+            REQUIRE(rowingMetrics.lastStrokeTime == 32'573'215);
+            const auto expectedDistance = 9'283.9722092293;
             REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(expectedDistance, 0.0000001));
-            REQUIRE(rowingMetrics.lastRevTime == 39577207);
+            REQUIRE(rowingMetrics.lastRevTime == 39'577'207);
         }
     }
 }

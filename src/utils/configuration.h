@@ -45,12 +45,12 @@ public:
     static const unsigned char driveHandleForcesMaxCapacity = UCHAR_MAX;
 
     // Sensor signal filter settings
-    static const unsigned short rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN * 1000;
-    static const unsigned int rowingStoppedThresholdPeriod = ROWING_STOPPED_THRESHOLD_PERIOD * 1000;
+    static const unsigned short rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN * 1'000;
+    static const unsigned int rowingStoppedThresholdPeriod = ROWING_STOPPED_THRESHOLD_PERIOD * 1'000;
 
     // Drag factor filter settings
     static constexpr double goodnessOfFitThreshold = GOODNESS_OF_FIT_THRESHOLD;
-    static const unsigned int maxDragFactorRecoveryPeriod = MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1000;
+    static const unsigned int maxDragFactorRecoveryPeriod = MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1'000;
     static constexpr double lowerDragFactorThreshold = LOWER_DRAG_FACTOR_THRESHOLD / 1e6;
     static constexpr double upperDragFactorThreshold = UPPER_DRAG_FACTOR_THRESHOLD / 1e6;
     static const unsigned char dragCoefficientsArrayLength = DRAG_COEFFICIENTS_ARRAY_LENGTH;
@@ -61,8 +61,8 @@ public:
     static constexpr double minimumDragTorque = MINIMUM_DRAG_TORQUE;
     static constexpr double minimumRecoverySlopeMargin = MINIMUM_RECOVERY_SLOPE_MARGIN / 1e6;
     static constexpr double minimumRecoverySlope = MINIMUM_RECOVERY_SLOPE;
-    static const unsigned int minimumRecoveryTime = MINIMUM_RECOVERY_TIME * 1000;
-    static const unsigned int minimumDriveTime = MINIMUM_DRIVE_TIME * 1000;
+    static const unsigned int minimumRecoveryTime = MINIMUM_RECOVERY_TIME * 1'000;
+    static const unsigned int minimumDriveTime = MINIMUM_DRIVE_TIME * 1'000;
     static const unsigned char impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
 
     // Network settings
@@ -80,6 +80,6 @@ public:
     static constexpr double batteryVoltageMax = BATTERY_VOLTAGE_MAX / Configurations::voltageDividerRatio;
     static const unsigned char batteryLevelArrayLength = BATTERY_LEVEL_ARRAY_LENGTH;
     static const unsigned char initialBatteryLevelMeasurementCount = INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT;
-    static const unsigned int batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1000;
-    static const unsigned long deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1000;
+    static const unsigned int batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1'000;
+    static const unsigned long deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1'000;
 };

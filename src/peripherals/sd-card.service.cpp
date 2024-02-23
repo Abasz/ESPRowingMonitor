@@ -88,7 +88,7 @@ void SdCardService::saveDeltaTime(const vector<unsigned long> &deltaTimes)
 
     sdCardTaskParameters.deltaTimes = deltaTimes;
 
-    const auto stackCoreSize = 2048;
+    const auto stackCoreSize = 2'048;
 
     xTaskCreatePinnedToCore(
         saveDeltaTimeTask,

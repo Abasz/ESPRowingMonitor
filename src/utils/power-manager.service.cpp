@@ -72,7 +72,7 @@ unsigned char PowerManagerService::measureBattery()
 
     for (unsigned char i = 0; i < Configurations::batteryLevelArrayLength; i++)
     {
-        auto rawNewBatteryLevel = (analogReadMilliVolts(Configurations::batteryPinNumber) / 1000.0 - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
+        auto rawNewBatteryLevel = (analogReadMilliVolts(Configurations::batteryPinNumber) / 1'000.0 - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
 
         if (rawNewBatteryLevel > 100)
         {

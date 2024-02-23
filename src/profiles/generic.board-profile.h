@@ -8,7 +8,7 @@
 #define BAUD_RATE BaudRates::Baud115200
 
 // LED settings
-#define LED_BLINK_FREQUENCY 1000
+#define LED_BLINK_FREQUENCY 1'000
 #define LED_PIN LED_BUILTIN // Use GPIO_NUM_NC if no led is available
 #define IS_RGB false
 

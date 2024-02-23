@@ -38,10 +38,10 @@ int main(int argc, const char *argv[])
 
     if (args[1] == string("simulate"))
     {
-        const auto minTimeThreshold = 40000UL;
-        const auto maxTimeThreshold = 45000UL;
+        const auto minTimeThreshold = 40'000UL;
+        const auto maxTimeThreshold = 45'000UL;
         unsigned long timeThreshold = maxTimeThreshold;
-        const size_t impulseCount = 20000;
+        const size_t impulseCount = 20'000;
         bool direction = false;
         for (size_t i = 0; i < impulseCount; i++)
         {
@@ -51,11 +51,11 @@ int main(int argc, const char *argv[])
 
             if (direction)
             {
-                timeThreshold += 1000;
+                timeThreshold += 1'000;
             }
             if (!direction)
             {
-                timeThreshold -= 1000;
+                timeThreshold -= 1'000;
             }
             if (timeThreshold == minTimeThreshold)
             {

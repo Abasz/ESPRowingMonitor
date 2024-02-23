@@ -16,7 +16,7 @@ NetworkService::NetworkService(EEPROMService &_eepromService, SdCardService &_sd
 void NetworkService::update()
 {
     const auto now = millis();
-    const auto cleanupInterval = 5000;
+    const auto cleanupInterval = 5'000;
     if (now - lastCleanupTime > cleanupInterval)
     {
         lastCleanupTime = now;
@@ -46,7 +46,7 @@ void NetworkService::update()
             {
                 Log.traceln("WebSocket client #%u connected from %p", client->id(), client->remoteIP());
                 
-                const auto stackCoreSize = 2048;
+                const auto stackCoreSize = 2'048;
                 xTaskCreatePinnedToCore(
                     broadcastSettingsTask,
                     "broadcastSettingsTask",
@@ -100,7 +100,7 @@ void NetworkService::setup()
     while (WiFiClass::status() != WL_CONNECTED)
     {
         Serial.print(".");
-        delay(1000);
+        delay(1'000);
 
         if (connectionTimeout == 0)
         {
@@ -146,7 +146,7 @@ void NetworkService::notifyBatteryLevel(const unsigned char newBatteryLevel)
     {
         return;
     }
-    const auto stackCoreSize = 2048;
+    const auto stackCoreSize = 2'048;
     xTaskCreatePinnedToCore(
         broadcastSettingsTask,
         "broadcastSettingsTask",
@@ -229,7 +229,7 @@ void NetworkService::notifyClients(const RowingDataModels::RowingMetrics &rowing
     metricTaskParameters.rowingMetrics = rowingMetrics;
     metricTaskParameters.deltaTimes = deltaTimes;
 
-    const auto coreStackSize = 2048U;
+    const auto coreStackSize = 2'048U;
     auto stackSize = coreStackSize;
     stackSize += rowingMetrics.driveHandleForces.size() * 4;
     if (!deltaTimes.empty())
@@ -312,7 +312,7 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
             Log.infoln("New LogLevel: %d", opCommand[1]);
             eepromService.setLogLevel(static_cast<ArduinoLogLevel>(opCommand[1]));
 
-            const auto stackCoreSize = 2048;
+            const auto stackCoreSize = 2'048;
             xTaskCreatePinnedToCore(
                 broadcastSettingsTask,
                 "broadcastSettingsTask",
@@ -359,7 +359,7 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
             Log.infoln("%s WebSocket deltaTime logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
             eepromService.setLogToWebsocket(static_cast<bool>(opCommand[1]));
 
-            const auto stackCoreSize = 2048;
+            const auto stackCoreSize = 2'048;
             xTaskCreatePinnedToCore(
                 broadcastSettingsTask,
                 "broadcastSettingsTask",
@@ -385,7 +385,7 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
             Log.infoln("%s SdCard logging", opCommand[1] == static_cast<bool>(true) ? "Enable" : "Disable");
             eepromService.setLogToSdCard(static_cast<bool>(opCommand[1]));
 
-            const auto stackCoreSize = 2048;
+            const auto stackCoreSize = 2'048;
             xTaskCreatePinnedToCore(
                 broadcastSettingsTask,
                 "broadcastSettingsTask",

@@ -20,14 +20,14 @@ void PowerManagerController::begin()
 void PowerManagerController::update(const unsigned long lastRevTime, const bool isDeviceConnected)
 {
     const auto now = micros();
-    if (!isDeviceConnected && now - lastRevTime > Configurations::deepSleepTimeout * 1000)
+    if (!isDeviceConnected && now - lastRevTime > Configurations::deepSleepTimeout * 1'000)
     {
         PowerManagerService::goToSleep();
     }
 
     if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
     {
-        if (now - lastBatteryMeasurementTime > Configurations::batteryMeasurementFrequency * 1000)
+        if (now - lastBatteryMeasurementTime > Configurations::batteryMeasurementFrequency * 1'000)
         {
             batteryLevel = powerManagerService.measureBattery();
             lastBatteryMeasurementTime = now;

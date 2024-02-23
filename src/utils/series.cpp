@@ -61,7 +61,7 @@ void Series::push(const Configurations::precision value)
     // Do manual memory reallocation via reserve if size is not known for better memory management
     if (maxSeriesLength == 0 && seriesArray.capacity() < seriesArray.size() + 1)
     {
-        const auto maxCapacity = std::min<unsigned int>(maxAllocationCapacity, 1000U);
+        const auto maxCapacity = std::min<unsigned int>(maxAllocationCapacity, 1'000U);
 
         if (seriesArray.capacity() * 2 > maxCapacity)
         {

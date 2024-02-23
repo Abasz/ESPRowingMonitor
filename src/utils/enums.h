@@ -76,21 +76,21 @@ enum class PSCResponseOpCodes : unsigned char
 
 enum class BaudRates : unsigned int
 {
-    Baud9600 = 9600U,
-    Baud14400 = 14400U,
-    Baud19200 = 19200U,
-    Baud33600 = 33600U,
-    Baud38400 = 38400U,
-    Baud56000 = 56000U,
-    Baud57600 = 57600U,
-    Baud76800 = 76800U,
-    Baud115200 = 115200U,
-    Baud128000 = 128000U,
-    Baud153600 = 153600U,
-    Baud230400 = 230400U,
-    Baud460800 = 460800U,
-    Baud921600 = 921600U,
-    Baud1500000 = 1500000U,
+    Baud9600 = 9'600U,
+    Baud14400 = 14'400U,
+    Baud19200 = 19'200U,
+    Baud33600 = 33'600U,
+    Baud38400 = 38'400U,
+    Baud56000 = 56'000U,
+    Baud57600 = 57'600U,
+    Baud76800 = 76'800U,
+    Baud115200 = 115'200U,
+    Baud128000 = 128'000U,
+    Baud153600 = 153'600U,
+    Baud230400 = 230'400U,
+    Baud460800 = 460'800U,
+    Baud921600 = 921'600U,
+    Baud1500000 = 1'500'000U,
 };
 
 class SensorLocations

@@ -73,7 +73,7 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
             pCharacteristic->indicate();
 
             Log.verboseln("Restarting device in 5s");
-            delay(5000);
+            delay(5'000);
             esp_restart();
 
             break;

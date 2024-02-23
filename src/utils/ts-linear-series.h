@@ -19,7 +19,7 @@ class TSLinearSeries
     Configurations::precision calculateSlope(unsigned char pointOne, unsigned char pointTwo) const;
 
 public:
-    explicit TSLinearSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1000);
+    explicit TSLinearSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
 
     Configurations::precision median() const;
     Configurations::precision coefficientA() const;
