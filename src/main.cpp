@@ -31,9 +31,6 @@ void setup()
 #endif
 }
 
-// execution time
-// - not connected 30 microsec
-// - connected  microsec 2000-4900
 void loop()
 {
 #if defined(SIMULATE_ROTATION)
@@ -50,12 +47,6 @@ void loop()
         strokeController.setPreviousRawImpulseCount();
     }
 
-    // auto start = micros();
-
-    // execution time
-    // - not connected 20-30 microsec
-    // - connected 1900-2200 microsec
-    // auto start = micros();
     const auto now = millis();
     const auto minUpdateInterval = 4000;
     if (strokeController.getStrokeCount() != strokeController.getPreviousStrokeCount() || now - lastUpdateTime > minUpdateInterval)
@@ -72,15 +63,8 @@ void loop()
         Log.traceln("power: %d", strokeController.getAvgStrokePower());
         Log.traceln("distance: %D", strokeController.getDistance() / 100.0);
 
-        // execution time
-        // - not connected: 173-200
-        // - connected: 900-2700
-        // auto start = micros();
         peripheralController.notifyDragFactor(strokeController.getDragFactor());
         strokeController.setPreviousStrokeCount();
-        // auto stop = micros();
-        // Serial.print("notifyDragFactor: ");
-        // Serial.println(stop - start);
     }
 
     if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)

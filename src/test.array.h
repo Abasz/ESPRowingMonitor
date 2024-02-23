@@ -1,12 +1,9 @@
 #include <array>
-#include <numeric>
 
 #include "Arduino.h"
 #include "LittleFS.h"
 
 #include "globals.h"
-
-using std::accumulate;
 
 const std::array test{
     5331447UL,
@@ -1777,7 +1774,7 @@ const std::array test{
 
 auto i = 1U;
 auto lastTestRevTime = 0UL;
-auto i2 = 0U;
+auto simulationCount = 0U;
 auto now = 0ULL;
 auto lastDelta = 0UL;
 
@@ -1799,8 +1796,8 @@ void setupFileSimulation()
 
 void simulateRotation()
 {
-    const auto repeatCount = 30;
-    if (micros() - lastTestRevTime < lastDelta || i2 == repeatCount)
+    const auto repeatCount = 1;
+    if (micros() - lastTestRevTime < lastDelta || simulationCount == repeatCount)
     {
         return;
     }
@@ -1833,6 +1830,6 @@ void simulateRotation()
 #endif
         Serial.printf("Going to sleep. Processed number of rotations: %d\n", i);
         i = 0;
-        i2++;
+        simulationCount++;
     }
 }

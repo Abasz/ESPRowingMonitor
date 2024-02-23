@@ -153,9 +153,8 @@ void BluetoothService::notifyCsc(const unsigned short revTime, const unsigned in
 {
     if (cscMeasurementCharacteristic->getSubscribedCount() > 0)
     {
-        // execution time: 0-1 microsec
-        // auto start = micros();
-        array<uint8_t, 11> temp = {
+        const auto length = 11U;
+        array<uint8_t, length> temp = {
             CSCSensorBleFlags::cscMeasurementFeaturesFlag,
 
             static_cast<unsigned char>(revCount),
@@ -171,23 +170,8 @@ void BluetoothService::notifyCsc(const unsigned short revTime, const unsigned in
             static_cast<unsigned char>(strokeTime),
             static_cast<unsigned char>(strokeTime >> 8)};
 
-        // auto stop = micros();
-        // Serial.print("data calc: ");
-        // Serial.println(stop - start);
-
-        // execution time: 28-35 microsec
-        // auto start = micros();
         cscMeasurementCharacteristic->setValue(temp);
-        // auto stop = micros();
-        // Serial.print("set value: ");
-        // Serial.println(stop - start);
-
-        // execution time: 1000-1600 microsec
-        // start = micros();
         cscMeasurementCharacteristic->notify();
-        // stop = micros();
-        // Serial.print("notify: ");
-        // Serial.println(stop - start);
     }
 }
 
@@ -195,9 +179,8 @@ void BluetoothService::notifyPsc(const unsigned short revTime, const unsigned in
 {
     if (pscMeasurementCharacteristic->getSubscribedCount() > 0)
     {
-        // execution time: 0-1 microsec
-        // auto start = micros();
-        array<uint8_t, 14> temp = {
+        const auto length = 14U;
+        array<uint8_t, length> temp = {
             static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
             static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
 
@@ -217,23 +200,8 @@ void BluetoothService::notifyPsc(const unsigned short revTime, const unsigned in
             static_cast<unsigned char>(strokeTime >> 8),
         };
 
-        // auto stop = micros();
-        // Serial.print("data calc: ");
-        // Serial.println(stop - start);
-
-        // execution time: 28-35 microsec
-        // auto start = micros();
         pscMeasurementCharacteristic->setValue(temp);
-        // auto stop = micros();
-        // Serial.print("set value: ");
-        // Serial.println(stop - start);
-
-        // execution time: 1000-1600 microsec
-        // start = micros();
         pscMeasurementCharacteristic->notify();
-        // stop = micros();
-        // Serial.print("notify: ");
-        // Serial.println(stop - start);
     }
 }
 
@@ -241,7 +209,7 @@ void BluetoothService::setupBleDevice()
 {
     Log.verboseln("Initializing BLE device");
 
-    const auto deviceName = Configurations::deviceName + "(" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
+    const auto deviceName = Configurations::deviceName + " (" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
     NimBLEDevice::init(deviceName);
     NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_ADV);
     NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_DEFAULT);

@@ -18,8 +18,6 @@ void FlywheelService::setup()
 
 RowingDataModels::FlywheelData FlywheelService::getData()
 {
-    // execution time: 12 microsec
-    // auto start = micros();
     detachRotationInterrupt();
     isDataChanged = false;
 
@@ -28,14 +26,11 @@ RowingDataModels::FlywheelData FlywheelService::getData()
         .deltaTime = cleanDeltaTime,
         .totalTime = totalTime,
         .totalAngularDisplacement = totalAngularDisplacement,
-        // TODO: These serve debugging purposes, my be deleted
+        // TODO: These serve debugging purposes, may be deleted
         .cleanImpulseTime = lastCleanImpulseTime,
         .rawImpulseTime = lastRawImpulseTime};
     attachRotationInterrupt();
-    // auto stop = micros();
 
-    // Serial.print("getCscData: ");
-    // Serial.println(stop - start);
     return data;
 }
 
@@ -64,7 +59,7 @@ void FlywheelService::processRotation(const unsigned long now)
 
     // lastDeltaTime = currentDeltaTime;
     // // We disregard rotation signals that are non sensible (the absolute difference of the current and the previous deltas exceeds the current delta)
-    // TODO: determine if it makes sense that the stroke engine updates the cyclePhase from outsde or not. questeion is whether this filtering method would really add considering the new algo
+    // TODO: determine if it makes sense that the stroke engine updates the cyclePhase from outside or not. Question is whether this filtering method would really add considering the new algo
     // if (deltaImpulseTimeDiff > currentDeltaTime && cyclePhase == CyclePhase::Recovery)
     //     return;
 

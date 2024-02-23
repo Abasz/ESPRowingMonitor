@@ -72,19 +72,16 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
 
     if (maxSeriesLength > 0 && slopes.size() >= maxSeriesLength)
     {
-        // the maximum of the array has been reached, we have to create room
-        // in the 2D array by removing the first row from the table
+        // The maximum of the array has been reached, we have to create room in the 2D array by removing the first row from the table
         slopes.erase(begin(slopes));
     }
 
-    // invariant: the indices of the X and Y array now match up with the
-    // row numbers of the slopes array. So, the slope of (X[0],Y[0]) and (X[1],Y[1]
-    // will be stored in slopes[0][.].
+    // Invariant: the indices of the X and Y array now match up with the row numbers of the slopes array. So, the slope of (X[0],Y[0]) and (X[1],Y[1] will be stored in slopes[0][.].
 
     // Calculate the slopes of this new point
     if (seriesX.size() > 1)
     {
-        // there are at least two points in the X and Y arrays, so let's add the new datapoint
+        // There are at least two points in the X and Y arrays, so let's add the new datapoint
         auto i = 0U;
         while (i < seriesX.size() - 1)
         {
@@ -104,7 +101,7 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
         b = intercepts.median();
     }
 
-    // add an empty array at the end to store futurs results for the most recent points
+    // Add an empty array at the end to store future results for the most recent points
     slopes.push_back({});
     if (maxSeriesLength > 0)
     {

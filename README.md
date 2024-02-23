@@ -7,7 +7,7 @@ The purpose of this project is to provide capabilities similar to the [Open Rowi
 
 The choice to the ESP32 was made instead of the Rpi due to its smaller size, its operability completely from battery, its very low cost, and easy accessibility.
 
-There is a lot of information available on the physics and math behind the code in the repos related to ORM. Before using this project I recommend reading the documentation of ORM (specifically the docs provided currently under the [v1beta branch](https://github.com/laberning/openrowingmonitor/tree/v1beta)) as this would greatly help with setting up and tuning in the settings of ESP Rowing Monitor.
+There is a lot of information available on the physics and math behind the code in the repos related to ORM. Before using this project I recommend reading the documentation of ORM (specifically the docs provided currently under the [v1beta_updates branch](https://github.com/JaapvanEkris/openrowingmonitor/tree/v1beta_updates)) as this would greatly help with setting up and tuning in the settings of ESP Rowing Monitor.
 
 ## Technical details
 
@@ -56,22 +56,48 @@ To obtain accurate speed and distance data, the wheel circumference must be set 
 
 ### Web interface
 
-ESP Rowing Monitor includes a WebSocket server that sends calculated metrics to connected clients (up to a maximum of 2 clients at a time). The data is sent in JSON format and follows the structure shown below:
+ESP Rowing Monitor includes a WebSocket server that sends calculated metrics to connected clients (up to a maximum of 2 clients at a time). In order to improve efficiency the data is sent in binary format. There are two types of data structure:
+
+#### Measurements
+
+Measurements are sent in an array format as follows:
 
 ```typescript
 {
-    driveDuration: number;
-    recoveryDuration: number;
-    batteryLevel: number;
+    data: [number, number, number, number, number, number, number, number, Array<number>, Array<number>];
+}
+```
+
+This array can be translated as follows based on the position:
+
+0. revTime
+1. distance
+2. strokeTime
+3. strokeCount
+4. avgStrokePower
+5. driveDuration
+6. recoveryDuration
+7. dragFactor
+8. handleForces
+9. deltaTimes (for logging purposes if enabled, if not one zero in the array is sent) since the last broadcast
+
+#### Settings and battery level
+
+The settings and the battery level is no longer sent along with every broadcast (to save on execution time), but rather
+
+1. on client connection
+2. after saving new settings
+3. on new battery measurement
+
+The data follows the below structure.
+
+```typescript
+{
+    logToWebSocket: boolean | undefined;
+    logToSdCard: boolean | undefined;
     bleServiceFlag: BleServiceFlag;
     logLevel: LogLevel;
-    revTime: number;
-    distance: number;
-    strokeTime: number;
-    strokeCount: number;
-    avgStrokePower: number;
-    dragFactor: number;
-    handleForces: Array<number>;
+    batteryLevel: number;
 }
 ```
 
@@ -86,6 +112,8 @@ Please note that the filesystem of the ESP32 is rather slow, so the first load o
 ESP Rowing Monitor implements a logging mechanism with different log levels (e.g. silent, error, info, trace, verbose, etc.). These logs are sent via serial (UART0) only, so the ESP32 MCU should be connected via USB to view the logs. The log level (0-6) can be set via the WebSocket or BLE Control Point using OpCode 17.
 
 Trace level logging is useful during the initial calibration process as it prints the delta times that can be used for replay. Further details can be found in the [Calibration](docs/settings.md#calibration)
+
+It is possible to log deltaTimes (i.e. time between impulses) to an SD card (if connected and enabled) as well as via WebSocket. In both cases the deltaTimes are collected in a `vector` and written to SD card and/or WebSocket on avery stroke or 4 seconds (which every happens earlier). This incremental way of making deltaTimes available is to optimize performance (e.g. websocket cannot broadcast in every 10m but can broadcast a big chunk in every 0.5s).
 
 ### Metrics
 
@@ -120,21 +148,23 @@ The ESP32 chip is available in a single core or dual core version with a clock s
 
 The algorithm used for calculating the necessary data for stroke detection can become rather CPU hungry. In a nutshell, the issue is that the Theil-Sen Quadratic Regression is O(N&#178;), which means that as the size of the `IMPULSE_DATA_ARRAY_LENGTH` increases, the time required to complete the calculations increases exponentially (for more information, please see [this explanation](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/physics_openrowingmonitor.md#use-of-quadratic-theil-senn-regression-for-determining-%CE%B1-and-%CF%89-based-on-time-and-%CE%B8)).
 
-As part of the version 5 update there has been significant work done to improve the execution time of the main loop and to better support higher value of `IMPULSE_DATA_ARRAY_LENGTH`. Through various optimizations in the algorithm there has been an approx. 40% improvement in this area leading when using double types to for instance an execution time of 4ms of a 15 data point set (compared to the original 7ms) and for float type for higher data point length over 50% (e.g. execution time is 2.2ms for a 15 data point set compared to the original 4.8).
+As part of the version 5 update there has been significant work done to improve the execution time of the main loop and to better support higher value of `IMPULSE_DATA_ARRAY_LENGTH`. Through various optimizations in the algorithm there has been an approx. 10-15% improvement on higher `IMPULSE_DATA_ARRAY_LENGTH` in this area leading when using double types to for instance an execution time of 5.6ms of a 15 data point set (compared to the original 7ms) and for float type for higher data point length over 15-20% (e.g. execution time is 3.5ms for a 15 data point set compared to the original 4.8).
+
+The improvements are even more noticeable on the maximum execution times (that was achieved through the implementation of proper offloading of peripheral calculations to the second core of the ESP32). The most relevant improvement is that these maximum execution times are within 1-1.5ms (compared to the previous 3-4ms) that avoids potential bug with more data points (e.g. metric calculation is not able to complete before a new data point comes in)
 
 I conducted some high-level tests and measured the execution times, which are shown in the table below:
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:-----------------:|
-|18                       |5858               |
-|15                       |4042               |
-|12                       |2783               |
-|9                        |1788               |
-|8                        |1544               |
-|7                        |1256               |
-|6                        |1072               |
-|5                        |957                |
-|3                        |516                |
+|18                       |7943               |
+|15                       |5669               |
+|12                       |4096               |
+|9                        |2757               |
+|8                        |2316               |
+|7                        |2021               |
+|6                        |1704               |
+|5                        |1462               |
+|3                        |1340               |
 
 The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is almost 6ms if double precision is used. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 (and double precision) and gives a warning at 12.
 
@@ -146,21 +176,25 @@ If, for some reason, testing shows that a higher value for the `IMPULSE_DATA_ARR
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:-----------------:|
-|18                       |2906               |
-|15                       |2223               |
-|12                       |1694               |
-|9                        |1257               |
-|8                        |1179               |
-|7                        |1047               |
-|6                        |930                |
-|5                        |618                |
-|3                        |549                |
+|18                       |4499               |
+|15                       |3560               |
+|12                       |2790               |
+|9                        |1965               |
+|8                        |1869               |
+|7                        |1689               |
+|6                        |1443               |
+|5                        |1145               |
+|3                        |687                |
 
-Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times significantly (notice the 2.9ms compared 5.8 for 18 data point). I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
+Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times significantly (notice the 4.5ms compared 6.3 for 18 data point). I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
 
 The below picture shows that the blue chart cuts some corners but generally follows the same curve (which does not mean that in certain edge cases the reduced precision does not create errors).
 
 ![Float vs. Double](docs/imgs/float-vs-double.jpg)
+
+Generally the execution time under the new algorithm shows a second degree polynomial where time is dependent on the `IMPULSE_DATA_ARRAY_LENGTH` size:
+
+![Float vs. Double Curves](docs/imgs/float-vs-double-curves.jpg)
 
 Another limitation related to CPU speed is the refresh rate of the peripherals such as BLE and the web server. The refresh rate is intentionally limited to conserve resources. For example, the web server only updates on a new stroke or after a 4-second interval if no new stroke detected during this period.
 
@@ -168,7 +202,7 @@ Further tests will be needed to determine if this refresh rate can be increased,
 
 ### Noise filtering
 
-Unlike ORM, the ESP Rowing Monitor has limited noise filtering capabilities. ESP Rowing Monitor implements only one impulse noise filter. This is based on the minimum required time between impulses. This means that the hardware used for sensing should produce clean impulses, and read switches with debounce may not yield accurate results. However, if the impulses per revolution are low (e.g. 1), and the minimum time between impulses can be set to a sufficiently high value, it may still work.
+Unlike ORM, the ESP Rowing Monitor has limited noise filtering capabilities on the ISR level. ESP Rowing Monitor implements only one impulse noise filter. This is based on the minimum required time between impulses. This means that the hardware used for sensing should produce clean impulses, and read switches with debounce may not yield accurate results. However, if the impulses per revolution are low (e.g. 1), and the minimum time between impulses can be set to a sufficiently high value, it may still work.
 
 Please see [Sensor signal filter settings](docs/settings.md#sensor-signal-filter-settings) for more details.
 
@@ -182,7 +216,7 @@ The ESP Rowing Monitor exposes BLE Cycling Power Profile and Cycling Speed and C
 
 ## Backlog
 
-- Need to improve and extend validation of settings on compiling
+- Implement FTMS
 
 ## Attribution
 

@@ -53,13 +53,12 @@ void Series::push(const Configurations::precision value)
 {
     if (maxSeriesLength > 0 && seriesArray.size() >= maxSeriesLength)
     {
-        // the maximum of the array has been reached, we have to create room by removing the first
-        // value from the array
+        // The maximum of the array has been reached, we have to create room by removing the first value from the array
         seriesSum -= seriesArray[0];
         seriesArray.erase(begin(seriesArray));
     }
 
-    // do manual memory reallocation via reserve if size is not known for better memory management
+    // Do manual memory reallocation via reserve if size is not known for better memory management
     if (maxSeriesLength == 0 && seriesArray.capacity() < seriesArray.size() + 1)
     {
         const auto maxCapacity = std::min<unsigned int>(maxAllocationCapacity, 1000U);

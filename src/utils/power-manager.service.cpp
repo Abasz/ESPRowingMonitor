@@ -68,17 +68,11 @@ void PowerManagerService::goToSleep()
 
 unsigned char PowerManagerService::measureBattery()
 {
-    // execution time: 460 micro sec
-    // auto start = micros();
     array<double, Configurations::batteryLevelArrayLength> batteryLevels{};
 
     for (unsigned char i = 0; i < Configurations::batteryLevelArrayLength; i++)
     {
-        const auto measurement = analogRead(Configurations::batteryPinNumber);
-
-        const auto espRefVolt = 3.3;
-        const auto dacResolution = 4095;
-        auto rawNewBatteryLevel = ((measurement * espRefVolt / dacResolution) - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
+        auto rawNewBatteryLevel = (analogReadMilliVolts(Configurations::batteryPinNumber) / 1000.0 - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
 
         if (rawNewBatteryLevel > 100)
         {
@@ -101,9 +95,6 @@ unsigned char PowerManagerService::measureBattery()
     batteryLevel = batteryLevel == 0 ? median : lround((median + batteryLevel) / 2);
 
     return batteryLevel;
-    // auto stop = micros();
-    // Serial.print("battery level: ");
-    // Serial.println(stop - start);
 }
 
 void PowerManagerService::setupBatteryMeasurement()

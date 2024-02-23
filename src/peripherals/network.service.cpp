@@ -216,7 +216,6 @@ void NetworkService::broadcastMetricsTask(void *parameters)
 
         params->webSocket.binaryAll(response.data(), response.size());
     }
-    // Terminate the task
     vTaskDelete(nullptr);
 }
 

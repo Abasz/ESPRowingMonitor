@@ -48,6 +48,10 @@ enum class BleServiceFlag : unsigned char
 
 Enables or disables the BLE service to broadcast data. Default is true.
 
+#### SUPPORT_SD_CARD_LOGGING
+
+This settings enables logging deltaTime values to a connected SD Card.
+
 ### Network settings
 
 These settings are required for the websocket to work
@@ -55,6 +59,10 @@ These settings are required for the websocket to work
 #### ENABLE_WEBSOCKET_MONITOR
 
 Enables or disables WebSocket monitor. For more details please refer to the [Wi-Fi](#wi-fi-and-websocket-monitor) section. Default is true.
+
+#### DISABLE_WEBSOCKET_DELTA_TIME_LOGGING
+
+By default deltaTime logging is allowed if WebSocket monitor is enabled. However, its possible to disable it by defining `DISABLE_WEBSOCKET_DELTA_TIME_LOGGING`.
 
 #### PORT
 
@@ -109,6 +117,10 @@ If LED related features are enabled, this sets the blinking frequency in case of
 #### IS_RGB
 
 It is possible to indicate battery charge via a connected RGB LED (actually some boards such as the FireBeetle 2 supports this by default via on-board RGB LED). Setting this to `true` enables these RGB related features. Default is false.
+
+#### SD_CARD_CHIP_SELECT_PIN
+
+The pin number of the ESP32 to which the SD Card chip select is connected (typeof `gpio_num_t`). Rest of the SD Card pins should be connected to the SPI pins of the board.
 
 #### SENSOR_PIN_NUMBER
 

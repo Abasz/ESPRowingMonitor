@@ -55,7 +55,7 @@ void EEPROMService::setup()
     Log.verboseln("%s: %d", bleServiceFlagAddress, bleServiceFlag);
 }
 
-void EEPROMService::setLogLevel(ArduinoLogLevel newLogLevel)
+void EEPROMService::setLogLevel(const ArduinoLogLevel newLogLevel)
 {
     int intLogLevel = static_cast<int>(newLogLevel);
     if (intLogLevel < 0 || intLogLevel > 6)
@@ -69,7 +69,7 @@ void EEPROMService::setLogLevel(ArduinoLogLevel newLogLevel)
     logLevel = newLogLevel;
 }
 
-void EEPROMService::setLogToWebsocket(bool shouldLogToWebSocket)
+void EEPROMService::setLogToWebsocket(const bool shouldLogToWebSocket)
 {
     if constexpr (!Configurations::enableWebSocketDeltaTimeLogging)
     {
@@ -81,7 +81,7 @@ void EEPROMService::setLogToWebsocket(bool shouldLogToWebSocket)
     logToWebsocket = shouldLogToWebSocket;
 }
 
-void EEPROMService::setLogToSdCard(bool shouldLogToSdCard)
+void EEPROMService::setLogToSdCard(const bool shouldLogToSdCard)
 {
     if constexpr (!Configurations::supportSdCardLogging)
     {
@@ -101,7 +101,7 @@ void EEPROMService::setLogToSdCard(bool shouldLogToSdCard)
     logToSdCard = shouldLogToSdCard;
 }
 
-void EEPROMService::setBleServiceFlag(BleServiceFlag newServiceFlag)
+void EEPROMService::setBleServiceFlag(const BleServiceFlag newServiceFlag)
 {
     int intBleServiceFlag = static_cast<int>(newServiceFlag);
     if (intBleServiceFlag < 0 || intBleServiceFlag > 1)

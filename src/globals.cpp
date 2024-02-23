@@ -18,13 +18,7 @@ PowerManagerController powerManagerController(powerManagerService);
 
 IRAM_ATTR void rotationInterrupt()
 {
-    // execution time general: 1-5, max: 520 and a few 120
-    // auto start = micros();
     flywheelService.processRotation(micros());
-    // auto stop = micros();
-
-    // Serial.print("rotationInterrupt: ");
-    // Serial.println(stop - start);
 }
 
 void attachRotationInterrupt()

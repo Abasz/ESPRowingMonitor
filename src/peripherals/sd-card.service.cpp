@@ -4,9 +4,6 @@
 #include "../utils/configuration.h"
 #include "sd-card.service.h"
 
-using std::string;
-using std::to_string;
-
 SdCardService::SdCardService(EEPROMService &_eepromService) : eepromService(_eepromService), sdCardTaskParameters{logFile, {}} {}
 
 void SdCardService::setup()
@@ -79,7 +76,6 @@ void SdCardService::saveDeltaTimeTask(void *parameters)
             }
         }
     }
-    // Terminate the task
     vTaskDelete(nullptr);
 }
 

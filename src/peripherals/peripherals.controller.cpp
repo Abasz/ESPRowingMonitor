@@ -11,7 +11,7 @@ PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService
     }
 }
 
-void PeripheralsController::update(unsigned char batteryLevel)
+void PeripheralsController::update(const unsigned char batteryLevel)
 {
     if constexpr (Configurations::isWebsocketEnabled)
     {
@@ -84,7 +84,7 @@ bool PeripheralsController::isAnyDeviceConnected()
            (Configurations::isWebsocketEnabled && networkService.isAnyDeviceConnected());
 }
 
-void PeripheralsController::updateLed(CRGB::HTMLColorCode newLedColor)
+void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
 {
     if constexpr (Configurations::isRgb)
     {

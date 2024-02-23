@@ -65,6 +65,10 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
     #define BATTERY_PIN_NUMBER GPIO_NUM_NC
 #endif
 
+#if !defined(BAUD_RATE)
+    #define BAUD_RATE BaudRates::Baud115200
+#endif
+
 #if !defined(SERIAL_NUMBER)
     #define SERIAL_NUMBER "03172022/1"
 #endif

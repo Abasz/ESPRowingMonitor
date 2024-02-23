@@ -36,17 +36,14 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
 {
     if (maxSeriesLength > 0 && seriesX.size() >= maxSeriesLength)
     {
-        // the maximum of the array has been reached, we have to create room
-        // in the 2D array by removing the first row from the A-table
+        // The maximum of the array has been reached, we have to create room in the 2D array by removing the first row from the A-table
         seriesA.erase(begin(seriesA));
     }
 
     seriesX.push(pointX);
     seriesY.push(pointY);
 
-    // invariant: the indices of the X and Y array now match up with the
-    // row numbers of the A array. So, the A of (X[0],Y[0]) and (X[1],Y[1]
-    // will be stored in A[0][.].
+    // Invariant: the indices of the X and Y array now match up with the row numbers of the A array. So, the A of (X[0],Y[0]) and (X[1],Y[1] will be stored in A[0][.].
 
     if (seriesX.size() < 3)
     {
@@ -57,7 +54,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
         return;
     }
 
-    // calculate the coefficients of this new point if we have three or more points in the series
+    // Calculate the coefficients of this new point if we have three or more points in the series
 
     seriesA.push_back({});
     if (maxSeriesAInnerLength > 0)
@@ -65,7 +62,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
         seriesA[seriesA.size() - 1].reserve(maxSeriesAInnerLength);
     }
 
-    // there are at least two points in the X and Y arrays, so let's add the new datapoint
+    // There are at least two points in the X and Y arrays, so let's add the new datapoint
     auto i = 0U;
     auto j = 0U;
 

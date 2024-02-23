@@ -25,7 +25,7 @@ class TSQuadraticSeries
     Configurations::precision seriesAMedian() const;
     constexpr unsigned short calculateMaxSeriesALength() const;
 
-    Configurations::precision projectX(Configurations::precision x) const;
+    Configurations::precision projectX(Configurations::precision pointX) const;
 
 public:
     explicit TSQuadraticSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1000);
