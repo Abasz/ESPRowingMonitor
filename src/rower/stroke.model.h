@@ -26,6 +26,6 @@ namespace RowingDataModels
         unsigned int recoveryDuration;
         Configurations::precision avgStrokePower;
         Configurations::precision dragCoefficient;
-        std::vector<Configurations::precision> driveHandleForces;
+        std::vector<float> driveHandleForces;
     };
 }

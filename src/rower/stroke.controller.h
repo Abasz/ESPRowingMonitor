@@ -20,7 +20,7 @@ class StrokeController
         0U,
         0.0,
         0.0,
-        std::vector<Configurations::precision>{}};
+        std::vector<float>{}};
 
     RowingDataModels::FlywheelData flywheelData{
         0UL,
@@ -44,7 +44,7 @@ public:
     unsigned long getPreviousRawImpulseCount() const;
     void setPreviousRawImpulseCount();
     unsigned long getRawImpulseCount() const;
-    
+
     unsigned long getDeltaTime() const;
     unsigned long long getLastRevTime() const;
     unsigned int getRevCount() const;

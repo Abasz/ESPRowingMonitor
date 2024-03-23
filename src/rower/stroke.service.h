@@ -46,7 +46,7 @@ class StrokeService
     Configurations::precision currentAngularVelocity = 0;
     Configurations::precision currentAngularAcceleration = 0;
     Configurations::precision currentTorque = 0;
-    vector<Configurations::precision> driveHandleForces;
+    vector<float> driveHandleForces;
 
     vector<WeightedAverageSeries> angularVelocityMatrix;
     vector<WeightedAverageSeries> angularAccelerationMatrix;

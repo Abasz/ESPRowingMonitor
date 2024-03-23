@@ -50,7 +50,7 @@ TEST_CASE("StrokeService")
     slopes.reserve(arraySize - 1);
     vector<double> torques;
     torques.reserve(arraySize - 1);
-    vector<vector<double>> forceCurves;
+    vector<vector<float>> forceCurves;
     forceCurves.reserve(10);
     vector<double> dragFactors;
     dragFactors.reserve(10);
@@ -85,7 +85,7 @@ TEST_CASE("StrokeService")
         size_t pos_start = 0;
         size_t pos_end = 0;
         string token = "";
-        vector<double> res;
+        vector<float> res;
 
         while ((pos_end = forceCurve.find(",", pos_start)) != string::npos)
         {
@@ -134,8 +134,8 @@ TEST_CASE("StrokeService")
                 SECTION("force curves on new stroke (" + std::to_string(rowingMetrics.strokeCount) + ")")
                 {
                     INFO("deltaTime: " << deltaTime << ", stroke number: " << rowingMetrics.strokeCount);
-                    REQUIRE_THAT(rowingMetrics.driveHandleForces, Catch::Matchers::RangeEquals(forceCurves[rowingMetrics.strokeCount - 1], [](double a, double b)
-                                                                                               { return std::abs(a - b) < 0.0000001; }));
+                    REQUIRE_THAT(rowingMetrics.driveHandleForces, Catch::Matchers::RangeEquals(forceCurves[rowingMetrics.strokeCount - 1], [](float a, float b)
+                                                                                               { return std::abs(a - b) < 0.00001F; }));
                     REQUIRE_THAT(rowingMetrics.dragCoefficient * 1e6, Catch::Matchers::WithinRel(dragFactors[rowingMetrics.strokeCount - 1], 0.0000001));
                 }
             }
