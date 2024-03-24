@@ -11,6 +11,27 @@ using std::to_string;
 
 BluetoothService::ControlPointCallbacks::ControlPointCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
 
+BluetoothService::HandleForcesCallbacks::HandleForcesCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
+
+BluetoothService::ServerCallbacks::ServerCallbacks() {}
+
+void BluetoothService::ServerCallbacks::onConnect(NimBLEServer *pServer)
+{
+    if (NimBLEDevice::getServer()->getConnectedCount() < 2)
+    {
+        Log.verboseln("Device connected");
+        NimBLEDevice::getAdvertising()->start();
+    }
+}
+
+void BluetoothService::HandleForcesCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc, uint16_t subValue)
+{
+    if (pCharacteristic->getUUID().toString() == CommonBleFlags::handleForcesUuid)
+    {
+        bleService.handleForcesClientId = desc->conn_handle;
+    }
+}
+
 void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic)
 {
     NimBLEAttValue message = pCharacteristic->getValue();
@@ -73,7 +94,7 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
             pCharacteristic->indicate();
 
             Log.verboseln("Restarting device in 5s");
-            delay(5'000);
+            delay(100);
             esp_restart();
 
             break;
@@ -104,7 +125,7 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     pCharacteristic->indicate();
 }
 
-BluetoothService::BluetoothService(EEPROMService &_eepromService) : eepromService(_eepromService), controlPointCallbacks(*this)
+BluetoothService::BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), handleForcesCallbacks(*this)
 {
 }
 
@@ -149,60 +170,143 @@ void BluetoothService::notifyDragFactor(const unsigned short distance, const uns
     }
 }
 
+void BluetoothService::notifyClients(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower) const
+{
+    if constexpr (Configurations::isBleServiceEnabled)
+    {
+        if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
+        {
+            notifyPsc(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+        }
+        if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
+        {
+            notifyCsc(revTime, revCount, strokeTime, strokeCount);
+        }
+    }
+}
+
+void BluetoothService::notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) const
+{
+    if (extendedMetricsCharacteristic->getSubscribedCount() == 0)
+    {
+        return;
+    }
+
+    const unsigned char settings = ((Configurations::enableWebSocketDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToWebsocket()) + 1 : 0) << 0U) | ((Configurations::supportSdCardLogging && sdCardService.isLogFileOpen() ? static_cast<unsigned char>(eepromService.getLogToSdCard()) + 1 : 0) << 2U) | (static_cast<unsigned char>(eepromService.getLogLevel()) << 4U);
+
+    const auto length = 12U;
+    array<uint8_t, length> temp = {
+        settings,
+
+        static_cast<unsigned char>(avgStrokePower),
+        static_cast<unsigned char>(avgStrokePower >> 8),
+
+        static_cast<unsigned char>(recoveryDuration),
+        static_cast<unsigned char>(recoveryDuration >> 8),
+        static_cast<unsigned char>(recoveryDuration >> 16),
+        static_cast<unsigned char>(recoveryDuration >> 24),
+        static_cast<unsigned char>(driveDuration),
+        static_cast<unsigned char>(driveDuration >> 8),
+        static_cast<unsigned char>(driveDuration >> 16),
+        static_cast<unsigned char>(driveDuration >> 24),
+
+        dragFactor,
+    };
+
+    extendedMetricsCharacteristic->setValue(temp);
+    extendedMetricsCharacteristic->notify();
+}
+
+void BluetoothService::notifyHandleForces(const std::vector<float> &handleForces) const
+{
+    if (handleForcesCharacteristic->getSubscribedCount() == 0)
+    {
+        return;
+    }
+
+    const auto mtu = handleForcesCharacteristic->getService()->getServer()->getPeerMTU(handleForcesClientId);
+
+    const unsigned char chunkSize = (mtu - 3 - 2) / sizeof(float);
+    const unsigned char split = handleForces.size() / chunkSize + (handleForces.size() % chunkSize == 0 ? 0 : 1);
+
+    auto i = 0;
+    Log.traceln("MTU of extended: %d, chunk size(bytes): %d, number of chunks: %d\n", mtu, chunkSize, split);
+
+    while (i < split)
+    {
+        auto start = handleForces.cbegin() + i * chunkSize;
+        const auto end = (i + 1) * chunkSize < handleForces.size() ? chunkSize * sizeof(float) : (handleForces.size() - i * chunkSize) * sizeof(float);
+        std::vector<unsigned char> temp(end + 2);
+
+        temp[0] = split;
+        temp[1] = i + 1;
+        memcpy(temp.data() + 2, handleForces.data() + i * chunkSize, end);
+
+        handleForcesCharacteristic->setValue(temp.data(), temp.size());
+        handleForcesCharacteristic->notify();
+        delay(1);
+        i++;
+    }
+}
+
 void BluetoothService::notifyCsc(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount) const
 {
-    if (cscMeasurementCharacteristic->getSubscribedCount() > 0)
+    if (cscMeasurementCharacteristic->getSubscribedCount() == 0)
     {
-        const auto length = 11U;
-        array<uint8_t, length> temp = {
-            CSCSensorBleFlags::cscMeasurementFeaturesFlag,
-
-            static_cast<unsigned char>(revCount),
-            static_cast<unsigned char>(revCount >> 8),
-            static_cast<unsigned char>(revCount >> 16),
-            static_cast<unsigned char>(revCount >> 24),
-
-            static_cast<unsigned char>(revTime),
-            static_cast<unsigned char>(revTime >> 8),
-
-            static_cast<unsigned char>(strokeCount),
-            static_cast<unsigned char>(strokeCount >> 8),
-            static_cast<unsigned char>(strokeTime),
-            static_cast<unsigned char>(strokeTime >> 8)};
-
-        cscMeasurementCharacteristic->setValue(temp);
-        cscMeasurementCharacteristic->notify();
+        return;
     }
+
+    const auto length = 11U;
+    array<uint8_t, length> temp = {
+        CSCSensorBleFlags::cscMeasurementFeaturesFlag,
+
+        static_cast<unsigned char>(revCount),
+        static_cast<unsigned char>(revCount >> 8),
+        static_cast<unsigned char>(revCount >> 16),
+        static_cast<unsigned char>(revCount >> 24),
+
+        static_cast<unsigned char>(revTime),
+        static_cast<unsigned char>(revTime >> 8),
+
+        static_cast<unsigned char>(strokeCount),
+        static_cast<unsigned char>(strokeCount >> 8),
+        static_cast<unsigned char>(strokeTime),
+        static_cast<unsigned char>(strokeTime >> 8)};
+
+    cscMeasurementCharacteristic->setValue(temp);
+    cscMeasurementCharacteristic->notify();
 }
 
 void BluetoothService::notifyPsc(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower) const
 {
-    if (pscMeasurementCharacteristic->getSubscribedCount() > 0)
+    if (pscMeasurementCharacteristic->getSubscribedCount() == 0)
     {
-        const auto length = 14U;
-        array<uint8_t, length> temp = {
-            static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
-            static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
-
-            static_cast<unsigned char>(avgStrokePower),
-            static_cast<unsigned char>(avgStrokePower >> 8),
-
-            static_cast<unsigned char>(revCount),
-            static_cast<unsigned char>(revCount >> 8),
-            static_cast<unsigned char>(revCount >> 16),
-            static_cast<unsigned char>(revCount >> 24),
-            static_cast<unsigned char>(revTime),
-            static_cast<unsigned char>(revTime >> 8),
-
-            static_cast<unsigned char>(strokeCount),
-            static_cast<unsigned char>(strokeCount >> 8),
-            static_cast<unsigned char>(strokeTime),
-            static_cast<unsigned char>(strokeTime >> 8),
-        };
-
-        pscMeasurementCharacteristic->setValue(temp);
-        pscMeasurementCharacteristic->notify();
+        return;
     }
+
+    const auto length = 14U;
+    array<uint8_t, length> temp = {
+        static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
+        static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
+
+        static_cast<unsigned char>(avgStrokePower),
+        static_cast<unsigned char>(avgStrokePower >> 8),
+
+        static_cast<unsigned char>(revCount),
+        static_cast<unsigned char>(revCount >> 8),
+        static_cast<unsigned char>(revCount >> 16),
+        static_cast<unsigned char>(revCount >> 24),
+        static_cast<unsigned char>(revTime),
+        static_cast<unsigned char>(revTime >> 8),
+
+        static_cast<unsigned char>(strokeCount),
+        static_cast<unsigned char>(strokeCount >> 8),
+        static_cast<unsigned char>(strokeTime),
+        static_cast<unsigned char>(strokeTime >> 8),
+    };
+
+    pscMeasurementCharacteristic->setValue(temp);
+    pscMeasurementCharacteristic->notify();
 }
 
 void BluetoothService::setupBleDevice()
@@ -216,7 +320,9 @@ void BluetoothService::setupBleDevice()
 
     Log.verboseln("Setting up Server");
 
-    NimBLEDevice::createServer();
+    auto *const pServer = NimBLEDevice::createServer();
+
+    pServer->setCallbacks(&serverCallbacks);
 
     setupServices();
     setupAdvertisement();
@@ -268,7 +374,17 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *const server)
     auto *cscService = server->createService(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
     cscMeasurementCharacteristic = cscService->createCharacteristic(CSCSensorBleFlags::cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
-    dragFactorCharacteristic = cscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    if constexpr (Configurations::hasExtendedBleMetrics)
+    {
+        handleForcesCharacteristic = cscService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
+        handleForcesCharacteristic->setCallbacks(&handleForcesCallbacks);
+
+        extendedMetricsCharacteristic = cscService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
+    }
+    else
+    {
+        dragFactorCharacteristic = cscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    }
 
     cscService
         ->createCharacteristic(CSCSensorBleFlags::cscFeatureUuid, NIMBLE_PROPERTY::READ)
@@ -289,7 +405,17 @@ NimBLEService *BluetoothService::setupPscServices(NimBLEServer *const server)
     auto *pscService = server->createService(PSCSensorBleFlags::cyclingPowerSvcUuid);
     pscMeasurementCharacteristic = pscService->createCharacteristic(PSCSensorBleFlags::pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
-    dragFactorCharacteristic = pscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    if constexpr (Configurations::hasExtendedBleMetrics)
+    {
+        handleForcesCharacteristic = pscService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
+        handleForcesCharacteristic->setCallbacks(&handleForcesCallbacks);
+
+        extendedMetricsCharacteristic = pscService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
+    }
+    else
+    {
+        dragFactorCharacteristic = pscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    }
 
     pscService
         ->createCharacteristic(PSCSensorBleFlags::pscFeatureUuid, NIMBLE_PROPERTY::READ)

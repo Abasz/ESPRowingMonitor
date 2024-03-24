@@ -44,7 +44,7 @@ void PeripheralsController::update(const unsigned char batteryLevel)
         const unsigned int bleUpdateInterval = 1'000;
         if (now - lastBroadcastTime > bleUpdateInterval)
         {
-            notify();
+            bluetoothService.notifyClients(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
             lastBroadcastTime = now;
         }
     }
@@ -140,6 +140,19 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
         networkService.notifyClients(data, Configurations::enableWebSocketDeltaTimeLogging ? deltaTimes : vector<unsigned long>{});
     }
 
+    if constexpr (Configurations::isBleServiceEnabled)
+    {
+        if constexpr (Configurations::hasExtendedBleMetrics)
+        {
+            bluetoothService.notifyHandleForces(data.driveHandleForces);
+            bluetoothService.notifyExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
+        }
+
+        bluetoothService.notifyClients(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+
+        lastBroadcastTime = millis();
+    }
+
     if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
     {
         sdCardService.saveDeltaTime(deltaTimes);
@@ -156,24 +169,9 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
     }
 }
 
-void PeripheralsController::notify() const
-{
-    if constexpr (Configurations::isBleServiceEnabled)
-    {
-        if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
-        {
-            bluetoothService.notifyPsc(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
-        }
-        if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
-        {
-            bluetoothService.notifyCsc(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData);
-        }
-    }
-}
-
 void PeripheralsController::notifyDragFactor(const unsigned char dragFactor) const
 {
-    if constexpr (Configurations::isBleServiceEnabled)
+    if constexpr (Configurations::isBleServiceEnabled && !Configurations::hasExtendedBleMetrics)
     {
         const auto distance = pow(dragFactor / Configurations::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
         bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);

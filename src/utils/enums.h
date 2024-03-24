@@ -123,6 +123,26 @@ public:
     static const unsigned char MultipleSensorLocationSupported = (0x01 << 2U);
 };
 
+class SettingsFlags
+{
+public:
+    static const unsigned char LogToWebsocketNotSupported = (0x00 << 0U);
+    static const unsigned char LogToWebsocketDisabled = (0x01 << 0U);
+    static const unsigned char LogToWebsocketEnabled = (0x02 << 0U);
+
+    static const unsigned char LogToSdCardNotSupported = (0x00 << 2U);
+    static const unsigned char LogToSdCardDisabled = (0x01 << 2U);
+    static const unsigned char LogToSdCardEnabled = (0x02 << 2U);
+
+    static const unsigned char LogLevelSilent = (0x00 << 4U);
+    static const unsigned char LogLevelFatal = (0x01 << 4U);
+    static const unsigned char LogLevelError = (0x02 << 4U);
+    static const unsigned char LogLevelWarning = (0x03 << 4U);
+    static const unsigned char LogLevelInfo = (0x04 << 4U);
+    static const unsigned char LogLevelTrace = (0x05 << 4U);
+    static const unsigned char LogLevelVerbose = (0x06 << 4U);
+};
+
 class PSCFeaturesFlags
 {
 public:
@@ -211,6 +231,12 @@ public:
     static const unsigned short sensorLocationUuid = 0x2A5D;
     inline static const std::string dragFactorUuid = "CE060031-43E5-11E4-916C-0800200C9A66";
     inline static const std::string dragFactorSvcUuid = "CE060030-43E5-11E4-916C-0800200C9A66";
+
+    inline static const std::string settingsServiceUuid = "56892de1-7068-4b5a-acaa-473d97b02206";
+    inline static const std::string settingsControlPointUuid = "51ba0a00-8853-477c-bf43-6a09c36aac9f";
+
+    inline static const std::string extendedMetricsUuid = "808a0d51-efae-4f0c-b2e0-48bc180d65c3";
+    inline static const std::string handleForcesUuid = "3d9c2760-cf91-41ee-87e9-fd99d5f129a4";
 
     static const unsigned short batterySvcUuid = 0x180F;
     static const unsigned short batteryLevelUuid = 0x2A19;

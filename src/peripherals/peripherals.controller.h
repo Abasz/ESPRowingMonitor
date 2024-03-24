@@ -30,7 +30,6 @@ class PeripheralsController
     CRGB::HTMLColorCode ledColor = CRGB::Black;
     inline static std::array<CRGB, 1> leds;
 
-    void notify() const;
     void updateLed(CRGB::HTMLColorCode newLedColor);
     static void setupConnectionIndicatorLed();
 

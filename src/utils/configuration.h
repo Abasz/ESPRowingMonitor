@@ -17,6 +17,7 @@ public:
     static const ArduinoLogLevel defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
     static const BleServiceFlag defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
     static const bool isBleServiceEnabled = ENABLE_BLE_SERVICE;
+    static const bool hasExtendedBleMetrics = HAS_BLE_EXTENDED_METRICS ? Configurations::isBleServiceEnabled : false;
     static const BleSignalStrength bleSignalStrength = BLE_SIGNAL_STRENGTH;
     static const bool supportSdCardLogging = SUPPORT_SD_CARD_LOGGING;
 

@@ -217,6 +217,7 @@ The ESP Rowing Monitor exposes BLE Cycling Power Profile and Cycling Speed and C
 ## Backlog
 
 - Implement FTMS
+- Implement more flexible settings system that does not require recompile and takes advantage of persistent storage
 
 ## Attribution
 

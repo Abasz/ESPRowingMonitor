@@ -45,6 +45,10 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
 #define TOSTRING(str) VAL(str)
 #define EMPTY(...) (true __VA_OPT__(&&false))
 
+#if !defined(DEFAULT_CPS_LOGGING_LEVEL)
+    #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
+#endif
+
 #if STROKE_DETECTION_TYPE == STROKE_DETECTION_BOTH
     #define STROKE_DETECTION StrokeDetectionType::Both
 #elif STROKE_DETECTION_TYPE == STROKE_DETECTION_SLOPE
@@ -89,10 +93,25 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
     #define LOG_CALIBRATION false
 #endif
 
+#if !defined(ENABLE_BLE_SERVICE)
+    #define ENABLE_BLE_SERVICE true
+#endif
+#if !defined(HAS_BLE_EXTENDED_METRICS)
+    #define HAS_BLE_EXTENDED_METRICS true
+#endif
 #if !defined(BLE_SIGNAL_STRENGTH)
     #define BLE_SIGNAL_STRENGTH BleSignalStrength::Default
 #endif
 
+#if !defined(ENABLE_WEBSOCKET_MONITOR)
+    #define ENABLE_WEBSOCKET_MONITOR false
+#endif
+#if !defined(ENABLE_WEBGUI)
+    #define ENABLE_WEBGUI false
+#endif
+#if !defined(PORT)
+    #define PORT 80
+#endif
 #if defined(DISABLE_WEBSOCKET_DELTA_TIME_LOGGING)
     #undef DISABLE_WEBSOCKET_DELTA_TIME_LOGGING
     #define DISABLE_WEBSOCKET_DELTA_TIME_LOGGING true
@@ -103,6 +122,10 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
 
 #if !defined(SUPPORT_SD_CARD_LOGGING)
     #define SUPPORT_SD_CARD_LOGGING false
+#endif
+
+#if !defined(HAS_BLE_EXTENDED_METRICS)
+    #define HAS_BLE_EXTENDED_METRICS true
 #endif
 
 // Sanity checks and validations
@@ -134,10 +157,8 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
     #error "Using too many data points will increase loop execution time. It should not be more than 17"
 #endif
 
-#if (ENABLE_WEBGUI == true && ENABLE_WEBSOCKET_MONITOR == false)
-    #undef ENABLE_WEBSOCKET_MONITOR
-    #define ENABLE_WEBSOCKET_MONITOR true
-    #warning "WebGui requires WebSocket, so enabling it"
+#if (ENABLE_WEBGUI == true)
+    #warning "Serving up the WebGUI from the MCU directly is now deprecated and this feature will be removed in the future in favour of the extended BLE API. https://github.com/Abasz/ESPRowingMonitor/blob/master/docs/settings.md#enable_webgui"
 #endif
 #if ((!defined(LOCAL_SSID) || !defined(PASSPHRASE)) && (ENABLE_WEBGUI == true || ENABLE_WEBSOCKET_MONITOR == true))
     #undef ENABLE_WEBSOCKET_MONITOR
@@ -146,8 +167,12 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
     #define ENABLE_WEBGUI false
     #warning "Not provided SSID and/or Passphrase, disabling WebSocket monitor and WebGUI"
 #endif
-#if (ENABLE_WEBGUI == true)
-    #warning "WebGUI is enabled, so a filesystem image needs to be uploaded, please refer to the docs: https://github.com/Abasz/ESPRowingMonitor/blob/master/docs/settings.md#enable_webgui"
+#if (ENABLE_WEBSOCKET_MONITOR == true)
+    #warning "The WebSocket API is now deprecated and may be removed in future version in favour of the extended BLE API."
+#endif
+
+#if (HAS_BLE_EXTENDED_METRICS == true && ENABLE_WEBSOCKET_MONITOR == true)
+    #warning "For performance reasons it is not recommended to enable both extended BLE data and WebSocket monitor at the same time."
 #endif
 
 #if IMPULSE_DATA_ARRAY_LENGTH < 12
