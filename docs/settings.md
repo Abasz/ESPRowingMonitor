@@ -48,45 +48,13 @@ enum class BleServiceFlag : unsigned char
 
 Enables or disables the BLE service to broadcast data. Default is true.
 
+#### HAS_BLE_EXTENDED_METRICS
+
+Enables or disables the extended BLE API to broadcast data. Default is true.
+
 #### SUPPORT_SD_CARD_LOGGING
 
 This settings enables logging deltaTime values to a connected SD Card.
-
-### Network settings
-
-These settings are required for the websocket to work
-
-#### ENABLE_WEBSOCKET_MONITOR
-
-Enables or disables WebSocket monitor. For more details please refer to the [Wi-Fi](#wi-fi-and-websocket-monitor) section. Default is true.
-
-#### DISABLE_WEBSOCKET_DELTA_TIME_LOGGING
-
-By default deltaTime logging is allowed if WebSocket monitor is enabled. However, its possible to disable it by defining `DISABLE_WEBSOCKET_DELTA_TIME_LOGGING`.
-
-#### PORT
-
-The port number that should be used by ESP32 MCU when creating the websocket server, default is 80.
-
-#### ENABLE_WEBGUI
-
-Enables or disables the WebGUI. ESP Rowing Monitor is capable os serving a WebGUI that communicates to the monitor via WebSocket. It requires `ENABLE_WEBSOCKET_MONITOR` to be true. Furthermore a filesystem image with the static resources is required. The WebGUI can be found under a separate repository [ESP Rowing Monitor WEbGUI](https://github.com/Abasz/ESPRowingMonitor-WebGUI), please refer to the [Build/Install](https://github.com/Abasz/ESPRowingMonitor-WebGUI#buildinstall) section. Default is false.
-
-### Wi-Fi and WebSocket monitor
-
-The Wi-Fi credentials are set up in a way that it cannot be accidentally committed to GitHub. Hence it should be set in a separate file named `wifi-config.ini` as follows:
-
-```ini
-[env:esp32]
-build_flags = 
- -O2
- -std=c++2a
- -std=gnu++2a
-    '-D LOCAL_SSID=My SSID'
-    '-D PASSPHRASE=MySecretPWD'
-```
-
-File name is critical as that is the name that platformio.ini includes when compiling. Please note if no wifi-config.ini is provided (or the `LOCAL_SSID` and/or `PASSPHRASE` is not provided as a macro variable) WebSocket monitor will be disabled by the compiler.
 
 ## Board profile settings
 

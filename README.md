@@ -41,7 +41,7 @@ ESP Rowing Monitor provides several ways to get the data and metrics it measures
 
 ### Bluetooth
 
-ESP Rowing Monitor supports two BLE profiles:
+ESP Rowing Monitor supports two standard BLE profiles that allows it to be connected to smart watches and 3rd party apps:
 
 1. Cycling Speed and Cadence Sensor profile
 2. Power Meter Sensor profile
@@ -54,58 +54,24 @@ Please note that in order for Garmin watches to work with ESP Rowing Monitor, a 
 
 To obtain accurate speed and distance data, the wheel circumference must be set to 10mm when pairing the device with ESP Rowing Monitor.
 
+In addition as of version 5.1 experimental supports for custom BLE profile were added. These currently include two characteristics (which are currently within the selected profile's service i.e. CPS or CSC):
+
+1. Extended metrics characteristic (UUID: 808a0d51-efae-4f0c-b2e0-48bc180d65c3)
+2. Handle forces characteristic (UUID: 3d9c2760-cf91-41ee-87e9-fd99d5f129a4)
+
+Please note that these are currently experimental and the API may be subject to change in the future.
+
+ESP Rowing Monitor now supports two concurrent BLE connection, meaning that one may connect a smart watch as well as connect to the WebGUI via BLE.
+
 ### Web interface
 
-ESP Rowing Monitor includes a WebSocket server that sends calculated metrics to connected clients (up to a maximum of 2 clients at a time). In order to improve efficiency the data is sent in binary format. There are two types of data structure:
+**As of version 5.1 the WebSocket based API as well as serving up the WebGUI locally from the MCU is being deprecated in favour of the extended BLE metrics API. However, option to compile with WebSocket API will be kept until that feature is stable. Related docs have been moved [here](docs/deprecated-docs.md)**
 
-#### Measurements
+The documentation of the experimental BLE profiles will be published once the stable release is reached. Therefore for the time being the actually structure of the API as well as the characteristics and services may be subject to change in future.
 
-Measurements are sent in an array format as follows:
+Data currently data is updated on every stroke or every 4 seconds, whichever occurs earlier. This is not a significant issue, as most of the metrics are only available at certain known states of the rowing cycle (e.g. end of drive, end of recovery, etc.). Nevertheless, BLE sends notify at least once per second (as pert he Bluetooth spec) in case a stroke takes longer but with the same data as the pervious one.
 
-```typescript
-{
-    data: [number, number, number, number, number, number, number, number, Array<number>, Array<number>];
-}
-```
-
-This array can be translated as follows based on the position:
-
-0. revTime
-1. distance
-2. strokeTime
-3. strokeCount
-4. avgStrokePower
-5. driveDuration
-6. recoveryDuration
-7. dragFactor
-8. handleForces
-9. deltaTimes (for logging purposes if enabled, if not one zero in the array is sent) since the last broadcast
-
-#### Settings and battery level
-
-The settings and the battery level is no longer sent along with every broadcast (to save on execution time), but rather
-
-1. on client connection
-2. after saving new settings
-3. on new battery measurement
-
-The data follows the below structure.
-
-```typescript
-{
-    logToWebSocket: boolean | undefined;
-    logToSdCard: boolean | undefined;
-    bleServiceFlag: BleServiceFlag;
-    logLevel: LogLevel;
-    batteryLevel: number;
-}
-```
-
-Due to resource constraints of the ESP32 MCU, data is only sent on every stroke or every 4 seconds, whichever occurs earlier. This is not a significant issue, as most of the metrics are only available at certain known states of the rowing cycle (e.g. end of drive, end of recovery, etc.).
-
-Currently, a simple WebGUI is being developed using Angular. The related repository can be found [here](https://github.com/Abasz/ESPRowingMonitor-WebGUI). Instructions on how to use/install the WebGUI can be found in the repository's readme. This WebGUI can be served up by the ESP32 micro controller and accessed over HTTP on the ESP32s IP Address.
-
-Please note that the filesystem of the ESP32 is rather slow, so the first load of the WebGUI may take up to half a minute. However, after the initial load, unless the files are modified, it will load instantly (potential reloading is controlled automatically via HTTP Last-Modified header).
+Currently, a simple WebGUI is being developed using Angular. The related repository can be found [here](https://github.com/Abasz/ESPRowingMonitor-WebGUI). Instructions on how to use/install the WebGUI can be found in the repository's readme.
 
 ### Logging
 
@@ -113,19 +79,19 @@ ESP Rowing Monitor implements a logging mechanism with different log levels (e.g
 
 Trace level logging is useful during the initial calibration process as it prints the delta times that can be used for replay. Further details can be found in the [Calibration](docs/settings.md#calibration)
 
-It is possible to log deltaTimes (i.e. time between impulses) to an SD card (if connected and enabled) as well as via WebSocket. In both cases the deltaTimes are collected in a `vector` and written to SD card and/or WebSocket on avery stroke or 4 seconds (which every happens earlier). This incremental way of making deltaTimes available is to optimize performance (e.g. websocket cannot broadcast in every 10m but can broadcast a big chunk in every 0.5s).
+It is possible to log deltaTimes (i.e. time between impulses) to an SD card (if connected and enabled). DeltaTimes are collected in a `vector` and written to SD card on every stroke or 4 seconds (which ever happens earlier). This incremental way of making deltaTimes available is to optimize performance.
 
 ### Metrics
 
 Currently, ESP Rowing Monitor is capable of calculating the following metrics, similar to ORM:
 
 - _driveDuration_ and _recoveryDuration_
-- _drive length (under development)_
 - _average cycle power_
 - _distance_
 - _stroke rate_
 - _handle forces for the drive phase_
 - _peak force for the drive phase_
+- _drag factor of the flywheel (i.e. resistance level)_
 - _speed and pace_
 
 ESP Rowing Monitor may not directly provide certain metrics such as caloric burn, heart rate, VO2max, etc. due to limitations of the device. These metrics require additional sensors or calculations that may not be supported by ESP Rowing Monitor's hardware or software capabilities. Users should refer to the [Limitations](#limitations) section for more detailed information on which metrics may not be available directly from ESP Rowing Monitor.
@@ -144,7 +110,9 @@ The ESP Rowing Monitor has several limitations that users should be aware of.
 
 ### CPU power and resource limitation of ESP32 chip
 
-The ESP32 chip is available in a single core or dual core version with a clock speed of 240MHz. I recommend using the dual core (as the tests were done on dual core ESP32). Nevertheless, currently only the web server runs on the secondary core.
+The ESP32 chip is available in a single core or dual core version with a clock speed of 240MHz. I recommend using the dual core (ESP32-S3 or wroom32) as the tests were done on dual core ESP32. Please note that the extended BLE metrics seem not to work on these chip version ESP32-D0WD-V3 (e.g. wemos d1 32, or dev kit v4).
+
+Please note that the SD card write only works with the dual core version as the actual writing is offloaded to the second core.
 
 The algorithm used for calculating the necessary data for stroke detection can become rather CPU hungry. In a nutshell, the issue is that the Theil-Sen Quadratic Regression is O(N&#178;), which means that as the size of the `IMPULSE_DATA_ARRAY_LENGTH` increases, the time required to complete the calculations increases exponentially (for more information, please see [this explanation](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/physics_openrowingmonitor.md#use-of-quadratic-theil-senn-regression-for-determining-%CE%B1-and-%CF%89-based-on-time-and-%CE%B8)).
 
@@ -212,12 +180,14 @@ The ESP Rowing Monitor does not support heart rate monitors directly, but it is 
 
 The ESP Rowing Monitor is unlikely to support ANT+ protocol, as setting up the necessary hardware (ANT+ radio) has proven to be challenging and no success has been achieved in loading the ANT network processor firmware on tested chips.
 
-The ESP Rowing Monitor exposes BLE Cycling Power Profile and Cycling Speed and Cadence Profile, which is a workaround. The wheel circumference should be set to 10mm in order for clients to show correct metrics (please see [this](docs/settings.md#) for more information). Note that in some cases, such as with Garmin watches, the data from these profiles may only show up if the activity is set as cycling, and may not work with Garmin rowing activity profile. Manual activity type change may be needed for certain devices, such as Garmin FR255.
+The ESP Rowing Monitor exposes BLE Cycling Power Profile and Cycling Speed and Cadence Profile, which is a workaround. The wheel circumference should be set to 10mm in order for clients to show correct metrics (please see [this](docs/settings.md#) for more information). Note that in sfses, such as with Garmin watches, the data from these profiles may only show up if the activity is set as cycling, and may not work with Garmin rowing activity profile. Manual activity type change may be needed for certain devices, such as Garmin FR255.
 
 ## Backlog
 
 - Implement FTMS
 - Implement more flexible settings system that does not require recompile and takes advantage of persistent storage
+- Decide on how to expose the settings API via BLE
+- Finalize the extended BLE API
 
 ## Attribution
 
