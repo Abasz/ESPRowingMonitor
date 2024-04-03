@@ -160,7 +160,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
 
     if constexpr ((Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC) || Configurations::isWebsocketEnabled)
     {
-        if (deltaTimes.size() > 0)
+        if (!deltaTimes.empty())
         {
             vector<unsigned long> clear;
             clear.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);

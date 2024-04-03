@@ -27,7 +27,7 @@ class BluetoothService
     public:
         explicit HandleForcesCallbacks(BluetoothService &_bleService);
 
-        void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, uint16_t subValue) override;
+        void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue) override;
     };
 
     class ServerCallbacks : public NimBLEServerCallbacks
