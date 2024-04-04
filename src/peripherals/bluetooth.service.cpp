@@ -88,7 +88,7 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *const server)
     Log.infoln("Setting up Cycling Speed and Cadence Profile");
 
     auto *cscService = server->createService(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
-    cscMeasurementCharacteristic = cscService->createCharacteristic(CSCSensorBleFlags::cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
+    baseMetricsParameters.characteristic = cscService->createCharacteristic(CSCSensorBleFlags::cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
     if constexpr (!Configurations::hasExtendedBleMetrics)
     {
@@ -112,7 +112,7 @@ NimBLEService *BluetoothService::setupPscServices(NimBLEServer *const server)
 {
     Log.infoln("Setting up Cycling Power Profile");
     auto *pscService = server->createService(PSCSensorBleFlags::cyclingPowerSvcUuid);
-    pscMeasurementCharacteristic = pscService->createCharacteristic(PSCSensorBleFlags::pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
+    baseMetricsParameters.characteristic = pscService->createCharacteristic(PSCSensorBleFlags::pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
     if constexpr (!Configurations::hasExtendedBleMetrics)
     {
@@ -137,10 +137,10 @@ NimBLEService *BluetoothService::setupExtendedMetricsServices(NimBLEServer *cons
     Log.infoln("Setting up Extended Metrics Services");
     auto *extendedMetricsService = server->createService(CommonBleFlags::extendedMetricsServiceUuid);
 
-    handleForcesCharacteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
-    handleForcesCharacteristic->setCallbacks(&handleForcesCallbacks);
+    handleForcesParameters.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
+    handleForcesParameters.characteristic->setCallbacks(&handleForcesCallbacks);
 
-    extendedMetricsCharacteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
+    extendedMetricsParameters.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
 
     return extendedMetricsService;
 }

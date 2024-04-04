@@ -41,6 +41,41 @@ class BluetoothService
         void onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc) override;
     };
 
+    struct HandleForcesParameters
+    {
+        NimBLECharacteristic *characteristic = nullptr;
+        unsigned short mtu = 512U;
+        vector<float> handleForces;
+
+        static void task(void *parameters);
+    } handleForcesParameters;
+
+    struct ExtendedMetricParameters
+    {
+        NimBLECharacteristic *characteristic = nullptr;
+        short avgStrokePower = 0;
+        unsigned short recoveryDuration = 0;
+        unsigned short driveDuration = 0;
+        unsigned char dragFactor = 0;
+
+        static void task(void *parameters);
+    } extendedMetricsParameters;
+
+    struct BaseMetricsParameters
+    {
+        NimBLECharacteristic *characteristic = nullptr;
+        unsigned short revTime = 0;
+        unsigned int revCount = 0;
+        unsigned short strokeTime = 0;
+        unsigned short strokeCount = 0;
+        short avgStrokePower = 0;
+
+        static void pscTask(void *parameters);
+        static void cscTask(void *parameters);
+    } baseMetricsParameters;
+
+    vector<unsigned short> handleForcesClientIds;
+
     EEPROMService &eepromService;
     SdCardService &sdCardService;
     ControlPointCallbacks controlPointCallbacks;
@@ -48,18 +83,8 @@ class BluetoothService
     ServerCallbacks serverCallbacks;
 
     NimBLECharacteristic *batteryLevelCharacteristic = nullptr;
-    NimBLECharacteristic *cscMeasurementCharacteristic = nullptr;
-    NimBLECharacteristic *pscMeasurementCharacteristic = nullptr;
     NimBLECharacteristic *dragFactorCharacteristic = nullptr;
-    NimBLECharacteristic *handleForcesCharacteristic = nullptr;
-    NimBLECharacteristic *extendedMetricsCharacteristic = nullptr;
     NimBLECharacteristic *settingsCharacteristic = nullptr;
-
-    vector<unsigned char> handleForcesClientIds;
-    static const unsigned char settingsArrayLength = 1U;
-
-    void notifyCsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount) const;
-    void notifyPsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const;
 
     void setupBleDevice();
     void setupServices();
@@ -71,6 +96,7 @@ class BluetoothService
     NimBLEService *setupSettingsServices(NimBLEServer *server);
     static NimBLEService *setupDeviceInfoServices(NimBLEServer *server);
 
+    static const unsigned char settingsArrayLength = 1U;
     std::array<unsigned char, settingsArrayLength> getSettings() const;
 
 public:
@@ -79,14 +105,13 @@ public:
     void setup();
     static void startBLEServer();
     static void stopServer();
+
     void notifyBattery(unsigned char batteryLevel) const;
-
-    void notifyClients(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const;
-
-    void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) const;
-    void notifyHandleForces(const std::vector<float> &handleForces) const;
+    void notifyBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower);
+    void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor);
+    void notifyHandleForces(const std::vector<float> &handleForces);
+    void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;
     void notifySettings() const;
 
-    void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;
     static bool isAnyDeviceConnected();
 };

@@ -31,146 +31,217 @@ void BluetoothService::notifyDragFactor(const unsigned short distance, const uns
     }
 }
 
-void BluetoothService::notifyClients(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower) const
+void BluetoothService::notifyBaseMetrics(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower)
 {
     if constexpr (Configurations::isBleServiceEnabled)
     {
+        if (baseMetricsParameters.characteristic->getSubscribedCount() == 0)
+        {
+            return;
+        }
+
+        baseMetricsParameters.revTime = revTime;
+        baseMetricsParameters.revCount = revCount;
+        baseMetricsParameters.strokeTime = strokeTime;
+        baseMetricsParameters.strokeCount = strokeCount;
+        baseMetricsParameters.avgStrokePower = avgStrokePower;
+
+        const auto coreStackSize = 1'800U;
+
         if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
         {
-            notifyPsc(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+            xTaskCreatePinnedToCore(
+                BaseMetricsParameters::pscTask,
+                "notifyClients",
+                coreStackSize,
+                &baseMetricsParameters,
+                1,
+                NULL,
+                0);
+
+            return;
         }
+
         if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
         {
-            notifyCsc(revTime, revCount, strokeTime, strokeCount);
+            xTaskCreatePinnedToCore(
+                BaseMetricsParameters::cscTask,
+                "notifyClients",
+                coreStackSize,
+                &baseMetricsParameters,
+                1,
+                NULL,
+                0);
+
+            return;
         }
     }
 }
 
-void BluetoothService::notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) const
+void BluetoothService::notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor)
 {
-    if (extendedMetricsCharacteristic->getSubscribedCount() == 0)
+    if (extendedMetricsParameters.characteristic->getSubscribedCount() == 0)
     {
         return;
     }
 
     const auto secInMicroSec = 1e6L;
-    const unsigned short recoveryDurationBle = lround(recoveryDuration / secInMicroSec * 4'096);
-    const unsigned short driveDurationBle = lround(driveDuration / secInMicroSec * 4'096);
+    extendedMetricsParameters.avgStrokePower = avgStrokePower;
+    extendedMetricsParameters.recoveryDuration = lround(recoveryDuration / secInMicroSec * 4'096);
+    extendedMetricsParameters.driveDuration = lround(driveDuration / secInMicroSec * 4'096);
+    extendedMetricsParameters.dragFactor = dragFactor;
 
-    const auto length = 7U;
-    array<unsigned char, length> temp = {
-        static_cast<unsigned char>(avgStrokePower),
-        static_cast<unsigned char>(avgStrokePower >> 8),
+    const auto coreStackSize = 1'800U;
 
-        static_cast<unsigned char>(driveDurationBle),
-        static_cast<unsigned char>(driveDurationBle >> 8),
-        static_cast<unsigned char>(recoveryDurationBle),
-        static_cast<unsigned char>(recoveryDurationBle >> 8),
-
-        dragFactor,
-    };
-
-    extendedMetricsCharacteristic->setValue(temp);
-    extendedMetricsCharacteristic->notify();
+    xTaskCreatePinnedToCore(
+        ExtendedMetricParameters::task,
+        "notifyExtendedMetrics",
+        coreStackSize,
+        &extendedMetricsParameters,
+        1,
+        NULL,
+        0);
 }
 
-void BluetoothService::notifyHandleForces(const std::vector<float> &handleForces) const
+void BluetoothService::notifyHandleForces(const std::vector<float> &handleForces)
 {
-    if (handleForcesCharacteristic->getSubscribedCount() == 0 || handleForces.empty())
+    if (handleForcesParameters.characteristic->getSubscribedCount() == 0 || handleForces.empty())
     {
         return;
     }
 
-    const auto mtu = std::accumulate(handleForcesClientIds.cbegin(), handleForcesClientIds.cend(), 512, [&](unsigned short previousValue, unsigned short currentValue)
-                                     {  
-                    const auto currentMTU = handleForcesCharacteristic->getService()->getServer()->getPeerMTU(currentValue);
+    handleForcesParameters.mtu = std::accumulate(handleForcesClientIds.cbegin(), handleForcesClientIds.cend(), 512, [&](unsigned short previousValue, unsigned short currentValue)
+                                                 {  
+                    const auto currentMTU = handleForcesParameters.characteristic->getService()->getServer()->getPeerMTU(currentValue);
                     if (currentMTU == 0)
                     {
                         return previousValue;
                     }
 
                 return std::min(previousValue, currentMTU); });
+    handleForcesParameters.handleForces = handleForces;
 
-    const unsigned char chunkSize = (mtu - 3 - 2) / sizeof(float);
-    const unsigned char split = handleForces.size() / chunkSize + (handleForces.size() % chunkSize == 0 ? 0 : 1);
+    const auto coreStackSize = 1'850U;
+    const auto variableStackSize = handleForcesParameters.mtu > handleForcesParameters.handleForces.size() * sizeof(float) ? handleForcesParameters.handleForces.size() * sizeof(float) : handleForcesParameters.mtu;
 
-    auto i = 0U;
-    Log.traceln("MTU of extended: %d, chunk size(bytes): %d, number of chunks: %d", mtu, chunkSize, split);
-
-    while (i < split)
-    {
-        const auto end = (i + 1U) * chunkSize < handleForces.size() ? chunkSize * sizeof(float) : (handleForces.size() - i * chunkSize) * sizeof(float);
-        std::vector<unsigned char> temp(end + 2);
-
-        temp[0] = split;
-        temp[1] = i + 1;
-        memcpy(temp.data() + 2, handleForces.data() + i * chunkSize, end);
-
-        handleForcesCharacteristic->setValue(temp.data(), temp.size());
-        handleForcesCharacteristic->notify();
-        delay(1);
-        i++;
-    }
+    xTaskCreatePinnedToCore(
+        HandleForcesParameters::task,
+        "notifyHandleForces",
+        coreStackSize + variableStackSize / 3,
+        &handleForcesParameters,
+        1,
+        NULL,
+        0);
 }
 
-void BluetoothService::notifyCsc(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount) const
+void BluetoothService::HandleForcesParameters::task(void *parameters)
 {
-    if (cscMeasurementCharacteristic->getSubscribedCount() == 0)
     {
-        return;
+        const auto *const params = static_cast<const BluetoothService::HandleForcesParameters *>(parameters);
+
+        const unsigned char chunkSize = (params->mtu - 3 - 2) / sizeof(float);
+        const unsigned char split = params->handleForces.size() / chunkSize + (params->handleForces.size() % chunkSize == 0 ? 0 : 1);
+
+        auto i = 0U;
+        Log.verboseln("MTU of extended: %d, chunk size(bytes): %d, number of chunks: %d", params->mtu, chunkSize, split);
+
+        while (i < split)
+        {
+            const auto end = (i + 1U) * chunkSize < params->handleForces.size() ? chunkSize * sizeof(float) : (params->handleForces.size() - i * chunkSize) * sizeof(float);
+            std::vector<unsigned char> temp(end + 2);
+
+            temp[0] = split;
+            temp[1] = i + 1;
+            memcpy(temp.data() + 2, params->handleForces.data() + i * chunkSize, end);
+
+            params->characteristic->setValue(temp.data(), temp.size());
+            params->characteristic->notify();
+            i++;
+        }
     }
-
-    const auto length = 11U;
-    array<unsigned char, length> temp = {
-        CSCSensorBleFlags::cscMeasurementFeaturesFlag,
-
-        static_cast<unsigned char>(revCount),
-        static_cast<unsigned char>(revCount >> 8),
-        static_cast<unsigned char>(revCount >> 16),
-        static_cast<unsigned char>(revCount >> 24),
-
-        static_cast<unsigned char>(revTime),
-        static_cast<unsigned char>(revTime >> 8),
-
-        static_cast<unsigned char>(strokeCount),
-        static_cast<unsigned char>(strokeCount >> 8),
-        static_cast<unsigned char>(strokeTime),
-        static_cast<unsigned char>(strokeTime >> 8)};
-
-    cscMeasurementCharacteristic->setValue(temp);
-    cscMeasurementCharacteristic->notify();
+    vTaskDelete(nullptr);
 }
 
-void BluetoothService::notifyPsc(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower) const
+void BluetoothService::ExtendedMetricParameters::task(void *parameters)
 {
-    if (pscMeasurementCharacteristic->getSubscribedCount() == 0)
     {
-        return;
+        const auto *const params = static_cast<const BluetoothService::ExtendedMetricParameters *>(parameters);
+
+        const auto length = 7U;
+        array<unsigned char, length> temp = {
+            static_cast<unsigned char>(params->avgStrokePower),
+            static_cast<unsigned char>(params->avgStrokePower >> 8),
+
+            static_cast<unsigned char>(params->driveDuration),
+            static_cast<unsigned char>(params->driveDuration >> 8),
+            static_cast<unsigned char>(params->recoveryDuration),
+            static_cast<unsigned char>(params->recoveryDuration >> 8),
+
+            params->dragFactor,
+        };
+
+        params->characteristic->setValue(temp);
+        params->characteristic->notify();
     }
+    vTaskDelete(nullptr);
+}
 
-    const auto length = 14U;
-    array<unsigned char, length> temp = {
-        static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
-        static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
+void BluetoothService ::BaseMetricsParameters::cscTask(void *parameters)
+{
+    {
+        const auto *const params = static_cast<const BluetoothService::BaseMetricsParameters *>(parameters);
+        const auto length = 11U;
+        array<unsigned char, length> temp = {
+            CSCSensorBleFlags::cscMeasurementFeaturesFlag,
 
-        static_cast<unsigned char>(avgStrokePower),
-        static_cast<unsigned char>(avgStrokePower >> 8),
+            static_cast<unsigned char>(params->revCount),
+            static_cast<unsigned char>(params->revCount >> 8),
+            static_cast<unsigned char>(params->revCount >> 16),
+            static_cast<unsigned char>(params->revCount >> 24),
 
-        static_cast<unsigned char>(revCount),
-        static_cast<unsigned char>(revCount >> 8),
-        static_cast<unsigned char>(revCount >> 16),
-        static_cast<unsigned char>(revCount >> 24),
-        static_cast<unsigned char>(revTime),
-        static_cast<unsigned char>(revTime >> 8),
+            static_cast<unsigned char>(params->revTime),
+            static_cast<unsigned char>(params->revTime >> 8),
 
-        static_cast<unsigned char>(strokeCount),
-        static_cast<unsigned char>(strokeCount >> 8),
-        static_cast<unsigned char>(strokeTime),
-        static_cast<unsigned char>(strokeTime >> 8),
-    };
+            static_cast<unsigned char>(params->strokeCount),
+            static_cast<unsigned char>(params->strokeCount >> 8),
+            static_cast<unsigned char>(params->strokeTime),
+            static_cast<unsigned char>(params->strokeTime >> 8)};
+        params->characteristic->setValue(temp);
+        params->characteristic->notify();
+    }
+    vTaskDelete(NULL);
+}
 
-    pscMeasurementCharacteristic->setValue(temp);
-    pscMeasurementCharacteristic->notify();
+void BluetoothService::BaseMetricsParameters ::pscTask(void *parameters)
+{
+    {
+        const auto *const params = static_cast<const BluetoothService::BaseMetricsParameters *>(parameters);
+
+        const auto length = 14U;
+        array<unsigned char, length> temp = {
+            static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
+            static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
+
+            static_cast<unsigned char>(params->avgStrokePower),
+            static_cast<unsigned char>(params->avgStrokePower >> 8),
+
+            static_cast<unsigned char>(params->revCount),
+            static_cast<unsigned char>(params->revCount >> 8),
+            static_cast<unsigned char>(params->revCount >> 16),
+            static_cast<unsigned char>(params->revCount >> 24),
+            static_cast<unsigned char>(params->revTime),
+            static_cast<unsigned char>(params->revTime >> 8),
+
+            static_cast<unsigned char>(params->strokeCount),
+            static_cast<unsigned char>(params->strokeCount >> 8),
+            static_cast<unsigned char>(params->strokeTime),
+            static_cast<unsigned char>(params->strokeTime >> 8),
+        };
+
+        params->characteristic->setValue(temp);
+        params->characteristic->notify();
+    }
+    vTaskDelete(NULL);
 }
 
 void BluetoothService::notifySettings() const

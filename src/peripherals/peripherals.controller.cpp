@@ -44,7 +44,7 @@ void PeripheralsController::update(const unsigned char batteryLevel)
         const unsigned int bleUpdateInterval = 1'000;
         if (now - lastBroadcastTime > bleUpdateInterval)
         {
-            bluetoothService.notifyClients(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+            bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
             lastBroadcastTime = now;
         }
     }
@@ -148,7 +148,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
             bluetoothService.notifyExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
         }
 
-        bluetoothService.notifyClients(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+        bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
 
         lastBroadcastTime = millis();
     }
