@@ -1,3 +1,4 @@
+#include <array>
 #include <string>
 
 #include "NimBLEDevice.h"
@@ -5,7 +6,7 @@
 #include "../utils/configuration.h"
 #include "bluetooth.service.h"
 
-BluetoothService::BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), handleForcesCallbacks(*this)
+BluetoothService::BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), handleForcesCallbacks(*this), serverCallbacks(*this)
 {
 }
 
@@ -63,29 +64,22 @@ void BluetoothService::setupServices()
         batteryService->start();
     }
 
-    auto *deviceInfoService = server->createService(CommonBleFlags::deviceInfoSvcUuid);
-
     auto *measurementService = eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? setupCscServices(server) : setupPscServices(server);
-
-    Log.verboseln("Setting up BLE Characteristics");
-
-    deviceInfoService
-        ->createCharacteristic(CommonBleFlags::manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(Configurations::deviceName);
-    deviceInfoService
-        ->createCharacteristic(CommonBleFlags::modelNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(Configurations::modelNumber);
-    deviceInfoService
-        ->createCharacteristic(CommonBleFlags::serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(Configurations::serialNumber);
-    deviceInfoService
-        ->createCharacteristic(CommonBleFlags::softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(Configurations::softwareVersion);
-
-    Log.verboseln("Starting BLE Service");
-
     measurementService->start();
+
+    if constexpr (Configurations::hasExtendedBleMetrics)
+    {
+        auto *extendedMetricsService = setupExtendedMetricsServices(server);
+        extendedMetricsService->start();
+    }
+
+    auto *settingsService = setupSettingsServices(server);
+    settingsService->start();
+    auto *deviceInfoService = setupDeviceInfoServices(server);
     deviceInfoService->start();
+
+    Log.verboseln("Starting BLE Server");
+
     server->start();
 }
 
@@ -96,14 +90,7 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *const server)
     auto *cscService = server->createService(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
     cscMeasurementCharacteristic = cscService->createCharacteristic(CSCSensorBleFlags::cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
-    if constexpr (Configurations::hasExtendedBleMetrics)
-    {
-        handleForcesCharacteristic = cscService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
-        handleForcesCharacteristic->setCallbacks(&handleForcesCallbacks);
-
-        extendedMetricsCharacteristic = cscService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
-    }
-    else
+    if constexpr (!Configurations::hasExtendedBleMetrics)
     {
         dragFactorCharacteristic = cscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
     }
@@ -127,14 +114,7 @@ NimBLEService *BluetoothService::setupPscServices(NimBLEServer *const server)
     auto *pscService = server->createService(PSCSensorBleFlags::cyclingPowerSvcUuid);
     pscMeasurementCharacteristic = pscService->createCharacteristic(PSCSensorBleFlags::pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
-    if constexpr (Configurations::hasExtendedBleMetrics)
-    {
-        handleForcesCharacteristic = pscService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
-        handleForcesCharacteristic->setCallbacks(&handleForcesCallbacks);
-
-        extendedMetricsCharacteristic = pscService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
-    }
-    else
+    if constexpr (!Configurations::hasExtendedBleMetrics)
     {
         dragFactorCharacteristic = pscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
     }
@@ -152,6 +132,52 @@ NimBLEService *BluetoothService::setupPscServices(NimBLEServer *const server)
     return pscService;
 }
 
+NimBLEService *BluetoothService::setupExtendedMetricsServices(NimBLEServer *const server)
+{
+    Log.infoln("Setting up Extended Metrics Services");
+    auto *extendedMetricsService = server->createService(CommonBleFlags::extendedMetricsServiceUuid);
+
+    handleForcesCharacteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
+    handleForcesCharacteristic->setCallbacks(&handleForcesCallbacks);
+
+    extendedMetricsCharacteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
+
+    return extendedMetricsService;
+}
+
+NimBLEService *BluetoothService::setupDeviceInfoServices(NimBLEServer *const server)
+{
+    Log.traceln("Setting up Device Info Service");
+    auto *deviceInfoService = server->createService(CommonBleFlags::deviceInfoSvcUuid);
+
+    deviceInfoService
+        ->createCharacteristic(CommonBleFlags::manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(Configurations::deviceName);
+    deviceInfoService
+        ->createCharacteristic(CommonBleFlags::modelNumberSvcUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(Configurations::modelNumber);
+    deviceInfoService
+        ->createCharacteristic(CommonBleFlags::serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(Configurations::serialNumber);
+    deviceInfoService
+        ->createCharacteristic(CommonBleFlags::softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(Configurations::softwareVersion);
+
+    return deviceInfoService;
+}
+
+NimBLEService *BluetoothService::setupSettingsServices(NimBLEServer *const server)
+{
+    Log.traceln("Setting up Settings Service");
+    auto *settingsService = server->createService(CommonBleFlags::settingsServiceUuid);
+    settingsCharacteristic = settingsService->createCharacteristic(CommonBleFlags::settingsUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    settingsCharacteristic->setValue(getSettings());
+
+    settingsService->createCharacteristic(CommonBleFlags::settingsControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
+
+    return settingsService;
+}
+
 void BluetoothService::setupAdvertisement() const
 {
     auto *pAdvertising = NimBLEDevice::getAdvertising();
@@ -165,4 +191,15 @@ void BluetoothService::setupAdvertisement() const
         pAdvertising->setAppearance(CSCSensorBleFlags::bleAppearanceCyclingSpeedCadence);
         pAdvertising->addServiceUUID(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
     }
+}
+
+std::array<unsigned char, 1U> BluetoothService::getSettings() const
+{
+    const unsigned char settings = ((Configurations::enableWebSocketDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToWebsocket()) + 1 : 0) << 0U) | ((Configurations::supportSdCardLogging && sdCardService.isLogFileOpen() ? static_cast<unsigned char>(eepromService.getLogToSdCard()) + 1 : 0) << 2U) | (static_cast<unsigned char>(eepromService.getLogLevel()) << 4U);
+
+    std::array<unsigned char, settingsArrayLength> temp = {
+        settings,
+    };
+
+    return temp;
 }

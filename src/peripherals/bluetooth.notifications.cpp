@@ -1,3 +1,4 @@
+#include <numeric>
 #include <string>
 
 #include "NimBLEDevice.h"
@@ -19,11 +20,14 @@ void BluetoothService::notifyBattery(const unsigned char batteryLevel) const
 
 void BluetoothService::notifyDragFactor(const unsigned short distance, const unsigned char dragFactor) const
 {
-    std::string value = "DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance);
-    dragFactorCharacteristic->setValue(value);
-    if (dragFactorCharacteristic->getSubscribedCount() > 0)
+    if constexpr (!Configurations::hasExtendedBleMetrics)
     {
-        dragFactorCharacteristic->notify();
+        std::string value = "DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance);
+        dragFactorCharacteristic->setValue(value);
+        if (dragFactorCharacteristic->getSubscribedCount() > 0)
+        {
+            dragFactorCharacteristic->notify();
+        }
     }
 }
 
@@ -49,23 +53,19 @@ void BluetoothService::notifyExtendedMetrics(short avgStrokePower, unsigned int 
         return;
     }
 
-    const unsigned char settings = ((Configurations::enableWebSocketDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToWebsocket()) + 1 : 0) << 0U) | ((Configurations::supportSdCardLogging && sdCardService.isLogFileOpen() ? static_cast<unsigned char>(eepromService.getLogToSdCard()) + 1 : 0) << 2U) | (static_cast<unsigned char>(eepromService.getLogLevel()) << 4U);
+    const auto secInMicroSec = 1e6L;
+    const unsigned short recoveryDurationBle = lround(recoveryDuration / secInMicroSec * 4'096);
+    const unsigned short driveDurationBle = lround(driveDuration / secInMicroSec * 4'096);
 
-    const auto length = 12U;
+    const auto length = 7U;
     array<unsigned char, length> temp = {
-        settings,
-
         static_cast<unsigned char>(avgStrokePower),
         static_cast<unsigned char>(avgStrokePower >> 8),
 
-        static_cast<unsigned char>(recoveryDuration),
-        static_cast<unsigned char>(recoveryDuration >> 8),
-        static_cast<unsigned char>(recoveryDuration >> 16),
-        static_cast<unsigned char>(recoveryDuration >> 24),
-        static_cast<unsigned char>(driveDuration),
-        static_cast<unsigned char>(driveDuration >> 8),
-        static_cast<unsigned char>(driveDuration >> 16),
-        static_cast<unsigned char>(driveDuration >> 24),
+        static_cast<unsigned char>(driveDurationBle),
+        static_cast<unsigned char>(driveDurationBle >> 8),
+        static_cast<unsigned char>(recoveryDurationBle),
+        static_cast<unsigned char>(recoveryDurationBle >> 8),
 
         dragFactor,
     };
@@ -76,23 +76,30 @@ void BluetoothService::notifyExtendedMetrics(short avgStrokePower, unsigned int 
 
 void BluetoothService::notifyHandleForces(const std::vector<float> &handleForces) const
 {
-    if (handleForcesCharacteristic->getSubscribedCount() == 0)
+    if (handleForcesCharacteristic->getSubscribedCount() == 0 || handleForces.empty())
     {
         return;
     }
 
-    const auto mtu = handleForcesCharacteristic->getService()->getServer()->getPeerMTU(handleForcesClientId);
+    const auto mtu = std::accumulate(handleForcesClientIds.cbegin(), handleForcesClientIds.cend(), 512, [&](unsigned short previousValue, unsigned short currentValue)
+                                     {  
+                    const auto currentMTU = handleForcesCharacteristic->getService()->getServer()->getPeerMTU(currentValue);
+                    if (currentMTU == 0)
+                    {
+                        return previousValue;
+                    }
+
+                return std::min(previousValue, currentMTU); });
 
     const unsigned char chunkSize = (mtu - 3 - 2) / sizeof(float);
     const unsigned char split = handleForces.size() / chunkSize + (handleForces.size() % chunkSize == 0 ? 0 : 1);
 
-    auto i = 0;
-    Log.traceln("MTU of extended: %d, chunk size(bytes): %d, number of chunks: %d\n", mtu, chunkSize, split);
+    auto i = 0U;
+    Log.traceln("MTU of extended: %d, chunk size(bytes): %d, number of chunks: %d", mtu, chunkSize, split);
 
     while (i < split)
     {
-        auto start = handleForces.cbegin() + i * chunkSize;
-        const auto end = (i + 1) * chunkSize < handleForces.size() ? chunkSize * sizeof(float) : (handleForces.size() - i * chunkSize) * sizeof(float);
+        const auto end = (i + 1U) * chunkSize < handleForces.size() ? chunkSize * sizeof(float) : (handleForces.size() - i * chunkSize) * sizeof(float);
         std::vector<unsigned char> temp(end + 2);
 
         temp[0] = split;
@@ -164,4 +171,13 @@ void BluetoothService::notifyPsc(const unsigned short revTime, const unsigned in
 
     pscMeasurementCharacteristic->setValue(temp);
     pscMeasurementCharacteristic->notify();
+}
+
+void BluetoothService::notifySettings() const
+{
+    settingsCharacteristic->setValue(getSettings());
+    if (settingsCharacteristic->getSubscribedCount() > 0)
+    {
+        settingsCharacteristic->notify();
+    }
 }

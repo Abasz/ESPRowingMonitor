@@ -32,11 +32,13 @@ class BluetoothService
 
     class ServerCallbacks : public NimBLEServerCallbacks
     {
+        BluetoothService &bleService;
 
     public:
-        ServerCallbacks();
+        explicit ServerCallbacks(BluetoothService &_bleService);
 
         void onConnect(NimBLEServer *pServer) override;
+        void onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc) override;
     };
 
     EEPROMService &eepromService;
@@ -51,17 +53,25 @@ class BluetoothService
     NimBLECharacteristic *dragFactorCharacteristic = nullptr;
     NimBLECharacteristic *handleForcesCharacteristic = nullptr;
     NimBLECharacteristic *extendedMetricsCharacteristic = nullptr;
+    NimBLECharacteristic *settingsCharacteristic = nullptr;
 
-    unsigned short handleForcesClientId = USHRT_MAX;
+    vector<unsigned char> handleForcesClientIds;
+    static const unsigned char settingsArrayLength = 1U;
 
     void notifyCsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount) const;
     void notifyPsc(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) const;
 
     void setupBleDevice();
     void setupServices();
+    void setupAdvertisement() const;
+
     NimBLEService *setupCscServices(NimBLEServer *server);
     NimBLEService *setupPscServices(NimBLEServer *server);
-    void setupAdvertisement() const;
+    NimBLEService *setupExtendedMetricsServices(NimBLEServer *server);
+    NimBLEService *setupSettingsServices(NimBLEServer *server);
+    static NimBLEService *setupDeviceInfoServices(NimBLEServer *server);
+
+    std::array<unsigned char, settingsArrayLength> getSettings() const;
 
 public:
     explicit BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService);
@@ -75,6 +85,7 @@ public:
 
     void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) const;
     void notifyHandleForces(const std::vector<float> &handleForces) const;
+    void notifySettings() const;
 
     void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;
     static bool isAnyDeviceConnected();

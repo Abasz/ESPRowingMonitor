@@ -123,7 +123,7 @@ public:
     static const unsigned char MultipleSensorLocationSupported = (0x01 << 2U);
 };
 
-class SettingsFlags
+class LogSettingsFlags
 {
 public:
     static const unsigned char LogToWebsocketNotSupported = (0x00 << 0U);
@@ -233,10 +233,13 @@ public:
     inline static const std::string dragFactorSvcUuid = "CE060030-43E5-11E4-916C-0800200C9A66";
 
     inline static const std::string settingsServiceUuid = "56892de1-7068-4b5a-acaa-473d97b02206";
+    inline static const std::string settingsUuid = "54e15528-73b5-4905-9481-89e5184a3364";
     inline static const std::string settingsControlPointUuid = "51ba0a00-8853-477c-bf43-6a09c36aac9f";
 
+    inline static const std::string extendedMetricsServiceUuid = "a72a5762-803b-421d-a759-f0314153da97";
     inline static const std::string extendedMetricsUuid = "808a0d51-efae-4f0c-b2e0-48bc180d65c3";
     inline static const std::string handleForcesUuid = "3d9c2760-cf91-41ee-87e9-fd99d5f129a4";
+    inline static const std::string deltaTimesUuid = "ae5d11ea-62f6-4789-b809-6fc93fee92b9";
 
     static const unsigned short batterySvcUuid = 0x180F;
     static const unsigned short batteryLevelUuid = 0x2A19;

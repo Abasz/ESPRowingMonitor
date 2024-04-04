@@ -1,10 +1,12 @@
+#include <algorithm>
+
 #include "NimBLEDevice.h"
 
 #include "bluetooth.service.h"
 
 using std::array;
 
-BluetoothService::ServerCallbacks::ServerCallbacks() {}
+BluetoothService::ServerCallbacks::ServerCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
 
 BluetoothService::ControlPointCallbacks::ControlPointCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
 
@@ -19,11 +21,26 @@ void BluetoothService::ServerCallbacks::onConnect(NimBLEServer *pServer)
     }
 }
 
+void BluetoothService::ServerCallbacks::onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc)
+{
+    Log.verboseln("disconnected ID: %n", desc->conn_handle);
+
+    bleService.handleForcesClientIds.erase(
+        std::remove_if(
+            bleService.handleForcesClientIds.begin(),
+            bleService.handleForcesClientIds.end(),
+            [&](char connectionId)
+            {
+                return connectionId == desc->conn_handle;
+            }),
+        bleService.handleForcesClientIds.end());
+}
+
 void BluetoothService::HandleForcesCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue)
 {
     if (pCharacteristic->getUUID().toString() == CommonBleFlags::handleForcesUuid)
     {
-        bleService.handleForcesClientId = desc->conn_handle;
+        bleService.handleForcesClientIds.push_back(desc->conn_handle);
     }
 }
 
@@ -70,6 +87,7 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
                 static_cast<unsigned char>(response)};
 
         pCharacteristic->setValue(temp);
+        bleService.notifySettings();
     }
     break;
 
@@ -87,6 +105,7 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
                 static_cast<unsigned char>(PSCResponseOpCodes::Successful)};
             pCharacteristic->setValue(temp);
             pCharacteristic->indicate();
+            bleService.notifySettings();
 
             Log.verboseln("Restarting device in 5s");
             delay(100);
