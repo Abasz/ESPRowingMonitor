@@ -153,6 +153,38 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     }
     break;
 
+    case static_cast<int>(SettingsOpCodes::SetWebSocketDeltaTimeLogging):
+    {
+        Log.infoln("Change WebSocket Logging");
+
+        if (message.size() == 2 && message[1] >= 0 && message[1] <= 1)
+        {
+            const auto shouldEnable = static_cast<bool>(message[1]);
+
+            Log.infoln("%s WebSocket deltaTime logging", shouldEnable ? "Enable" : "Disable");
+            bleService.eepromService.setLogToWebsocket(shouldEnable);
+
+            array<uint8_t, 3> temp = {
+                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+                static_cast<unsigned char>(message[0]),
+                static_cast<unsigned char>(ResponseOpCodes::Successful)};
+            pCharacteristic->setValue(temp);
+            pCharacteristic->indicate();
+            bleService.notifySettings();
+
+            return;
+        }
+
+        Log.infoln("Invalid OP command for setting WebSocket deltaTime logging, this should be a bool: %d", message[1]);
+        array<uint8_t, 3> temp = {
+            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+            static_cast<unsigned char>(message[0]),
+            static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+
+        pCharacteristic->setValue(temp);
+    }
+    break;
+
     default:
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);
