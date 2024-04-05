@@ -303,7 +303,7 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
 
     switch (opCommand[0])
     {
-    case static_cast<int>(PSCOpCodes::SetLogLevel):
+    case static_cast<int>(SettingsOpCodes::SetLogLevel):
     {
         Log.infoln("Set LogLevel OpCode");
 
@@ -329,7 +329,7 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
     }
     break;
 
-    case static_cast<int>(PSCOpCodes::ChangeBleService):
+    case static_cast<int>(SettingsOpCodes::ChangeBleService):
     {
         Log.infoln("Change BLE Service");
 
@@ -350,7 +350,7 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
     }
     break;
 
-    case static_cast<int>(PSCOpCodes::SetWebSocketDeltaTimeLogging):
+    case static_cast<int>(SettingsOpCodes::SetWebSocketDeltaTimeLogging):
     {
         Log.infoln("Change WebSocket Logging");
 
@@ -376,7 +376,7 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
     }
     break;
 
-    case static_cast<int>(PSCOpCodes::SetSdCardLogging):
+    case static_cast<int>(SettingsOpCodes::SetSdCardLogging):
     {
         Log.infoln("Change Sd Card Logging");
 

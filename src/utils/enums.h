@@ -41,7 +41,7 @@ enum class ArduinoLogLevel : unsigned char
     LogLevelVerbose = 6
 };
 
-enum class PSCOpCodes : unsigned char
+enum class SettingsOpCodes : unsigned char
 {
     SetCumulativeValue = 1U,
     UpdateSensorLocation = 2U,
@@ -66,7 +66,7 @@ enum class PSCOpCodes : unsigned char
     ResponseCode = 32U
 };
 
-enum class PSCResponseOpCodes : unsigned char
+enum class ResponseOpCodes : unsigned char
 {
     Successful = 1U,
     UnsupportedOpCode,

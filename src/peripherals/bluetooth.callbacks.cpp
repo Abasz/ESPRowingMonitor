@@ -54,9 +54,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     {
         Log.infoln("Invalid request, no Op Code");
         array<unsigned char, 3U> errorResponse = {
-            static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(0),
-            static_cast<unsigned char>(PSCResponseOpCodes::OperationFailed)};
+            static_cast<unsigned char>(ResponseOpCodes::OperationFailed)};
         pCharacteristic->setValue(errorResponse);
         pCharacteristic->indicate();
 
@@ -68,21 +68,21 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     switch (message[0])
     {
 
-    case static_cast<unsigned char>(PSCOpCodes::SetLogLevel):
+    case static_cast<unsigned char>(SettingsOpCodes::SetLogLevel):
     {
         Log.infoln("Set LogLevel");
 
-        auto response = PSCResponseOpCodes::InvalidParameter;
-        if (message.size() == 2 && message[1] >= 0 && message[1] <= 6)
+        auto response = ResponseOpCodes::InvalidParameter;
+        if (message.length() == 2 && message[1] >= 0 && message[1] <= 6)
         {
             Log.infoln("New LogLevel: %d", message[1]);
             bleService.eepromService.setLogLevel(static_cast<ArduinoLogLevel>(message[1]));
-            response = PSCResponseOpCodes::Successful;
+            response = ResponseOpCodes::Successful;
         }
 
         array<unsigned char, 3U>
             temp = {
-                static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
                 static_cast<unsigned char>(message[0]),
                 static_cast<unsigned char>(response)};
 
@@ -91,7 +91,7 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     }
     break;
 
-    case static_cast<unsigned char>(PSCOpCodes::ChangeBleService):
+    case static_cast<unsigned char>(SettingsOpCodes::ChangeBleService):
     {
         Log.infoln("Change BLE Service");
 
@@ -100,9 +100,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
             Log.infoln("New BLE Service: %s", message[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
             bleService.eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
             array<unsigned char, 3U> temp = {
-                static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
                 static_cast<unsigned char>(message[0]),
-                static_cast<unsigned char>(PSCResponseOpCodes::Successful)};
+                static_cast<unsigned char>(ResponseOpCodes::Successful)};
             pCharacteristic->setValue(temp);
             pCharacteristic->indicate();
             bleService.notifySettings();
@@ -115,9 +115,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
         }
 
         array<unsigned char, 3U> temp = {
-            static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(PSCResponseOpCodes::InvalidParameter)};
+            static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
 
         pCharacteristic->setValue(temp);
     }
@@ -127,9 +127,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);
         array<unsigned char, 3U> response = {
-            static_cast<unsigned char>(PSCOpCodes::ResponseCode),
+            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(PSCResponseOpCodes::UnsupportedOpCode)};
+            static_cast<unsigned char>(ResponseOpCodes::UnsupportedOpCode)};
         pCharacteristic->setValue(response);
     }
     break;
