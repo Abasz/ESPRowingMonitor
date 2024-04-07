@@ -21,10 +21,14 @@ CheckOptions:
     value: true
   - key: cppcoreguidelines-pro-type-member-init.IgnoreArrays
     value: true
-HeaderFilterRegex: '^.+((?!\\.pio|\\.platformio|Arduino.h).)*$'
+HeaderFilterRegex: '^src/.*'
 ExtraArgs:
   - -D LOCAL_SSID=\"Test SSID\",
   - -D PASSPHRASE=\"TEST PWD\",
+  - -D CONFIG_ASYNC_TCP_RUNNING_CORE=0
+  - -D CONFIG_BT_NIMBLE_PINNED_TO_CORE=0
+  - -D CONFIG_BT_NIMBLE_ROLE_CENTRAL_DISABLED
+  - -D CONFIG_BT_NIMBLE_ROLE_OBSERVER_DISABLED
   - -D PLATFORMIO=60107
   - -D ARDUINO_ESP32_DEV
   - -D HAVE_CONFIG_H
@@ -52,8 +56,6 @@ ExtraArgs:
   - -I.pio/libdeps/generic/AsyncTCP-esphome/src
   - -I.pio/libdeps/generic/ESPAsyncWebServer-esphome/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32/cores/esp32
-  - -I../../../../Documents/www/Embeded System Dev/esp-rowing-monitor/.pio/libdeps/esp32/AsyncTCP-esphome/src
-  - -I../../../../Documents/www/Embeded System Dev/esp-rowing-monitor/.pio/libdeps/esp32/ESPAsyncWebServer-esphome/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32/libraries/FS/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32/libraries/LittleFS/src

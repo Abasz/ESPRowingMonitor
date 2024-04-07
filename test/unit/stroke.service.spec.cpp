@@ -19,11 +19,11 @@ TEST_CASE("StrokeService")
     {
         CHECK(Configurations::impulsesPerRevolution == 3);
         CHECK(Configurations::impulseDataArrayLength == 7);
-        CHECK(Configurations::flywheelInertia == 0.073);
+        CHECK(Configurations::flywheelInertia == 0.073F);
         CHECK(Configurations::dragCoefficientsArrayLength == 1);
-        CHECK(Configurations::goodnessOfFitThreshold == 0.97);
+        CHECK(Configurations::goodnessOfFitThreshold == 0.97F);
         CHECK(Configurations::rotationDebounceTimeMin == 7'000);
-        CHECK(Configurations::sprocketRadius == 1.5 / 100);
+        CHECK(Configurations::sprocketRadius == 1.5F / 100);
         CHECK(Configurations::minimumDriveTime == 300'000);
         CHECK(Configurations::minimumRecoveryTime == 300'000);
     }
