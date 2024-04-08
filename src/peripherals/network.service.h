@@ -11,7 +11,8 @@
 
 using std::vector;
 
-class NetworkService
+/// @deprecated WebSocket based connection is deprecated in favor of the extended BLE API and may be removed in future
+class [[deprecated("WebSocket based connection is deprecated in favor of the extended BLE API and may be removed in future")]] NetworkService
 {
     EEPROMService &eepromService;
     SdCardService &sdCardService;

@@ -158,7 +158,7 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
 #endif
 
 #if (ENABLE_WEBGUI == true)
-    #warning "Serving up the WebGUI from the MCU directly is now deprecated and this feature will be removed in the future in favour of the extended BLE API. https://github.com/Abasz/ESPRowingMonitor/blob/master/docs/settings.md#enable_webgui"
+    #warning "Serving up the WebGUI from the MCU directly is now deprecated and this feature will be removed in the future in favour of the extended BLE API. https://github.com/Abasz/ESPRowingMonitor/blob/master/README.md#web-interface"
 #endif
 #if ((!defined(LOCAL_SSID) || !defined(PASSPHRASE)) && (ENABLE_WEBGUI == true || ENABLE_WEBSOCKET_MONITOR == true))
     #undef ENABLE_WEBSOCKET_MONITOR
@@ -168,7 +168,7 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
     #warning "Not provided SSID and/or Passphrase, disabling WebSocket monitor and WebGUI"
 #endif
 #if (ENABLE_WEBSOCKET_MONITOR == true)
-    #warning "The WebSocket API is now deprecated and may be removed in future version in favour of the extended BLE API."
+    #warning "The WebSocket API is now deprecated in favor of the extended BLE API and may be removed in future version in favour of the extended BLE API."
 #endif
 
 #if (HAS_BLE_EXTENDED_METRICS == true && ENABLE_WEBSOCKET_MONITOR == true)

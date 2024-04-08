@@ -41,6 +41,9 @@ public:
     void notifyBattery(unsigned char batteryLevel);
     void updateData(const RowingDataModels::RowingMetrics &data);
     void updateDeltaTime(unsigned long deltaTime);
+
+    /// @deprecated Standalone drag factor notification is deprecated in favor of the extended BLE API and may be removed in future
+    [[deprecated("Standalone drag factor notification is deprecated in favor of the extended BLE API and may be removed in future")]]
     void notifyDragFactor(unsigned char dragFactor) const;
     bool isAnyDeviceConnected();
 };

@@ -110,6 +110,8 @@ public:
     void notifyBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower);
     void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor);
     void notifyHandleForces(const std::vector<float> &handleForces);
+    /// @deprecated Standalone drag factor notification is deprecated in favor of the extended BLE API and may be removed in future
+    [[deprecated("Standalone drag factor notification is deprecated in favor of the extended BLE API and may be removed in future")]]
     void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;
     void notifySettings() const;
 

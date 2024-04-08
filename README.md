@@ -37,9 +37,11 @@ Please note that due to the difference between the Rpi and the ESP32 (including 
 
 ## Features
 
-ESP Rowing Monitor provides several ways to get the data and metrics it measures
-
 ### Bluetooth
+
+ESP Rowing Monitor provides a BLE interface to get the data and metrics it measures.
+
+It supports two concurrent BLE connection, meaning that one may connect a smart watch as well as connect to the [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/) via BLE.
 
 ESP Rowing Monitor supports two standard BLE profiles that allows it to be connected to smart watches and 3rd party apps:
 
@@ -48,38 +50,132 @@ ESP Rowing Monitor supports two standard BLE profiles that allows it to be conne
 
 Switching between the profiles can be done through the WebGUI or via BLE Control Point using a specific OpCode (18). The implementation of these profiles complies with BLE standards, although the OpCode used is not standard.
 
-Both BLE profiles are fully compliant with BLE standards, making them accessible by compatible devices such as smartwatches. They have been tested with Garmin smartwatches, including FR235, FR645, and FR255.
+Both BLE profiles are fully compliant with BLE standards, making them accessible by compatible devices such as smartwatches. They have been tested with Garmin smartwatches, including FR235, FR645, and FR255. This also means that the device advertisement data is either CPS or CSC (based on the selected profile).
 
 Please note that in order for Garmin watches to work with ESP Rowing Monitor, a cycling activity must be selected. Otherwise, due to limitations of Garmin, the watch will connect but will not use the sensor data for metrics.
 
 To obtain accurate speed and distance data, the wheel circumference must be set to 10mm when pairing the device with ESP Rowing Monitor.
 
-In addition as of version 5.1 experimental supports for custom BLE profile were added. These currently include two characteristics (which are currently within the selected profile's service i.e. CPS or CSC):
+In addition as of version 5.1 experimental supports for custom BLE profiles/services were added.
 
-1. Extended metrics characteristic (UUID: 808a0d51-efae-4f0c-b2e0-48bc180d65c3)
-2. Handle forces characteristic (UUID: 3d9c2760-cf91-41ee-87e9-fd99d5f129a4)
+1. Extended Metrics Service (UUID: a72a5762-803b-421d-a759-f0314153da97)
+2. Settings Service (UUID: 56892de1-7068-4b5a-acaa-473d97b02206)
 
-Please note that these are currently experimental and the API may be subject to change in the future.
+#### Extended Metrics Service
 
-ESP Rowing Monitor now supports two concurrent BLE connection, meaning that one may connect a smart watch as well as connect to the WebGUI via BLE.
+This Service currently contains two characteristics:
+
+```text
+Extended Metrics (UUID: 808a0d51-efae-4f0c-b2e0-48bc180d65c3)
+```
+
+Uses Notify to broadcast the following metrics (which may be extended in the future) as an array of consecutive bytes (i.e. currently a total of 7 bytes, Little Endian):
+
+- avgStrokePower (16bit short in Watts)
+- recoveryDuration (16bit unsigned short in seconds with a resolution of 4096)
+- driveDuration (16bit unsigned short in seconds with a resolution of 4096)
+- dragFactor (8bit unsigned char)
+
+New metrics are broadcasted on every stroke (after the drive ends) or at least 4 seconds (which ever happens earlier).
+
+```text
+Handle Forces (UUID: 3d9c2760-cf91-41ee-87e9-fd99d5f129a4)
+```
+
+Uses Notify to broadcast the handle forces measured during the last drive phase. Full data is broadcasted once per stroke (after the drive ends) or at least 4 seconds (which ever happens earlier).
+
+Considering that the number of measurements vary from stroke to stroke (since, among others, it depends on the number of impulses per rotation, the machine etc.) this characteristics may be chunked into consecutive notifies ("bursts") until all data is flushed. The chunk size (consequently the number of consecutive notifies within a burst) will depend on the MTU (max data size per broadcast) negotiated with the client (ESP32 supports 512 bytes, but for instance on android based on experience this is around 250).
+
+The first byte in every Notify is the expected total number of chunks within the burst, the second is the current chunk number. Rest of the bytes in one Notify are 32bit floats in Little Endian. Every chunk can be parsed individually without data loss (i.e. the bytes of one float is never broken into two notifies, which prevents data loss on missed packages/notifies). Basically the last Notify within the burst is signaled by the fact that first two bytes of the data package are equal.
+
+Below is an example of data where the MTU is 23 bytes (which practically means that 20 bytes would be available to transfer actual data). Considering the first two bytes are reserved, that leaves 18 bytes for the data, but since into that only 4 32bit float can be fitted basically a maximum of 4 floats per Notify can be sent.
+
+Handle Forces values:
+_[2.4188, 52.64054, 80.1877, 110.6412, 142.9242, 174.9786, 201.5447, 218.6083, 228.5825, 233.4143, 234.7116, 234.2218, 230.6765, 227.8172]_
+
+Notifies:
+
+1. [5,1,159,205,26,64,234,143,82,66,37,96,160,66,81,72,221,66]
+2. [5,2,156,236,14,67,135,250,46,67,119,139,73,67,186,155,90,67]
+3. [4,3,32,149,100,67,19,106,105,67,46,182,106,67,201,56,106,67]
+4. [4,4,48,173,102,67,56,209,99,67]
+
+The last Notify (4/4) has the data of only two floats while the rest has 4 each.
+
+#### Settings Service
+
+This Service currently contains two characteristics:
+
+```text
+Settings (UUID: 54e15528-73b5-4905-9481-89e5184a3364)
+```
+
+Uses Notify to broadcast and allow Read the current settings (which may be extended in the future) as an array of consecutive bytes. It notifies when a setting is changed.
+
+Currently the Notify includes only one byte where every two bit represents the status of the logging related settings:
+
+_Delta Time logging to WebSocket_ - (deprecated and will be changed in the future to logging to the extended BLE - which is not implemented yet - currently serving as a place holder for this)
+
+```cpp
+LogToWebsocketNotSupported = (0x00 << 0U);
+LogToWebsocketDisabled = (0x01 << 0U);
+LogToWebsocketEnabled = (0x02 << 0U);
+```
+
+_SD Card logging_ - whether logging to SC Card is enabled or not
+
+```cpp
+LogToSdCardNotSupported = (0x00 << 2U);
+LogToSdCardDisabled = (0x01 << 2U);
+LogToSdCardEnabled = (0x02 << 2U);
+```
+
+_Log level setting_ - current log level for the monitor
+
+```cpp
+LogLevelSilent = (0x00 << 4U);
+LogLevelFatal = (0x01 << 4U);
+LogLevelError = (0x02 << 4U);
+LogLevelWarning = (0x03 << 4U);
+LogLevelInfo = (0x04 << 4U);
+LogLevelTrace = (0x05 << 4U);
+LogLevelVerbose = (0x06 << 4U);
+```
+
+```text
+Settings Control Point (UUID: 51ba0a00-8853-477c-bf43-6a09c36aac9f)**
+```
+
+Uses Indicate and allow Write to change the settings. The structure corresponds to the standard BLE profile Control Point with the difference that custom OpCodes are used for each setting:
+
+```cpp
+    SetLogLevel = 17U,
+    ChangeBleService = 18U,
+    SetWebSocketDeltaTimeLogging = 19U, // deprecated and will be changed to delta time logging via extended BLE
+    SetSdCardLogging = 20U,
+```
+
+The response to the Write is sent via Indicate and the structure follows the BLE Control Point standard (i.e. starts with the ResponseCode - 32 -, followed by the request OpCode, than the ResponseOpCode - e.g. 1 for success or 2 for an unsupported request OpCode).
+
+Also a Notify is sent by the Settings characteristic including the new settings.
+
+Please note that the new BLE service structure is currently experimental and the API may be subject to change in the future.
+
+For an example of an implementation (in Javascript) please visit the [WebGUI page]((https://github.com/Abasz/ESPRowingMonitor-WebGUI/blob/master/src/common/services/ble-data.service.ts)).
 
 ### Web interface
 
-**As of version 5.1 the WebSocket based API as well as serving up the WebGUI locally from the MCU is being deprecated in favour of the extended BLE metrics API. However, option to compile with WebSocket API will be kept until that feature is stable. Related docs have been moved [here](docs/deprecated-docs.md)**
+**As of version 5.1 the WebSocket based API as well as serving up the WebGUI locally from the MCU is being deprecated in favour of the extended BLE metrics API and a progressive web app. However, option to compile with WebSocket API will be kept until that feature is stable. Related docs have been moved [here](docs/deprecated-docs.md)**
 
-The documentation of the experimental BLE profiles will be published once the stable release is reached. Therefore for the time being the actually structure of the API as well as the characteristics and services may be subject to change in future.
-
-Data currently data is updated on every stroke or every 4 seconds, whichever occurs earlier. This is not a significant issue, as most of the metrics are only available at certain known states of the rowing cycle (e.g. end of drive, end of recovery, etc.). Nevertheless, BLE sends notify at least once per second (as pert he Bluetooth spec) in case a stroke takes longer but with the same data as the pervious one.
-
-Currently, a simple WebGUI is being developed using Angular. The related repository can be found [here](https://github.com/Abasz/ESPRowingMonitor-WebGUI). Instructions on how to use/install the WebGUI can be found in the repository's readme.
+A WebGUI is available that can be accessed [here](https://abasz.github.io/ESPRowingMonitor-WebGUI/). Its an installable Progressive Web App (that works offline after installation), for further details please read the [documentation](https://github.com/Abasz/ESPRowingMonitor-WebGUI/)
 
 ### Logging
 
-ESP Rowing Monitor implements a logging mechanism with different log levels (e.g. silent, error, info, trace, verbose, etc.). These logs are sent via serial (UART0) only, so the ESP32 MCU should be connected via USB to view the logs. The log level (0-6) can be set via the WebSocket or BLE Control Point using OpCode 17.
+ESP Rowing Monitor implements a logging mechanism with different log levels (e.g. silent, error, info, trace, verbose, etc.). These logs are sent via serial (UART0) only, so the ESP32 MCU should be connected via USB to view the logs. The log level (0-6) can be set via the BLE Control Point using OpCode 17.
 
 Trace level logging is useful during the initial calibration process as it prints the delta times that can be used for replay. Further details can be found in the [Calibration](docs/settings.md#calibration)
 
-It is possible to log deltaTimes (i.e. time between impulses) to an SD card (if connected and enabled). DeltaTimes are collected in a `vector` and written to SD card on every stroke or 4 seconds (which ever happens earlier). This incremental way of making deltaTimes available is to optimize performance.
+It is possible to log deltaTimes (i.e. time between impulses) to an SD card (if connected and enabled). DeltaTimes are collected in a `vector` and written to SD card on every stroke (after the drive ends) or 4 seconds (which ever happens earlier). This incremental way of making deltaTimes available is to optimize performance.
 
 ### Metrics
 
@@ -138,7 +234,8 @@ The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the t
 
 As an example, on my setup, I use 3 impulses per rotation. Based on my experience, the delta times cannot dip below 10ms. So with an `IMPULSE_DATA_ARRAY_LENGTH` size of 7 (execution time with double is approximately 1.2ms), this should be pretty much fine.
 
-On other machine where 6 impulse per rotation happens thanks to the more efficient algorithm for an `IMPULSE_DATA_ARRAY_LENGTH` size of 12 double precision can be used safely as the delta times should not dip below 5ms, giving sufficient time for WebSocket and BLE updates to run.
+On other machine where 6 impulse per rotation happens, thanks to the more efficient algorithm, for an `IMPULSE_DATA_ARRAY_LENGTH` size of 12 with double precision can be used safely as the delta times should not dip below 5ms, giving sufficient buffer time for BLE updates to run.
+_Note: on a dual core MCU frequent BLE related tasks are offloaded to the second core, and the ISR and the algorithm - along with small one-off and less frequent tasks - run on the main core, so strictly speaking these functions should not interfere on a dual core ESP32._
 
 If, for some reason, testing shows that a higher value for the `IMPULSE_DATA_ARRAY_LENGTH` size is necessary, the execution time can be reduced to some extent if float precision is used instead of double. This is due to the fact that on the 32bit ESP32 MCU doubles are emulated hence, performance suffers:
 
@@ -186,7 +283,6 @@ The ESP Rowing Monitor exposes BLE Cycling Power Profile and Cycling Speed and C
 
 - Implement FTMS
 - Implement more flexible settings system that does not require recompile and takes advantage of persistent storage
-- Decide on how to expose the settings API via BLE
 - Finalize the extended BLE API
 
 ## Attribution

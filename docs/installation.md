@@ -17,7 +17,7 @@ The generic board profile should work with any ESP32 board (as it does not have 
 
 ### Other already supported boards
 
-Currently there are two specific boards that are set up and upported:
+Currently there are two specific boards that are set up and supported:
 
 1. Firebeetle 2
 2. ESP32 Devkit 1.0

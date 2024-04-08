@@ -4,6 +4,10 @@
 
 ESP Rowing Monitor includes a WebSocket server that sends calculated metrics to connected clients (up to a maximum of 2 clients at a time). In order to improve efficiency the data is sent in binary format. There are two types of data structure:
 
+Data is updated on every stroke (after the drive ends) or every 4 seconds, whichever occurs earlier. This is not a significant issue, as most of the metrics are only available at certain known states of the rowing cycle (e.g. end of drive, end of recovery, etc.). Nevertheless, BLE sends Notify at least once per second (as pert he Bluetooth spec) in case a stroke takes longer but with the same data as the pervious one.
+
+Currently, a simple WebGUI is being developed using Angular. The related repository can be found [here](https://github.com/Abasz/ESPRowingMonitor-WebGUI). Instructions on how to use/install the WebGUI can be found in the repository's readme.
+
 ### Measurements
 
 Measurements are sent in an array format as follows:
