@@ -7,7 +7,13 @@ PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService
 {
     if constexpr (Configurations::enableWebSocketDeltaTimeLogging || (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
     {
-        deltaTimes.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
+        sdDeltaTimes.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
+    }
+
+    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    {
+        const auto maxMTU = 512 / sizeof(unsigned long);
+        bleDeltaTimes.reserve(maxMTU);
     }
 }
 
@@ -42,10 +48,18 @@ void PeripheralsController::update(const unsigned char batteryLevel)
     if constexpr (Configurations::isBleServiceEnabled)
     {
         const unsigned int bleUpdateInterval = 1'000;
-        if (now - lastBroadcastTime > bleUpdateInterval)
+        if (now - lastMetricsBroadcastTime > bleUpdateInterval)
         {
             bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
-            lastBroadcastTime = now;
+            lastMetricsBroadcastTime = now;
+        }
+
+        if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+        {
+            if (now - lastDeltaTimesBroadcastTime > bleUpdateInterval)
+            {
+                flushBleDeltaTimes(bluetoothService.getDeltaTimesMTU());
+            }
         }
     }
 }
@@ -117,13 +131,49 @@ void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
 
 void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
 {
-    if constexpr (Configurations::enableWebSocketDeltaTimeLogging || (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
+    if constexpr (Configurations::enableWebSocketDeltaTimeLogging ||
+                  (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
     {
-        if (eepromService.getLogToSdCard() || (eepromService.getLogToWebsocket() && networkService.isAnyDeviceConnected()))
+        if ((eepromService.getLogToSdCard() && sdCardService.isLogFileOpen()) ||
+            (eepromService.getLogToWebsocket() && networkService.isAnyDeviceConnected()))
         {
-            deltaTimes.push_back(deltaTime);
+            sdDeltaTimes.push_back(deltaTime);
         }
     }
+
+    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    {
+        if (!eepromService.getLogToBluetooth() || !bluetoothService.isDeltaTimesSubscribed())
+        {
+            return;
+        }
+
+        const auto mtu = bluetoothService.getDeltaTimesMTU();
+
+        const auto minimumMTU = 100;
+        if (mtu < minimumMTU)
+        {
+            return;
+        }
+
+        bleDeltaTimes.push_back(deltaTime);
+
+        if ((bleDeltaTimes.size() + 1U) * sizeof(unsigned long) > mtu - 3U)
+        {
+            flushBleDeltaTimes(mtu);
+        }
+    }
+}
+
+void PeripheralsController::flushBleDeltaTimes(const unsigned short mtu = 512U)
+{
+    bluetoothService.notifyDeltaTimes(bleDeltaTimes);
+
+    vector<unsigned long> clear;
+    clear.reserve(mtu / sizeof(unsigned long) + 1U);
+    bleDeltaTimes.swap(clear);
+
+    lastDeltaTimesBroadcastTime = millis();
 }
 
 void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &data)
@@ -137,7 +187,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
 
     if constexpr (Configurations::isWebsocketEnabled)
     {
-        networkService.notifyClients(data, Configurations::enableWebSocketDeltaTimeLogging ? deltaTimes : vector<unsigned long>{});
+        networkService.notifyClients(data, Configurations::enableWebSocketDeltaTimeLogging ? sdDeltaTimes : vector<unsigned long>{});
     }
 
     if constexpr (Configurations::isBleServiceEnabled)
@@ -150,24 +200,25 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
 
         bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
 
-        lastBroadcastTime = millis();
+        lastMetricsBroadcastTime = millis();
     }
 
     if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
     {
         if (eepromService.getLogToSdCard())
         {
-            sdCardService.saveDeltaTime(deltaTimes);
+            sdCardService.saveDeltaTime(sdDeltaTimes);
         }
     }
 
-    if constexpr ((Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC) || Configurations::isWebsocketEnabled)
+    if constexpr (Configurations::enableWebSocketDeltaTimeLogging ||
+                  (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
     {
-        if (!deltaTimes.empty())
+        if (!sdDeltaTimes.empty())
         {
             vector<unsigned long> clear;
             clear.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
-            deltaTimes.swap(clear);
+            sdDeltaTimes.swap(clear);
         }
     }
 }

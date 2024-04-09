@@ -124,6 +124,10 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
     #define DISABLE_WEBSOCKET_DELTA_TIME_LOGGING false
 #endif
 
+#if !defined(ENABLE_BLUETOOTH_DELTA_TIME_LOGGING)
+    #define ENABLE_BLUETOOTH_DELTA_TIME_LOGGING false
+#endif
+
 #if !defined(SUPPORT_SD_CARD_LOGGING)
     #define SUPPORT_SD_CARD_LOGGING false
 #endif

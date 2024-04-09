@@ -20,12 +20,12 @@ class BluetoothService
         void onWrite(NimBLECharacteristic *pCharacteristic) override;
     };
 
-    class HandleForcesCallbacks : public NimBLECharacteristicCallbacks
+    class ChunkedNotifyMetricCallbacks : public NimBLECharacteristicCallbacks
     {
         BluetoothService &bleService;
 
     public:
-        explicit HandleForcesCallbacks(BluetoothService &_bleService);
+        explicit ChunkedNotifyMetricCallbacks(BluetoothService &_bleService);
 
         void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue) override;
     };
@@ -41,11 +41,21 @@ class BluetoothService
         void onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc) override;
     };
 
+    struct DeltaTimesParameters
+    {
+        NimBLECharacteristic *characteristic = nullptr;
+        vector<unsigned long> deltaTimes;
+        vector<unsigned char> clientIds;
+
+        static void task(void *parameters);
+    } deltaTimesParameters;
+
     struct HandleForcesParameters
     {
         NimBLECharacteristic *characteristic = nullptr;
         unsigned short mtu = 512U;
         vector<float> handleForces;
+        vector<unsigned char> clientIds;
 
         static void task(void *parameters);
     } handleForcesParameters;
@@ -74,12 +84,10 @@ class BluetoothService
         static void cscTask(void *parameters);
     } baseMetricsParameters;
 
-    vector<unsigned short> handleForcesClientIds;
-
     EEPROMService &eepromService;
     SdCardService &sdCardService;
     ControlPointCallbacks controlPointCallbacks;
-    HandleForcesCallbacks handleForcesCallbacks;
+    ChunkedNotifyMetricCallbacks chunkedNotifyMetricCallbacks;
     ServerCallbacks serverCallbacks;
 
     NimBLECharacteristic *batteryLevelCharacteristic = nullptr;
@@ -110,6 +118,9 @@ public:
     void notifyBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower);
     void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor);
     void notifyHandleForces(const std::vector<float> &handleForces);
+    void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes);
+    unsigned short getDeltaTimesMTU() const;
+    bool isDeltaTimesSubscribed() const;
     /// @deprecated Standalone drag factor notification is deprecated in favor of the extended BLE API and may be removed in future
     [[deprecated("Standalone drag factor notification is deprecated in favor of the extended BLE API and may be removed in future")]]
     void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;

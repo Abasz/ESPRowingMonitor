@@ -350,7 +350,7 @@ void NetworkService::handleWebSocketMessage(const void *const arg, uint8_t *cons
     }
     break;
 
-    case static_cast<int>(SettingsOpCodes::SetWebSocketDeltaTimeLogging):
+    case static_cast<int>(SettingsOpCodes::SetDeltaTimeLogging):
     {
         Log.infoln("Change WebSocket Logging");
 

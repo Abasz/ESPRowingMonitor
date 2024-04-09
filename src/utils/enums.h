@@ -61,7 +61,7 @@ enum class SettingsOpCodes : unsigned char
     StartEnhancedOffsetCompensation = 16U,
     SetLogLevel = 17U,
     ChangeBleService = 18U,
-    SetWebSocketDeltaTimeLogging = 19U,
+    SetDeltaTimeLogging = 19U,
     SetSdCardLogging = 20U,
     ResponseCode = 32U
 };
@@ -126,9 +126,9 @@ public:
 class LogSettingsFlags
 {
 public:
-    static const unsigned char LogToWebsocketNotSupported = (0x00 << 0U);
-    static const unsigned char LogToWebsocketDisabled = (0x01 << 0U);
-    static const unsigned char LogToWebsocketEnabled = (0x02 << 0U);
+    static const unsigned char DeltaTimeLoggingNotSupported = (0x00 << 0U);
+    static const unsigned char DeltaTimeLoggingDisabled = (0x01 << 0U);
+    static const unsigned char DeltaTimeLoggingEnabled = (0x02 << 0U);
 
     static const unsigned char LogToSdCardNotSupported = (0x00 << 2U);
     static const unsigned char LogToSdCardDisabled = (0x01 << 2U);

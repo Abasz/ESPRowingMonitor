@@ -10,7 +10,7 @@ BluetoothService::ServerCallbacks::ServerCallbacks(BluetoothService &_bleService
 
 BluetoothService::ControlPointCallbacks::ControlPointCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
 
-BluetoothService::HandleForcesCallbacks::HandleForcesCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
+BluetoothService::ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
 
 void BluetoothService::ServerCallbacks::onConnect(NimBLEServer *pServer)
 {
@@ -25,22 +25,36 @@ void BluetoothService::ServerCallbacks::onDisconnect(NimBLEServer *pServer, ble_
 {
     Log.verboseln("disconnected ID: %n", desc->conn_handle);
 
-    bleService.handleForcesClientIds.erase(
+    bleService.handleForcesParameters.clientIds.erase(
         std::remove_if(
-            bleService.handleForcesClientIds.begin(),
-            bleService.handleForcesClientIds.end(),
+            bleService.handleForcesParameters.clientIds.begin(),
+            bleService.handleForcesParameters.clientIds.end(),
             [&](char connectionId)
             {
                 return connectionId == desc->conn_handle;
             }),
-        bleService.handleForcesClientIds.end());
+        bleService.handleForcesParameters.clientIds.end());
+
+    bleService.deltaTimesParameters.clientIds.erase(
+        std::remove_if(
+            bleService.deltaTimesParameters.clientIds.begin(),
+            bleService.deltaTimesParameters.clientIds.end(),
+            [&](char connectionId)
+            {
+                return connectionId == desc->conn_handle;
+            }),
+        bleService.deltaTimesParameters.clientIds.end());
 }
 
-void BluetoothService::HandleForcesCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue)
+void BluetoothService::ChunkedNotifyMetricCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue)
 {
     if (pCharacteristic->getUUID().toString() == CommonBleFlags::handleForcesUuid)
     {
-        bleService.handleForcesClientIds.push_back(desc->conn_handle);
+        bleService.handleForcesParameters.clientIds.push_back(desc->conn_handle);
+    }
+    if (pCharacteristic->getUUID().toString() == CommonBleFlags::deltaTimesUuid)
+    {
+        bleService.deltaTimesParameters.clientIds.push_back(desc->conn_handle);
     }
 }
 
@@ -153,16 +167,16 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     }
     break;
 
-    case static_cast<int>(SettingsOpCodes::SetWebSocketDeltaTimeLogging):
+    case static_cast<int>(SettingsOpCodes::SetDeltaTimeLogging):
     {
-        Log.infoln("Change WebSocket Logging");
+        Log.infoln("Change deltaTime logging");
 
         if (message.size() == 2 && message[1] >= 0 && message[1] <= 1)
         {
             const auto shouldEnable = static_cast<bool>(message[1]);
 
-            Log.infoln("%s WebSocket deltaTime logging", shouldEnable ? "Enable" : "Disable");
-            bleService.eepromService.setLogToWebsocket(shouldEnable);
+            Log.infoln("%s deltaTime logging", shouldEnable ? "Enable" : "Disable");
+            bleService.eepromService.setLogToBluetooth(shouldEnable);
 
             array<uint8_t, 3> temp = {
                 static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
@@ -175,7 +189,7 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
             return;
         }
 
-        Log.infoln("Invalid OP command for setting WebSocket deltaTime logging, this should be a bool: %d", message[1]);
+        Log.infoln("Invalid OP command for setting deltaTime logging, this should be a bool: %d", message[1]);
         array<uint8_t, 3> temp = {
             static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),

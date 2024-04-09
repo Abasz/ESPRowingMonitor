@@ -37,6 +37,17 @@ void EEPROMService::setup()
         Log.verboseln("%s: %d", websocketDeltaTimeLoggingAddress, logToWebsocket);
     }
 
+        if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    {
+        if (!preferences.isKey(bluetoothDeltaTimeLoggingAddress))
+        {
+            Log.infoln("Setting Bluetooth deltaTime log location");
+            preferences.putBool(bluetoothDeltaTimeLoggingAddress, Configurations::enableBluetoothDeltaTimeLogging);
+        }
+        logToBluetooth = preferences.getBool(bluetoothDeltaTimeLoggingAddress, Configurations::enableBluetoothDeltaTimeLogging);
+        Log.verboseln("%s: %d", bluetoothDeltaTimeLoggingAddress, logToBluetooth);
+    }
+
     if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
     {
         if (!preferences.isKey(sdCardLoggingAddress))
@@ -73,12 +84,24 @@ void EEPROMService::setLogToWebsocket(const bool shouldLogToWebSocket)
 {
     if constexpr (!Configurations::enableWebSocketDeltaTimeLogging)
     {
-        Log.warningln("Not able to change deltaTime logging as the feature is disabled");
+        Log.warningln("Not able to change WebSocket deltaTime logging as the feature is disabled");
 
         return;
     }
     preferences.putBool(websocketDeltaTimeLoggingAddress, shouldLogToWebSocket);
     logToWebsocket = shouldLogToWebSocket;
+}
+
+void EEPROMService::setLogToBluetooth(const bool shouldLogToBluetooth)
+{
+    if constexpr (!Configurations::enableBluetoothDeltaTimeLogging)
+    {
+        Log.warningln("Not able to change Bluetooth deltaTime logging as the feature is disabled");
+
+        return;
+    }
+    preferences.putBool(bluetoothDeltaTimeLoggingAddress, shouldLogToBluetooth);
+    logToBluetooth = shouldLogToBluetooth;
 }
 
 void EEPROMService::setLogToSdCard(const bool shouldLogToSdCard)
@@ -127,6 +150,11 @@ ArduinoLogLevel EEPROMService::getLogLevel() const
 bool EEPROMService::getLogToWebsocket() const
 {
     return logToWebsocket;
+}
+
+bool EEPROMService::getLogToBluetooth() const
+{
+    return logToBluetooth;
 }
 
 bool EEPROMService::getLogToSdCard() const

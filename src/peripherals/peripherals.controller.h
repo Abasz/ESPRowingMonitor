@@ -16,7 +16,8 @@ class PeripheralsController
     EEPROMService &eepromService;
 
     unsigned int lastConnectedDeviceCheckTime = 0;
-    unsigned int lastBroadcastTime = 0UL;
+    unsigned int lastMetricsBroadcastTime = 0UL;
+    unsigned int lastDeltaTimesBroadcastTime = 0UL;
 
     unsigned short bleRevTimeData = 0;
     unsigned int bleRevCountData = 0;
@@ -24,13 +25,15 @@ class PeripheralsController
     unsigned short bleStrokeCountData = 0;
     short bleAvgStrokePowerData = 0;
 
-    std::vector<unsigned long> deltaTimes;
+    std::vector<unsigned long> sdDeltaTimes;
+    std::vector<unsigned long> bleDeltaTimes;
 
     unsigned char ledState = HIGH;
     CRGB::HTMLColorCode ledColor = CRGB::Black;
     inline static std::array<CRGB, 1> leds;
 
     void updateLed(CRGB::HTMLColorCode newLedColor);
+    void flushBleDeltaTimes(unsigned short mtu);
     static void setupConnectionIndicatorLed();
 
 public:

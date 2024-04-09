@@ -1,4 +1,5 @@
 #include <array>
+#include <numeric>
 #include <string>
 
 #include "NimBLEDevice.h"
@@ -6,7 +7,7 @@
 #include "../utils/configuration.h"
 #include "bluetooth.service.h"
 
-BluetoothService::BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), handleForcesCallbacks(*this), serverCallbacks(*this)
+BluetoothService::BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), chunkedNotifyMetricCallbacks(*this), serverCallbacks(*this)
 {
 }
 
@@ -138,7 +139,9 @@ NimBLEService *BluetoothService::setupExtendedMetricsServices(NimBLEServer *cons
     auto *extendedMetricsService = server->createService(CommonBleFlags::extendedMetricsServiceUuid);
 
     handleForcesParameters.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
-    handleForcesParameters.characteristic->setCallbacks(&handleForcesCallbacks);
+    handleForcesParameters.characteristic->setCallbacks(&chunkedNotifyMetricCallbacks);
+    deltaTimesParameters.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::deltaTimesUuid, NIMBLE_PROPERTY::NOTIFY);
+    deltaTimesParameters.characteristic->setCallbacks(&chunkedNotifyMetricCallbacks);
 
     extendedMetricsParameters.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
 
@@ -193,9 +196,35 @@ void BluetoothService::setupAdvertisement() const
     }
 }
 
+unsigned short BluetoothService::getDeltaTimesMTU() const
+{
+    if (deltaTimesParameters.characteristic->getSubscribedCount() == 0)
+    {
+        return 0;
+    }
+
+    return std::accumulate(deltaTimesParameters.clientIds.cbegin(), deltaTimesParameters.clientIds.cend(), 512, [&](unsigned short previousValue, unsigned short currentValue)
+                           {
+                    const auto currentMTU = deltaTimesParameters.characteristic->getService()->getServer()->getPeerMTU(currentValue);
+                    if (currentMTU == 0)
+                    {
+                        return previousValue;
+                    }
+
+                    return std::min(previousValue, currentMTU); });
+}
+
+bool BluetoothService::isDeltaTimesSubscribed() const
+{
+    return deltaTimesParameters.characteristic->getSubscribedCount() > 0;
+}
+
 std::array<unsigned char, 1U> BluetoothService::getSettings() const
 {
-    const unsigned char settings = ((Configurations::enableWebSocketDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToWebsocket()) + 1 : 0) << 0U) | ((Configurations::supportSdCardLogging && sdCardService.isLogFileOpen() ? static_cast<unsigned char>(eepromService.getLogToSdCard()) + 1 : 0) << 2U) | (static_cast<unsigned char>(eepromService.getLogLevel()) << 4U);
+    const unsigned char settings =
+        ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToBluetooth()) + 1 : 0) << 0U) |
+        ((Configurations::supportSdCardLogging && sdCardService.isLogFileOpen() ? static_cast<unsigned char>(eepromService.getLogToSdCard()) + 1 : 0) << 2U) |
+        (static_cast<unsigned char>(eepromService.getLogLevel()) << 4U);
 
     std::array<unsigned char, settingsArrayLength> temp = {
         settings,

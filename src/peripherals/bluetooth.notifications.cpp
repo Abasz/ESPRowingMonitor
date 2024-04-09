@@ -110,7 +110,7 @@ void BluetoothService::notifyHandleForces(const std::vector<float> &handleForces
         return;
     }
 
-    handleForcesParameters.mtu = std::accumulate(handleForcesClientIds.cbegin(), handleForcesClientIds.cend(), 512, [&](unsigned short previousValue, unsigned short currentValue)
+    handleForcesParameters.mtu = std::accumulate(handleForcesParameters.clientIds.cbegin(), handleForcesParameters.clientIds.cend(), 512, [&](unsigned short previousValue, unsigned short currentValue)
                                                  {  
                     const auto currentMTU = handleForcesParameters.characteristic->getService()->getServer()->getPeerMTU(currentValue);
                     if (currentMTU == 0)
@@ -129,6 +129,27 @@ void BluetoothService::notifyHandleForces(const std::vector<float> &handleForces
         "notifyHandleForces",
         coreStackSize + variableStackSize / 3,
         &handleForcesParameters,
+        1,
+        NULL,
+        0);
+}
+
+void BluetoothService::notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes)
+{
+    if (deltaTimesParameters.characteristic->getSubscribedCount() == 0 || deltaTimes.empty())
+    {
+        return;
+    }
+
+    deltaTimesParameters.deltaTimes = deltaTimes;
+
+    const auto coreStackSize = 1'850U;
+
+    xTaskCreatePinnedToCore(
+        DeltaTimesParameters::task,
+        "notifyDeltaTimes",
+        coreStackSize + deltaTimesParameters.deltaTimes.size() * sizeof(unsigned long) / 3,
+        &deltaTimesParameters,
         1,
         NULL,
         0);
@@ -158,6 +179,17 @@ void BluetoothService::HandleForcesParameters::task(void *parameters)
             params->characteristic->notify();
             i++;
         }
+    }
+    vTaskDelete(nullptr);
+}
+
+void BluetoothService::DeltaTimesParameters::task(void *parameters)
+{
+    {
+        const auto *const params = static_cast<const BluetoothService::DeltaTimesParameters *>(parameters);
+
+        params->characteristic->setValue((const unsigned char *)params->deltaTimes.data(), params->deltaTimes.size() * sizeof(unsigned long));
+        params->characteristic->notify();
     }
     vTaskDelete(nullptr);
 }

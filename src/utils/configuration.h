@@ -15,11 +15,14 @@ public:
 
     static const bool logCalibration = LOG_CALIBRATION;
     static const ArduinoLogLevel defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
+    static const bool supportSdCardLogging = SUPPORT_SD_CARD_LOGGING;
+
+    // Bluetooth Settings
     static const BleServiceFlag defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
     static const bool isBleServiceEnabled = ENABLE_BLE_SERVICE;
     static const bool hasExtendedBleMetrics = HAS_BLE_EXTENDED_METRICS ? isBleServiceEnabled : false;
+    static const bool enableBluetoothDeltaTimeLogging = ENABLE_BLUETOOTH_DELTA_TIME_LOGGING ? isBleServiceEnabled : false;
     static const BleSignalStrength bleSignalStrength = BLE_SIGNAL_STRENGTH;
-    static const bool supportSdCardLogging = SUPPORT_SD_CARD_LOGGING;
 
     inline static const string deviceName = TOSTRING(DEVICE_NAME);
     inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
