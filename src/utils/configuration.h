@@ -17,7 +17,7 @@ public:
     static const ArduinoLogLevel defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
     static const BleServiceFlag defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
     static const bool isBleServiceEnabled = ENABLE_BLE_SERVICE;
-    static const bool hasExtendedBleMetrics = HAS_BLE_EXTENDED_METRICS ? Configurations::isBleServiceEnabled : false;
+    static const bool hasExtendedBleMetrics = HAS_BLE_EXTENDED_METRICS ? isBleServiceEnabled : false;
     static const BleSignalStrength bleSignalStrength = BLE_SIGNAL_STRENGTH;
     static const bool supportSdCardLogging = SUPPORT_SD_CARD_LOGGING;
 
@@ -31,18 +31,18 @@ public:
     static const gpio_num_t sdCardChipSelectPin = SD_CARD_CHIP_SELECT_PIN;
     static const gpio_num_t sensorPinNumber = SENSOR_PIN_NUMBER;
     static const gpio_num_t wakeupPinNumber = WAKEUP_SENSOR_PIN_NUMBER;
-    static const bool hasWakeupPinNumber = Configurations::wakeupPinNumber != GPIO_NUM_NC;
+    static const bool hasWakeupPinNumber = wakeupPinNumber != GPIO_NUM_NC;
     static const gpio_num_t sensorOnSwitchPinNumber = SENSOR_ON_SWITCH_PIN_NUMBER;
-    static const bool hasSensorOnSwitchPinNumber = Configurations::sensorOnSwitchPinNumber != GPIO_NUM_NC;
+    static const bool hasSensorOnSwitchPinNumber = sensorOnSwitchPinNumber != GPIO_NUM_NC;
     static const gpio_num_t ledPin = static_cast<gpio_num_t>(LED_PIN);
-    static const bool isRgb = Configurations::ledPin == GPIO_NUM_NC ? false : IS_RGB;
+    static const bool isRgb = ledPin == GPIO_NUM_NC ? false : IS_RGB;
     static const unsigned char impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
     static constexpr float flywheelInertia = FLYWHEEL_INERTIA;
     static const unsigned short ledBlinkFrequency = LED_BLINK_FREQUENCY;
     static constexpr float sprocketRadius = SPROCKET_RADIUS / 100;
     static constexpr float concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
 
-    static constexpr Configurations::precision angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
+    static constexpr precision angularDisplacementPerImpulse = (2 * PI) / impulsesPerRevolution;
     static const unsigned char driveHandleForcesMaxCapacity = UCHAR_MAX;
 
     // Sensor signal filter settings
@@ -77,8 +77,8 @@ public:
     // Device power management settings
     static const gpio_num_t batteryPinNumber = BATTERY_PIN_NUMBER;
     static const unsigned char voltageDividerRatio = VOLTAGE_DIVIDER_RATIO;
-    static constexpr float batteryVoltageMin = BATTERY_VOLTAGE_MIN / Configurations::voltageDividerRatio;
-    static constexpr float batteryVoltageMax = BATTERY_VOLTAGE_MAX / Configurations::voltageDividerRatio;
+    static constexpr float batteryVoltageMin = BATTERY_VOLTAGE_MIN / voltageDividerRatio;
+    static constexpr float batteryVoltageMax = BATTERY_VOLTAGE_MAX / voltageDividerRatio;
     static const unsigned char batteryLevelArrayLength = BATTERY_LEVEL_ARRAY_LENGTH;
     static const unsigned char initialBatteryLevelMeasurementCount = INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT;
     static const unsigned int batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1'000;

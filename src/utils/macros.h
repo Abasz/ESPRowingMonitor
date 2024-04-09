@@ -49,6 +49,10 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
     #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 #endif
 
+#if !defined(DEFAULT_BLE_SERVICE)
+    #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
+#endif
+
 #if STROKE_DETECTION_TYPE == STROKE_DETECTION_BOTH
     #define STROKE_DETECTION StrokeDetectionType::Both
 #elif STROKE_DETECTION_TYPE == STROKE_DETECTION_SLOPE
