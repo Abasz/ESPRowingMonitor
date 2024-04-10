@@ -4,13 +4,10 @@
 
 #include "SdFat.h"
 
-#include "../utils/EEPROM.service.h"
-
 using std::vector;
 
 class SdCardService
 {
-    EEPROMService &eepromService;
     SdFat32 sd;
     File32 logFile;
 
@@ -24,7 +21,7 @@ class SdCardService
     void initSdCard();
 
 public:
-    explicit SdCardService(EEPROMService &_eepromService);
+    explicit SdCardService();
     void setup();
     void saveDeltaTime(const vector<unsigned long> &deltaTime);
     bool isLogFileOpen() const;

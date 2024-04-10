@@ -4,17 +4,10 @@
 #include "../utils/configuration.h"
 #include "sd-card.service.h"
 
-SdCardService::SdCardService(EEPROMService &_eepromService) : eepromService(_eepromService), sdCardTaskParameters{logFile, {}} {}
+SdCardService::SdCardService() : sdCardTaskParameters{logFile, {}} {}
 
 void SdCardService::setup()
 {
-    if (!eepromService.getLogToSdCard())
-    {
-        Log.verboseln("SD card logging is disabled");
-
-        return;
-    }
-
     Log.verboseln("Initialize SD card");
     initSdCard();
 }
@@ -88,7 +81,7 @@ void SdCardService::saveDeltaTime(const vector<unsigned long> &deltaTimes)
 
     sdCardTaskParameters.deltaTimes = deltaTimes;
 
-    const auto stackCoreSize = 2'048;
+    const auto stackCoreSize = 2'048U;
 
     xTaskCreatePinnedToCore(
         saveDeltaTimeTask,

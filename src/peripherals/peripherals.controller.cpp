@@ -54,6 +54,12 @@ void PeripheralsController::begin()
 {
     Log.infoln("Setting up peripherals");
 
+    if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
+    {
+        Log.infoln("Setting up SDCard service");
+        sdCardService.setup();
+    }
+
     if constexpr (Configurations::isWebsocketEnabled)
     {
         Log.infoln("Setting up Network service");
@@ -64,12 +70,6 @@ void PeripheralsController::begin()
     {
         Log.infoln("Setting up BLE service");
         bluetoothService.setup();
-    }
-
-    if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
-    {
-        Log.infoln("Setting up SDCard service");
-        sdCardService.setup();
     }
 
     if constexpr (Configurations::ledPin != GPIO_NUM_NC)
@@ -155,7 +155,10 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
 
     if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
     {
-        sdCardService.saveDeltaTime(deltaTimes);
+        if (eepromService.getLogToSdCard())
+        {
+            sdCardService.saveDeltaTime(deltaTimes);
+        }
     }
 
     if constexpr ((Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC) || Configurations::isWebsocketEnabled)

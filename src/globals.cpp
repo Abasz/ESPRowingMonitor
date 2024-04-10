@@ -5,7 +5,7 @@
 Preferences preferences;
 
 EEPROMService eepromService(preferences);
-SdCardService sdCardService(eepromService);
+SdCardService sdCardService;
 BluetoothService bleService(eepromService, sdCardService);
 NetworkService networkService(eepromService, sdCardService);
 FlywheelService flywheelService;
