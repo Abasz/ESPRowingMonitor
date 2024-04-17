@@ -63,7 +63,7 @@ In addition as of version 5.1 experimental supports for custom BLE profiles/serv
 
 #### Extended Metrics Service
 
-This Service currently contains two characteristics:
+This Service currently contains three characteristics:
 
 ```text
 Extended Metrics (UUID: 808a0d51-efae-4f0c-b2e0-48bc180d65c3)
@@ -102,6 +102,20 @@ Notifies:
 
 The last Notify (4/4) has the data of only two floats while the rest has 4 each.
 
+```text
+Delta Times (UUID: ae5d11ea-62f6-4789-b809-6fc93fee92b9)
+```
+
+Uses Notify to broadcast the measured delta times if enabled. This serves mostly calibration/debugging purposes as the recorded delta times can be replayed and test various settings efficiently. This feature is disabled by default (meaning that this characteristic may not be visible). It can be enabled by defining `ENABLE_BLUETOOTH_DELTA_TIME_LOGGING true`. After that the actual notification of the measured delta times can be turned on or off via OpCode 19.
+
+The measured delta times are broadcasted once sufficient elements to fill the max negotiated MTU (minus 3 for the header i.e. when the max data capacity) is reached or if 1 second since the last broadcast has passed.
+
+Basically if the negotiated MTU is 255 then 63 delta times can be broadcasted ((255 - 3)/4 - assuming that unsigned integer is 4bytes on the system like on the ESP32). Actual frequency will depend on the number of impulses and the speed of the flywheel since.
+
+In practice once the system measured 63 delta time value it will send Notify (or if 1 second elapses since the last Notify) to the connected clients. Please note that in certain cases this could be rather resource intensive (e.g. when there are a lot of impulses per rotation), the client should support and negotiate a minimum MTU of 100 (ESP32 NimBle stack supports up to 512bytes). If the MTU is below 100, no Notify will be sent.
+
+The data in the Notify are 32bit unsigned integers in Little Endian.
+
 #### Settings Service
 
 This Service currently contains two characteristics:
@@ -114,15 +128,15 @@ Uses Notify to broadcast and allow Read the current settings (which may be exten
 
 Currently the Notify includes only one byte where every two bit represents the status of the logging related settings:
 
-_Delta Time logging to WebSocket_ - (deprecated and will be changed in the future to logging to the extended BLE - which is not implemented yet - currently serving as a place holder for this)
+_Delta Time logging_ - whether to broadcast the measured delta times
 
 ```cpp
-LogToWebsocketNotSupported = (0x00 << 0U);
-LogToWebsocketDisabled = (0x01 << 0U);
-LogToWebsocketEnabled = (0x02 << 0U);
+DeltaTimeLoggingNotSupported = (0x00 << 0U);
+DeltaTimeLoggingDisabled = (0x01 << 0U);
+DeltaTimeLoggingEnabled = (0x02 << 0U);
 ```
 
-_SD Card logging_ - whether logging to SC Card is enabled or not
+_SD Card logging_ - whether logging to SD Card is enabled or not
 
 ```cpp
 LogToSdCardNotSupported = (0x00 << 2U);
@@ -151,7 +165,7 @@ Uses Indicate and allow Write to change the settings. The structure corresponds 
 ```cpp
     SetLogLevel = 17U,
     ChangeBleService = 18U,
-    SetWebSocketDeltaTimeLogging = 19U, // deprecated and will be changed to delta time logging via extended BLE
+    SetDeltaTimeLogging = 19U,
     SetSdCardLogging = 20U,
 ```
 
@@ -212,7 +226,7 @@ Please note that the SD card write only works with the dual core version as the 
 
 The algorithm used for calculating the necessary data for stroke detection can become rather CPU hungry. In a nutshell, the issue is that the Theil-Sen Quadratic Regression is O(N&#178;), which means that as the size of the `IMPULSE_DATA_ARRAY_LENGTH` increases, the time required to complete the calculations increases exponentially (for more information, please see [this explanation](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/physics_openrowingmonitor.md#use-of-quadratic-theil-senn-regression-for-determining-%CE%B1-and-%CF%89-based-on-time-and-%CE%B8)).
 
-As part of the version 5 update there has been significant work done to improve the execution time of the main loop and to better support higher value of `IMPULSE_DATA_ARRAY_LENGTH`. Through various optimizations in the algorithm there has been an approx. 10-15% improvement on higher `IMPULSE_DATA_ARRAY_LENGTH` in this area leading when using double types to for instance an execution time of 5.6ms of a 15 data point set (compared to the original 7ms) and for float type for higher data point length over 15-20% (e.g. execution time is 3.5ms for a 15 data point set compared to the original 4.8).
+As part of the version 5 update there has been significant work done to improve the execution time of the main loop and to better support higher value of `IMPULSE_DATA_ARRAY_LENGTH`. Through various optimizations in the algorithm there has been an approx. 20-30% improvement on higher `IMPULSE_DATA_ARRAY_LENGTH` in this area leading when using double types to for instance an execution time of 3.4ms of a 15 data point set (compared to the original 7ms) and for float type for higher data point length over 30-40% (e.g. execution time is 1.4ms for a 15 data point set compared to the original 4.8).
 
 The improvements are even more noticeable on the maximum execution times (that was achieved through the implementation of proper offloading of peripheral calculations to the second core of the ESP32). The most relevant improvement is that these maximum execution times are within 1-1.5ms (compared to the previous 3-4ms) that avoids potential bug with more data points (e.g. metric calculation is not able to complete before a new data point comes in)
 
@@ -220,38 +234,38 @@ I conducted some high-level tests and measured the execution times, which are sh
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:-----------------:|
-|18                       |7943               |
-|15                       |5669               |
-|12                       |4096               |
-|9                        |2757               |
-|8                        |2316               |
-|7                        |2021               |
-|6                        |1704               |
-|5                        |1462               |
-|3                        |1340               |
+|18                       |4792               |
+|15                       |3407               |
+|12                       |2424               |
+|9                        |1663               |
+|8                        |1446               |
+|7                        |1192               |
+|6                        |1057               |
+|5                        |1005               |
+|3                        |782                |
 
-The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is almost 6ms if double precision is used. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 (and double precision) and gives a warning at 12.
+The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is almost 4.7ms if double precision is used. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 (and double precision) and gives a warning at 14.
 
 As an example, on my setup, I use 3 impulses per rotation. Based on my experience, the delta times cannot dip below 10ms. So with an `IMPULSE_DATA_ARRAY_LENGTH` size of 7 (execution time with double is approximately 1.2ms), this should be pretty much fine.
 
-On other machine where 6 impulse per rotation happens, thanks to the more efficient algorithm, for an `IMPULSE_DATA_ARRAY_LENGTH` size of 12 with double precision can be used safely as the delta times should not dip below 5ms, giving sufficient buffer time for BLE updates to run.
+On other machine where 6 impulse per rotation happens, thanks to the more efficient algorithm, for an `IMPULSE_DATA_ARRAY_LENGTH` size of 12 with double precision can be used safely as the delta times should not dip below 3.3ms, giving sufficient buffer time for BLE updates to run.
 _Note: on a dual core MCU frequent BLE related tasks are offloaded to the second core, and the ISR and the algorithm - along with small one-off and less frequent tasks - run on the main core, so strictly speaking these functions should not interfere on a dual core ESP32._
 
 If, for some reason, testing shows that a higher value for the `IMPULSE_DATA_ARRAY_LENGTH` size is necessary, the execution time can be reduced to some extent if float precision is used instead of double. This is due to the fact that on the 32bit ESP32 MCU doubles are emulated hence, performance suffers:
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:-----------------:|
-|18                       |4499               |
-|15                       |3560               |
-|12                       |2790               |
-|9                        |1965               |
-|8                        |1869               |
-|7                        |1689               |
-|6                        |1443               |
-|5                        |1145               |
-|3                        |687                |
+|18                       |1837               |
+|15                       |1453               |
+|12                       |1164               |
+|9                        |906                |
+|8                        |836                |
+|7                        |784                |
+|6                        |712                |
+|5                        |688                |
+|3                        |616                |
 
-Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times significantly (notice the 4.5ms compared 6.3 for 18 data point). I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
+Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times significantly (notice the 4.8ms compared 1.8 for 18 data point). I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
 
 The below picture shows that the blue chart cuts some corners but generally follows the same curve (which does not mean that in certain edge cases the reduced precision does not create errors).
 
@@ -261,9 +275,11 @@ Generally the execution time under the new algorithm shows a second degree polyn
 
 ![Float vs. Double Curves](docs/imgs/float-vs-double-curves.jpg)
 
-Another limitation related to CPU speed is the refresh rate of the peripherals such as BLE and the web server. The refresh rate is intentionally limited to conserve resources. For example, the web server only updates on a new stroke or after a 4-second interval if no new stroke detected during this period.
+Another limitation related to CPU speed is the refresh rate of the BLE peripherals. The refresh rate is intentionally limited to conserve resources. For example, the web server only updates on a new stroke or after a 4-second interval if no new stroke detected during this period.
 
-Further tests will be needed to determine if this refresh rate can be increased, such as updating on every full rotation. However, this may only be feasible on dual-core versions of the ESP32 chip.
+In addition based on testing the ESP32s3 chip (e.g. on a Loling S3 mini board) is significantly more efficient than the wroom chips. Depending on the `IMPULSE_DATA_ARRAY_LENGTH` value the performance improvement is between 40-10% (performance improvement decreasing exponentially when increasing the value).
+
+Based on this, this chip is now the clearly recommended chip for the purpose of this project.
 
 ### Noise filtering
 
@@ -283,7 +299,6 @@ The ESP Rowing Monitor exposes BLE Cycling Power Profile and Cycling Speed and C
 
 - Implement FTMS
 - Implement more flexible settings system that does not require recompile and takes advantage of persistent storage
-- Finalize the extended BLE API
 
 ## Attribution
 

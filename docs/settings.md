@@ -52,6 +52,10 @@ Enables or disables the BLE service to broadcast data. Default is true.
 
 Enables or disables the extended BLE API to broadcast data. Default is true.
 
+#### ENABLE_BLUETOOTH_DELTA_TIME_LOGGING
+
+Enables or disables to delta time logging via BLE (by setting up a specific characteristic under extended metrics service). This serves debugging and calibration purposes (without a PC and serial connection) as it allows the recording the delta times between impulses measured that can be replayed as a [simulation](#running-a-simulation) later on. Default is false.
+
 #### SUPPORT_SD_CARD_LOGGING
 
 This settings enables logging deltaTime values to a connected SD Card.
@@ -85,6 +89,10 @@ If LED related features are enabled, this sets the blinking frequency in case of
 #### IS_RGB
 
 It is possible to indicate battery charge via a connected RGB LED (actually some boards such as the FireBeetle 2 supports this by default via on-board RGB LED). Setting this to `true` enables these RGB related features. Default is false.
+
+#### RGB_LED_COLOR_CHANNEL_ORDER
+
+This is the FastLED `EOrder` enum that allows setting the color channel order as some RGB LEDs use GBR instead of RGB order (e.g. Firebeetle2 devboard). Default is `RGB`.
 
 #### SD_CARD_CHIP_SELECT_PIN
 
@@ -142,7 +150,7 @@ These are the settings applicable to the rowing machine. It can be included in a
 
 #### DEVICE_NAME
 
-This is the device name that is set as BLE Device name as well as server name in case WebSocket is enabled. This should be one word without spaces and without quotes.
+This is the device name that is set as BLE Device name. This should be one word without spaces and without quotes.
 
 #### MODEL_NUMBER
 
@@ -258,9 +266,13 @@ This is the minimum recovery slope. This setting corresponds to the [minimumReco
 
 Only relevant if STROKE_DETECTION_TYPE is either BOTH or SLOPE
 
-#### STROKE_DEBOUNCE_TIME
+#### MINIMUM_RECOVERY_TIME
 
-This is the minimum time that is required to stay in a phase of the cycle (drive or recovery) if change would be triggered within this period it is ignored. This should generally mean that this is the minimum time between strokes. This setting corresponds to ORM's `minimumDriveTime` and `minimumRecoveryTime` (please see [here](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/rower_settings.md#minimumdrivetime-and-minimumrecoverytime)) but having only one setting for both.
+This is the minimum time that is required to stay in the recovery phase, if change would be triggered within this period it is ignored. This should generally mean that this is the minimum time before drive phase can start within the stroke. This setting corresponds to ORM's `minimumRecoveryTime` (please see [here](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/rower_settings.md#minimumdrivetime-and-minimumrecoverytime)).
+
+#### MINIMUM_DRIVE_TIME
+
+This is the minimum time that is required to stay in the drive phase, if change would be triggered within this period it is ignored. This should generally mean that this is the minimum time before recovery phase can start within the strokes. This setting corresponds to ORM's `minimumDriveTime` (please see [here](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/rower_settings.md#minimumdrivetime-and-minimumrecoverytime)).
 
 ## Calibration
 

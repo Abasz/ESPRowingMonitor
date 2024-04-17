@@ -165,8 +165,8 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
 #if IMPULSE_DATA_ARRAY_LENGTH < 3
     #error "IMPULSE_DATA_ARRAY_LENGTH should not be less than 3"
 #endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 18
-    #error "Using too many data points will increase loop execution time. It should not be more than 17"
+#if IMPULSE_DATA_ARRAY_LENGTH > 18
+    #error "Using too many data points will increase loop execution time. It should not be more than 18"
 #endif
 
 #if (ENABLE_WEBGUI == true)
@@ -187,26 +187,26 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
     #warning "For performance reasons it is not recommended to enable both extended BLE data and WebSocket monitor at the same time."
 #endif
 
-#if IMPULSE_DATA_ARRAY_LENGTH < 12
+#if IMPULSE_DATA_ARRAY_LENGTH < 14
     #if !defined(FLOATING_POINT_PRECISION)
         #define PRECISION double
     #else
         #define PRECISION IF(FLOATING_POINT_PRECISION, double, float)
     #endif
 #endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 12 && IMPULSE_DATA_ARRAY_LENGTH < 15
+#if IMPULSE_DATA_ARRAY_LENGTH >= 14 && IMPULSE_DATA_ARRAY_LENGTH < 16
     #if !defined(FLOATING_POINT_PRECISION)
         #define PRECISION float
     #elif defined(FLOATING_POINT_PRECISION)
         #if FLOATING_POINT_PRECISION == PRECISION_DOUBLE
-            #warning "Using too many data points (i.e. setting `IMPULSE_DATA_ARRAY_LENGTH` to a high number) will increase loop execution time. Using 14 and a precision of double would require around 3-3.5ms to complete all calculations. Hence impulses may be missed. So setting precision to float to save on execution time (but potentially loose some precision). Thus, consider changing precision from double to float. For further details please refer to [docs](docs/settings.md#impulse_data_array_length)"
+            #warning "Using too many data points (i.e. setting `IMPULSE_DATA_ARRAY_LENGTH` to a high number) will increase loop execution time. Using 15 and a precision of double would require around 3.4-4ms to complete all calculations. Hence impulses may be missed. So setting precision to float to save on execution time (but potentially loose some precision). Thus, consider changing precision from double to float. For further details please refer to [docs](docs/settings.md#impulse_data_array_length)"
         #endif
         #define PRECISION IF(FLOATING_POINT_PRECISION, double, float)
     #endif
 #endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 15 && IMPULSE_DATA_ARRAY_LENGTH < 18
+#if IMPULSE_DATA_ARRAY_LENGTH >= 16 && IMPULSE_DATA_ARRAY_LENGTH < 18
     #if (FLOATING_POINT_PRECISION == PRECISION_DOUBLE)
-        #warning "Using too many data points (i.e. setting `IMPULSE_DATA_ARRAY_LENGTH` to a high number) will increase loop execution time. Using 15 and a precision of double would require 4ms to complete all calculation. Hence impulses may be missed. So setting precision to float to save on execution time (but potentially loose some precision). For further details please refer to [docs](docs/settings.md#impulse_data_array_length)"
+        #warning "Using too many data points (i.e. setting `IMPULSE_DATA_ARRAY_LENGTH` to a high number) will increase loop execution time. Using 16 and a precision of double would require 3.9-4.7ms to complete all calculation. Hence impulses may be missed. So setting precision to float to save on execution time (but potentially loose some precision). For further details please refer to [docs](docs/settings.md#impulse_data_array_length)"
     #endif
     #define PRECISION float
 #endif
