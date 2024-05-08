@@ -69,6 +69,10 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
     #endif
 #endif
 
+#if !defined(RGB_LED_COLOR_CHANNEL_ORDER)
+    #define RGB_LED_COLOR_CHANNEL_ORDER RGB
+#endif
+
 #if !defined(BATTERY_PIN_NUMBER)
     #define BATTERY_PIN_NUMBER GPIO_NUM_NC
 #endif

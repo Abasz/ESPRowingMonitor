@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Arduino.h"
+#include "FastLED.h"
 
 #include "./macros.h"
 
@@ -31,14 +32,19 @@ public:
 
     // Hardware settings
     static const BaudRates baudRate = BAUD_RATE;
+
     static const gpio_num_t sdCardChipSelectPin = SD_CARD_CHIP_SELECT_PIN;
     static const gpio_num_t sensorPinNumber = SENSOR_PIN_NUMBER;
     static const gpio_num_t wakeupPinNumber = WAKEUP_SENSOR_PIN_NUMBER;
     static const bool hasWakeupPinNumber = wakeupPinNumber != GPIO_NUM_NC;
     static const gpio_num_t sensorOnSwitchPinNumber = SENSOR_ON_SWITCH_PIN_NUMBER;
     static const bool hasSensorOnSwitchPinNumber = sensorOnSwitchPinNumber != GPIO_NUM_NC;
+
     static const gpio_num_t ledPin = static_cast<gpio_num_t>(LED_PIN);
     static const bool isRgb = ledPin == GPIO_NUM_NC ? false : IS_RGB;
+    static const bool rgbLed = ledPin == GPIO_NUM_NC ? false : IS_RGB;
+    static const EOrder ledColorChannelOrder = RGB_LED_COLOR_CHANNEL_ORDER;
+
     static const unsigned char impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
     static constexpr float flywheelInertia = FLYWHEEL_INERTIA;
     static const unsigned short ledBlinkFrequency = LED_BLINK_FREQUENCY;

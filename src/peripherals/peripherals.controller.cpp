@@ -236,7 +236,7 @@ void PeripheralsController::setupConnectionIndicatorLed()
 {
     if constexpr (Configurations::isRgb)
     {
-        FastLED.addLeds<WS2812, static_cast<unsigned char>(Configurations::ledPin), GRB>(leds.data(), 1);
+        FastLED.addLeds<WS2812, static_cast<unsigned char>(Configurations::ledPin), Configurations::ledColorChannelOrder>(leds.data(), 1);
     }
     else
     {

@@ -6,20 +6,22 @@
 
 // General settings
 #define BAUD_RATE BaudRates::Baud1500000
+#define BLE_SIGNAL_STRENGTH BleSignalStrength::MaxPower
+#define SUPPORT_SD_CARD_LOGGING false
 
 // LED settings
 #define LED_BLINK_FREQUENCY 1'000
-#define LED_PIN GPIO_NUM_5 // Use GPIO_NUM_NC if no led is available
+#define LED_PIN GPIO_NUM_47 // Use GPIO_NUM_NC if no led is available
 #define IS_RGB true
-#define RGB_LED_COLOR_CHANNEL_ORDER GRB
 
 // Hardware settings
-#define SENSOR_PIN_NUMBER GPIO_NUM_15
-#define SENSOR_ON_SWITCH_PIN_NUMBER GPIO_NUM_22 // Use GPIO_NUM_NC if no sensor switch is available
-#define WAKEUP_SENSOR_PIN_NUMBER GPIO_NUM_25    // Use GPIO_NUM_NC if no separate wakeup pin is available
+#define SENSOR_PIN_NUMBER GPIO_NUM_16
+#define SENSOR_ON_SWITCH_PIN_NUMBER GPIO_NUM_NC // Use GPIO_NUM_NC if no sensor switch is available
+#define WAKEUP_SENSOR_PIN_NUMBER GPIO_NUM_NC    // Use GPIO_NUM_NC if no separate wakeup pin is available
+#define SD_CARD_CHIP_SELECT_PIN GPIO_NUM_NC
 
 // Device power management settings
-#define BATTERY_PIN_NUMBER GPIO_NUM_34
+#define BATTERY_PIN_NUMBER GPIO_NUM_NC
 #define VOLTAGE_DIVIDER_RATIO 2
 #define BATTERY_VOLTAGE_MIN 3.3
 #define BATTERY_VOLTAGE_MAX 4.00

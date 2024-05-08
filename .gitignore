@@ -92,6 +92,7 @@ src/custom.settings.h
 src/profiles/*
 !src/profiles/generic.rower-profile.h
 !src/profiles/generic.board-profile.h
+!src/profiles/lolinS3-mini.board-profile.h
 !src/profiles/kayakfirst.rower-profile.h
 !src/profiles/kayakfirstBlue.rower-profile.h
 !src/profiles/firebeetle.board-profile.h

@@ -7,9 +7,12 @@
 void setup()
 {
     Serial.begin(static_cast<int>(Configurations::baudRate));
+
+#if ARDUINO_USB_CDC_ON_BOOT != 1
     while (!Serial && !(bool)Serial.available())
     {
     }
+#endif
 
     Log.begin(static_cast<int>(Configurations::defaultLogLevel), &Serial, false);
     Log.setPrefix(printPrefix);
