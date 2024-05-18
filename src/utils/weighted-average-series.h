@@ -1,12 +1,9 @@
 #pragma once
 
-#include <vector>
-
-#include "configuration.h"
-#include "series.h"
+#include "./configuration.h"
+#include "./series.h"
 
 using std::size_t;
-using std::vector;
 
 class WeightedAverageSeries
 {

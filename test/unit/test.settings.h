@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../src/profiles/generic.board-profile.h"
-
 #include "../src/utils/enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)

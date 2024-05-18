@@ -1,7 +1,10 @@
 #include <algorithm>
 #include <numeric>
+#include <vector>
 
-#include "ts-linear-series.h"
+#include "./ts-linear-series.h"
+
+using std::vector;
 
 TSLinearSeries::TSLinearSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxSlopeSeriesLength(((_maxSeriesLength - 2) * (_maxSeriesLength - 1)) / 2), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity)
 {

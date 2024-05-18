@@ -7,11 +7,8 @@
 #include "ArduinoLog.h"
 
 #include "globals.h"
-#include "stroke.service.h"
 
-using std::any_of;
-using std::array;
-using std::minmax;
+#include "./stroke.service.h"
 
 using RowingDataModels::RowingMetrics;
 

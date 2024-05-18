@@ -1,6 +1,6 @@
 #include "../utils/configuration.h"
-#include "flywheel.service.h"
-#include "stroke.service.h"
+#include "./flywheel.service.h"
+#include "./stroke.service.h"
 
 class StrokeController
 {

@@ -5,7 +5,7 @@
 #include "NimBLEDevice.h"
 
 #include "../utils/configuration.h"
-#include "bluetooth.service.h"
+#include "./bluetooth.service.h"
 
 BluetoothService::BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), chunkedNotifyMetricCallbacks(*this), serverCallbacks(*this)
 {

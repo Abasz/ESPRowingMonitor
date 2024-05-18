@@ -2,8 +2,9 @@
 
 #include "ArduinoLog.h"
 
-#include "flywheel.service.h"
 #include "globals.h"
+
+#include "./flywheel.service.h"
 
 // using std::minmax;
 

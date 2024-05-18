@@ -4,7 +4,7 @@
 
 #include "Arduino.h"
 
-#include "macros.h"
+#include "./macros.h"
 
 using std::string;
 

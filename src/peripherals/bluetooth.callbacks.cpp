@@ -2,7 +2,7 @@
 
 #include "NimBLEDevice.h"
 
-#include "bluetooth.service.h"
+#include "./bluetooth.service.h"
 
 using std::array;
 

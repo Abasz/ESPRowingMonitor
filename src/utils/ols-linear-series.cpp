@@ -1,4 +1,4 @@
-#include "ols-linear-series.h"
+#include "./ols-linear-series.h"
 
 OLSLinearSeries::OLSLinearSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), sumX(_maxSeriesLength, _maxAllocationCapacity), sumXSquare(_maxSeriesLength, _maxAllocationCapacity), sumY(_maxSeriesLength, _maxAllocationCapacity), sumYSquare(_maxSeriesLength, _maxAllocationCapacity), sumXY(_maxSeriesLength, _maxAllocationCapacity) {}
 

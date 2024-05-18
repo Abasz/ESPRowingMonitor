@@ -1,6 +1,6 @@
 #include "ArduinoLog.h"
 
-#include "EEPROM.service.h"
+#include "./EEPROM.service.h"
 
 EEPROMService::EEPROMService(Preferences &_preferences) : preferences(_preferences)
 {
@@ -37,7 +37,7 @@ void EEPROMService::setup()
         Log.verboseln("%s: %d", websocketDeltaTimeLoggingAddress, logToWebsocket);
     }
 
-        if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
     {
         if (!preferences.isKey(bluetoothDeltaTimeLoggingAddress))
         {

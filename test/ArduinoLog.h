@@ -1,8 +1,9 @@
 // NOLINTBEGIN
 #pragma once
 
-#include "../src/utils/configuration.h"
 #include <stdio.h>
+
+#include "../src/utils/configuration.h"
 
 class Logging
 {

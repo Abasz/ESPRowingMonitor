@@ -2,7 +2,7 @@
 
 #include "ArduinoLog.h"
 
-#include "stroke.controller.h"
+#include "./stroke.controller.h"
 
 StrokeController::StrokeController(StrokeService &_strokeService, FlywheelService &_flywheelService) : strokeService(_strokeService), flywheelService(_flywheelService)
 {

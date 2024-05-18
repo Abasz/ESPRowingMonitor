@@ -9,7 +9,7 @@
 #else
     #include "../default.settings.h"
 #endif
-#include "enums.h"
+#include "./enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 

@@ -1,8 +1,10 @@
 #include <algorithm>
 #include <numeric>
 
-#include "ts-linear-series.h"
-#include "ts-quadratic-series.h"
+#include "./ts-linear-series.h"
+#include "./ts-quadratic-series.h"
+
+using std::vector;
 
 TSQuadraticSeries::TSQuadraticSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxSeriesAInnerLength(((_maxSeriesLength - 2) * (_maxSeriesLength - 1)) / 2), maxSeriesALength(calculateMaxSeriesALength()), maxAllocationCapacity(_maxAllocationCapacity), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity)
 {

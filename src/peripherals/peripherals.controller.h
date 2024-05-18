@@ -3,10 +3,10 @@
 
 #include "FastLED.h"
 
-#include "bluetooth.service.h"
-#include "network.service.h"
-#include "sd-card.service.h"
-#include "utils/EEPROM.service.h"
+#include "../utils/EEPROM.service.h"
+#include "./bluetooth.service.h"
+#include "./network.service.h"
+#include "./sd-card.service.h"
 
 class PeripheralsController
 {

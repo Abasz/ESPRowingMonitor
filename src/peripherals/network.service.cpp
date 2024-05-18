@@ -6,7 +6,7 @@
 #include "ArduinoLog.h"
 #include "LittleFS.h"
 
-#include "network.service.h"
+#include "./network.service.h"
 
 using std::string;
 using std::to_string;

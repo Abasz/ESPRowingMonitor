@@ -2,17 +2,16 @@
 
 #include <vector>
 
-#include "configuration.h"
+#include "./configuration.h"
 
 using std::size_t;
-using std::vector;
 
 class Series
 {
     unsigned char maxSeriesLength = 0;
     unsigned short maxAllocationCapacity = 1'000;
     Configurations::precision seriesSum = 0;
-    vector<Configurations::precision> seriesArray;
+    std::vector<Configurations::precision> seriesArray;
 
 public:
     explicit Series(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);

@@ -2,10 +2,10 @@
 
 #include "Preferences.h"
 
-#include "peripherals/peripherals.controller.h"
-#include "rower/stroke.controller.h"
-#include "utils/EEPROM.service.h"
-#include "utils/power-manager.controller.h"
+#include "./peripherals/peripherals.controller.h"
+#include "./rower/stroke.controller.h"
+#include "./utils/EEPROM.service.h"
+#include "./utils/power-manager.controller.h"
 
 static unsigned long lastUpdateTime = 0UL;
 

@@ -1,7 +1,7 @@
 #include "catch_amalgamated.hpp"
 
 #include "../../src/utils/ols-linear-series.h"
-#include "regression.test-cases.spec.h"
+#include "./regression.test-cases.spec.h"
 
 TEST_CASE("Ordinary Least Square Linear Regression", "[regression]")
 {

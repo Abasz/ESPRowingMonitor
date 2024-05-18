@@ -1,7 +1,7 @@
 #include "ArduinoLog.h"
 
 #include "../utils/configuration.h"
-#include "peripherals.controller.h"
+#include "./peripherals.controller.h"
 
 PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, SdCardService &_sdCardService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), sdCardService(_sdCardService), eepromService(_eepromService)
 {

@@ -2,8 +2,9 @@
 #include <fstream>
 #include <vector>
 
-#include "../Arduino.h"
 #include "catch_amalgamated.hpp"
+
+#include "../Arduino.h"
 
 #include "../../src/rower/stroke.service.h"
 #include "../../src/utils/configuration.h"

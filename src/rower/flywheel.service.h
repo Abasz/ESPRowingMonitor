@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../utils/configuration.h"
-#include "stroke.model.h"
+#include "./stroke.model.h"
 
 class FlywheelService
 {

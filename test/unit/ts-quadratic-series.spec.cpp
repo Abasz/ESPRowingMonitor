@@ -3,7 +3,7 @@
 #include "catch_amalgamated.hpp"
 
 #include "../../src/utils/ts-quadratic-series.h"
-#include "regression.test-cases.spec.h"
+#include "./regression.test-cases.spec.h"
 
 TEST_CASE("Theil Sen Quadratic Regression", "[regression]")
 {

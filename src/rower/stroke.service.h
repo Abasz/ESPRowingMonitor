@@ -4,8 +4,7 @@
 #include "../utils/ols-linear-series.h"
 #include "../utils/ts-quadratic-series.h"
 #include "../utils/weighted-average-series.h"
-
-#include "stroke.model.h"
+#include "./stroke.model.h"
 
 class StrokeService
 {

@@ -1,6 +1,8 @@
 #include <algorithm>
 
-#include "series.h"
+#include "./series.h"
+
+using std::vector;
 
 Series::Series(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxAllocationCapacity(_maxAllocationCapacity)
 {

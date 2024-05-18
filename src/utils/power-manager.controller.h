@@ -1,6 +1,6 @@
 #pragma once
 
-#include "power-manager.service.h"
+#include "./power-manager.service.h"
 
 class PowerManagerController
 {

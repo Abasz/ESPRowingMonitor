@@ -2,7 +2,7 @@
 
 #include "globals.h"
 
-#include "test.array.h"
+#include "./test.array.h"
 
 void setup()
 {

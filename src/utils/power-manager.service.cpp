@@ -1,15 +1,16 @@
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <numeric>
 
 #include "Arduino.h"
-
 #include "ArduinoLog.h"
 #include "FastLED.h"
 
-#include "configuration.h"
 #include "globals.h"
-#include "power-manager.service.h"
+
+#include "./configuration.h"
+#include "./power-manager.service.h"
 
 PowerManagerService::PowerManagerService()
 {
