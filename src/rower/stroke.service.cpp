@@ -9,7 +9,6 @@
 #include "globals.h"
 #include "stroke.service.h"
 
-using std::accumulate;
 using std::any_of;
 using std::array;
 using std::minmax;
@@ -69,7 +68,7 @@ void StrokeService::calculateDragCoefficient()
         return;
     }
 
-    auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * Configurations::flywheelInertia) / Configurations::angularDisplacementPerImpulse;
+    const auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * Configurations::flywheelInertia) / Configurations::angularDisplacementPerImpulse;
 
     if (rawNewDragCoefficient > Configurations::upperDragFactorThreshold ||
         rawNewDragCoefficient < Configurations::lowerDragFactorThreshold)
@@ -77,24 +76,32 @@ void StrokeService::calculateDragCoefficient()
         return;
     }
 
-    if constexpr (Configurations::dragCoefficientsArrayLength > 1)
+    if constexpr (Configurations::dragCoefficientsArrayLength < 2)
     {
-        char i = Configurations::dragCoefficientsArrayLength - 1;
-        while (i > 0)
-        {
-            dragCoefficients[i] = dragCoefficients[i - 1];
-            i--;
-        }
-        dragCoefficients[0] = rawNewDragCoefficient;
+        dragCoefficient = rawNewDragCoefficient;
 
-        vector<Configurations::precision> sortedArray(dragCoefficients);
-        unsigned short mid = dragCoefficients.size() / 2;
-        partial_sort(begin(sortedArray), begin(sortedArray) + mid + 1, end(sortedArray));
-
-        rawNewDragCoefficient = sortedArray.size() % 2 != 0 ? sortedArray[mid] : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
+        return;
     }
 
-    dragCoefficient = rawNewDragCoefficient;
+    if (dragCoefficients.size() >= Configurations::dragCoefficientsArrayLength)
+    {
+        dragCoefficients.erase(begin(dragCoefficients));
+    }
+    dragCoefficients.push_back(rawNewDragCoefficient);
+
+    unsigned short mid = dragCoefficients.size() / 2;
+    vector<Configurations::precision> sortedArray(mid + 1);
+
+    std::partial_sort_copy(cbegin(dragCoefficients), cend(dragCoefficients), begin(sortedArray), end(sortedArray));
+
+    if (dragCoefficients.size() == Configurations::dragCoefficientsArrayLength)
+    {
+        dragCoefficient = isOdd(Configurations::dragCoefficientsArrayLength) ? sortedArray[mid] : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
+
+        return;
+    }
+
+    dragCoefficient = isOdd(dragCoefficients.size()) ? sortedArray[mid] : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
 }
 
 void StrokeService::calculateAvgStrokePower()
@@ -169,6 +176,7 @@ void StrokeService::recoveryEnd()
     recoveryDuration = rowingTotalTime - recoveryStartTime;
     recoveryTotalAngularDisplacement = rowingTotalAngularDisplacement - recoveryStartAngularDisplacement;
     calculateDragCoefficient();
+
     recoveryDeltaTimes.reset();
     calculateAvgStrokePower();
 

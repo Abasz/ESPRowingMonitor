@@ -2,16 +2,14 @@
 
 class PowerManagerService
 {
-    unsigned char batteryLevel = 0;
-
-    void setupBatteryMeasurement();
+    static unsigned char setupBatteryMeasurement();
     static void printWakeupReason();
     static void powerSensorOn();
 
 public:
     PowerManagerService();
 
-    void setup();
+    static unsigned char setup();
     static void goToSleep();
-    unsigned char measureBattery();
+    static unsigned char measureBattery();
 };

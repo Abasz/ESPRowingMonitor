@@ -33,3 +33,8 @@ void detachRotationInterrupt();
 void printPrefix(Print *_logOutput, int logLevel);
 void printTimestamp(Print *_logOutput);
 void printLogLevel(Print *_logOutput, int logLevel);
+
+constexpr bool isOdd(unsigned long number)
+{
+    return number % 2 != 0;
+};

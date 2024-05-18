@@ -10,11 +10,7 @@ PowerManagerController::PowerManagerController(PowerManagerService &_powerManage
 void PowerManagerController::begin()
 {
     Log.infoln("Setting up power manager controller");
-    powerManagerService.setup();
-    if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
-    {
-        batteryLevel = powerManagerService.measureBattery();
-    }
+    batteryLevel = PowerManagerService::setup();
 }
 
 void PowerManagerController::update(const unsigned long lastRevTime, const bool isDeviceConnected)

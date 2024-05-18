@@ -8,16 +8,14 @@
 #include "FastLED.h"
 
 #include "configuration.h"
+#include "globals.h"
 #include "power-manager.service.h"
-
-using std::accumulate;
-using std::array;
 
 PowerManagerService::PowerManagerService()
 {
 }
 
-void PowerManagerService::setup()
+unsigned char PowerManagerService::setup()
 {
     printWakeupReason();
     if constexpr (Configurations::hasSensorOnSwitchPinNumber)
@@ -26,8 +24,10 @@ void PowerManagerService::setup()
     }
     if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
     {
-        setupBatteryMeasurement();
+        return setupBatteryMeasurement();
     }
+
+    return 0;
 }
 
 void PowerManagerService::powerSensorOn()
@@ -68,45 +68,42 @@ void PowerManagerService::goToSleep()
 
 unsigned char PowerManagerService::measureBattery()
 {
-    array<double, Configurations::batteryLevelArrayLength> batteryLevels{};
+    std::array<float, Configurations::batteryLevelArrayLength> batteryLevels{};
 
     for (unsigned char i = 0; i < Configurations::batteryLevelArrayLength; i++)
     {
-        auto rawNewBatteryLevel = (analogReadMilliVolts(Configurations::batteryPinNumber) / 1'000.0 - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
+        auto rawNewBatteryLevel = (analogReadMilliVolts(Configurations::batteryPinNumber) / 1'000.0F - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
 
-        if (rawNewBatteryLevel > 100)
-        {
-            rawNewBatteryLevel = 100;
-        }
+        rawNewBatteryLevel = std::min(std::max(rawNewBatteryLevel, 0.0F), 100.0F);
 
-        if (rawNewBatteryLevel < 0)
-        {
-            rawNewBatteryLevel = 0;
-        }
-
-        batteryLevels[i] = accumulate(cbegin(batteryLevels), cbegin(batteryLevels) + i, rawNewBatteryLevel) / (i + 1);
+        batteryLevels[i] = rawNewBatteryLevel;
     }
+
     const unsigned char mid = Configurations::batteryLevelArrayLength / 2;
-    std::partial_sort(begin(batteryLevels), begin(batteryLevels) + mid + 1, end(batteryLevels));
-    const unsigned char median = batteryLevels.size() % 2 != 0
-                                     ? lround(batteryLevels[mid])
-                                     : lround((batteryLevels[mid - 1] + batteryLevels[mid]) / 2);
+    std::nth_element(begin(batteryLevels), begin(batteryLevels) + mid + 1, end(batteryLevels));
 
-    batteryLevel = batteryLevel == 0 ? median : lround((median + batteryLevel) / 2);
+    if constexpr (isOdd(batteryLevels.size()))
+    {
+        return lround(batteryLevels[mid]);
+    }
 
-    return batteryLevel;
+    return lround((batteryLevels[mid] + *std::max_element(begin(batteryLevels), begin(batteryLevels) + mid)) / 2);
 }
 
-void PowerManagerService::setupBatteryMeasurement()
+unsigned char PowerManagerService::setupBatteryMeasurement()
 {
     pinMode(Configurations::batteryPinNumber, INPUT);
 
     delay(500);
-    for (unsigned char i = 0; i < Configurations::initialBatteryLevelMeasurementCount; i++)
+    unsigned char i = 0;
+    unsigned short sum = 0;
+    for (; i < Configurations::initialBatteryLevelMeasurementCount; i++)
     {
-        measureBattery();
+        sum += measureBattery();
         delay(100);
     }
+
+    return lround((float)sum / (float)i);
 }
 
 void PowerManagerService::printWakeupReason()
