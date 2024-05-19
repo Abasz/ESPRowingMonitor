@@ -424,7 +424,7 @@ vector<unsigned char> NetworkService::parseOpCode(string requestOpCommand)
         }
         parsed = requestOpCommand.substr(0, position);
         requestOpCommand.erase(0, position + 1);
-        if (std::any_of(begin(parsed), end(parsed), [](unsigned char character)
+        if (std::any_of(cbegin(parsed), cend(parsed), [](unsigned char character)
                         { return !(bool)std::isdigit(character); }))
         {
             Log.traceln("Invalid opCode: %s", parsed.c_str());

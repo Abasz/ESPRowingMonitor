@@ -124,7 +124,7 @@ Configurations::precision TSQuadraticSeries::seriesAMedian() const
 
     for (const auto &input : seriesA)
     {
-        flattened.insert(end(flattened), begin(input), end(input));
+        flattened.insert(cend(flattened), cbegin(input), end(input));
     }
 
     const unsigned int mid = flattened.size() / 2;
@@ -136,7 +136,7 @@ Configurations::precision TSQuadraticSeries::seriesAMedian() const
         return flattened[mid];
     }
 
-    return (flattened[mid] + *std::max_element(begin(flattened), begin(flattened) + mid)) / 2;
+    return (flattened[mid] + *std::max_element(cbegin(flattened), cbegin(flattened) + mid)) / 2;
 }
 
 Configurations::precision TSQuadraticSeries::goodnessOfFit() const

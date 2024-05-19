@@ -74,7 +74,7 @@ Configurations::precision TSLinearSeries::median() const
 
     for (const auto &slope : slopes)
     {
-        flattened.insert(end(flattened), begin(slope), end(slope));
+        flattened.insert(cend(flattened), cbegin(slope), cend(slope));
     }
 
     const unsigned int mid = flattened.size() / 2;
@@ -86,7 +86,7 @@ Configurations::precision TSLinearSeries::median() const
         return flattened[mid];
     }
 
-    return (flattened[mid] + *std::max_element(begin(flattened), begin(flattened) + mid)) / 2;
+    return (flattened[mid] + *std::max_element(cbegin(flattened), cbegin(flattened) + mid)) / 2;
 }
 
 void TSLinearSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)

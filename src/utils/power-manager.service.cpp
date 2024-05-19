@@ -88,7 +88,7 @@ unsigned char PowerManagerService::measureBattery()
         return lround(batteryLevels[mid]);
     }
 
-    return lround((batteryLevels[mid] + *std::max_element(begin(batteryLevels), begin(batteryLevels) + mid)) / 2);
+    return lround((batteryLevels[mid] + *std::max_element(cbegin(batteryLevels), cbegin(batteryLevels) + mid)) / 2);
 }
 
 unsigned char PowerManagerService::setupBatteryMeasurement()
