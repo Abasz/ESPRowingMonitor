@@ -22,6 +22,13 @@ class SdCardService
 
 public:
     explicit SdCardService();
+    ~SdCardService();
+
+    SdCardService(const SdCardService &) = delete;
+    SdCardService &operator=(const SdCardService &) = delete;
+    SdCardService(SdCardService &&) = delete;
+    SdCardService &operator=(SdCardService &&) = delete;
+
     void setup();
     void saveDeltaTime(const vector<unsigned long> &deltaTime);
     bool isLogFileOpen() const;

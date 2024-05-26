@@ -6,6 +6,14 @@
 
 SdCardService::SdCardService() : sdCardTaskParameters{logFile, {}} {}
 
+SdCardService::~SdCardService()
+{
+    Log.verboseln("Closing SD Card");
+
+    logFile.close();
+    sd.end();
+}
+
 void SdCardService::setup()
 {
     Log.verboseln("Initialize SD card");
@@ -18,15 +26,19 @@ void SdCardService::initSdCard()
     {
         Log.errorln("Error while initializing SD Card. May be its not mounted?");
 
+        sd.end();
+
         return;
     }
 
-    File32 root;
-
     int rootFileCount = 0U;
-    if (!root.open("/"))
+    auto root = sd.open("/", O_RDONLY);
+    if (!root.isOpen())
     {
         Log.errorln("Error while opening root");
+
+        root.close();
+        sd.end();
 
         return;
     }
@@ -36,6 +48,8 @@ void SdCardService::initSdCard()
         rootFileCount++;
         logFile.close();
     }
+    root.close();
+
     Log.verboseln("Number of files in root: %d", rootFileCount);
 
     std::string fileName = std::to_string(rootFileCount);
@@ -44,6 +58,8 @@ void SdCardService::initSdCard()
     if (!logFile.open(fileName.c_str(), O_WRITE | O_CREAT | O_AT_END))
     {
         Log.errorln("Error while creating logfile");
+
+        sd.end();
 
         return;
     }
