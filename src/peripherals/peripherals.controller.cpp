@@ -3,9 +3,9 @@
 #include "../utils/configuration.h"
 #include "./peripherals.controller.h"
 
-PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, NetworkService &_networkService, SdCardService &_sdCardService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), networkService(_networkService), sdCardService(_sdCardService), eepromService(_eepromService)
+PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, SdCardService &_sdCardService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), sdCardService(_sdCardService), eepromService(_eepromService)
 {
-    if constexpr (Configurations::enableWebSocketDeltaTimeLogging || (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
+    if constexpr ((Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
     {
         sdDeltaTimes.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
     }
@@ -19,11 +19,6 @@ PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService
 
 void PeripheralsController::update(const unsigned char batteryLevel)
 {
-    if constexpr (Configurations::isWebsocketEnabled)
-    {
-        networkService.update();
-    }
-
     const auto now = millis();
     if constexpr (Configurations::ledPin != GPIO_NUM_NC)
     {
@@ -45,21 +40,18 @@ void PeripheralsController::update(const unsigned char batteryLevel)
         }
     }
 
-    if constexpr (Configurations::isBleServiceEnabled)
+    const unsigned int bleUpdateInterval = 1'000;
+    if (now - lastMetricsBroadcastTime > bleUpdateInterval)
     {
-        const unsigned int bleUpdateInterval = 1'000;
-        if (now - lastMetricsBroadcastTime > bleUpdateInterval)
-        {
-            bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
-            lastMetricsBroadcastTime = now;
-        }
+        bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+        lastMetricsBroadcastTime = now;
+    }
 
-        if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    {
+        if (now - lastDeltaTimesBroadcastTime > bleUpdateInterval)
         {
-            if (now - lastDeltaTimesBroadcastTime > bleUpdateInterval)
-            {
-                flushBleDeltaTimes(bluetoothService.getDeltaTimesMTU());
-            }
+            flushBleDeltaTimes(bluetoothService.getDeltaTimesMTU());
         }
     }
 }
@@ -74,17 +66,8 @@ void PeripheralsController::begin()
         sdCardService.setup();
     }
 
-    if constexpr (Configurations::isWebsocketEnabled)
-    {
-        Log.infoln("Setting up Network service");
-        networkService.setup();
-    }
-
-    if constexpr (Configurations::isBleServiceEnabled)
-    {
-        Log.infoln("Setting up BLE service");
-        bluetoothService.setup();
-    }
+    Log.infoln("Setting up BLE service");
+    bluetoothService.setup();
 
     if constexpr (Configurations::ledPin != GPIO_NUM_NC)
     {
@@ -94,8 +77,7 @@ void PeripheralsController::begin()
 
 bool PeripheralsController::isAnyDeviceConnected()
 {
-    return (Configurations::isBleServiceEnabled && BluetoothService::isAnyDeviceConnected()) ||
-           (Configurations::isWebsocketEnabled && networkService.isAnyDeviceConnected());
+    return BluetoothService::isAnyDeviceConnected();
 }
 
 void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
@@ -118,24 +100,14 @@ void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
 
 void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
 {
-    if constexpr (Configurations::isBleServiceEnabled)
-    {
-        bluetoothService.notifyBattery(batteryLevel);
-    }
-
-    if constexpr (Configurations::isWebsocketEnabled)
-    {
-        networkService.notifyBatteryLevel(batteryLevel);
-    }
+    bluetoothService.notifyBattery(batteryLevel);
 }
 
 void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
 {
-    if constexpr (Configurations::enableWebSocketDeltaTimeLogging ||
-                  (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
+    if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
     {
-        if ((eepromService.getLogToSdCard() && sdCardService.isLogFileOpen()) ||
-            (eepromService.getLogToWebsocket() && networkService.isAnyDeviceConnected()))
+        if ((eepromService.getLogToSdCard() && sdCardService.isLogFileOpen()))
         {
             sdDeltaTimes.push_back(deltaTime);
         }
@@ -185,23 +157,15 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
     bleStrokeCountData = data.strokeCount;
     bleAvgStrokePowerData = static_cast<short>(lround(data.avgStrokePower));
 
-    if constexpr (Configurations::isWebsocketEnabled)
+    if constexpr (Configurations::hasExtendedBleMetrics)
     {
-        networkService.notifyClients(data, Configurations::enableWebSocketDeltaTimeLogging ? sdDeltaTimes : vector<unsigned long>{});
+        bluetoothService.notifyHandleForces(data.driveHandleForces);
+        bluetoothService.notifyExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
     }
 
-    if constexpr (Configurations::isBleServiceEnabled)
-    {
-        if constexpr (Configurations::hasExtendedBleMetrics)
-        {
-            bluetoothService.notifyHandleForces(data.driveHandleForces);
-            bluetoothService.notifyExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
-        }
+    bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
 
-        bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
-
-        lastMetricsBroadcastTime = millis();
-    }
+    lastMetricsBroadcastTime = millis();
 
     if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
     {
@@ -211,8 +175,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
         }
     }
 
-    if constexpr (Configurations::enableWebSocketDeltaTimeLogging ||
-                  (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
+    if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
     {
         if (!sdDeltaTimes.empty())
         {
@@ -220,15 +183,6 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
             clear.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
             sdDeltaTimes.swap(clear);
         }
-    }
-}
-
-void PeripheralsController::notifyDragFactor(const unsigned char dragFactor) const
-{
-    if constexpr (Configurations::isBleServiceEnabled && !Configurations::hasExtendedBleMetrics)
-    {
-        const auto distance = pow(dragFactor / Configurations::concept2MagicNumber, 1.0 / 3.0) * (2.0 * PI) * 10;
-        bluetoothService.notifyDragFactor(static_cast<unsigned short>(distance), dragFactor);
     }
 }
 

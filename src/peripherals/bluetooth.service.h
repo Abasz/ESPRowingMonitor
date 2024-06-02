@@ -91,7 +91,6 @@ class BluetoothService
     ServerCallbacks serverCallbacks;
 
     NimBLECharacteristic *batteryLevelCharacteristic = nullptr;
-    NimBLECharacteristic *dragFactorCharacteristic = nullptr;
     NimBLECharacteristic *settingsCharacteristic = nullptr;
 
     void setupBleDevice();
@@ -119,12 +118,9 @@ public:
     void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor);
     void notifyHandleForces(const std::vector<float> &handleForces);
     void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes);
-    unsigned short getDeltaTimesMTU() const;
-    bool isDeltaTimesSubscribed() const;
-    /// @deprecated Standalone drag factor notification is deprecated in favor of the extended BLE API and may be removed in future
-    [[deprecated("Standalone drag factor notification is deprecated in favor of the extended BLE API and may be removed in future")]]
-    void notifyDragFactor(unsigned short distance, unsigned char dragFactor) const;
     void notifySettings() const;
 
+    unsigned short getDeltaTimesMTU() const;
+    bool isDeltaTimesSubscribed() const;
     static bool isAnyDeviceConnected();
 };

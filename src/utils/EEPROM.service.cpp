@@ -26,17 +26,6 @@ void EEPROMService::setup()
         preferences.putUChar(bleServiceFlagAddress, static_cast<unsigned char>(Configurations::defaultBleServiceFlag));
     }
 
-    if constexpr (Configurations::enableWebSocketDeltaTimeLogging)
-    {
-        if (!preferences.isKey(websocketDeltaTimeLoggingAddress))
-        {
-            Log.infoln("Setting WebSocket deltaTime log location");
-            preferences.putBool(websocketDeltaTimeLoggingAddress, Configurations::enableWebSocketDeltaTimeLogging);
-        }
-        logToWebsocket = preferences.getBool(websocketDeltaTimeLoggingAddress, Configurations::enableWebSocketDeltaTimeLogging);
-        Log.verboseln("%s: %d", websocketDeltaTimeLoggingAddress, logToWebsocket);
-    }
-
     if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
     {
         if (!preferences.isKey(bluetoothDeltaTimeLoggingAddress))
@@ -78,18 +67,6 @@ void EEPROMService::setLogLevel(const ArduinoLogLevel newLogLevel)
     preferences.putUChar(logLevelAddress, intLogLevel);
     Log.setLevel(intLogLevel);
     logLevel = newLogLevel;
-}
-
-void EEPROMService::setLogToWebsocket(const bool shouldLogToWebSocket)
-{
-    if constexpr (!Configurations::enableWebSocketDeltaTimeLogging)
-    {
-        Log.warningln("Not able to change WebSocket deltaTime logging as the feature is disabled");
-
-        return;
-    }
-    preferences.putBool(websocketDeltaTimeLoggingAddress, shouldLogToWebSocket);
-    logToWebsocket = shouldLogToWebSocket;
 }
 
 void EEPROMService::setLogToBluetooth(const bool shouldLogToBluetooth)
@@ -145,11 +122,6 @@ BleServiceFlag EEPROMService::getBleServiceFlag() const
 ArduinoLogLevel EEPROMService::getLogLevel() const
 {
     return logLevel;
-}
-
-bool EEPROMService::getLogToWebsocket() const
-{
-    return logToWebsocket;
 }
 
 bool EEPROMService::getLogToBluetooth() const

@@ -20,9 +20,8 @@ public:
 
     // Bluetooth Settings
     static const BleServiceFlag defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
-    static const bool isBleServiceEnabled = ENABLE_BLE_SERVICE;
-    static const bool hasExtendedBleMetrics = HAS_BLE_EXTENDED_METRICS ? isBleServiceEnabled : false;
-    static const bool enableBluetoothDeltaTimeLogging = ENABLE_BLUETOOTH_DELTA_TIME_LOGGING ? isBleServiceEnabled : false;
+    static const bool hasExtendedBleMetrics = HAS_BLE_EXTENDED_METRICS;
+    static const bool enableBluetoothDeltaTimeLogging = ENABLE_BLUETOOTH_DELTA_TIME_LOGGING;
     static const BleSignalStrength bleSignalStrength = BLE_SIGNAL_STRENGTH;
 
     inline static const string deviceName = TOSTRING(DEVICE_NAME);
@@ -74,14 +73,6 @@ public:
     static const unsigned int minimumRecoveryTime = MINIMUM_RECOVERY_TIME * 1'000;
     static const unsigned int minimumDriveTime = MINIMUM_DRIVE_TIME * 1'000;
     static const unsigned char impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
-
-    // Network settings
-    inline static const string ssid = TOSTRING(LOCAL_SSID);
-    inline static const string passphrase = TOSTRING(PASSPHRASE);
-    static const unsigned char port = PORT;
-    static const bool isWebsocketEnabled = ENABLE_WEBSOCKET_MONITOR;
-    static const bool isWebGUIEnabled = ENABLE_WEBGUI;
-    static const bool enableWebSocketDeltaTimeLogging = DISABLE_WEBSOCKET_DELTA_TIME_LOGGING ? false : isWebsocketEnabled;
 
     // Device power management settings
     static const gpio_num_t batteryPinNumber = BATTERY_PIN_NUMBER;

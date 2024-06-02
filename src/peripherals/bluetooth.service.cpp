@@ -91,11 +91,6 @@ NimBLEService *BluetoothService::setupCscServices(NimBLEServer *const server)
     auto *cscService = server->createService(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
     baseMetricsParameters.characteristic = cscService->createCharacteristic(CSCSensorBleFlags::cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
 
-    if constexpr (!Configurations::hasExtendedBleMetrics)
-    {
-        dragFactorCharacteristic = cscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
-    }
-
     cscService
         ->createCharacteristic(CSCSensorBleFlags::cscFeatureUuid, NIMBLE_PROPERTY::READ)
         ->setValue(CSCSensorBleFlags::cscFeaturesFlag);
@@ -114,11 +109,6 @@ NimBLEService *BluetoothService::setupPscServices(NimBLEServer *const server)
     Log.infoln("Setting up Cycling Power Profile");
     auto *pscService = server->createService(PSCSensorBleFlags::cyclingPowerSvcUuid);
     baseMetricsParameters.characteristic = pscService->createCharacteristic(PSCSensorBleFlags::pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
-
-    if constexpr (!Configurations::hasExtendedBleMetrics)
-    {
-        dragFactorCharacteristic = pscService->createCharacteristic(CommonBleFlags::dragFactorUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
-    }
 
     pscService
         ->createCharacteristic(PSCSensorBleFlags::pscFeatureUuid, NIMBLE_PROPERTY::READ)

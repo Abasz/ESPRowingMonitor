@@ -20,7 +20,6 @@ ifeq ($(OS), Windows_NT)
 endif
 
 INCLUDES:=-I$(TEST_DIR)/fixtures
-override DEFINES+=-D LOCAL_SSID=testSSID -D PASSPHRASE=testPhrase
 
 DEPFLAGS=-MT $@ -MMD -MP -MF $(BUILD_DIR)/$*.d
 

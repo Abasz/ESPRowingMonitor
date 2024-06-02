@@ -18,63 +18,47 @@ void BluetoothService::notifyBattery(const unsigned char batteryLevel) const
     }
 }
 
-void BluetoothService::notifyDragFactor(const unsigned short distance, const unsigned char dragFactor) const
-{
-    if constexpr (!Configurations::hasExtendedBleMetrics)
-    {
-        std::string value = "DF=" + to_string(dragFactor) + ", Dist=" + to_string(distance);
-        dragFactorCharacteristic->setValue(value);
-        if (dragFactorCharacteristic->getSubscribedCount() > 0)
-        {
-            dragFactorCharacteristic->notify();
-        }
-    }
-}
-
 void BluetoothService::notifyBaseMetrics(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower)
 {
-    if constexpr (Configurations::isBleServiceEnabled)
+    if (baseMetricsParameters.characteristic->getSubscribedCount() == 0)
     {
-        if (baseMetricsParameters.characteristic->getSubscribedCount() == 0)
-        {
-            return;
-        }
+        return;
+    }
 
-        baseMetricsParameters.revTime = revTime;
-        baseMetricsParameters.revCount = revCount;
-        baseMetricsParameters.strokeTime = strokeTime;
-        baseMetricsParameters.strokeCount = strokeCount;
-        baseMetricsParameters.avgStrokePower = avgStrokePower;
+    baseMetricsParameters.revTime = revTime;
+    baseMetricsParameters.revCount = revCount;
+    baseMetricsParameters.strokeTime = strokeTime;
+    baseMetricsParameters.strokeCount = strokeCount;
+    baseMetricsParameters.avgStrokePower = avgStrokePower;
 
-        const auto coreStackSize = 2'048U;
+    const auto coreStackSize = 2'048U;
 
-        if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
-        {
-            xTaskCreatePinnedToCore(
-                BaseMetricsParameters::pscTask,
-                "notifyClients",
-                coreStackSize,
-                &baseMetricsParameters,
-                1,
-                NULL,
-                0);
+    if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
+    {
+        xTaskCreatePinnedToCore(
+            BaseMetricsParameters::pscTask,
+            "notifyClients",
+            coreStackSize,
+            &baseMetricsParameters,
+            1,
+            NULL,
+            0);
 
-            return;
-        }
+        return;
+    }
 
-        if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
-        {
-            xTaskCreatePinnedToCore(
-                BaseMetricsParameters::cscTask,
-                "notifyClients",
-                coreStackSize,
-                &baseMetricsParameters,
-                1,
-                NULL,
-                0);
+    if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
+    {
+        xTaskCreatePinnedToCore(
+            BaseMetricsParameters::cscTask,
+            "notifyClients",
+            coreStackSize,
+            &baseMetricsParameters,
+            1,
+            NULL,
+            0);
 
-            return;
-        }
+        return;
     }
 }
 

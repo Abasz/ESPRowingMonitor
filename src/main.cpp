@@ -66,7 +66,6 @@ void loop()
         Log.traceln("power: %d", strokeController.getAvgStrokePower());
         Log.traceln("distance: %D", strokeController.getDistance() / 100.0);
 
-        peripheralController.notifyDragFactor(strokeController.getDragFactor());
         strokeController.setPreviousStrokeCount();
     }
 

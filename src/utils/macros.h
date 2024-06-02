@@ -101,31 +101,11 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
     #define LOG_CALIBRATION false
 #endif
 
-#if !defined(ENABLE_BLE_SERVICE)
-    #define ENABLE_BLE_SERVICE true
-#endif
 #if !defined(HAS_BLE_EXTENDED_METRICS)
     #define HAS_BLE_EXTENDED_METRICS true
 #endif
 #if !defined(BLE_SIGNAL_STRENGTH)
     #define BLE_SIGNAL_STRENGTH BleSignalStrength::Default
-#endif
-
-#if !defined(ENABLE_WEBSOCKET_MONITOR)
-    #define ENABLE_WEBSOCKET_MONITOR false
-#endif
-#if !defined(ENABLE_WEBGUI)
-    #define ENABLE_WEBGUI false
-#endif
-#if !defined(PORT)
-    #define PORT 80
-#endif
-#if defined(DISABLE_WEBSOCKET_DELTA_TIME_LOGGING)
-    #undef DISABLE_WEBSOCKET_DELTA_TIME_LOGGING
-    #define DISABLE_WEBSOCKET_DELTA_TIME_LOGGING true
-#else
-    #undef DISABLE_WEBSOCKET_DELTA_TIME_LOGGING
-    #define DISABLE_WEBSOCKET_DELTA_TIME_LOGGING false
 #endif
 
 #if !defined(ENABLE_BLUETOOTH_DELTA_TIME_LOGGING)
@@ -149,16 +129,6 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
     #warning "Theoretically the recovery may end up creating a vector with a max of 1000 data points (which amount reality would depend on, among others, the drag). This vector size would use up a considerable amount of memory and can cause instability and crash. Please consider reducing the MAX_DRAG_FACTOR_RECOVERY_PERIOD property to avoid this. Please see docs for further information"
 #endif
 
-#if defined(STROKE_DEBOUNCE_TIME)
-    #warning "STROKE_DEBOUNCE_TIME" setting is deprecated and will be removed in future versions. Please use "MINIMUM_RECOVERY_TIME" and "MINIMUM_DRIVE_TIME" instead
-    #if !defined(MINIMUM_RECOVERY_TIME)
-        #define MINIMUM_RECOVERY_TIME STROKE_DEBOUNCE_TIME
-    #endif
-    #if !defined(MINIMUM_DRIVE_TIME)
-        #define MINIMUM_DRIVE_TIME STROKE_DEBOUNCE_TIME
-    #endif
-#endif
-
 #if defined(FLOATING_POINT_PRECISION) && FLOATING_POINT_PRECISION != PRECISION_DOUBLE && FLOATING_POINT_PRECISION != PRECISION_FLOAT
     #error "Invalid floating point precision setting"
 #endif
@@ -167,24 +137,6 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
 #endif
 #if IMPULSE_DATA_ARRAY_LENGTH > 18
     #error "Using too many data points will increase loop execution time. It should not be more than 18"
-#endif
-
-#if (ENABLE_WEBGUI == true)
-    #warning "Serving up the WebGUI from the MCU directly is now deprecated and this feature will be removed in the future in favour of the extended BLE API. https://github.com/Abasz/ESPRowingMonitor/blob/master/README.md#web-interface"
-#endif
-#if ((!defined(LOCAL_SSID) || !defined(PASSPHRASE)) && (ENABLE_WEBGUI == true || ENABLE_WEBSOCKET_MONITOR == true))
-    #undef ENABLE_WEBSOCKET_MONITOR
-    #define ENABLE_WEBSOCKET_MONITOR false
-    #undef ENABLE_WEBGUI
-    #define ENABLE_WEBGUI false
-    #warning "Not provided SSID and/or Passphrase, disabling WebSocket monitor and WebGUI"
-#endif
-#if (ENABLE_WEBSOCKET_MONITOR == true)
-    #warning "The WebSocket API is now deprecated in favor of the extended BLE API and may be removed in future version in favour of the extended BLE API."
-#endif
-
-#if (HAS_BLE_EXTENDED_METRICS == true && ENABLE_WEBSOCKET_MONITOR == true)
-    #warning "For performance reasons it is not recommended to enable both extended BLE data and WebSocket monitor at the same time."
 #endif
 
 #if IMPULSE_DATA_ARRAY_LENGTH < 14

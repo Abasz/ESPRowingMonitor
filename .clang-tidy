@@ -23,8 +23,6 @@ CheckOptions:
     value: true
 HeaderFilterRegex: '^src/.*'
 ExtraArgs:
-  - -D LOCAL_SSID=\"Test SSID\",
-  - -D PASSPHRASE=\"TEST PWD\",
   - -D CONFIG_ASYNC_TCP_RUNNING_CORE=0
   - -D CONFIG_BT_NIMBLE_PINNED_TO_CORE=0
   - -D CONFIG_BT_NIMBLE_ROLE_CENTRAL_DISABLED
@@ -57,7 +55,6 @@ ExtraArgs:
   - -I.pio/libdeps/generic/SdFat/src
   - -I.pio/libdeps/generic/NimBLE-Arduino/src
   - -I.pio/libdeps/generic/AsyncTCP-esphome/src
-  - -I.pio/libdeps/generic/ESPAsyncWebServer-esphome/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32/cores/esp32
   - -I../../../../.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src
   - -I../../../../.platformio/packages/framework-arduinoespressif32/libraries/FS/src
