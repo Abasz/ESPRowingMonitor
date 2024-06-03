@@ -1,16 +1,20 @@
 #pragma once
 
 #include <array>
+#include <vector>
 
 #include "NimBLEDevice.h"
 
-#include "../utils/EEPROM.service.h"
+#include "../utils/EEPROM.service.interface.h"
 #include "../utils/enums.h"
-#include "./sd-card.service.h"
+#include "./bluetooth.service.interface.h"
+#include "./sd-card.service.interface.h"
 
-class BluetoothService
+using std::vector;
+
+class BluetoothService final : public IBluetoothService
 {
-    class ControlPointCallbacks : public NimBLECharacteristicCallbacks
+    class ControlPointCallbacks final : public NimBLECharacteristicCallbacks
     {
         BluetoothService &bleService;
 
@@ -20,7 +24,7 @@ class BluetoothService
         void onWrite(NimBLECharacteristic *pCharacteristic) override;
     };
 
-    class ChunkedNotifyMetricCallbacks : public NimBLECharacteristicCallbacks
+    class ChunkedNotifyMetricCallbacks final : public NimBLECharacteristicCallbacks
     {
         BluetoothService &bleService;
 
@@ -30,7 +34,7 @@ class BluetoothService
         void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue) override;
     };
 
-    class ServerCallbacks : public NimBLEServerCallbacks
+    class ServerCallbacks final : public NimBLEServerCallbacks
     {
         BluetoothService &bleService;
 
@@ -84,8 +88,8 @@ class BluetoothService
         static void cscTask(void *parameters);
     } baseMetricsParameters;
 
-    EEPROMService &eepromService;
-    SdCardService &sdCardService;
+    IEEPROMService &eepromService;
+    ISdCardService &sdCardService;
     ControlPointCallbacks controlPointCallbacks;
     ChunkedNotifyMetricCallbacks chunkedNotifyMetricCallbacks;
     ServerCallbacks serverCallbacks;
@@ -103,24 +107,24 @@ class BluetoothService
     NimBLEService *setupSettingsServices(NimBLEServer *server);
     static NimBLEService *setupDeviceInfoServices(NimBLEServer *server);
 
-    static const unsigned char settingsArrayLength = 1U;
+    static constexpr unsigned char settingsArrayLength = 1U;
     std::array<unsigned char, settingsArrayLength> getSettings() const;
 
 public:
-    explicit BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService);
+    explicit BluetoothService(IEEPROMService &_eepromService, ISdCardService &_sdCardService);
 
-    void setup();
-    static void startBLEServer();
-    static void stopServer();
+    void setup() override;
+    void startBLEServer() override;
+    void stopServer() override;
 
-    void notifyBattery(unsigned char batteryLevel) const;
-    void notifyBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower);
-    void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor);
-    void notifyHandleForces(const std::vector<float> &handleForces);
-    void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes);
-    void notifySettings() const;
+    void notifyBattery(unsigned char batteryLevel) const override;
+    void notifyBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) override;
+    void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) override;
+    void notifyHandleForces(const std::vector<float> &handleForces) override;
+    void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;
+    void notifySettings() const override;
 
-    unsigned short getDeltaTimesMTU() const;
-    bool isDeltaTimesSubscribed() const;
-    static bool isAnyDeviceConnected();
+    unsigned short getDeltaTimesMTU() const override;
+    bool isDeltaTimesSubscribed() const override;
+    bool isAnyDeviceConnected() override;
 };

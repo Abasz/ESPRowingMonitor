@@ -3,14 +3,14 @@
 #include "./configuration.h"
 #include "./power-manager.controller.h"
 
-PowerManagerController::PowerManagerController(PowerManagerService &_powerManagerService) : powerManagerService(_powerManagerService)
+PowerManagerController::PowerManagerController(IPowerManagerService &_powerManagerService) : powerManagerService(_powerManagerService)
 {
 }
 
 void PowerManagerController::begin()
 {
     Log.infoln("Setting up power manager controller");
-    batteryLevel = PowerManagerService::setup();
+    batteryLevel = powerManagerService.setup();
 }
 
 void PowerManagerController::update(const unsigned long lastRevTime, const bool isDeviceConnected)
@@ -18,7 +18,7 @@ void PowerManagerController::update(const unsigned long lastRevTime, const bool 
     const auto now = micros();
     if (!isDeviceConnected && now - lastRevTime > Configurations::deepSleepTimeout * 1'000)
     {
-        PowerManagerService::goToSleep();
+        powerManagerService.goToSleep();
     }
 
     if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)

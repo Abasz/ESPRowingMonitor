@@ -16,7 +16,7 @@ PowerManagerService::PowerManagerService()
 {
 }
 
-unsigned char PowerManagerService::setup()
+unsigned char PowerManagerService::setup() const
 {
     printWakeupReason();
     if constexpr (Configurations::hasSensorOnSwitchPinNumber)
@@ -37,7 +37,7 @@ void PowerManagerService::powerSensorOn()
     digitalWrite(Configurations::sensorOnSwitchPinNumber, HIGH);
 }
 
-void PowerManagerService::goToSleep()
+void PowerManagerService::goToSleep() const
 {
     Log.verboseln("Configure deep sleep mode");
 
@@ -67,7 +67,7 @@ void PowerManagerService::goToSleep()
     esp_deep_sleep_start();
 }
 
-unsigned char PowerManagerService::measureBattery()
+unsigned char PowerManagerService::measureBattery() const
 {
     std::array<float, Configurations::batteryLevelArrayLength> batteryLevels{};
 
@@ -91,7 +91,7 @@ unsigned char PowerManagerService::measureBattery()
     return lround((batteryLevels[mid] + *std::max_element(cbegin(batteryLevels), cbegin(batteryLevels) + mid)) / 2);
 }
 
-unsigned char PowerManagerService::setupBatteryMeasurement()
+unsigned char PowerManagerService::setupBatteryMeasurement() const
 {
     pinMode(Configurations::batteryPinNumber, INPUT);
 

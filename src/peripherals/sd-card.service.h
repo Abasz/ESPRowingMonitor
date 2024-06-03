@@ -4,9 +4,11 @@
 
 #include "SdFat.h"
 
+#include "./sd-card.service.interface.h"
+
 using std::vector;
 
-class SdCardService
+class SdCardService final : public ISdCardService
 {
     SdFat32 sd;
     File32 logFile;
@@ -29,7 +31,7 @@ public:
     SdCardService(SdCardService &&) = delete;
     SdCardService &operator=(SdCardService &&) = delete;
 
-    void setup();
-    void saveDeltaTime(const vector<unsigned long> &deltaTime);
-    bool isLogFileOpen() const;
+    void setup() override;
+    void saveDeltaTime(const vector<unsigned long> &deltaTime) override;
+    bool isLogFileOpen() const override;
 };

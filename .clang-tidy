@@ -13,6 +13,8 @@ Checks: >
 CheckOptions:
   - key: readability-identifier-length.IgnoredVariableNames
     value: "^(c|i|j|w|k|t|u|v|_|x|y|z|a|b|aa|bb|ip|os)$"
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: true
   - key: readability-magic-numbers.IgnoredIntegerValues
     value: 3;5;6;10;11;14;20;24;1024;2048;100;500;1000;5000;1000000;1e6;
   - key: readability-magic-numbers.IgnoredFloatingPointValues

@@ -22,7 +22,7 @@ void setup()
 
     peripheralController.begin();
     powerManagerController.begin();
-    StrokeController::begin();
+    strokeController.begin();
 
     if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
     {

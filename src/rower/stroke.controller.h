@@ -1,11 +1,14 @@
-#include "../utils/configuration.h"
-#include "./flywheel.service.h"
-#include "./stroke.service.h"
+#pragma once
 
-class StrokeController
+#include "../utils/configuration.h"
+#include "./flywheel.service.interface.h"
+#include "./stroke.controller.interface.h"
+#include "./stroke.service.interface.h"
+
+class StrokeController final : public IStrokeController
 {
-    StrokeService &strokeService;
-    FlywheelService &flywheelService;
+    IStrokeService &strokeService;
+    IFlywheelService &flywheelService;
 
     unsigned int previousRevCount = 0;
     unsigned int previousStrokeCount = 0U;
@@ -30,29 +33,29 @@ class StrokeController
         0UL};
 
 public:
-    StrokeController(StrokeService &_strokeService, FlywheelService &_flywheelService);
+    StrokeController(IStrokeService &_strokeService, IFlywheelService &_flywheelService);
 
-    static void begin();
-    void update();
+    void begin() override;
+    void update() override;
 
-    const RowingDataModels::RowingMetrics &getAllData() const;
-    unsigned int getPreviousRevCount() const;
-    void setPreviousRevCount();
-    unsigned int getPreviousStrokeCount() const;
-    void setPreviousStrokeCount();
+    const RowingDataModels::RowingMetrics &getAllData() const override;
+    unsigned int getPreviousRevCount() const override;
+    void setPreviousRevCount() override;
+    unsigned int getPreviousStrokeCount() const override;
+    void setPreviousStrokeCount() override;
 
-    unsigned long getPreviousRawImpulseCount() const;
-    void setPreviousRawImpulseCount();
-    unsigned long getRawImpulseCount() const;
+    unsigned long getPreviousRawImpulseCount() const override;
+    void setPreviousRawImpulseCount() override;
+    unsigned long getRawImpulseCount() const override;
 
-    unsigned long getDeltaTime() const;
-    unsigned long long getLastRevTime() const;
-    unsigned int getRevCount() const;
-    unsigned long long getLastStrokeTime() const;
-    unsigned short getStrokeCount() const;
-    Configurations::precision getDistance() const;
-    Configurations::precision getRecoveryDuration() const;
-    Configurations::precision getDriveDuration() const;
-    short getAvgStrokePower() const;
-    unsigned char getDragFactor() const;
+    unsigned long getDeltaTime() const override;
+    unsigned long long getLastRevTime() const override;
+    unsigned int getRevCount() const override;
+    unsigned long long getLastStrokeTime() const override;
+    unsigned short getStrokeCount() const override;
+    Configurations::precision getDistance() const override;
+    Configurations::precision getRecoveryDuration() const override;
+    Configurations::precision getDriveDuration() const override;
+    short getAvgStrokePower() const override;
+    unsigned char getDragFactor() const override;
 };

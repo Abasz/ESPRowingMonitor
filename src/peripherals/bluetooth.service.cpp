@@ -2,12 +2,13 @@
 #include <numeric>
 #include <string>
 
+#include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
 #include "../utils/configuration.h"
 #include "./bluetooth.service.h"
 
-BluetoothService::BluetoothService(EEPROMService &_eepromService, SdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), chunkedNotifyMetricCallbacks(*this), serverCallbacks(*this)
+BluetoothService::BluetoothService(IEEPROMService &_eepromService, ISdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), chunkedNotifyMetricCallbacks(*this), serverCallbacks(*this)
 {
 }
 
@@ -19,7 +20,7 @@ bool BluetoothService::isAnyDeviceConnected()
 void BluetoothService::setup()
 {
     setupBleDevice();
-    BluetoothService::startBLEServer();
+    startBLEServer();
 }
 
 void BluetoothService::startBLEServer()
@@ -209,7 +210,7 @@ bool BluetoothService::isDeltaTimesSubscribed() const
     return deltaTimesParameters.characteristic->getSubscribedCount() > 0;
 }
 
-std::array<unsigned char, 1U> BluetoothService::getSettings() const
+std::array<unsigned char, BluetoothService::settingsArrayLength> BluetoothService::getSettings() const
 {
     const unsigned char settings =
         ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToBluetooth()) + 1 : 0) << 0U) |

@@ -5,8 +5,9 @@
 #include "../utils/ts-quadratic-series.h"
 #include "../utils/weighted-average-series.h"
 #include "./stroke.model.h"
+#include "./stroke.service.interface.h"
 
-class StrokeService
+class StrokeService final : public IStrokeService
 {
     // rower state
     CyclePhase cyclePhase = CyclePhase::Stopped;
@@ -73,6 +74,6 @@ class StrokeService
 public:
     StrokeService();
 
-    RowingDataModels::RowingMetrics getData();
-    void processData(RowingDataModels::FlywheelData data);
+    RowingDataModels::RowingMetrics getData() override;
+    void processData(RowingDataModels::FlywheelData data) override;
 };

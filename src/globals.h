@@ -2,10 +2,15 @@
 
 #include "Preferences.h"
 
+#include "./peripherals/bluetooth.service.h"
 #include "./peripherals/peripherals.controller.h"
+#include "./peripherals/sd-card.service.h"
+#include "./rower/flywheel.service.h"
 #include "./rower/stroke.controller.h"
+#include "./rower/stroke.service.h"
 #include "./utils/EEPROM.service.h"
 #include "./utils/power-manager.controller.h"
+#include "./utils/power-manager.service.h"
 
 static unsigned long lastUpdateTime = 0UL;
 
@@ -22,6 +27,7 @@ extern PeripheralsController peripheralController;
 extern FlywheelService flywheelService;
 extern StrokeService strokeService;
 extern StrokeController strokeController;
+extern PowerManagerService powerManagerService;
 extern PowerManagerController powerManagerController;
 
 IRAM_ATTR void rotationInterrupt();

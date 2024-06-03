@@ -3,10 +3,11 @@
 #include "ArduinoLog.h"
 #include "Preferences.h"
 
+#include "./EEPROM.service.interface.h"
 #include "./configuration.h"
 #include "./enums.h"
 
-class EEPROMService
+class EEPROMService final : public IEEPROMService
 {
     Preferences &preferences;
 
@@ -23,15 +24,15 @@ class EEPROMService
 public:
     explicit EEPROMService(Preferences &_preferences);
 
-    void setup();
+    void setup() override;
 
-    void setLogLevel(ArduinoLogLevel newLogLevel);
-    void setLogToBluetooth(bool shouldLogToBluetooth);
-    void setLogToSdCard(bool shouldLogToSdCard);
-    void setBleServiceFlag(BleServiceFlag newServiceFlag);
+    void setLogLevel(ArduinoLogLevel newLogLevel) override;
+    void setLogToBluetooth(bool shouldLogToBluetooth) override;
+    void setLogToSdCard(bool shouldLogToSdCard) override;
+    void setBleServiceFlag(BleServiceFlag newServiceFlag) override;
 
-    BleServiceFlag getBleServiceFlag() const;
-    ArduinoLogLevel getLogLevel() const;
-    bool getLogToBluetooth() const;
-    bool getLogToSdCard() const;
+    BleServiceFlag getBleServiceFlag() const override;
+    ArduinoLogLevel getLogLevel() const override;
+    bool getLogToBluetooth() const override;
+    bool getLogToSdCard() const override;
 };

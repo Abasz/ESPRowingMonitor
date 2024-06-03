@@ -1,15 +1,17 @@
 #pragma once
 
-class PowerManagerService
+#include "./power-manager.service.interface.h"
+
+class PowerManagerService final : public IPowerManagerService
 {
-    static unsigned char setupBatteryMeasurement();
+    unsigned char setupBatteryMeasurement() const;
     static void printWakeupReason();
     static void powerSensorOn();
 
 public:
     PowerManagerService();
 
-    static unsigned char setup();
-    static void goToSleep();
-    static unsigned char measureBattery();
+    unsigned char setup() const override;
+    void goToSleep() const override;
+    unsigned char measureBattery() const override;
 };

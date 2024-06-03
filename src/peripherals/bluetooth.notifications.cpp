@@ -1,6 +1,7 @@
 #include <numeric>
 #include <string>
 
+#include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
 #include "../utils/configuration.h"

@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
 #include "./bluetooth.service.h"

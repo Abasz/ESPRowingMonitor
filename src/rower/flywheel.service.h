@@ -1,9 +1,10 @@
 #pragma once
 
 #include "../utils/configuration.h"
+#include "./flywheel.service.interface.h"
 #include "./stroke.model.h"
 
-class FlywheelService
+class FlywheelService final : public IFlywheelService
 {
     volatile unsigned long lastDeltaTime = 0;
     volatile unsigned long cleanDeltaTime = 0;
@@ -19,8 +20,8 @@ class FlywheelService
 public:
     FlywheelService();
 
-    static void setup();
-    bool hasDataChanged() const;
-    RowingDataModels::FlywheelData getData();
-    void processRotation(unsigned long now);
+    void setup() override;
+    bool hasDataChanged() const override;
+    RowingDataModels::FlywheelData getData() override;
+    void processRotation(unsigned long now) override;
 };

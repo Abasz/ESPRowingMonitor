@@ -4,14 +4,14 @@
 
 #include "./stroke.controller.h"
 
-StrokeController::StrokeController(StrokeService &_strokeService, FlywheelService &_flywheelService) : strokeService(_strokeService), flywheelService(_flywheelService)
+StrokeController::StrokeController(IStrokeService &_strokeService, IFlywheelService &_flywheelService) : strokeService(_strokeService), flywheelService(_flywheelService)
 {
 }
 
 void StrokeController::begin()
 {
     Log.infoln("Setting up rowing monitor controller");
-    FlywheelService::setup();
+    flywheelService.setup();
 }
 
 void StrokeController::update()

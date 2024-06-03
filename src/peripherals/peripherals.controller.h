@@ -1,18 +1,21 @@
 #pragma once
 #include <array>
+#include <vector>
 
 #include "FastLED.h"
 
-#include "../rower/stroke.model.h"
-#include "../utils/EEPROM.service.h"
-#include "./bluetooth.service.h"
-#include "./sd-card.service.h"
+#include "../utils/EEPROM.service.interface.h"
+#include "./bluetooth.service.interface.h"
+#include "./peripherals.controller.interface.h"
+#include "./sd-card.service.interface.h"
 
-class PeripheralsController
+using std::vector;
+
+class PeripheralsController final : public IPeripheralsController
 {
-    BluetoothService &bluetoothService;
-    SdCardService &sdCardService;
-    EEPROMService &eepromService;
+    IBluetoothService &bluetoothService;
+    ISdCardService &sdCardService;
+    IEEPROMService &eepromService;
 
     unsigned int lastConnectedDeviceCheckTime = 0;
     unsigned int lastMetricsBroadcastTime = 0UL;
@@ -24,8 +27,8 @@ class PeripheralsController
     unsigned short bleStrokeCountData = 0;
     short bleAvgStrokePowerData = 0;
 
-    std::vector<unsigned long> sdDeltaTimes;
-    std::vector<unsigned long> bleDeltaTimes;
+    vector<unsigned long> sdDeltaTimes;
+    vector<unsigned long> bleDeltaTimes;
 
     unsigned char ledState = HIGH;
     CRGB::HTMLColorCode ledColor = CRGB::Black;
@@ -36,12 +39,12 @@ class PeripheralsController
     static void setupConnectionIndicatorLed();
 
 public:
-    PeripheralsController(BluetoothService &_bluetoothService, SdCardService &sdCardService, EEPROMService &_eepromService);
+    PeripheralsController(IBluetoothService &_bluetoothService, ISdCardService &sdCardService, IEEPROMService &_eepromService);
 
-    void begin();
-    void update(unsigned char batteryLevel);
-    void notifyBattery(unsigned char batteryLevel);
-    void updateData(const RowingDataModels::RowingMetrics &data);
-    void updateDeltaTime(unsigned long deltaTime);
-    bool isAnyDeviceConnected();
+    void begin() override;
+    void update(unsigned char batteryLevel) override;
+    void notifyBattery(unsigned char batteryLevel) override;
+    void updateData(const RowingDataModels::RowingMetrics &data) override;
+    void updateDeltaTime(unsigned long deltaTime) override;
+    bool isAnyDeviceConnected() override;
 };

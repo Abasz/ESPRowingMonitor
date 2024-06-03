@@ -1,10 +1,11 @@
 #pragma once
 
-#include "./power-manager.service.h"
+#include "./power-manager.controller.interface.h"
+#include "./power-manager.service.interface.h"
 
-class PowerManagerController
+class PowerManagerController final : public IPowerManagerController
 {
-    PowerManagerService &powerManagerService;
+    IPowerManagerService &powerManagerService;
 
     unsigned char batteryLevel = 0;
     unsigned char previousBatteryLevel = 0;
@@ -12,11 +13,11 @@ class PowerManagerController
     unsigned long lastBatteryMeasurementTime = 0;
 
 public:
-    explicit PowerManagerController(PowerManagerService &_powerManagerService);
+    explicit PowerManagerController(IPowerManagerService &_powerManagerService);
 
-    void begin();
-    void update(unsigned long lastRevTime, bool isDeviceConnected);
-    unsigned char getBatteryLevel() const;
-    unsigned char getPreviousBatteryLevel() const;
-    void setPreviousBatteryLevel();
+    void begin() override;
+    void update(unsigned long lastRevTime, bool isDeviceConnected) override;
+    unsigned char getBatteryLevel() const override;
+    unsigned char getPreviousBatteryLevel() const override;
+    void setPreviousBatteryLevel() override;
 };

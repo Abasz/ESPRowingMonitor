@@ -3,7 +3,7 @@
 #include "../utils/configuration.h"
 #include "./peripherals.controller.h"
 
-PeripheralsController::PeripheralsController(BluetoothService &_bluetoothService, SdCardService &_sdCardService, EEPROMService &_eepromService) : bluetoothService(_bluetoothService), sdCardService(_sdCardService), eepromService(_eepromService)
+PeripheralsController::PeripheralsController(IBluetoothService &_bluetoothService, ISdCardService &_sdCardService, IEEPROMService &_eepromService) : bluetoothService(_bluetoothService), sdCardService(_sdCardService), eepromService(_eepromService)
 {
     if constexpr ((Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
     {
@@ -77,7 +77,7 @@ void PeripheralsController::begin()
 
 bool PeripheralsController::isAnyDeviceConnected()
 {
-    return BluetoothService::isAnyDeviceConnected();
+    return bluetoothService.isAnyDeviceConnected();
 }
 
 void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
