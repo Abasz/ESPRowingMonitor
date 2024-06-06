@@ -1,5 +1,5 @@
 CC:=g++
-CPP_FLAGS:=-ggdb -Og -Wall -std=c++20 -std=gnu++20
+override CPP_FLAGS+=-ggdb -Og -Wall -std=c++20 -std=gnu++20
 .PHONY: e2e test clean calibrate
 .DEFAULT_GOAL:=e2e
 
@@ -7,7 +7,7 @@ LIB_DIR:=src
 TEST_DIR:=test
 E2E_TEST_DIR:=$(TEST_DIR)/e2e
 UNIT_TEST_DIR:=$(TEST_DIR)/unit
-BUILD_DIR:=build
+BUILD_DIR:=build$(BUILD_DIR_COVERAGE)
 RMDIR_COMMAND=rm -f -r
 MK_BUILD_DIR_COMMAND=mkdir -p $(dir $<)
 MAKE=make

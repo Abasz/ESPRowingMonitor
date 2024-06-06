@@ -66,6 +66,29 @@
 		},
 		{
 			"type": "cppbuild",
+			"label": "test coverage",
+			"command": "mingw32-make",
+			"args": [
+				"test",
+				"CPP_FLAGS+=--coverage -fprofile-abs-path",
+				"BUILD_DIR_COVERAGE=/coverage",
+				"TEST_SRC=test/unit/*.spec.cpp",
+				"--trace"
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"detail": "compiler: mingw32-make"
+		},
+		{
+			"type": "cppbuild",
 			"label": "catch test all",
 			"command": "mingw32-make",
 			"args": [
