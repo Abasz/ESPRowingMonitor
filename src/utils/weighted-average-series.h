@@ -18,8 +18,6 @@ class WeightedAverageSeries
 public:
     explicit WeightedAverageSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
 
-    const Configurations::precision &operator[](size_t index) const;
-
     size_t size() const;
     size_t capacity() const;
     Configurations::precision average() const;

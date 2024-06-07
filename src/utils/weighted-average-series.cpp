@@ -26,7 +26,7 @@ Configurations::precision WeightedAverageSeries::average() const
 
 void WeightedAverageSeries::push(const Configurations::precision value, const Configurations::precision weight)
 {
-    weightedSeries.push(value);
+    weightedSeries.push(value * weight);
     weightSeries.push(weight);
 }
 
