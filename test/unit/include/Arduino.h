@@ -5,6 +5,11 @@
 
 #include "Esp32-typedefs.h"
 
+typedef int BaseType_t;
+typedef unsigned int UBaseType_t;
+typedef void (*TaskFunction_t)(void *);
+typedef void *TaskHandle_t;
+
 #define INPUT 0x01
 #define OUTPUT 0x03
 #define INPUT_PULLUP 0x05
@@ -27,6 +32,14 @@ public:
     virtual esp_sleep_wakeup_cause_t esp_sleep_get_wakeup_cause() = 0;
     virtual void esp_sleep_enable_ext0_wakeup(gpio_num_t gpio_num, int level) = 0;
     virtual void esp_deep_sleep_start() = 0;
+    virtual BaseType_t xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode,
+                                               const char *const pcName,
+                                               const unsigned int usStackDepth,
+                                               void *const pvParameters,
+                                               UBaseType_t uxPriority,
+                                               TaskHandle_t *const pvCreatedTask,
+                                               const BaseType_t xCoreID) = 0;
+    virtual void vTaskDelete(TaskHandle_t xTaskToDelete) = 0;
 };
 
 extern fakeit::Mock<MockArduino> mockArduino;
@@ -82,6 +95,30 @@ inline void esp_sleep_enable_ext0_wakeup(gpio_num_t gpio_num, int level)
 inline void esp_deep_sleep_start()
 {
     mockArduino.get().esp_deep_sleep_start();
+}
+
+inline void vTaskDelete(TaskHandle_t xTaskToDelete)
+{
+    mockArduino.get().vTaskDelete(xTaskToDelete);
+}
+
+inline BaseType_t xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode,
+                                          const char *const pcName,
+                                          const uint32_t usStackDepth,
+                                          void *const pvParameters,
+                                          UBaseType_t uxPriority,
+                                          TaskHandle_t *const pvCreatedTask,
+                                          const BaseType_t xCoreID)
+{
+    pvTaskCode(pvParameters);
+    return mockArduino.get().xTaskCreatePinnedToCore(
+        pvTaskCode,
+        pcName,
+        usStackDepth,
+        pvParameters,
+        uxPriority,
+        pvCreatedTask,
+        xCoreID);
 }
 
 class MockHardwareSerial
