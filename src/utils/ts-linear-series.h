@@ -9,6 +9,8 @@ class TSLinearSeries
 {
     unsigned char maxSeriesLength = 0;
     unsigned short maxSlopeSeriesLength = 0;
+    bool shouldRecalculateB = true;
+    bool shouldRecalculateA = true;
     Configurations::precision a = 0;
     Configurations::precision b = 0;
 
@@ -22,8 +24,8 @@ public:
     explicit TSLinearSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
 
     Configurations::precision median() const;
-    Configurations::precision coefficientA() const;
-    Configurations::precision coefficientB() const;
+    Configurations::precision coefficientA();
+    Configurations::precision coefficientB();
 
     void push(Configurations::precision pointX, Configurations::precision pointY);
     void reset();

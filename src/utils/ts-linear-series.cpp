@@ -25,13 +25,34 @@ Configurations::precision TSLinearSeries::calculateSlope(const unsigned char poi
            (seriesXPointTwo - seriesXPointOne);
 }
 
-Configurations::precision TSLinearSeries::coefficientA() const
+Configurations::precision TSLinearSeries::coefficientA()
 {
+    if (shouldRecalculateA)
+    {
+        a = median();
+        shouldRecalculateA = false;
+    }
+
     return a;
 }
 
-Configurations::precision TSLinearSeries::coefficientB() const
+Configurations::precision TSLinearSeries::coefficientB()
 {
+    if (shouldRecalculateB)
+    {
+        a = median();
+
+        auto i = 0U;
+        Series intercepts(maxSeriesLength, seriesX.size() - 1);
+        while (i < seriesX.size() - 1)
+        {
+            intercepts.push((seriesY[i] - (a * seriesX[i])));
+            i++;
+        }
+        b = intercepts.median();
+        shouldRecalculateB = false;
+    }
+
     return b;
 }
 
@@ -69,6 +90,8 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
 {
     seriesX.push(pointX);
     seriesY.push(pointY);
+    shouldRecalculateA = true;
+    shouldRecalculateB = true;
 
     if (maxSeriesLength > 0 && slopes.size() >= maxSeriesLength)
     {
@@ -89,16 +112,6 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
             slopes[i].push_back(result);
             i++;
         }
-        a = median();
-
-        i = 0U;
-        Series intercepts(maxSeriesLength, seriesX.size() - 1);
-        while (i < seriesX.size() - 1)
-        {
-            intercepts.push((seriesY[i] - (a * seriesX[i])));
-            i++;
-        }
-        b = intercepts.median();
     }
 
     // Add an empty array at the end to store future results for the most recent points
