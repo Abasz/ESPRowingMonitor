@@ -1,56 +1,56 @@
 #include "./ols-linear-series.h"
 
-OLSLinearSeries::OLSLinearSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), sumX(_maxSeriesLength, _maxAllocationCapacity), sumXSquare(_maxSeriesLength, _maxAllocationCapacity), sumY(_maxSeriesLength, _maxAllocationCapacity), sumYSquare(_maxSeriesLength, _maxAllocationCapacity), sumXY(_maxSeriesLength, _maxAllocationCapacity) {}
+OLSLinearSeries::OLSLinearSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesXSquare(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity), seriesYSquare(_maxSeriesLength, _maxAllocationCapacity), seriesXY(_maxSeriesLength, _maxAllocationCapacity) {}
 
 void OLSLinearSeries::reset()
 {
-    sumX.reset();
-    sumXSquare.reset();
-    sumY.reset();
-    sumYSquare.reset();
-    sumXY.reset();
+    seriesX.reset();
+    seriesXSquare.reset();
+    seriesY.reset();
+    seriesYSquare.reset();
+    seriesXY.reset();
 }
 
 void OLSLinearSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)
 {
-    sumX.push(pointX);
-    sumXSquare.push(pointX * pointX);
-    sumY.push(pointY);
-    sumYSquare.push(pointY * pointY);
-    sumXY.push(pointX * pointY);
+    seriesX.push(pointX);
+    seriesXSquare.push(pointX * pointX);
+    seriesY.push(pointY);
+    seriesYSquare.push(pointY * pointY);
+    seriesXY.push(pointX * pointY);
 }
 
 Configurations::precision OLSLinearSeries::yAtSeriesBegin() const
 {
-    return sumY[0];
+    return seriesY[0];
 }
 
 Configurations::precision OLSLinearSeries::slope() const
 {
-    if (sumX.size() < 2 || sumX.sum() == 0)
+    if (seriesX.size() < 2 || seriesX.sum() == 0)
     {
         return 0.0;
     }
 
-    return ((Configurations::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Configurations::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
+    return ((Configurations::precision)seriesX.size() * seriesXY.sum() - seriesX.sum() * seriesY.sum()) / ((Configurations::precision)seriesX.size() * seriesXSquare.sum() - seriesX.sum() * seriesX.sum());
 }
 
 Configurations::precision OLSLinearSeries::goodnessOfFit() const
 {
     // This function returns the R^2 as a goodness of fit indicator
-    if (sumX.size() < 2 || sumX.sum() == 0)
+    if (seriesX.size() < 2 || seriesX.sum() == 0)
     {
         return 0;
     }
 
-    const auto slope = ((Configurations::precision)sumX.size() * sumXY.sum() - sumX.sum() * sumY.sum()) / ((Configurations::precision)sumX.size() * sumXSquare.sum() - sumX.sum() * sumX.sum());
-    const auto intercept = (sumY.sum() - (slope * sumX.sum())) / (Configurations::precision)sumX.size();
-    const auto sse = sumYSquare.sum() - (intercept * sumY.sum()) - (slope * sumXY.sum());
-    const auto sst = sumYSquare.sum() - (sumY.sum() * sumY.sum()) / (Configurations::precision)sumX.size();
+    const auto slope = ((Configurations::precision)seriesX.size() * seriesXY.sum() - seriesX.sum() * seriesY.sum()) / ((Configurations::precision)seriesX.size() * seriesXSquare.sum() - seriesX.sum() * seriesX.sum());
+    const auto intercept = (seriesY.sum() - (slope * seriesX.sum())) / (Configurations::precision)seriesX.size();
+    const auto sse = seriesYSquare.sum() - (intercept * seriesY.sum()) - (slope * seriesXY.sum());
+    const auto sst = seriesYSquare.sum() - (seriesY.sum() * seriesY.sum()) / (Configurations::precision)seriesX.size();
     return 1 - (sse / sst);
 }
 
 size_t OLSLinearSeries::size() const
 {
-    return sumY.size();
+    return seriesY.size();
 }

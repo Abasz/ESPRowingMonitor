@@ -6,11 +6,11 @@
 class OLSLinearSeries
 {
     unsigned char maxSeriesLength = 0;
-    Series sumX;
-    Series sumXSquare;
-    Series sumY;
-    Series sumYSquare;
-    Series sumXY;
+    Series seriesX;
+    Series seriesXSquare;
+    Series seriesY;
+    Series seriesYSquare;
+    Series seriesXY;
 
 public:
     explicit OLSLinearSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
