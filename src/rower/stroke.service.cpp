@@ -22,11 +22,11 @@ StrokeService::StrokeService()
     angularDistances.push(0, 0);
 }
 
-bool StrokeService::isFlywheelUnpowered() const
+bool StrokeService::isFlywheelUnpowered()
 {
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
-        if (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && ((currentTorque < Configurations::minimumDragTorque && deltaTimes.slope() > 0) || std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin))
+        if (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && ((currentTorque < Configurations::minimumDragTorque && deltaTimes.coefficientA() > 0) || std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin))
         {
             if constexpr (Configurations::logCalibration)
             {
@@ -39,7 +39,7 @@ bool StrokeService::isFlywheelUnpowered() const
 
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Torque)
     {
-        if (deltaTimes.slope() > Configurations::minimumRecoverySlope)
+        if (deltaTimes.coefficientA() > Configurations::minimumRecoverySlope)
         {
             return true;
         }
@@ -48,9 +48,9 @@ bool StrokeService::isFlywheelUnpowered() const
     return false;
 }
 
-bool StrokeService::isFlywheelPowered() const
+bool StrokeService::isFlywheelPowered()
 {
-    return currentTorque > Configurations::minimumPoweredTorque && deltaTimes.slope() < 0;
+    return currentTorque > Configurations::minimumPoweredTorque && deltaTimes.coefficientA() < 0;
 }
 
 void StrokeService::calculateDragCoefficient()
@@ -118,7 +118,7 @@ void StrokeService::driveStart()
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
         deltaTimesSlopes.reset();
-        deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
+        deltaTimesSlopes.push(rowingTotalTime, deltaTimes.coefficientA());
     }
 }
 
@@ -132,7 +132,7 @@ void StrokeService::driveUpdate()
     driveHandleForces.push_back(currentTorque / Configurations::sprocketRadius);
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
-        deltaTimesSlopes.push(rowingTotalTime, deltaTimes.slope());
+        deltaTimesSlopes.push(rowingTotalTime, deltaTimes.coefficientA());
     }
 }
 

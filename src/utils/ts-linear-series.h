@@ -25,9 +25,11 @@ class TSLinearSeries
 public:
     explicit TSLinearSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
 
+    Configurations::precision yAtSeriesBegin() const;
     Configurations::precision median() const;
     Configurations::precision coefficientA();
     Configurations::precision coefficientB();
+    size_t size() const;
 
     void push(Configurations::precision pointX, Configurations::precision pointY);
     void reset();

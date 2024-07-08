@@ -2,6 +2,7 @@
 
 #include "../utils/configuration.h"
 #include "../utils/ols-linear-series.h"
+#include "../utils/ts-linear-series.h"
 #include "../utils/ts-quadratic-series.h"
 #include "../utils/weighted-average-series.h"
 #include "./stroke.model.h"
@@ -51,13 +52,13 @@ class StrokeService final : public IStrokeService
     vector<WeightedAverageSeries> angularVelocityMatrix;
     vector<WeightedAverageSeries> angularAccelerationMatrix;
 
-    OLSLinearSeries deltaTimes = OLSLinearSeries(Configurations::impulseDataArrayLength);
+    TSLinearSeries deltaTimes = TSLinearSeries(Configurations::impulseDataArrayLength);
     OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength);
     OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries(0, Configurations::maxDragFactorRecoveryPeriod / Configurations::rotationDebounceTimeMin / 2);
     TSQuadraticSeries angularDistances = TSQuadraticSeries(Configurations::impulseDataArrayLength);
 
-    bool isFlywheelUnpowered() const;
-    bool isFlywheelPowered() const;
+    bool isFlywheelUnpowered();
+    bool isFlywheelPowered();
     void calculateDragCoefficient();
     void calculateAvgStrokePower();
 

@@ -28,6 +28,11 @@ Configurations::precision TSLinearSeries::calculateSlope(const unsigned char poi
            (seriesXPointTwo - seriesXPointOne);
 }
 
+Configurations::precision TSLinearSeries::yAtSeriesBegin() const
+{
+    return seriesY[0];
+}
+
 Configurations::precision TSLinearSeries::coefficientA()
 {
     if (shouldRecalculateA)
@@ -135,4 +140,9 @@ void TSLinearSeries::reset()
     slopes.swap(clear);
 
     a = 0;
+}
+
+size_t TSLinearSeries::size() const
+{
+    return seriesY.size();
 }

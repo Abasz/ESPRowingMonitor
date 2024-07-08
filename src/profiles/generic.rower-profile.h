@@ -26,7 +26,7 @@
 
 // Stroke phase detection filter settings
 #define MINIMUM_POWERED_TORQUE 0
-#define MINIMUM_DRAG_TORQUE 0.1
+#define MINIMUM_DRAG_TORQUE 0.021
 #define STROKE_DETECTION_TYPE STROKE_DETECTION_TORQUE
 #define MINIMUM_RECOVERY_SLOPE_MARGIN 0.0000151 // Only relevant if STROKE_DETECTION_TYPE is either BOTH or TORQUE
 #define MINIMUM_RECOVERY_SLOPE 0.01             // Only relevant if STROKE_DETECTION_TYPE is either BOTH or SLOPE
