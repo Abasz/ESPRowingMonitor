@@ -226,27 +226,27 @@ Please note that the SD card write only works with the dual core version as the 
 
 The algorithm used for calculating the necessary data for stroke detection can become rather CPU hungry. In a nutshell, the issue is that the Theil-Sen Quadratic Regression is O(N&#178;), which means that as the size of the `IMPULSE_DATA_ARRAY_LENGTH` increases, the time required to complete the calculations increases exponentially (for more information, please see [this explanation](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/physics_openrowingmonitor.md#use-of-quadratic-theil-senn-regression-for-determining-%CE%B1-and-%CF%89-based-on-time-and-%CE%B8)).
 
-As part of the version 5 update there has been significant work done to improve the execution time of the main loop and to better support higher value of `IMPULSE_DATA_ARRAY_LENGTH`. Through various optimizations in the algorithm there has been an approx. 20-30% improvement on higher `IMPULSE_DATA_ARRAY_LENGTH` in this area leading when using double types to for instance an execution time of 3.4ms of a 15 data point set (compared to the original 7ms) and for float type for higher data point length over 30-40% (e.g. execution time is 1.4ms for a 15 data point set compared to the original 4.8).
+As part of the version 5 update there has been significant work done to improve the execution time of the main loop and to better support higher value of `IMPULSE_DATA_ARRAY_LENGTH`. Through various optimizations in the algorithm there has been an approx. 20-30% improvement on higher `IMPULSE_DATA_ARRAY_LENGTH` in this area leading when using double types to for instance an execution time of 3.4ms of a 15 data point set (compared to the original 7ms) and for float type for higher data point length over 30-40% (e.g. execution time is 1.4ms for a 15 data point set compared to the original 4.8). In version 6 in order to make the algorithm more resilient to outlier a move from the OLS approach to determine delta time slopes has been made to a Theil-Sen Linear Regression model. This has approximately 5-10% execution time performance overhead compared to v5. But this has been deemed to be acceptable considering the accuracy improvement for the stroke detection.
 
 The improvements are even more noticeable on the maximum execution times (that was achieved through the implementation of proper offloading of peripheral calculations to the second core of the ESP32). The most relevant improvement is that these maximum execution times are within 1-1.5ms (compared to the previous 3-4ms) that avoids potential bug with more data points (e.g. metric calculation is not able to complete before a new data point comes in)
 
-I conducted some high-level tests and measured the execution times, which are shown in the table below:
+I conducted some high-level tests and measured the execution times, which are shown in the table below for version 6:
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:-----------------:|
-|18                       |4792               |
-|15                       |3407               |
-|12                       |2424               |
-|9                        |1663               |
-|8                        |1446               |
-|7                        |1192               |
-|6                        |1057               |
-|5                        |1005               |
-|3                        |782                |
+|18                       |5074               |
+|15                       |3631               |
+|12                       |2598               |
+|9                        |1777               |
+|8                        |1555               |
+|7                        |1343               |
+|6                        |1188               |
+|5                        |1104               |
+|3                        |871                |
 
-The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is almost 4.7ms if double precision is used. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 (and double precision) and gives a warning at 14.
+The above table shows that with an `IMPULSE_DATA_ARRAY_LENGTH` size of 18, the total execution time of the calculations on every impulse is around 5ms if double precision is used. This could cause issues, for instance, when a new impulse comes in before the previous calculation is finished. Due to this, currently, the compiler does not allow an `IMPULSE_DATA_ARRAY_LENGTH` size higher than 15 (and double precision) and gives a warning at 14.
 
-As an example, on my setup, I use 3 impulses per rotation. Based on my experience, the delta times cannot dip below 10ms. So with an `IMPULSE_DATA_ARRAY_LENGTH` size of 7 (execution time with double is approximately 1.2ms), this should be pretty much fine.
+As an example, on my setup, I use 3 impulses per rotation. Based on my experience, the delta times cannot dip below 10ms. So with an `IMPULSE_DATA_ARRAY_LENGTH` size of 7 (execution time with double is approximately 1.3ms), this should be pretty much fine.
 
 On other machine where 6 impulse per rotation happens, thanks to the more efficient algorithm, for an `IMPULSE_DATA_ARRAY_LENGTH` size of 12 with double precision can be used safely as the delta times should not dip below 3.3ms, giving sufficient buffer time for BLE updates to run.
 _Note: on a dual core MCU frequent BLE related tasks are offloaded to the second core, and the ISR and the algorithm - along with small one-off and less frequent tasks - run on the main core, so strictly speaking these functions should not interfere on a dual core ESP32._
@@ -255,17 +255,17 @@ If, for some reason, testing shows that a higher value for the `IMPULSE_DATA_ARR
 
 |IMPULSE_DATA_ARRAY_LENGTH|Execution time (us)|
 |:-----------------------:|:-----------------:|
-|18                       |1837               |
-|15                       |1453               |
-|12                       |1164               |
-|9                        |906                |
-|8                        |836                |
-|7                        |784                |
-|6                        |712                |
-|5                        |688                |
-|3                        |616                |
+|18                       |1977               |
+|15                       |1581               |
+|12                       |1275               |
+|9                        |1017               |
+|8                        |942                |
+|7                        |866                |
+|6                        |793                |
+|5                        |787                |
+|3                        |694                |
 
-Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times significantly (notice the 4.8ms compared 1.8 for 18 data point). I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
+Using float precision instead of double precision, of course, reduces the precision but shaves off the execution times significantly (notice the 4.8ms compared 1.9 for 18 data point). I have not run extensive testing on this, but for the limited simulations I run, this did not make a significant difference.
 
 The below picture shows that the blue chart cuts some corners but generally follows the same curve (which does not mean that in certain edge cases the reduced precision does not create errors).
 
