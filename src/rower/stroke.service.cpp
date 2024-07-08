@@ -60,7 +60,9 @@ void StrokeService::calculateDragCoefficient()
         return;
     }
 
-    if (recoveryDeltaTimes.goodnessOfFit() < Configurations::goodnessOfFitThreshold)
+    const auto goodnessOfFit = recoveryDeltaTimes.goodnessOfFit();
+
+    if (goodnessOfFit < Configurations::goodnessOfFitThreshold)
     {
         return;
     }
@@ -80,25 +82,9 @@ void StrokeService::calculateDragCoefficient()
         return;
     }
 
-    if (dragCoefficients.size() >= Configurations::dragCoefficientsArrayLength)
-    {
-        dragCoefficients.erase(begin(dragCoefficients));
-    }
-    dragCoefficients.push_back(rawNewDragCoefficient);
+    dragCoefficients.push(rawNewDragCoefficient, goodnessOfFit);
 
-    unsigned short mid = dragCoefficients.size() / 2;
-    vector<Configurations::precision> sortedArray(mid + 1);
-
-    std::partial_sort_copy(cbegin(dragCoefficients), cend(dragCoefficients), begin(sortedArray), end(sortedArray));
-
-    if (dragCoefficients.size() == Configurations::dragCoefficientsArrayLength)
-    {
-        dragCoefficient = isOdd(Configurations::dragCoefficientsArrayLength) ? sortedArray[mid] : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
-
-        return;
-    }
-
-    dragCoefficient = isOdd(dragCoefficients.size()) ? sortedArray[mid] : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
+    dragCoefficient = dragCoefficients.average();
 }
 
 void StrokeService::calculateAvgStrokePower()

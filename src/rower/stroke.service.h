@@ -39,7 +39,7 @@ class StrokeService final : public IStrokeService
 
     Configurations::precision dragCoefficient = 0;
 
-    vector<Configurations::precision> dragCoefficients;
+    WeightedAverageSeries dragCoefficients = WeightedAverageSeries(Configurations::dragCoefficientsArrayLength);
 
     Configurations::precision totalAngularDisplacement = 0;
 
