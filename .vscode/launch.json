@@ -66,8 +66,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/esp32/firmware.elf",
-            "projectEnvName": "esp32",
+            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/concept2/firmware.elf",
+            "projectEnvName": "concept2",
             "toolchainBinDir": "${userHome}/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": {
@@ -79,8 +79,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/esp32/firmware.elf",
-            "projectEnvName": "esp32",
+            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/concept2/firmware.elf",
+            "projectEnvName": "concept2",
             "toolchainBinDir": "${userHome}/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
             "internalConsoleOptions": "openOnSessionStart"
         },
@@ -88,8 +88,8 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/esp32/firmware.elf",
-            "projectEnvName": "esp32",
+            "executable": "${workspaceFolder}/esp-rowing-monitor/.pio/build/concept2/firmware.elf",
+            "projectEnvName": "concept2",
             "toolchainBinDir": "${userHome}/.platformio/packages/toolchain-xtensa-esp32@8.4.0+2021r2-patch5/bin",
             "internalConsoleOptions": "openOnSessionStart",
             "loadMode": "manual"
