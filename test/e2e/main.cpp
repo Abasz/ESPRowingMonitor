@@ -9,8 +9,6 @@
 
 #include "./test.array.h"
 
-using std::string;
-
 void loop(const unsigned long now)
 {
     simulateRotation(now);
@@ -34,10 +32,21 @@ void loop(const unsigned long now)
 
 int main(int argc, const char *argv[])
 {
-    const auto args = std::span(argv, size_t(argc));
+    const auto args = std::span(argv + 1, size_t(argc - 1));
     unsigned long now = 0;
 
-    if (args[1] == string("simulate"))
+    if (args.empty())
+    {
+        for (const auto &deltaTime : testDeltaTimes)
+        {
+            now += deltaTime;
+            loop(now);
+        }
+
+        return 0;
+    }
+
+    if (args[0] == std::string("simulate"))
     {
         const auto minTimeThreshold = 40'000UL;
         const auto maxTimeThreshold = 45'000UL;
@@ -72,21 +81,10 @@ int main(int argc, const char *argv[])
         return 0;
     }
 
-    if (argc < 2 || string(args[1]).empty())
-    {
-        for (const auto &deltaTime : testDeltaTimes)
-        {
-            now += deltaTime;
-            loop(now);
-        }
-
-        return 0;
-    }
-
     unsigned long deltaTime = 0;
 
-    std::ifstream deltaTimeStream(args[1]);
-    printf("Running external file: %s\n", args[1]);
+    std::ifstream deltaTimeStream(args[0]);
+    printf("Running external file: %s\n", args[0]);
     while (deltaTimeStream >> deltaTime)
     {
         now += deltaTime;
