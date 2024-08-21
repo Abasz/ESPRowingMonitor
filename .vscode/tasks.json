@@ -6,10 +6,9 @@
 		{
 			"type": "cppbuild",
 			"label": "e2e test",
-			"command": "mingw32-make",
+			"command": "build/build-e2e",
 			"args": [
-				"e2e",
-				"--trace"
+				"${command:platformio-ide.activeEnvironment}"
 			],
 			"problemMatcher": [
 				"$gcc"
@@ -21,15 +20,14 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "compiler: mingw32-make"
+			"detail": "compiler: make"
 		},
 		{
 			"type": "cppbuild",
 			"label": "calibrate",
-			"command": "mingw32-make",
+			"command": "build/run-calibration",
 			"args": [
-				"calibrate",
-				"TARGET_ENVIRONMENT=${command:platformio-ide.activeEnvironment}"
+				"${command:platformio-ide.activeEnvironment}"
 			],
 			"options": {
 				"cwd": "${cwd}"
@@ -41,60 +39,19 @@
 				"kind": "build",
 				"isDefault": true
 			},
-			"detail": "compiler: mingw32-make"
+			"detail": "compiler: make"
 		},
 		{
 			"type": "cppbuild",
-			"label": "catch test file",
-			"command": "mingw32-make",
+			"label": "run tests",
+			"command": "cmake",
 			"args": [
-				"test",
-				"TEST_SRC=${file}",
-				"--trace"
-			],
-			"options": {
-				"cwd": "${cwd}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": {
-				"kind": "test",
-				"isDefault": false
-			},
-			"detail": "compiler: mingw32-make"
-		},
-		{
-			"type": "cppbuild",
-			"label": "test coverage",
-			"command": "mingw32-make",
-			"args": [
-				"test",
-				"CPP_FLAGS+=--coverage -fprofile-abs-path",
-				"BUILD_DIR_COVERAGE=/coverage",
-				"TEST_SRC=test/unit/*.spec.cpp",
-				"--trace"
-			],
-			"options": {
-				"cwd": "${cwd}"
-			},
-			"problemMatcher": [
-				"$gcc"
-			],
-			"group": {
-				"kind": "test",
-				"isDefault": false
-			},
-			"detail": "compiler: mingw32-make"
-		},
-		{
-			"type": "cppbuild",
-			"label": "catch test all",
-			"command": "mingw32-make",
-			"args": [
-				"test",
-				"TEST_SRC=test/unit/*.spec.cpp",
-				"--trace"
+				"--build",
+				"build",
+				"--target",
+				"run-unit-test",
+				"--parallel",
+				"4"
 			],
 			"options": {
 				"cwd": "${cwd}"
@@ -106,7 +63,77 @@
 				"kind": "test",
 				"isDefault": true
 			},
-			"detail": "compiler: mingw32-make"
+			"detail": "compiler: make"
+		},
+		{
+			"type": "cppbuild",
+			"label": "test coverage",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"build",
+				"--target",
+				"test-coverage",
+				"--parallel",
+				"4"
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"detail": "compiler: make"
+		},
+		{
+			"type": "cppbuild",
+			"label": "build test",
+			"command": "cmake",
+			"args": [
+				"--build",
+				"build",
+				"--target",
+				"unit-test",
+				"--parallel",
+				"4"
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"detail": "compiler: make"
+		},
+		{
+			"type": "cppbuild",
+			"label": "configure project",
+			"command": "cmake",
+			"args": [
+				"-S",
+				".",
+				"-B",
+				"build"
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"detail": "Setup CMake build environment"
 		}
 	]
 }

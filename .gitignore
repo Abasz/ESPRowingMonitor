@@ -87,6 +87,7 @@ data
 # Misc
 *.txt
 !*.spec.*.txt
+!CMakeLists.txt
 wifi-config.ini
 src/custom.settings.h
 src/profiles/*
