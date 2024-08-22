@@ -46,7 +46,7 @@ void BluetoothService::notifyBaseMetrics(const unsigned short revTime, const uns
         baseMetricsParameters.strokeCount = strokeCount;
         baseMetricsParameters.avgStrokePower = avgStrokePower;
 
-        const auto coreStackSize = 1'800U;
+        const auto coreStackSize = 2'048U;
 
         if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
         {
@@ -121,7 +121,7 @@ void BluetoothService::notifyHandleForces(const std::vector<float> &handleForces
                 return std::min(previousValue, currentMTU); });
     handleForcesParameters.handleForces = handleForces;
 
-    const auto coreStackSize = 1'850U;
+    const auto coreStackSize = 2'048U;
     const auto variableStackSize = handleForcesParameters.mtu > handleForcesParameters.handleForces.size() * sizeof(float) ? handleForcesParameters.handleForces.size() * sizeof(float) : handleForcesParameters.mtu;
 
     xTaskCreatePinnedToCore(
