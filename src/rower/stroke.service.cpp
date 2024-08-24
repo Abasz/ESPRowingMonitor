@@ -99,12 +99,12 @@ void StrokeService::driveStart()
     driveStartAngularDisplacement = rowingTotalAngularDisplacement;
 
     driveHandleForces.clear();
-    driveHandleForces.push_back(currentTorque / Configurations::sprocketRadius);
+    driveHandleForces.push_back(static_cast<float>(currentTorque) / Configurations::sprocketRadius);
 
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
         deltaTimesSlopes.reset();
-        deltaTimesSlopes.push(rowingTotalTime, deltaTimes.coefficientA());
+        deltaTimesSlopes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.coefficientA());
     }
 }
 
@@ -115,10 +115,10 @@ void StrokeService::driveUpdate()
         driveHandleForces.clear();
         Log.warningln("driveHandleForces variable data point size exceeded max capacity indicating an extremely long drive phase. With plausible stroke detection settings this should not happen. Resetting variable to avoid crash...");
     }
-    driveHandleForces.push_back(currentTorque / Configurations::sprocketRadius);
+    driveHandleForces.push_back(static_cast<float>(currentTorque) / Configurations::sprocketRadius);
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
-        deltaTimesSlopes.push(rowingTotalTime, deltaTimes.coefficientA());
+        deltaTimesSlopes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.coefficientA());
     }
 }
 
