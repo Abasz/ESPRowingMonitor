@@ -1,3 +1,4 @@
+#pragma once
 // NOLINTBEGIN
 #define NAN (__builtin_nanf(""))
 

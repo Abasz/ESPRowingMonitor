@@ -4,7 +4,7 @@
 
 #include "catch_amalgamated.hpp"
 
-#include "../Arduino.h"
+#include "Arduino.h"
 
 #include "../../src/rower/stroke.service.h"
 #include "../../src/utils/configuration.h"
@@ -29,19 +29,19 @@ TEST_CASE("StrokeService")
         CHECK(Configurations::minimumRecoveryTime == 300'000);
     }
 
-    ifstream deltaTimesStream("test/unit/stroke.service.spec.deltaTimes.txt");
+    ifstream deltaTimesStream("test/unit/test-data/stroke.service.spec.deltaTimes.txt");
     REQUIRE(deltaTimesStream.good());
 
-    ifstream slopeStream("test/unit/stroke.service.spec.slope.txt");
+    ifstream slopeStream("test/unit/test-data/stroke.service.spec.slope.txt");
     REQUIRE(slopeStream.good());
 
-    ifstream torqueStream("test/unit/stroke.service.spec.torque.txt");
+    ifstream torqueStream("test/unit/test-data/stroke.service.spec.torque.txt");
     REQUIRE(torqueStream.good());
 
-    ifstream forceCurveStream("test/unit/stroke.service.spec.forceCurves.txt");
+    ifstream forceCurveStream("test/unit/test-data/stroke.service.spec.forceCurves.txt");
     REQUIRE(forceCurveStream.good());
 
-    ifstream dragFactorStream("test/unit/stroke.service.spec.dragFactor.txt");
+    ifstream dragFactorStream("test/unit/test-data/stroke.service.spec.dragFactor.txt");
     REQUIRE(dragFactorStream.good());
 
     vector<unsigned long> deltaTimes;

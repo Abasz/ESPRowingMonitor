@@ -1,3 +1,4 @@
+#pragma once
 
 /**
  * @brief Bluetooth TX power level(index), it's just a index corresponding to power(dbm).

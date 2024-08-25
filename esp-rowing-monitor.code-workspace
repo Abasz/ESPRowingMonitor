@@ -67,7 +67,16 @@
 			"regex": "cpp",
 			"ranges": "cpp",
 			"span": "cpp",
-			"cassert": "cpp"
+			"cassert": "cpp",
+			"chrono": "cpp",
+			"condition_variable": "cpp",
+			"ratio": "cpp",
+			"set": "cpp",
+			"future": "cpp",
+			"iostream": "cpp",
+			"mutex": "cpp",
+			"thread": "cpp",
+			"variant": "cpp"
 		}
 	}
 }

@@ -3,7 +3,7 @@
 #include <string>
 
 #if defined(UNIT_TEST)
-    #include "../../test/unit/test.settings.h"
+    #include "../../test/unit/include/test.settings.h"
 #elif defined(USE_CUSTOM_SETTINGS)
     #include "../custom.settings.h"
 #else

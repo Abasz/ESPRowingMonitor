@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 
-#include "../src/utils/configuration.h"
+#include "../../src/utils/configuration.h"
 
 class Logging
 {

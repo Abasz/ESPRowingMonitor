@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../src/rower/stroke.controller.h"
+#include "../../src/rower/stroke.controller.h"
 
 extern FlywheelService flywheelService;
 extern StrokeService strokeService;

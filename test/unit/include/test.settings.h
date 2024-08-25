@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../src/profiles/generic.board-profile.h"
-#include "../src/utils/enums.h"
+#include "../../../src/profiles/generic.board-profile.h"
+#include "../../../src/utils/enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-#define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
+#define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelSilent
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
 
 #undef BAUD_RATE
