@@ -25,6 +25,7 @@ public:
     virtual void pinMode(unsigned char pin, unsigned char mode) = 0;
     virtual void digitalWrite(unsigned char pin, unsigned char val) = 0;
     virtual unsigned long micros() = 0;
+    virtual unsigned long millis() = 0;
     virtual int digitalRead(unsigned char pin) = 0;
     virtual void gpio_hold_en(gpio_num_t gpio_num) = 0;
     virtual unsigned short analogRead(unsigned char pin) = 0;
@@ -67,6 +68,10 @@ inline void digitalWrite(unsigned char pin, unsigned char val)
 inline unsigned long micros()
 {
     return mockArduino.get().micros();
+}
+inline unsigned long millis()
+{
+    return mockArduino.get().millis();
 }
 inline int digitalRead(unsigned char pin)
 {

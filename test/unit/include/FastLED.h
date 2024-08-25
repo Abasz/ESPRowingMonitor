@@ -22,11 +22,28 @@ class CLEDController
 {
 };
 
+struct CRGB
+{
+    typedef enum
+    {
+        Black = 0x000000,
+        Blue = 0x0000FF,
+        Green = 0x008000,
+        Red = 0xFF0000
+    } HTMLColorCode;
+
+    // NOLINTNEXTLINE
+    void operator=(const HTMLColorCode rhs);
+};
+
 class MockCFastLED
 {
 public:
     virtual CLEDController &addLeds(struct CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) = 0;
     virtual void clear(bool writeData = false) = 0;
+    virtual void show() = 0;
+
+    virtual void mockHelperSetColor(const CRGB::HTMLColorCode rhs) = 0;
 };
 extern fakeit::Mock<MockCFastLED> mockFastLED;
 
@@ -43,6 +60,16 @@ public:
     {
         mockFastLED.get().clear(writeData);
     }
+
+    void show()
+    {
+        mockFastLED.get().show();
+    }
+};
+
+template <unsigned char DATA_PIN, EOrder RGB_ORDER>
+class WS2812
+{
 };
 
 extern CFastLED FastLED;
