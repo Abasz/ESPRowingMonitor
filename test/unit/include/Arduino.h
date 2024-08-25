@@ -32,6 +32,7 @@ public:
     virtual esp_sleep_wakeup_cause_t esp_sleep_get_wakeup_cause() = 0;
     virtual void esp_sleep_enable_ext0_wakeup(gpio_num_t gpio_num, int level) = 0;
     virtual void esp_deep_sleep_start() = 0;
+    virtual void esp_restart() = 0;
     virtual BaseType_t xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode,
                                                const char *const pcName,
                                                const unsigned int usStackDepth,
@@ -119,6 +120,11 @@ inline BaseType_t xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode,
         uxPriority,
         pvCreatedTask,
         xCoreID);
+}
+
+inline void esp_restart()
+{
+    mockArduino.get().esp_restart();
 }
 
 class MockHardwareSerial

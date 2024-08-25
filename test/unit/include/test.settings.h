@@ -8,6 +8,10 @@
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelSilent
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
 
+#define DEVICE_NAME TestDevice
+#define MODEL_NUMBER TestModelNum
+#define SERIAL_NUMBER "TestSerial"
+
 #undef BAUD_RATE
 #define BAUD_RATE BaudRates::Baud1500000
 #define ENABLE_BLUETOOTH_DELTA_TIME_LOGGING true

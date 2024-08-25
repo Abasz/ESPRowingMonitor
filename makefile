@@ -31,7 +31,7 @@ e2e: INCLUDES+=-I$(E2E_TEST_DIR)
 e2e: $(E2E_OBJS)
 	@$(CC) $(CPP_FLAGS) $(INCLUDES) $(DEFINES) -o $(BUILD_DIR)/run_e2e_test.out $^
 
-TEST_SRCS:=$(wildcard $(LIB_DIR)/utils/*.cpp) $(wildcard $(LIB_DIR)/rower/*.cpp) $(wildcard $(LIB_DIR)/peripherals/sd-card.service.cpp) $(wildcard $(UNIT_TEST_DIR)/include/*.cpp) $(wildcard $(TEST_DIR)/fixtures/*.cpp) $(wildcard $(TEST_SRC))
+TEST_SRCS:=$(wildcard $(LIB_DIR)/utils/*.cpp) $(wildcard $(LIB_DIR)/rower/*.cpp) $(wildcard $(LIB_DIR)/peripherals/*service.cpp) $(wildcard $(LIB_DIR)/peripherals/bluetooth.*.cpp) $(wildcard $(UNIT_TEST_DIR)/include/*.cpp) $(wildcard $(TEST_DIR)/fixtures/*.cpp) $(wildcard $(TEST_SRC))
 
 TEST_OBJS:=$(TEST_SRCS:%.cpp=$(BUILD_DIR)/unit/%.o)
 
