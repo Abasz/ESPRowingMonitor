@@ -87,13 +87,7 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     {
         Log.infoln("Set LogLevel");
 
-        auto response = ResponseOpCodes::InvalidParameter;
-        if (message.length() == 2 && message[1] >= 0 && message[1] <= 6)
-        {
-            Log.infoln("New LogLevel: %d", message[1]);
-            bleService.eepromService.setLogLevel(static_cast<ArduinoLogLevel>(message[1]));
-            response = ResponseOpCodes::Successful;
-        }
+        const auto response = processLogLevel(message, pCharacteristic);
 
         array<unsigned char, 3U>
             temp = {
@@ -102,7 +96,6 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
                 static_cast<unsigned char>(response)};
 
         pCharacteristic->setValue(temp);
-        bleService.notifySettings();
     }
     break;
 
@@ -112,21 +105,9 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
 
         if (message.size() == 2 && message[1] >= 0 && message[1] <= 1)
         {
-            Log.infoln("New BLE Service: %s", message[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
-            bleService.eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
-            array<unsigned char, 3U> temp = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(message[0]),
-                static_cast<unsigned char>(ResponseOpCodes::Successful)};
-            pCharacteristic->setValue(temp);
-            pCharacteristic->indicate();
-            bleService.notifySettings();
+            processBleServiceChange(message, pCharacteristic);
 
-            Log.verboseln("Restarting device in 5s");
-            delay(100);
-            esp_restart();
-
-            break;
+            return;
         }
 
         array<unsigned char, 3U> temp = {
@@ -138,63 +119,31 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
     }
     break;
 
-    case static_cast<int>(SettingsOpCodes::SetSdCardLogging):
+    case static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging):
     {
         Log.infoln("Change Sd Card Logging");
 
-        if (message.size() == 2 && message[1] >= 0 && message[1] <= 1)
-        {
-            const auto shouldEnable = static_cast<bool>(message[1]);
-            Log.infoln("%s SdCard logging", shouldEnable ? "Enable" : "Disable");
-            bleService.eepromService.setLogToSdCard(shouldEnable);
+        const auto response = processSdCardLogging(message, pCharacteristic);
 
-            array<uint8_t, 3> temp = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(message[0]),
-                static_cast<unsigned char>(ResponseOpCodes::Successful)};
-            pCharacteristic->setValue(temp);
-            pCharacteristic->indicate();
-            bleService.notifySettings();
-            return;
-        }
-
-        Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", message[1]);
-        array<uint8_t, 3> temp = {
+        array<unsigned char, 3U> temp = {
             static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+            static_cast<unsigned char>(response)};
 
         pCharacteristic->setValue(temp);
     }
     break;
 
-    case static_cast<int>(SettingsOpCodes::SetDeltaTimeLogging):
+    case static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging):
     {
         Log.infoln("Change deltaTime logging");
 
-        if (message.size() == 2 && message[1] >= 0 && message[1] <= 1)
-        {
-            const auto shouldEnable = static_cast<bool>(message[1]);
+        const auto response = processDeltaTimeLogging(message, pCharacteristic);
 
-            Log.infoln("%s deltaTime logging", shouldEnable ? "Enable" : "Disable");
-            bleService.eepromService.setLogToBluetooth(shouldEnable);
-
-            array<uint8_t, 3> temp = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(message[0]),
-                static_cast<unsigned char>(ResponseOpCodes::Successful)};
-            pCharacteristic->setValue(temp);
-            pCharacteristic->indicate();
-            bleService.notifySettings();
-
-            return;
-        }
-
-        Log.infoln("Invalid OP command for setting deltaTime logging, this should be a bool: %d", message[1]);
-        array<uint8_t, 3> temp = {
+        array<unsigned char, 3U> temp = {
             static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+            static_cast<unsigned char>(response)};
 
         pCharacteristic->setValue(temp);
     }
@@ -214,4 +163,74 @@ void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *cons
 
     Log.verboseln("Send indicate");
     pCharacteristic->indicate();
+}
+
+ResponseOpCodes BluetoothService::ControlPointCallbacks::processLogLevel(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
+{
+    if (message.size() != 2 || message[1] < 0 || message[1] > 6)
+    {
+        return ResponseOpCodes::InvalidParameter;
+    }
+
+    Log.infoln("New LogLevel: %d", message[1]);
+    bleService.eepromService.setLogLevel(static_cast<ArduinoLogLevel>(message[1]));
+
+    bleService.notifySettings();
+
+    return ResponseOpCodes::Successful;
+}
+
+ResponseOpCodes BluetoothService::ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
+{
+    if (message.size() != 2 || message[1] < 0 || message[1] > 1)
+    {
+        Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", message[1]);
+
+        return ResponseOpCodes::InvalidParameter;
+    }
+
+    const auto shouldEnable = static_cast<bool>(message[1]);
+    Log.infoln("%s SdCard logging", shouldEnable ? "Enable" : "Disable");
+    bleService.eepromService.setLogToSdCard(shouldEnable);
+
+    bleService.notifySettings();
+
+    return ResponseOpCodes::Successful;
+}
+
+ResponseOpCodes BluetoothService::ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
+{
+    if (message.size() != 2 || message[1] < 0 || message[1] > 1)
+    {
+        Log.infoln("Invalid OP command for setting deltaTime logging, this should be a bool: %d", message[1]);
+
+        return ResponseOpCodes::InvalidParameter;
+    }
+
+    const auto shouldEnable = static_cast<bool>(message[1]);
+
+    Log.infoln("%s deltaTime logging", shouldEnable ? "Enable" : "Disable");
+    bleService.eepromService.setLogToBluetooth(shouldEnable);
+
+    bleService.notifySettings();
+
+    return ResponseOpCodes::Successful;
+}
+
+void BluetoothService::ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
+{
+    Log.infoln("New BLE Service: %s", message[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
+    bleService.eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
+    array<unsigned char, 3U> temp = {
+        static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+        static_cast<unsigned char>(message[0]),
+        static_cast<unsigned char>(ResponseOpCodes::Successful)};
+    pCharacteristic->setValue(temp);
+    pCharacteristic->indicate();
+
+    bleService.notifySettings();
+
+    Log.verboseln("Restarting device in 5s");
+    delay(100);
+    esp_restart();
 }
