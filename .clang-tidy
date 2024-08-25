@@ -49,7 +49,6 @@ ExtraArgs:
   - -Iinclude
   - -Isrc
   - -Itest/unit/include
-  - -Itest/unit/fixtures
   - -Itest/e2e
   - -I../../../../.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src
   - -I.pio/libdeps/generic/ArduinoLog
