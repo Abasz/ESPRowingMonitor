@@ -18,7 +18,7 @@ void PowerManagerController::update(const unsigned long lastRevTime, const bool 
     const auto now = micros();
     if (!isDeviceConnected && now - lastRevTime > Configurations::deepSleepTimeout * 1'000)
     {
-        powerManagerService.goToSleep();
+        return powerManagerService.goToSleep();
     }
 
     if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)

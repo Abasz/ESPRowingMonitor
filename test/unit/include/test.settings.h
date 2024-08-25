@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../../../src/profiles/generic.board-profile.h"
 #include "../../../src/utils/enums.h"
+#include "./test.board-profile.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -10,6 +10,9 @@
 
 #undef BAUD_RATE
 #define BAUD_RATE BaudRates::Baud1500000
+#define ENABLE_BLUETOOTH_DELTA_TIME_LOGGING true
+#define SUPPORT_SD_CARD_LOGGING true
+
 // Machine settings
 #define IMPULSES_PER_REVOLUTION 3
 #define FLYWHEEL_INERTIA 0.073

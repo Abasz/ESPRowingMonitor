@@ -63,6 +63,3 @@ typedef enum
 } esp_sleep_source_t;
 
 typedef esp_sleep_source_t esp_sleep_wakeup_cause_t;
-
-inline void esp_sleep_enable_ext0_wakeup(gpio_num_t gpio_num, int level) {}
-inline void esp_deep_sleep_start() {}

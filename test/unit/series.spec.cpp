@@ -1,3 +1,4 @@
+// NOLINTBEGIN(readability-magic-numbers)
 #include "catch_amalgamated.hpp"
 
 #include "../../src/utils/configuration.h"
@@ -11,7 +12,7 @@ TEST_CASE("Series")
         Series series(maxSeriesLength);
         REQUIRE(series.capacity() == maxSeriesLength);
     }
-    SECTION("when maxSeriesLength is not provided should set")
+    SECTION("when maxSeriesLength is not provided")
     {
         const auto maxCapacity = 500U;
         Series series(0, maxCapacity);
@@ -79,3 +80,4 @@ TEST_CASE("Series")
         }
     }
 }
+// NOLINTEND(readability-magic-numbers)

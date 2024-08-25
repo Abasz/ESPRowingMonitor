@@ -1,8 +1,10 @@
 // NOLINTBEGIN
 #pragma once
+#include <climits>
 
 #include "Esp32-typedefs.h"
 
+#define INPUT 0x01
 #define OUTPUT 0x03
 #define INPUT_PULLUP 0x05
 #define LOW 0x00
@@ -19,15 +21,6 @@ inline void gpio_hold_en(gpio_num_t gpio_num) {}
 inline unsigned short analogRead(unsigned char pin) { return 0; }
 inline void delay(unsigned int) {}
 inline esp_sleep_wakeup_cause_t esp_sleep_get_wakeup_cause() { return ESP_SLEEP_WAKEUP_EXT1; }
-
-class HardwareSerial
-{
-public:
-    inline void begin(unsigned long baud, unsigned int config, char rxPin = -1, char txPin = -1, bool invert = false, unsigned long timeout_ms = 20'000UL, unsigned char rxfifo_full_thrhd = 112) {};
-    inline void end(bool fullyTerminate = true) {};
-    inline void updateBaudRate(unsigned long baud) {};
-    inline int available(void) { return 1; };
-    inline int availableForWrite(void) { return 1; };
-    inline void flush(void) {};
-};
+inline void esp_sleep_enable_ext0_wakeup(gpio_num_t gpio_num, int level) {}
+inline void esp_deep_sleep_start() {}
 // NOLINTEND

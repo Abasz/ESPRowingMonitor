@@ -27,7 +27,7 @@ public:
     virtual inline unsigned char putUShort(const char *key, unsigned short value) { return 1; }
     virtual inline unsigned char putInt(const char *key, int value) { return 1; }
     virtual inline unsigned char putUInt(const char *key, unsigned int value) { return 1; }
-    virtual inline unsigned char putLong(const char *key, int value) { return 1; }
+    virtual inline unsigned char putLong(const char *key, long value) { return 1; }
     virtual inline unsigned char putULong(const char *key, unsigned int value) { return 1; }
     virtual inline unsigned char putLong64(const char *key, long value) { return 1; }
     virtual inline unsigned char putULong64(const char *key, unsigned long value) { return 1; }
