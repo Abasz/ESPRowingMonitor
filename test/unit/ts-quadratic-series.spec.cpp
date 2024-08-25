@@ -1,6 +1,5 @@
-// NOLINTBEGIN(readability-function-cognitive-complexity,readability-magic-numbers)
-
-#include "catch_amalgamated.hpp"
+// NOLINTBEGIN(readability-magic-numbers)
+#include "./include/catch_amalgamated.hpp"
 
 #include "../../src/utils/ts-quadratic-series.h"
 #include "./regression.test-cases.spec.h"
@@ -52,4 +51,4 @@ TEST_CASE("Theil Sen Quadratic Regression", "[regression]")
         }
     }
 }
-// NOLINTEND(readability-function-cognitive-complexity,readability-magic-numbers)
+// NOLINTEND(readability-magic-numbers)

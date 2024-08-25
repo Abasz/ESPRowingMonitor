@@ -143,14 +143,14 @@ void StrokeService::recoveryStart()
     recoveryStartTime = rowingTotalTime;
     recoveryStartAngularDisplacement = rowingTotalAngularDisplacement;
     recoveryStartDistance = distance;
-    recoveryDeltaTimes.push(rowingTotalTime, deltaTimes.yAtSeriesBegin());
+    recoveryDeltaTimes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.yAtSeriesBegin());
 }
 
 void StrokeService::recoveryUpdate()
 {
     if (rowingTotalTime - recoveryStartTime < Configurations::maxDragFactorRecoveryPeriod)
     {
-        recoveryDeltaTimes.push(rowingTotalTime, deltaTimes.yAtSeriesBegin());
+        recoveryDeltaTimes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.yAtSeriesBegin());
     }
 }
 
@@ -187,8 +187,8 @@ RowingDataModels::RowingMetrics StrokeService::getData()
 
 void StrokeService::processData(const RowingDataModels::FlywheelData data)
 {
-    deltaTimes.push(data.totalTime, data.deltaTime);
-    angularDistances.push(data.totalTime / 1e6, data.totalAngularDisplacement);
+    deltaTimes.push(static_cast<Configurations::precision>(data.totalTime), static_cast<Configurations::precision>(data.deltaTime));
+    angularDistances.push(static_cast<Configurations::precision>(data.totalTime) / 1e6, data.totalAngularDisplacement);
 
     if (angularVelocityMatrix.size() >= Configurations::impulseDataArrayLength)
     {
@@ -238,7 +238,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
         }
 
         rowingImpulseCount++;
-        rowingTotalTime += deltaTimes.yAtSeriesBegin();
+        rowingTotalTime += static_cast<long long>(deltaTimes.yAtSeriesBegin());
         revTime = rowingTotalTime;
         rowingTotalAngularDisplacement += Configurations::angularDisplacementPerImpulse;
 
@@ -249,7 +249,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     }
 
     rowingImpulseCount++;
-    rowingTotalTime += deltaTimes.yAtSeriesBegin();
+    rowingTotalTime += static_cast<long long>(deltaTimes.yAtSeriesBegin());
     rowingTotalAngularDisplacement += Configurations::angularDisplacementPerImpulse;
 
     distance += distancePerAngularDisplacement * (distance == 0 ? rowingTotalAngularDisplacement : Configurations::angularDisplacementPerImpulse);
@@ -311,7 +311,7 @@ void StrokeService::logNewStrokeData() const
         response.append(std::to_string(handleForce) + ",");
     }
 
-    if (driveHandleForces.size() > 0)
+    if (!driveHandleForces.empty())
     {
         response.pop_back();
     }

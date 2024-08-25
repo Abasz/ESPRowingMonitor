@@ -1,16 +1,15 @@
-// NOLINTBEGIN(cppcoreguidelines-init-variables,readability-function-cognitive-complexity)
 #include <fstream>
 #include <vector>
 
-#include "catch_amalgamated.hpp"
+#include "./include/catch_amalgamated.hpp"
 
-#include "Arduino.h"
+#include "./include/Arduino.h"
 
 #include "../../src/rower/stroke.service.h"
 #include "../../src/utils/configuration.h"
 
 using std::ifstream;
-using std::stod;
+using std::stof;
 using std::string;
 using std::vector;
 
@@ -80,30 +79,30 @@ TEST_CASE("StrokeService")
         dragFactors.push_back(dragFactor);
     }
 
-    string forceCurve = "";
+    string forceCurve;
     while (forceCurveStream >> forceCurve)
     {
         size_t pos_start = 0;
         size_t pos_end = 0;
-        string token = "";
+        string token;
         vector<float> res;
 
         while ((pos_end = forceCurve.find(",", pos_start)) != string::npos)
         {
             token = forceCurve.substr(pos_start, pos_end - pos_start);
             pos_start = pos_end + 1;
-            res.push_back(stod(token));
+            res.push_back(stof(token));
         }
 
-        res.push_back(stod(forceCurve.substr(pos_start)));
+        res.push_back(stof(forceCurve.substr(pos_start)));
 
         forceCurves.push_back(res);
     }
 
-    REQUIRE(deltaTimes.size() > 0);
-    REQUIRE(slopes.size() > 0);
-    REQUIRE(torques.size() > 0);
-    REQUIRE(forceCurves.size() > 0);
+    REQUIRE(!deltaTimes.empty());
+    REQUIRE(!slopes.empty());
+    REQUIRE(!torques.empty());
+    REQUIRE(!forceCurves.empty());
 
     SECTION("processData method should correctly determine")
     {
@@ -135,8 +134,8 @@ TEST_CASE("StrokeService")
                 SECTION("force curves on new stroke (" + std::to_string(rowingMetrics.strokeCount) + ")")
                 {
                     INFO("deltaTime: " << deltaTime << ", stroke number: " << rowingMetrics.strokeCount);
-                    REQUIRE_THAT(rowingMetrics.driveHandleForces, Catch::Matchers::RangeEquals(forceCurves[rowingMetrics.strokeCount - 1], [](float a, float b)
-                                                                                               { return std::abs(a - b) < 0.00001F; }));
+                    REQUIRE_THAT(rowingMetrics.driveHandleForces, Catch::Matchers::RangeEquals(forceCurves[rowingMetrics.strokeCount - 1], [](float first, float second)
+                                                                                               { return std::abs(first - second) < 0.00001F; }));
                     REQUIRE_THAT(rowingMetrics.dragCoefficient * 1e6, Catch::Matchers::WithinRel(dragFactors[rowingMetrics.strokeCount - 1], 0.0000001));
                 }
             }
@@ -152,4 +151,3 @@ TEST_CASE("StrokeService")
         }
     }
 }
-// NOLINTEND(cppcoreguidelines-init-variables,readability-function-cognitive-complexity)

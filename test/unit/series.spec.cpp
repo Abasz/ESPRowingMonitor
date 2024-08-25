@@ -1,5 +1,5 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "catch_amalgamated.hpp"
+#include "./include/catch_amalgamated.hpp"
 
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/series.h"
@@ -51,7 +51,7 @@ TEST_CASE("Series")
             {
                 series.push(0.1);
             }
-            REQUIRE(series.capacity() == initialCapacity * 2);
+            REQUIRE(series.capacity() == initialCapacity * 2UL);
         }
 
         SECTION("should set new capacity to maxCapacity when default allocation would yield higher capacity than maxCapacity")

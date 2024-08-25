@@ -2,7 +2,7 @@
 
 #include "../utils/enums.h"
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)
 
 // General settings
 #define BAUD_RATE BaudRates::Baud115200
@@ -27,4 +27,4 @@
 #define BATTERY_MEASUREMENT_FREQUENCY 10
 #define DEEP_SLEEP_TIMEOUT 4
 
-// NOLINTEND(cppcoreguidelines-macro-usage)
+// NOLINTEND(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)

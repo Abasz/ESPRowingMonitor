@@ -18,14 +18,14 @@ namespace RowingDataModels
 
     struct RowingMetrics
     {
-        Configurations::precision distance;
-        unsigned long long lastRevTime;
-        unsigned long long lastStrokeTime;
-        unsigned short strokeCount;
-        unsigned int driveDuration;
-        unsigned int recoveryDuration;
-        Configurations::precision avgStrokePower;
-        Configurations::precision dragCoefficient;
+        Configurations::precision distance{};
+        unsigned long long lastRevTime{};
+        unsigned long long lastStrokeTime{};
+        unsigned short strokeCount{};
+        unsigned int driveDuration{};
+        unsigned int recoveryDuration{};
+        Configurations::precision avgStrokePower{};
+        Configurations::precision dragCoefficient{};
         std::vector<float> driveHandleForces;
     };
 }

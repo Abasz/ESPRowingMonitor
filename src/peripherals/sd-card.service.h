@@ -16,7 +16,7 @@ class SdCardService final : public ISdCardService
     struct SdCardTaskParameters
     {
         File32 &logFile;
-        vector<unsigned long> deltaTimes{};
+        vector<unsigned long> deltaTimes;
     } sdCardTaskParameters;
 
     static void saveDeltaTimeTask(void *parameters);

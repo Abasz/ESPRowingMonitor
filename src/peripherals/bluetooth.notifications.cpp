@@ -70,7 +70,7 @@ void BluetoothService::notifyExtendedMetrics(short avgStrokePower, unsigned int 
         return;
     }
 
-    const auto secInMicroSec = 1e6L;
+    const auto secInMicroSec = 1e6;
     extendedMetricsParameters.avgStrokePower = avgStrokePower;
     extendedMetricsParameters.recoveryDuration = lround(recoveryDuration / secInMicroSec * 4'096);
     extendedMetricsParameters.driveDuration = lround(driveDuration / secInMicroSec * 4'096);
@@ -148,7 +148,7 @@ void BluetoothService::HandleForcesParameters::task(void *parameters)
         const unsigned char chunkSize = (params->mtu - 3 - 2) / sizeof(float);
         const unsigned char split = params->handleForces.size() / chunkSize + (params->handleForces.size() % chunkSize == 0 ? 0 : 1);
 
-        auto i = 0U;
+        auto i = 0UL;
         Log.verboseln("MTU of extended: %d, chunk size(bytes): %d, number of chunks: %d", params->mtu, chunkSize, split);
 
         while (i < split)
@@ -158,6 +158,7 @@ void BluetoothService::HandleForcesParameters::task(void *parameters)
 
             temp[0] = split;
             temp[1] = i + 1;
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             memcpy(temp.data() + 2, params->handleForces.data() + i * chunkSize, end);
 
             params->characteristic->setValue(temp.data(), temp.size());
@@ -173,6 +174,7 @@ void BluetoothService::DeltaTimesParameters::task(void *parameters)
     {
         const auto *const params = static_cast<const BluetoothService::DeltaTimesParameters *>(parameters);
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
         params->characteristic->setValue((const unsigned char *)params->deltaTimes.data(), params->deltaTimes.size() * sizeof(unsigned long));
         params->characteristic->notify();
     }

@@ -1,5 +1,5 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "catch_amalgamated.hpp"
+#include "./include/catch_amalgamated.hpp"
 
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/weighted-average-series.h"

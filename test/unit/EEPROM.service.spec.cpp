@@ -1,8 +1,8 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
-#include "Preferences.h"
+#include "./include/Preferences.h"
 
 #include "../../src/utils/EEPROM.service.h"
 

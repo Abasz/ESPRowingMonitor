@@ -1,8 +1,8 @@
 // NOLINTBEGIN(cppcoreguidelines-avoid-do-while)
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
-#include "Arduino.h"
+#include "./include/Arduino.h"
 
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/power-manager.controller.h"

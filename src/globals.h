@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Arduino.h"
 #include "Preferences.h"
 
 #include "./peripherals/bluetooth.service.h"

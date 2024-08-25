@@ -70,14 +70,15 @@ void PowerManagerService::goToSleep() const
 unsigned char PowerManagerService::measureBattery() const
 {
     std::array<float, Configurations::batteryLevelArrayLength> batteryLevels{};
+    batteryLevels.fill(0);
 
-    for (unsigned char i = 0; i < Configurations::batteryLevelArrayLength; i++)
+    for (auto &batteryLevel : batteryLevels)
     {
-        auto rawNewBatteryLevel = (analogReadMilliVolts(Configurations::batteryPinNumber) / 1'000.0F - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
+        auto rawNewBatteryLevel = (static_cast<float>(analogReadMilliVolts(Configurations::batteryPinNumber)) / 1'000.0F - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100;
 
         rawNewBatteryLevel = std::min(std::max(rawNewBatteryLevel, 0.0F), 100.0F);
 
-        batteryLevels[i] = rawNewBatteryLevel;
+        batteryLevel = rawNewBatteryLevel;
     }
 
     const unsigned char mid = Configurations::batteryLevelArrayLength / 2;

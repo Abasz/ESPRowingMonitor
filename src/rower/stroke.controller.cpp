@@ -84,7 +84,7 @@ Configurations::precision StrokeController::getRecoveryDuration() const
 
 short StrokeController::getAvgStrokePower() const
 {
-    return lround(rowerState.avgStrokePower);
+    return static_cast<short>(round(rowerState.avgStrokePower));
 }
 
 Configurations::precision StrokeController::getDistance() const

@@ -84,18 +84,24 @@ void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
 {
     if constexpr (Configurations::isRgb)
     {
-        ledColor = isAnyDeviceConnected() ? newLedColor : ledColor == CRGB::Black ? newLedColor
-                                                                                  : CRGB::Black;
+        if (isAnyDeviceConnected() || ledColor == CRGB::Black)
+        {
+            ledColor = newLedColor;
+        }
+        else
+        {
+            ledColor = CRGB::Black;
+        }
+
         leds[0] = ledColor;
         FastLED.show();
-    }
-    else
-    {
-        ledState = isAnyDeviceConnected() ? HIGH : ledState == HIGH ? LOW
-                                                                    : HIGH;
 
-        digitalWrite(Configurations::ledPin, ledState);
+        return;
     }
+
+    ledState = isAnyDeviceConnected() ? HIGH : (ledState ^ HIGH);
+
+    digitalWrite(Configurations::ledPin, ledState);
 }
 
 void PeripheralsController::notifyBattery(const unsigned char batteryLevel)

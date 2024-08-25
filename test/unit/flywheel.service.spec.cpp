@@ -2,12 +2,12 @@
 #include <numeric>
 #include <vector>
 
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
-#include "Arduino.h"
+#include "./include/Arduino.h"
 
-#include "globals.h"
+#include "./include/globals.h"
 
 #include "../../src/rower/flywheel.service.h"
 

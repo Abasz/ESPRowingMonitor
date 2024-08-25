@@ -1,7 +1,7 @@
 // NOLINTBEGIN
 #pragma once
 
-#include "fakeit.hpp"
+#include "./fakeit.hpp"
 
 /// RGB color channel orderings, used when instantiating controllers to determine
 /// what order the controller should send data out in. The default ordering

@@ -1,15 +1,16 @@
 // NOLINTBEGIN
 #pragma once
 
-#include "fakeit.hpp"
+#include "./fakeit.hpp"
 
-#include "Esp32-typedefs.h"
+#include "./Esp32-typedefs.h"
 
 typedef int BaseType_t;
 typedef unsigned int UBaseType_t;
 typedef void (*TaskFunction_t)(void *);
 typedef void *TaskHandle_t;
 
+#define FALLING 0x02
 #define INPUT 0x01
 #define OUTPUT 0x03
 #define INPUT_PULLUP 0x05
@@ -17,6 +18,19 @@ typedef void *TaskHandle_t;
 #define HIGH 0x01
 #define PI 3.1415926535897932384626433832795
 #define LED_BUILTIN GPIO_NUM_2
+#define IRAM_ATTR
+
+class Print
+{
+private:
+public:
+    Print() {}
+
+    size_t print(const char[])
+    {
+        return 0;
+    };
+};
 
 class MockArduino
 {
@@ -144,7 +158,7 @@ public:
 };
 extern fakeit::Mock<MockHardwareSerial> mockSerial;
 
-class HardwareSerial
+class HardwareSerial final : public Print
 {
 public:
     inline void begin(unsigned long baud, unsigned int config = 0, char rxPin = -1, char txPin = -1, bool invert = false, unsigned long timeout_ms = 20'000UL, unsigned char rxfifo_full_thrhd = 112)

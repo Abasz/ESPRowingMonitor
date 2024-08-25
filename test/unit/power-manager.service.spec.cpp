@@ -1,10 +1,10 @@
 // NOLINTBEGIN(cppcoreguidelines-avoid-do-while)
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
-#include "Arduino.h"
+#include "./include/Arduino.h"
 
-#include "globals.h"
+#include "./include/globals.h"
 
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/power-manager.service.h"
@@ -47,7 +47,7 @@ TEST_CASE("PowerManagerService", "[utils]")
         {
             Verify(Method(mockArduino, analogReadMilliVolts).Using(Configurations::batteryPinNumber)).Exactly(Configurations::initialBatteryLevelMeasurementCount * Configurations::batteryLevelArrayLength);
 
-            const auto expectedBatteryLevel = lround((analogVoltage / 1'000.0 - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100);
+            const unsigned char expectedBatteryLevel = lround((analogVoltage / 1'000.0 - Configurations::batteryVoltageMin) / (Configurations::batteryVoltageMax - Configurations::batteryVoltageMin) * 100);
 
             REQUIRE(batteryLevel == expectedBatteryLevel);
         }

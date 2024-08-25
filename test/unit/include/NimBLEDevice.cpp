@@ -1,6 +1,6 @@
-#include "fakeit.hpp"
+#include "./fakeit.hpp"
 
-#include "NimBLEDevice.h"
+#include "./NimBLEDevice.h"
 
 fakeit::Mock<NimBLEServer> mockNimBLEServer;
 fakeit::Mock<NimBLEAdvertising> mockNimBLEAdvertising;

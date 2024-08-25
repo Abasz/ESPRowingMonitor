@@ -1,11 +1,11 @@
 #include <array>
 #include <string>
 
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
-#include "Arduino.h"
-#include "NimBLEDevice.h"
+#include "./include/Arduino.h"
+#include "./include/NimBLEDevice.h"
 
 #include "../../src/peripherals/bluetooth.service.h"
 #include "../../src/peripherals/sd-card.service.interface.h"

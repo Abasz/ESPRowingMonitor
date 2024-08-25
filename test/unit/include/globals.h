@@ -1,11 +1,12 @@
 #pragma once
 
-#include "fakeit.hpp"
+#include "./fakeit.hpp"
 
-#include "Arduino.h"
+#include "./Arduino.h"
 
 class Globals
 {
+protected:
     ~Globals() = default;
 
 public:

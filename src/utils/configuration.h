@@ -27,7 +27,7 @@ public:
     inline static const string deviceName = TOSTRING(DEVICE_NAME);
     inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
     inline static const string serialNumber = SERIAL_NUMBER;
-    inline static const string softwareVersion = std::to_string(compileDateYear) + std::to_string(compileDateMonth) + std::to_string(compileDateDay);
+    inline static const string softwareVersion = string(getCompileDate().data(), getCompileDate().size());
 
     // Hardware settings
     static constexpr BaudRates baudRate = BAUD_RATE;
@@ -40,8 +40,10 @@ public:
     static constexpr bool hasSensorOnSwitchPinNumber = sensorOnSwitchPinNumber != GPIO_NUM_NC;
 
     static constexpr gpio_num_t ledPin = static_cast<gpio_num_t>(LED_PIN);
+    // NOLINTBEGIN(bugprone-branch-clone,readability-simplify-boolean-expr)
     static constexpr bool isRgb = ledPin == GPIO_NUM_NC ? false : IS_RGB;
     static constexpr bool rgbLed = ledPin == GPIO_NUM_NC ? false : IS_RGB;
+    // NOLINTEND(bugprone-branch-clone,readability-simplify-boolean-expr)
     static constexpr EOrder ledColorChannelOrder = RGB_LED_COLOR_CHANNEL_ORDER;
 
     static constexpr unsigned char impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
@@ -82,5 +84,5 @@ public:
     static constexpr unsigned char batteryLevelArrayLength = BATTERY_LEVEL_ARRAY_LENGTH;
     static constexpr unsigned char initialBatteryLevelMeasurementCount = INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT;
     static constexpr unsigned int batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1'000;
-    static constexpr unsigned long deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1'000;
+    static constexpr unsigned int deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1'000;
 };

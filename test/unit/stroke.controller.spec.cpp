@@ -2,8 +2,8 @@
 #include <numeric>
 #include <vector>
 
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
 #include "../../src/rower/stroke.controller.h"
 

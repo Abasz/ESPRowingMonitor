@@ -173,14 +173,14 @@ Configurations::precision TSQuadraticSeries::goodnessOfFit() const
     return 1 - (sse / sst);
 }
 
-Configurations::precision TSQuadraticSeries::projectX(Configurations::precision valueX) const
+Configurations::precision TSQuadraticSeries::projectX(Configurations::precision pointX) const
 {
     if (seriesX.size() < 3)
     {
         return 0.0;
     }
 
-    return ((a * valueX * valueX) + (b * valueX) + c);
+    return ((a * pointX * pointX) + (b * pointX) + c);
 }
 
 constexpr unsigned short TSQuadraticSeries::calculateMaxSeriesALength() const

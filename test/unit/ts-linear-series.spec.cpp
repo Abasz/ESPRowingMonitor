@@ -1,4 +1,4 @@
-#include "catch_amalgamated.hpp"
+#include "./include/catch_amalgamated.hpp"
 
 #include "../../src/utils/ts-linear-series.h"
 #include "./regression.test-cases.spec.h"

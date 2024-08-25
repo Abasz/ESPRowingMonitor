@@ -2,7 +2,7 @@
 
 #include "../utils/enums.h"
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)
 #define DEVICE_NAME KayakFirst
 #define MODEL_NUMBER Orange
 #define SERIAL_NUMBER "03172022/1"
@@ -35,4 +35,4 @@
 #define IMPULSE_DATA_ARRAY_LENGTH 7
 // #define FLOATING_POINT_PRECISION PRECISION_DOUBLE
 
-// NOLINTEND(cppcoreguidelines-macro-usage)
+// NOLINTEND(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)

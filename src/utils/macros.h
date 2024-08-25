@@ -1,6 +1,7 @@
 #pragma once
 
-#include <string>
+#include <array>
+#include <string_view>
 
 #if defined(UNIT_TEST)
     #include "../../test/unit/include/test.settings.h"
@@ -11,24 +12,72 @@
 #endif
 #include "./enums.h"
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+using std::string_view;
 
-constexpr unsigned int compileDateYear = (__DATE__[7] - '0') * 1'000 + (__DATE__[8] - '0') * 100 + (__DATE__[9] - '0') * 10 + (__DATE__[10] - '0');
-constexpr unsigned int compileDateMonthNumber = (int)__DATE__[0] + (int)__DATE__[1] + (int)__DATE__[2];
-constexpr unsigned int compileDateMonth = compileDateMonthNumber == 281   ? 1
-                                          : compileDateMonthNumber == 269 ? 2
-                                          : compileDateMonthNumber == 288 ? 3
-                                          : compileDateMonthNumber == 291 ? 4
-                                          : compileDateMonthNumber == 295 ? 5
-                                          : compileDateMonthNumber == 301 ? 6
-                                          : compileDateMonthNumber == 299 ? 7
-                                          : compileDateMonthNumber == 285 ? 8
-                                          : compileDateMonthNumber == 296 ? 9
-                                          : compileDateMonthNumber == 294 ? 10
-                                          : compileDateMonthNumber == 307 ? 11
-                                          : compileDateMonthNumber == 268 ? 12
-                                                                          : 0;
-constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0') : (__DATE__[4] - '0') * 10 + (__DATE__[5] - '0');
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+constexpr string_view getCompileMonth()
+{
+    constexpr auto month = string_view(__DATE__).substr(0, 3);
+    if (month == "Jan")
+    {
+        return "01";
+    }
+    if (month == "Feb")
+    {
+        return "02";
+    }
+    if (month == "Mar")
+    {
+        return "03";
+    }
+    if (month == "Apr")
+    {
+        return "04";
+    }
+    if (month == "May")
+    {
+        return "05";
+    }
+    if (month == "Jun")
+    {
+        return "06";
+    }
+    if (month == "Jul")
+    {
+        return "07";
+    }
+    if (month == "Aug")
+    {
+        return "08";
+    }
+    if (month == "Sep")
+    {
+        return "09";
+    }
+    if (month == "Oct")
+    {
+        return "10";
+    }
+    if (month == "Nov")
+    {
+        return "11";
+    }
+    if (month == "Dec")
+    {
+        return "12";
+    }
+
+    return "00";
+}
+
+constexpr std::array<char, 8> getCompileDate()
+{
+    constexpr auto day = string_view(__DATE__).substr(4, 2);
+    constexpr auto month = getCompileMonth();
+    constexpr auto year = string_view(__DATE__).substr(7, 4);
+
+    return {year[0], year[1], year[2], year[3], month[0], month[1], day[0], day[1]};
+}
 
 #define PRECISION_FLOAT 0
 #define PRECISION_DOUBLE 1
@@ -114,10 +163,6 @@ constexpr unsigned int compileDateDay = (__DATE__[4] == ' ') ? (__DATE__[5] - '0
 
 #if !defined(SUPPORT_SD_CARD_LOGGING)
     #define SUPPORT_SD_CARD_LOGGING false
-#endif
-
-#if !defined(HAS_BLE_EXTENDED_METRICS)
-    #define HAS_BLE_EXTENDED_METRICS true
 #endif
 
 // Sanity checks and validations

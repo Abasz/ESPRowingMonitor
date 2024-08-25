@@ -1,6 +1,6 @@
-#include "fakeit.hpp"
+#include "./fakeit.hpp"
 
-#include "Arduino.h"
+#include "./Arduino.h"
 
 fakeit::Mock<MockArduino> mockArduino;
 fakeit::Mock<MockHardwareSerial> mockSerial;

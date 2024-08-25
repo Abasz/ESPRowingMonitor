@@ -30,7 +30,7 @@ void detachRotationInterrupt()
     detachInterrupt(digitalPinToInterrupt(Configurations::sensorPinNumber));
 }
 
-void printPrefix(Print *const _logOutput, int logLevel)
+void printPrefix(Print *const _logOutput, const int logLevel)
 {
     printTimestamp(_logOutput);
     printLogLevel(_logOutput, logLevel);

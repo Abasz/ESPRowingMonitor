@@ -77,6 +77,9 @@
 			"mutex": "cpp",
 			"thread": "cpp",
 			"variant": "cpp"
-		}
+		},
+		"C_Cpp.codeAnalysis.clangTidy.args": [
+			// "-extra-arg=test/unit/include"
+		]
 	}
 }

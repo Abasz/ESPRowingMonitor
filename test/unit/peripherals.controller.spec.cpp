@@ -2,8 +2,8 @@
 #include <array>
 #include <string>
 
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
 #include "./include/FastLED.h"
 
@@ -204,7 +204,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
         SECTION("notify deltaTimes when last notification was send more than 1 seconds ago, clear vector and reserve memory based on MTU")
         {
-            std::vector<std::vector<unsigned long>> notifiedDeltaTimes;
+            std::vector<std::vector<unsigned long>> notifiedDeltaTimes{};
             When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval, blinkInterval * 2, blinkInterval * 2);
             When(Method(mockBluetoothService, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
             When(Method(mockBluetoothService, isDeltaTimesSubscribed)).AlwaysReturn(true);
@@ -241,7 +241,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
         {
             SECTION("add new deltaTime when logging to sd-card is enabled and log file is open")
             {
-                std::vector<std::vector<unsigned long>> notifiedDeltaTimes;
+                std::vector<std::vector<unsigned long>> notifiedDeltaTimes{};
 
                 When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(true);
                 Fake(Method(mockSdCardService, saveDeltaTime).Matching([&notifiedDeltaTimes](const std::vector<unsigned long> &deltaTimes)

@@ -5,11 +5,11 @@
 #include <string>
 #include <vector>
 
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
-#include "Arduino.h"
-#include "NimBLEDevice.h"
+#include "./include/Arduino.h"
+#include "./include/NimBLEDevice.h"
 
 #include "../../src/peripherals/bluetooth.service.h"
 #include "../../src/peripherals/sd-card.service.interface.h"
@@ -738,7 +738,7 @@ TEST_CASE("BluetoothServer", "[callbacks]")
         {
             const auto expectedMTU = 100;
             ble_gap_conn_desc first = {0};
-            std::vector<std::vector<unsigned char>> results;
+            std::vector<std::vector<unsigned char>> results{};
 
             const unsigned short expectedChunkSize = (expectedMTU - 3U - 2U) / sizeof(float);
             const unsigned char expectedNumberOfNotifies = expectedBigHandleForces.size() / expectedChunkSize + (expectedBigHandleForces.size() % expectedChunkSize == 0 ? 0 : 1);
@@ -769,7 +769,7 @@ TEST_CASE("BluetoothServer", "[callbacks]")
         {
             const auto expectedMTU = 100;
             ble_gap_conn_desc first = {0};
-            std::vector<std::vector<unsigned char>> results;
+            std::vector<std::vector<unsigned char>> results{};
 
             const unsigned short expectedChunkSize = (expectedMTU - 3U - 2U) / sizeof(float);
             const unsigned char expectedNumberOfNotifies = expectedBigHandleForces.size() / expectedChunkSize + (expectedBigHandleForces.size() % expectedChunkSize == 0 ? 0 : 1);
@@ -788,7 +788,7 @@ TEST_CASE("BluetoothServer", "[callbacks]")
 
             for (unsigned char i = 0; i < expectedNumberOfNotifies; i++)
             {
-                std::vector<float> parsedHandleForces;
+                std::vector<float> parsedHandleForces{};
                 size_t numOfFloats = (results[i].size() - 2) / sizeof(float);
                 for (size_t j = 0; j < numOfFloats; ++j)
                 {

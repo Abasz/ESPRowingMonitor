@@ -3,9 +3,9 @@
 #include <span>
 #include <string>
 
-#include "ArduinoLog.h"
+#include "./ArduinoLog.h"
 
-#include "globals.h"
+#include "./globals.h"
 
 #include "./test.array.h"
 

@@ -1,6 +1,6 @@
 #include <numeric>
 
-#include "globals.h"
+#include "./globals.h"
 
 void simulateRotation(const unsigned long now)
 {

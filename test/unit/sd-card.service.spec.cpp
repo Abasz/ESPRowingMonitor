@@ -1,11 +1,11 @@
 // NOLINTBEGIN(readability-magic-numbers)
 #include <string>
 
-#include "catch_amalgamated.hpp"
-#include "fakeit.hpp"
+#include "./include/catch_amalgamated.hpp"
+#include "./include/fakeit.hpp"
 
-#include "Arduino.h"
-#include "SdFat.h"
+#include "./include/Arduino.h"
+#include "./include/SdFat.h"
 
 #include "../../src/peripherals/sd-card.service.h"
 #include "../../src/utils/configuration.h"

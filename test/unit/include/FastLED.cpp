@@ -1,6 +1,6 @@
-#include "fakeit.hpp"
+#include "./fakeit.hpp"
 
-#include "FastLED.h"
+#include "./FastLED.h"
 
 fakeit::Mock<MockCFastLED> mockFastLED;
 

@@ -1,7 +1,7 @@
 // NOLINTBEGIN
 #pragma once
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "../../src/utils/configuration.h"
 
@@ -9,52 +9,67 @@ class Logging
 {
 public:
     template <class T, typename... Args>
-    static void infoln(T msg, Args... args)
+    void infoln(T msg, Args... args)
     {
         if (Configurations::defaultLogLevel >= ArduinoLogLevel::LogLevelInfo)
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
             printf(msg, args...);
             printf("\n");
+#pragma GCC diagnostic pop
         }
     };
 
     template <class T, typename... Args>
-    static void verboseln(T msg, Args... args)
+    void verboseln(T msg, Args... args)
     {
         if (Configurations::defaultLogLevel >= ArduinoLogLevel::LogLevelVerbose)
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
             printf(msg, args...);
             printf("\n");
+#pragma GCC diagnostic pop
         }
     };
 
     template <class T, typename... Args>
-    static void traceln(T msg, Args... args)
+    void traceln(T msg, Args... args)
     {
         if (Configurations::defaultLogLevel >= ArduinoLogLevel::LogLevelTrace)
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
             printf(msg, args...);
             printf("\n");
+#pragma GCC diagnostic pop
         }
     };
 
     template <class T, typename... Args>
-    static void warningln(T msg, Args... args)
+    void warningln(T msg, Args... args)
     {
         if (Configurations::defaultLogLevel >= ArduinoLogLevel::LogLevelWarning)
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
             printf(msg, args...);
             printf("\n");
+#pragma GCC diagnostic pop
         }
     };
 
     template <class T, typename... Args>
-    static void errorln(T msg, Args... args)
+    void errorln(T msg, Args... args)
     {
         if (Configurations::defaultLogLevel >= ArduinoLogLevel::LogLevelError)
         {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
             printf(msg, args...);
             printf("\n");
+#pragma GCC diagnostic pop
         }
     };
 
