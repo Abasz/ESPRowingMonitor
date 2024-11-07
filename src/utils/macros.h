@@ -76,7 +76,9 @@ constexpr std::array<char, 8> getCompileDate()
     constexpr auto month = getCompileMonth();
     constexpr auto year = string_view(__DATE__).substr(7, 4);
 
-    return {year[0], year[1], year[2], year[3], month[0], month[1], day[0], day[1]};
+    const char zeroChar = 48;
+    const char spaceChar = 32;
+    return {year[0], year[1], year[2], year[3], month[0], month[1], day[0] == spaceChar ? zeroChar : day[0], day[1]};
 }
 
 #define PRECISION_FLOAT 0
