@@ -393,7 +393,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
                 .Once();
             Verify(
                 OverloadedMethod(mockDeviceInfoService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::softwareNumberSvcUuid, expectedProperty))
+                    .Using(CommonBleFlags::firmwareNumberSvcUuid, expectedProperty))
                 .Once();
 
             Verify(
@@ -410,7 +410,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
                 .Once();
             Verify(
                 OverloadedMethod(mockDeviceInfoCharacteristic, setValue, void(const std::string))
-                    .Using(Configurations::softwareVersion))
+                    .Using(Configurations::firmwareVersion))
                 .Once();
 
             Verify(Method(mockDeviceInfoService, start)).Once();

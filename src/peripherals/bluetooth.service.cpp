@@ -154,8 +154,8 @@ NimBLEService *BluetoothService::setupDeviceInfoServices(NimBLEServer *const ser
         ->createCharacteristic(CommonBleFlags::serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue(Configurations::serialNumber);
     deviceInfoService
-        ->createCharacteristic(CommonBleFlags::softwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(Configurations::softwareVersion);
+        ->createCharacteristic(CommonBleFlags::firmwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(Configurations::firmwareVersion);
 
     return deviceInfoService;
 }

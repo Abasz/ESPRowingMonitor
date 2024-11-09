@@ -247,6 +247,6 @@ public:
     static constexpr unsigned short deviceInfoSvcUuid = 0x180A;
     static constexpr unsigned short modelNumberSvcUuid = 0x2A24;
     static constexpr unsigned short serialNumberSvcUuid = 0x2A25;
-    static constexpr unsigned short softwareNumberSvcUuid = 0x2A28;
+    static constexpr unsigned short firmwareNumberSvcUuid = 0x2A26;
     static constexpr unsigned short manufacturerNameSvcUuid = 0x2A29;
 };

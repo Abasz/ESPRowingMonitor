@@ -28,7 +28,7 @@ public:
     inline static const string deviceName = TOSTRING(DEVICE_NAME);
     inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
     inline static const string serialNumber = SERIAL_NUMBER;
-    inline static const string softwareVersion = string(getCompileDate().data(), getCompileDate().size());
+    inline static const string firmwareVersion = string(getCompileDate().data(), getCompileDate().size());
 
     // Hardware settings
     static constexpr BaudRates baudRate = BAUD_RATE;
