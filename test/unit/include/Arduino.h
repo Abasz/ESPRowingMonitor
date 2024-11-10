@@ -146,50 +146,22 @@ inline void esp_restart()
     mockArduino.get().esp_restart();
 }
 
-class MockHardwareSerial
+class HardwareSerial : public Print
 {
 public:
-    virtual inline void begin(unsigned long baud, unsigned int config, char rxPin = -1, char txPin = -1, bool invert = false, unsigned long timeout_ms = 20'000UL, unsigned char rxfifo_full_thrhd = 112) = 0;
-    virtual inline void end(bool fullyTerminate = true) = 0;
-    virtual inline void updateBaudRate(unsigned long baud) = 0;
-    virtual inline const int available() = 0;
-    virtual inline int availableForWrite() = 0;
-    virtual inline void flush() = 0;
-};
-extern fakeit::Mock<MockHardwareSerial> mockSerial;
-
-class HardwareSerial final : public Print
-{
-public:
-    inline void begin(unsigned long baud, unsigned int config = 0, char rxPin = -1, char txPin = -1, bool invert = false, unsigned long timeout_ms = 20'000UL, unsigned char rxfifo_full_thrhd = 112)
-    {
-        mockSerial.get().begin(baud, config, rxPin, txPin, invert, timeout_ms, rxfifo_full_thrhd);
-    };
-    inline void end(bool fullyTerminate = true)
-    {
-        mockSerial.get().end(fullyTerminate);
-    };
-    inline void updateBaudRate(unsigned long baud)
-    {
-        mockSerial.get().updateBaudRate(baud);
-    };
-    inline const int available()
-    {
-        return mockSerial.get().available();
-    };
-    inline int availableForWrite()
-    {
-        return mockSerial.get().availableForWrite();
-    };
-    inline void flush()
-    {
-        mockSerial.get().flush();
-    };
+    virtual inline void begin(unsigned long baud, unsigned int config = 134217756, char rxPin = -1, char txPin = -1, bool invert = false, unsigned long timeout_ms = 20'000UL, unsigned char rxfifo_full_thrhd = 112) {}
+    virtual inline void end(bool fullyTerminate = true) {}
+    virtual inline void updateBaudRate(unsigned long baud) {}
+    virtual inline const int available() { return 0; }
+    virtual inline int availableForWrite() { return 0; }
+    virtual inline void printf(const char *__restrict __fmt, ...) {};
+    virtual inline void flush() {}
     inline operator bool()
     {
         return static_cast<bool>(available());
     }
 };
+extern fakeit::Mock<HardwareSerial> mockSerial;
+extern HardwareSerial &Serial;
 
-extern HardwareSerial Serial;
 // NOLINTEND

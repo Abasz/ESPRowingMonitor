@@ -1,10 +1,4 @@
-#include "./Arduino.h"
-#include "./FastLED.h"
-
 #include "./globals.h"
-
-HardwareSerial Serial;
-CFastLED FastLED;
 
 fakeit::Mock<Globals> mockGlobals;
 

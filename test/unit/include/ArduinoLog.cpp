@@ -1,3 +1,3 @@
 #include "./ArduinoLog.h"
 
-Logging Log = Logging();
+Logging Log;

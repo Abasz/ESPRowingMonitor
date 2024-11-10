@@ -3,4 +3,6 @@
 #include "./Arduino.h"
 
 fakeit::Mock<MockArduino> mockArduino;
-fakeit::Mock<MockHardwareSerial> mockSerial;
+fakeit::Mock<HardwareSerial> mockSerial;
+
+HardwareSerial &Serial = mockSerial.get();
