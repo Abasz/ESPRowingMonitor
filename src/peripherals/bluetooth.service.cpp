@@ -8,7 +8,7 @@
 #include "../utils/configuration.h"
 #include "./bluetooth.service.h"
 
-BluetoothService::BluetoothService(IEEPROMService &_eepromService, ISdCardService &_sdCardService) : eepromService(_eepromService), sdCardService(_sdCardService), controlPointCallbacks(*this), chunkedNotifyMetricCallbacks(*this), serverCallbacks(*this)
+BluetoothService::BluetoothService(IEEPROMService &_eepromService, ISdCardService &_sdCardService, IOtaUploaderService &_otaService) : eepromService(_eepromService), sdCardService(_sdCardService), otaService(_otaService), otaRxCallbacks(*this), controlPointCallbacks(*this), chunkedNotifyMetricCallbacks(*this), serverCallbacks(*this)
 {
 }
 
@@ -77,6 +77,8 @@ void BluetoothService::setupServices()
 
     auto *settingsService = setupSettingsServices(server);
     settingsService->start();
+    auto *otaService = setupOtaServices(server);
+    otaService->start();
     auto *deviceInfoService = setupDeviceInfoServices(server);
     deviceInfoService->start();
 
@@ -170,6 +172,19 @@ NimBLEService *BluetoothService::setupSettingsServices(NimBLEServer *const serve
     settingsService->createCharacteristic(CommonBleFlags::settingsControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
     return settingsService;
+}
+
+NimBLEService *BluetoothService::setupOtaServices(NimBLEServer *server)
+{
+    Log.traceln("Setting up OTA Service");
+    auto *otaBleService = server->createService(CommonBleFlags::otaServiceUuid);
+    auto *otaTxCharacteristic = otaBleService->createCharacteristic(CommonBleFlags::otaTxUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+
+    otaService.begin(otaTxCharacteristic);
+
+    otaBleService->createCharacteristic(CommonBleFlags::otaRxUuid, NIMBLE_PROPERTY::WRITE)->setCallbacks(&otaRxCallbacks);
+
+    return otaBleService;
 }
 
 void BluetoothService::setupAdvertisement() const

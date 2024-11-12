@@ -16,6 +16,7 @@
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/enums.h"
+#include "../../src/utils/ota-updater.service.interface.h"
 
 using namespace fakeit;
 
@@ -23,6 +24,7 @@ TEST_CASE("BluetoothServer", "[callbacks]")
 {
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISdCardService> mockSdCardService;
+    Mock<IOtaUploaderService> mockOtaService;
     Mock<NimBLECharacteristic> mockBatteryLevelCharacteristic;
     Mock<NimBLECharacteristic> mockSettingsCharacteristic;
     Mock<NimBLECharacteristic> mockHandleForcesCharacteristic;
@@ -62,6 +64,8 @@ TEST_CASE("BluetoothServer", "[callbacks]")
 
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(true);
 
+    Fake(Method(mockOtaService, begin));
+
     // Test specific mocks
 
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(Eq(CommonBleFlags::batteryLevelUuid), Any())).AlwaysReturn(&mockBatteryLevelCharacteristic.get());
@@ -76,7 +80,7 @@ TEST_CASE("BluetoothServer", "[callbacks]")
 
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(Eq(CommonBleFlags::handleForcesUuid), Any())).AlwaysReturn(&mockHandleForcesCharacteristic.get());
 
-    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get());
+    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
     bluetoothService.setup();
     NimBLECharacteristicCallbacks *handleForcesCallback = std::move(mockHandleForcesCharacteristic.get().callbacks);
 

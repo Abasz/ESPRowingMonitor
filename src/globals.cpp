@@ -6,7 +6,8 @@ Preferences preferences;
 
 EEPROMService eepromService(preferences);
 SdCardService sdCardService;
-BluetoothService bleService(eepromService, sdCardService);
+OtaUpdaterService otaService;
+BluetoothService bleService(eepromService, sdCardService, otaService);
 FlywheelService flywheelService;
 StrokeService strokeService;
 PowerManagerService powerManagerService;

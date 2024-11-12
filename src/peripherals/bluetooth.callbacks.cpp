@@ -9,6 +9,8 @@ using std::array;
 
 BluetoothService::ServerCallbacks::ServerCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
 
+BluetoothService::OtaRxCallbacks::OtaRxCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
+
 BluetoothService::ControlPointCallbacks::ControlPointCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
 
 BluetoothService::ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks(BluetoothService &_bleService) : bleService(_bleService) {}
@@ -57,6 +59,13 @@ void BluetoothService::ChunkedNotifyMetricCallbacks::onSubscribe(NimBLECharacter
     {
         bleService.deltaTimesParameters.clientIds.push_back(desc->conn_handle);
     }
+}
+
+void BluetoothService::OtaRxCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc)
+{
+    const auto mtu = pCharacteristic->getService()->getServer()->getPeerMTU(desc->conn_handle);
+
+    bleService.otaService.onData(pCharacteristic->getValue(), mtu);
 }
 
 void BluetoothService::ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic)

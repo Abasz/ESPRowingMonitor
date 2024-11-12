@@ -16,7 +16,7 @@ CheckOptions:
   - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
     value: true
   - key: readability-magic-numbers.IgnoredIntegerValues
-    value: 3;5;6;10;11;14;20;24;1024;2048;100;500;1000;5000;1000000;1e6;
+    value: 3;5;6;10;11;14;15;20;24;1024;2048;100;500;1000;5000;1000000;1e6;
   - key: readability-magic-numbers.IgnoredFloatingPointValues
     value: 0.073;0.5;0.75;0.97;1.0;1.5;2.0;3.0;10.0;100.0;1000.0;0.1;0.001;0.0001;0.00001;0.0000001;1e6;1e6L;1000000.0L;1000000.0;-1.0;-2.0;-3.0;
   - key: readability-magic-numbers.IgnorePowersOf2IntegerValues

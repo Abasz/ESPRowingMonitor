@@ -10,6 +10,7 @@
 #include "./rower/stroke.controller.h"
 #include "./rower/stroke.service.h"
 #include "./utils/EEPROM.service.h"
+#include "./utils/ota-updater.service.h"
 #include "./utils/power-manager.controller.h"
 #include "./utils/power-manager.service.h"
 
@@ -22,6 +23,7 @@ static const unsigned long secsPerDay = 86'400;
 
 extern Preferences preferences;
 extern EEPROMService eepromService;
+extern OtaUpdaterService otaService;
 extern BluetoothService bleService;
 extern SdCardService sdCardService;
 extern PeripheralsController peripheralController;

@@ -7,6 +7,7 @@
 
 #include "../utils/EEPROM.service.interface.h"
 #include "../utils/enums.h"
+#include "../utils/ota-updater.service.interface.h"
 #include "./bluetooth.service.interface.h"
 #include "./sd-card.service.interface.h"
 
@@ -14,6 +15,16 @@ using std::vector;
 
 class BluetoothService final : public IBluetoothService
 {
+    class OtaRxCallbacks final : public NimBLECharacteristicCallbacks
+    {
+        BluetoothService &bleService;
+
+    public:
+        explicit OtaRxCallbacks(BluetoothService &_bleService);
+
+        void onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc) override;
+    };
+
     class ControlPointCallbacks final : public NimBLECharacteristicCallbacks
     {
         BluetoothService &bleService;
@@ -95,6 +106,9 @@ class BluetoothService final : public IBluetoothService
 
     IEEPROMService &eepromService;
     ISdCardService &sdCardService;
+    IOtaUploaderService &otaService;
+
+    OtaRxCallbacks otaRxCallbacks;
     ControlPointCallbacks controlPointCallbacks;
     ChunkedNotifyMetricCallbacks chunkedNotifyMetricCallbacks;
     ServerCallbacks serverCallbacks;
@@ -110,13 +124,14 @@ class BluetoothService final : public IBluetoothService
     NimBLEService *setupPscServices(NimBLEServer *server);
     NimBLEService *setupExtendedMetricsServices(NimBLEServer *server);
     NimBLEService *setupSettingsServices(NimBLEServer *server);
+    NimBLEService *setupOtaServices(NimBLEServer *server);
     static NimBLEService *setupDeviceInfoServices(NimBLEServer *server);
 
     static constexpr unsigned char settingsArrayLength = 1U;
     std::array<unsigned char, settingsArrayLength> getSettings() const;
 
 public:
-    explicit BluetoothService(IEEPROMService &_eepromService, ISdCardService &_sdCardService);
+    explicit BluetoothService(IEEPROMService &_eepromService, ISdCardService &_sdCardService, IOtaUploaderService &_otaService);
 
     void setup() override;
     void startBLEServer() override;

@@ -66,7 +66,7 @@ private:
 public:
     NimBLEAttValue(std::initializer_list<unsigned char> initList)
     {
-        data.assign(initList.begin(), initList.end());
+        data.assign(cbegin(initList), cend(initList));
     }
 
     size_t size() const
@@ -74,9 +74,29 @@ public:
         return data.size();
     }
 
+    const unsigned char *begin() const
+    {
+        return data.data();
+    }
+
+    const unsigned char *end() const
+    {
+        return &data.back() + 1;
+    }
+
     const unsigned char &operator[](size_t index) const
     {
         return data[index];
+    }
+
+    void push_back(unsigned char newElement)
+    {
+        data.push_back(newElement);
+    }
+
+    void insert(std::vector<unsigned char> &newRange)
+    {
+        data.insert(std::cend(data), cbegin(newRange), cend(newRange));
     }
 };
 
@@ -119,6 +139,7 @@ class NimBLECharacteristicCallbacks
 {
 public:
     virtual void onWrite(NimBLECharacteristic *pCharacteristic) {};
+    virtual void onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc) {};
     virtual void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue) {};
 };
 

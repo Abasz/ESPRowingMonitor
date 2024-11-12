@@ -13,6 +13,7 @@
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/enums.h"
+#include "../../src/utils/ota-updater.service.interface.h"
 
 using namespace fakeit;
 
@@ -20,6 +21,7 @@ TEST_CASE("BluetoothServer ChunkedNotifyMetricCallbacks onSubscribed method", "[
 {
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISdCardService> mockSdCardService;
+    Mock<IOtaUploaderService> mockOtaService;
     Mock<NimBLECharacteristic> mockDeltaTimesCharacteristic;
 
     mockArduino.Reset();
@@ -56,6 +58,8 @@ TEST_CASE("BluetoothServer ChunkedNotifyMetricCallbacks onSubscribed method", "[
 
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(true);
 
+    Fake(Method(mockOtaService, begin));
+
     // Test specific mocks
     When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(23);
 
@@ -72,7 +76,7 @@ TEST_CASE("BluetoothServer ChunkedNotifyMetricCallbacks onSubscribed method", "[
         .AlwaysReturn(&mockDeltaTimesCharacteristic.get());
     Fake(Method(mockDeltaTimesCharacteristic, notify));
 
-    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get());
+    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
     bluetoothService.setup();
     NimBLECharacteristicCallbacks *chunkedNotifyMetricCallback = std::move(mockDeltaTimesCharacteristic.get().callbacks);
 

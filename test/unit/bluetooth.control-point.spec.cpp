@@ -12,6 +12,7 @@
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/enums.h"
+#include "../../src/utils/ota-updater.service.interface.h"
 
 using namespace fakeit;
 
@@ -19,6 +20,7 @@ TEST_CASE("BluetoothServer ControlPointCallbacks onWrite method should", "[callb
 {
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISdCardService> mockSdCardService;
+    Mock<IOtaUploaderService> mockOtaService;
     Mock<NimBLECharacteristic> mockControlPointCharacteristic;
 
     mockArduino.Reset();
@@ -56,6 +58,8 @@ TEST_CASE("BluetoothServer ControlPointCallbacks onWrite method should", "[callb
 
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(true);
 
+    Fake(Method(mockOtaService, begin));
+
     // Test specific mocks
     When(
         OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))
@@ -71,7 +75,7 @@ TEST_CASE("BluetoothServer ControlPointCallbacks onWrite method should", "[callb
     Fake(Method(mockEEPROMService, setLogToSdCard));
     Fake(Method(mockEEPROMService, setLogToBluetooth));
 
-    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get());
+    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
     bluetoothService.setup();
     mockNimBLECharacteristic.ClearInvocationHistory();
     NimBLECharacteristicCallbacks *controlPointCallback = std::move(mockControlPointCharacteristic.get().callbacks);

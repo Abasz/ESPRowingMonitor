@@ -1,3 +1,5 @@
+#include "esp_ota_ops.h"
+
 #include "ArduinoLog.h"
 
 #include "globals.h"
@@ -29,6 +31,14 @@ void setup()
         peripheralController.notifyBattery(powerManagerController.getBatteryLevel());
     }
 
+    const esp_partition_t *partitionNext = esp_ota_get_next_update_partition(nullptr);
+
+    Log.traceln("address: %d; label: %s; size: %d, subtype: %d, type: %d", partitionNext->address, partitionNext->label, partitionNext->size, partitionNext->subtype, partitionNext->type);
+
+    const esp_partition_t *partitionCurrent = esp_ota_get_running_partition();
+    Log.traceln("address: %d; label: %s; size: %d, subtype: %d, type: %d", partitionCurrent->address,
+                partitionCurrent->label, partitionCurrent->size, partitionCurrent->subtype, partitionCurrent->type);
+
 #if defined(SIMULATE_FILE)
     setupFileSimulation();
 #endif
@@ -39,6 +49,11 @@ void loop()
 #if defined(SIMULATE_ROTATION)
     simulateRotation();
 #endif
+
+    if (otaService.isUpdating())
+    {
+        return;
+    }
 
     strokeController.update();
     peripheralController.update(powerManagerController.getBatteryLevel());

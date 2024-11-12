@@ -74,6 +74,24 @@ enum class ResponseOpCodes : unsigned char
     OperationFailed,
 };
 
+enum class OtaResponseOpCodes : unsigned char
+{
+    Ok,
+    NotOk,
+    IncorrectFormat,
+    IncorrectFirmwareSize,
+    ChecksumError,
+    InternalStorageError,
+};
+
+enum class OtaRequestOpCodes : unsigned char
+{
+    Begin,
+    Package,
+    End,
+    Abort,
+};
+
 enum class BaudRates : unsigned int
 {
     Baud9600 = 9'600U,
@@ -240,6 +258,10 @@ public:
     inline static const std::string extendedMetricsUuid = "808a0d51-efae-4f0c-b2e0-48bc180d65c3";
     inline static const std::string handleForcesUuid = "3d9c2760-cf91-41ee-87e9-fd99d5f129a4";
     inline static const std::string deltaTimesUuid = "ae5d11ea-62f6-4789-b809-6fc93fee92b9";
+
+    inline static const std::string otaServiceUuid = "ed249319-32c3-4e9f-83d7-7bb5aa5d5d4b";
+    inline static const std::string otaRxUuid = "fbac1540-698b-40ff-a34e-f39e5b78d1cf";
+    inline static const std::string otaTxUuid = "b31126a7-a29b-450a-b0c2-c0516f46b699";
 
     static constexpr unsigned short batterySvcUuid = 0x180F;
     static constexpr unsigned short batteryLevelUuid = 0x2A19;
