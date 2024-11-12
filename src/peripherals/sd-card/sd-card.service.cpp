@@ -1,7 +1,7 @@
 #include "Arduino.h"
 #include "ArduinoLog.h"
 
-#include "../utils/configuration.h"
+#include "../../utils/configuration.h"
 #include "./sd-card.service.h"
 
 SdCardService::SdCardService() : sdCardTaskParameters{logFile, {}} {}

@@ -9,7 +9,7 @@
 
 #include "../../src/peripherals/bluetooth/bluetooth.controller.interface.h"
 #include "../../src/peripherals/peripherals.controller.h"
-#include "../../src/peripherals/sd-card.service.interface.h"
+#include "../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../src/utils/EEPROM.service.interface.h"
 
 using namespace fakeit;

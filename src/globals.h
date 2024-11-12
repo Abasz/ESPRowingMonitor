@@ -5,7 +5,7 @@
 
 #include "./peripherals/bluetooth/bluetooth.controller.h"
 #include "./peripherals/peripherals.controller.h"
-#include "./peripherals/sd-card.service.h"
+#include "./peripherals/sd-card/sd-card.service.h"
 #include "./rower/flywheel.service.h"
 #include "./rower/stroke.controller.h"
 #include "./rower/stroke.service.h"

@@ -9,7 +9,7 @@
 #include "./include/NimBLEDevice.h"
 
 #include "../../src/peripherals/bluetooth/bluetooth.controller.h"
-#include "../../src/peripherals/sd-card.service.interface.h"
+#include "../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/enums.h"

@@ -1,28 +1,26 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include <string>
-
 #include "./include/catch_amalgamated.hpp"
 #include "./include/fakeit.hpp"
 
 #include "./include/Arduino.h"
 #include "./include/SdFat.h"
 
-#include "../../src/peripherals/sd-card.service.h"
+#include "../../src/peripherals/sd-card/sd-card.service.h"
 #include "../../src/utils/configuration.h"
 
 using namespace fakeit;
 
 TEST_CASE("SdCardService", "[peripheral]")
 {
+    mockSdFat32.Reset();
+    mockFile32.Reset();
+    mockArduino.Reset();
+
     SECTION("setup method")
     {
         File32 root;
-
         SdCardService sdCardService;
 
-        mockSdFat32.Reset();
-        mockFile32.Reset();
-        mockArduino.Reset();
         When(Method(mockSdFat32, begin)).AlwaysReturn(true);
         When(Method(mockSdFat32, open)).AlwaysReturn(root);
         Fake(Method(mockSdFat32, end));

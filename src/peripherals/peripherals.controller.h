@@ -7,7 +7,7 @@
 #include "../utils/EEPROM.service.interface.h"
 #include "./bluetooth/bluetooth.controller.interface.h"
 #include "./peripherals.controller.interface.h"
-#include "./sd-card.service.interface.h"
+#include "./sd-card/sd-card.service.interface.h"
 
 using std::vector;
 

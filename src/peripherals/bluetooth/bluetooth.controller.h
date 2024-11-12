@@ -8,7 +8,7 @@
 #include "../../utils/EEPROM.service.interface.h"
 #include "../../utils/enums.h"
 #include "../../utils/ota-updater.service.interface.h"
-#include "../sd-card.service.interface.h"
+#include "../sd-card/sd-card.service.interface.h"
 #include "./ble-services/base-metrics.service.h"
 #include "./ble-services/battery.service.h"
 #include "./ble-services/extended-metrics.service.h"

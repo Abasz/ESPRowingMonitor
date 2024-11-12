@@ -43,7 +43,7 @@ set(SOURCES_UNIT_TEST
     "${LIB_DIR}/rower/stroke.controller.cpp"
 
     "${LIB_DIR}/peripherals/peripherals.controller.cpp"
-    "${LIB_DIR}/peripherals/sd-card.service.cpp"
+    "${LIB_DIR}/peripherals/sd-card/sd-card.service.cpp"
 
     "${LIB_DIR}/peripherals/bluetooth/ble-services/base-metrics.service.cpp"
     "${LIB_DIR}/peripherals/bluetooth/ble-services/extended-metrics.service.cpp"
