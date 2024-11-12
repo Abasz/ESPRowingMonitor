@@ -7,7 +7,7 @@
 #include "./include/Arduino.h"
 #include "./include/NimBLEDevice.h"
 
-#include "../../src/peripherals/bluetooth.service.h"
+#include "../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../src/peripherals/sd-card.service.interface.h"
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
@@ -16,7 +16,7 @@
 
 using namespace fakeit;
 
-TEST_CASE("BluetoothServer ControlPointCallbacks onWrite method should", "[callbacks]")
+TEST_CASE("BluetoothController ControlPointCallbacks onWrite method should", "[callbacks]")
 {
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISdCardService> mockSdCardService;
@@ -75,8 +75,8 @@ TEST_CASE("BluetoothServer ControlPointCallbacks onWrite method should", "[callb
     Fake(Method(mockEEPROMService, setLogToSdCard));
     Fake(Method(mockEEPROMService, setLogToBluetooth));
 
-    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
-    bluetoothService.setup();
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
+    bluetoothController.setup();
     mockNimBLECharacteristic.ClearInvocationHistory();
     NimBLECharacteristicCallbacks *controlPointCallback = std::move(mockControlPointCharacteristic.get().callbacks);
 

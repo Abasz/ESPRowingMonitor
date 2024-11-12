@@ -8,7 +8,7 @@
 #include "./include/Arduino.h"
 #include "./include/NimBLEDevice.h"
 
-#include "../../src/peripherals/bluetooth.service.h"
+#include "../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../src/peripherals/sd-card.service.interface.h"
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
@@ -17,7 +17,7 @@
 
 using namespace fakeit;
 
-TEST_CASE("BluetoothServer", "[peripheral]")
+TEST_CASE("BluetoothController", "[peripheral]")
 {
     const auto serviceFlag = BleServiceFlag::CpsService;
     const auto logToBluetooth = true;
@@ -64,18 +64,18 @@ TEST_CASE("BluetoothServer", "[peripheral]")
 
     Fake(Method(mockOtaService, begin));
 
-    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
 
     SECTION("startBLEServer method should start advertisement")
     {
-        bluetoothService.startBLEServer();
+        bluetoothController.startBLEServer();
 
         Verify(Method(mockNimBLEAdvertising, start)).Once();
     }
 
     SECTION("stopServer method should start advertisement")
     {
-        bluetoothService.stopServer();
+        bluetoothController.stopServer();
 
         Verify(Method(mockNimBLEAdvertising, stop)).Once();
     }
@@ -93,14 +93,14 @@ TEST_CASE("BluetoothServer", "[peripheral]")
 
             When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, init).Using(cpsDeviceName)).Once();
 
             mockNimBLEServer.ClearInvocationHistory();
             When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, init).Using(cscDeviceName)).Once();
         }
@@ -109,7 +109,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
         {
             mockNimBLEServer.ClearInvocationHistory();
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, setPower).Using(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_ADV)).Once();
             Verify(Method(mockNimBLEServer, setPower).Using(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_DEFAULT)).Once();
@@ -119,7 +119,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
         {
             mockNimBLEServer.ClearInvocationHistory();
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, createServer)).Once();
         }
@@ -128,7 +128,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
         {
             mockNimBLEServer.ClearInvocationHistory();
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             REQUIRE(mockNimBLEServer.get().callbacks != nullptr);
             Verify(Method(mockNimBLEServer, createServer)).Once();
@@ -150,7 +150,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
                 .AlwaysReturn(&mockNimBLECharacteristic.get());
             Fake(Method(mockBatteryService, start));
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(
                 OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short))
@@ -169,11 +169,11 @@ TEST_CASE("BluetoothServer", "[peripheral]")
 
             When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(PSCSensorBleFlags::cyclingPowerSvcUuid)).Once();
             Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid)).Once();
@@ -196,7 +196,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
             Fake(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned short)));
             Fake(Method(mockCpsService, start));
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (unsigned short)).Using(PSCSensorBleFlags::cyclingPowerSvcUuid)).Once();
             Verify(
@@ -241,7 +241,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
             Fake(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned short)));
             Fake(Method(mockCscService, start));
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (unsigned short)).Using(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid)).Once();
             Verify(
@@ -295,7 +295,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
                 .AlwaysReturn(&mockNimBLECharacteristic.get());
             Fake(Method(mockExtendedService, start));
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string)).Using(CommonBleFlags::extendedMetricsServiceUuid)).Once();
             Verify(
@@ -343,7 +343,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
             Fake(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
             Fake(Method(mockSettingsService, start));
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string)).Using(CommonBleFlags::settingsServiceUuid)).Once();
             Verify(
@@ -383,7 +383,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
                 .AlwaysReturn(&mockRxCharacteristic.get());
             Fake(Method(mockOtaBleService, start));
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             SECTION("BLE service")
             {
@@ -427,7 +427,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
             Fake(OverloadedMethod(mockDeviceInfoCharacteristic, setValue, void(const std::string)));
             Fake(Method(mockDeviceInfoService, start));
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(CommonBleFlags::deviceInfoSvcUuid)).Once();
             Verify(
@@ -471,7 +471,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
         {
             mockNimBLEServer.ClearInvocationHistory();
 
-            bluetoothService.setup();
+            bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, start)).Once();
         }
@@ -483,7 +483,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
         {
             When(Method(mockNimBLEServer, getConnectedCount)).Return(1);
 
-            const auto isConnected = bluetoothService.isAnyDeviceConnected();
+            const auto isConnected = bluetoothController.isAnyDeviceConnected();
 
             REQUIRE(isConnected == true);
         }
@@ -492,7 +492,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
         {
             When(Method(mockNimBLEServer, getConnectedCount)).Return(0);
 
-            const auto isConnected = bluetoothService.isAnyDeviceConnected();
+            const auto isConnected = bluetoothController.isAnyDeviceConnected();
 
             REQUIRE(isConnected == false);
         }
@@ -500,7 +500,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
 
     SECTION("isDeltaTimesSubscribed method")
     {
-        bluetoothService.setup();
+        bluetoothController.setup();
 
         SECTION("should return true if at least one device is connected")
         {
@@ -508,7 +508,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
 
             When(Method(mockNimBLECharacteristic, getSubscribedCount)).Return(1);
 
-            const auto isSubscribed = bluetoothService.isDeltaTimesSubscribed();
+            const auto isSubscribed = bluetoothController.isDeltaTimesSubscribed();
 
             REQUIRE(isSubscribed == true);
         }
@@ -517,7 +517,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
         {
             When(Method(mockNimBLECharacteristic, getSubscribedCount)).Return(0);
 
-            const auto isSubscribed = bluetoothService.isDeltaTimesSubscribed();
+            const auto isSubscribed = bluetoothController.isDeltaTimesSubscribed();
 
             REQUIRE(isSubscribed == false);
         }
@@ -535,7 +535,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
         When(Method(mockDeltaTimesCharacteristic, getService)).AlwaysReturn(&mockNimBLEService.get());
         When(Method(mockDeltaTimesCharacteristic, getUUID)).AlwaysReturn(NimBLEUUID{CommonBleFlags::deltaTimesUuid});
 
-        bluetoothService.setup();
+        bluetoothController.setup();
 
         Verify(
             OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))
@@ -548,7 +548,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
 
             When(Method(mockDeltaTimesCharacteristic, getSubscribedCount)).AlwaysReturn(0);
 
-            const auto mtu = bluetoothService.getDeltaTimesMTU();
+            const auto mtu = bluetoothController.getDeltaTimesMTU();
 
             REQUIRE(mtu == expectedMTU);
         }
@@ -565,7 +565,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
             mockDeltaTimesCharacteristic.get().callbacks->onSubscribe(&mockDeltaTimesCharacteristic.get(), &first, 0);
             mockDeltaTimesCharacteristic.get().callbacks->onSubscribe(&mockDeltaTimesCharacteristic.get(), &second, 0);
 
-            const auto mtu = bluetoothService.getDeltaTimesMTU();
+            const auto mtu = bluetoothController.getDeltaTimesMTU();
 
             REQUIRE(mtu == expectedMTU);
         }
@@ -583,7 +583,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
             mockDeltaTimesCharacteristic.get().callbacks->onSubscribe(&mockDeltaTimesCharacteristic.get(), &first, 0);
             mockDeltaTimesCharacteristic.get().callbacks->onSubscribe(&mockDeltaTimesCharacteristic.get(), &second, 0);
 
-            const auto mtu = bluetoothService.getDeltaTimesMTU();
+            const auto mtu = bluetoothController.getDeltaTimesMTU();
 
             REQUIRE(mtu == expectedMTU);
         }
@@ -601,7 +601,7 @@ TEST_CASE("BluetoothServer", "[peripheral]")
             mockDeltaTimesCharacteristic.get().callbacks->onSubscribe(&mockDeltaTimesCharacteristic.get(), &first, 0);
             mockDeltaTimesCharacteristic.get().callbacks->onSubscribe(&mockDeltaTimesCharacteristic.get(), &second, 0);
 
-            const auto mtu = bluetoothService.getDeltaTimesMTU();
+            const auto mtu = bluetoothController.getDeltaTimesMTU();
 
             REQUIRE(mtu == expectedMTU);
         }

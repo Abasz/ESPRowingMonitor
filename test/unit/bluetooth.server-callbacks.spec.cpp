@@ -8,7 +8,7 @@
 #include "./include/Arduino.h"
 #include "./include/NimBLEDevice.h"
 
-#include "../../src/peripherals/bluetooth.service.h"
+#include "../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../src/peripherals/sd-card.service.interface.h"
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
@@ -17,7 +17,7 @@
 
 using namespace fakeit;
 
-TEST_CASE("BluetoothServer ServerCallbacks", "[callbacks]")
+TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
 {
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISdCardService> mockSdCardService;
@@ -78,8 +78,8 @@ TEST_CASE("BluetoothServer ServerCallbacks", "[callbacks]")
         .AlwaysReturn(&mockDeltaTimesCharacteristic.get());
     Fake(Method(mockDeltaTimesCharacteristic, notify));
 
-    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
-    bluetoothService.setup();
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
+    bluetoothController.setup();
     mockNimBLEAdvertising.ClearInvocationHistory();
     NimBLEServerCallbacks *serverCallback = std::move(mockNimBLEServer.get().callbacks);
     NimBLECharacteristicCallbacks *deltaTimesCallback = std::move(mockDeltaTimesCharacteristic.get().callbacks);
@@ -122,8 +122,8 @@ TEST_CASE("BluetoothServer ServerCallbacks", "[callbacks]")
         deltaTimesCallback->onSubscribe(&mockDeltaTimesCharacteristic.get(), &first, 0);
         deltaTimesCallback->onSubscribe(&mockDeltaTimesCharacteristic.get(), &second, 0);
 
-        bluetoothService.getDeltaTimesMTU();
-        bluetoothService.notifyHandleForces({30.3});
+        bluetoothController.getDeltaTimesMTU();
+        bluetoothController.notifyHandleForces({30.3});
 
         Verify(Method(mockNimBLEServer, getPeerMTU)).Exactly(4);
 
@@ -133,8 +133,8 @@ TEST_CASE("BluetoothServer ServerCallbacks", "[callbacks]")
 
             serverCallback->onDisconnect(&mockNimBLEServer.get(), &first);
 
-            bluetoothService.getDeltaTimesMTU();
-            bluetoothService.notifyHandleForces({30.3});
+            bluetoothController.getDeltaTimesMTU();
+            bluetoothController.notifyHandleForces({30.3});
 
             Verify(Method(mockNimBLEServer, getPeerMTU)).Exactly(2);
         }
@@ -147,8 +147,8 @@ TEST_CASE("BluetoothServer ServerCallbacks", "[callbacks]")
 
             serverCallback->onDisconnect(&mockNimBLEServer.get(), &third);
 
-            bluetoothService.getDeltaTimesMTU();
-            bluetoothService.notifyHandleForces({30.3});
+            bluetoothController.getDeltaTimesMTU();
+            bluetoothController.notifyHandleForces({30.3});
 
             Verify(Method(mockNimBLEServer, getPeerMTU)).Exactly(4);
         }

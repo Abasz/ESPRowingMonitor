@@ -3,7 +3,7 @@
 #include "../utils/configuration.h"
 #include "./peripherals.controller.h"
 
-PeripheralsController::PeripheralsController(IBluetoothService &_bluetoothService, ISdCardService &_sdCardService, IEEPROMService &_eepromService) : bluetoothService(_bluetoothService), sdCardService(_sdCardService), eepromService(_eepromService)
+PeripheralsController::PeripheralsController(IBluetoothController &_bluetoothController, ISdCardService &_sdCardService, IEEPROMService &_eepromService) : bluetoothController(_bluetoothController), sdCardService(_sdCardService), eepromService(_eepromService)
 {
     if constexpr ((Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
     {
@@ -43,7 +43,7 @@ void PeripheralsController::update(const unsigned char batteryLevel)
     const unsigned int bleUpdateInterval = 1'000;
     if (now - lastMetricsBroadcastTime > bleUpdateInterval)
     {
-        bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+        bluetoothController.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
         lastMetricsBroadcastTime = now;
     }
 
@@ -51,7 +51,7 @@ void PeripheralsController::update(const unsigned char batteryLevel)
     {
         if (now - lastDeltaTimesBroadcastTime > bleUpdateInterval)
         {
-            flushBleDeltaTimes(bluetoothService.getDeltaTimesMTU());
+            flushBleDeltaTimes(bluetoothController.getDeltaTimesMTU());
         }
     }
 }
@@ -67,7 +67,7 @@ void PeripheralsController::begin()
     }
 
     Log.infoln("Setting up BLE service");
-    bluetoothService.setup();
+    bluetoothController.setup();
 
     if constexpr (Configurations::ledPin != GPIO_NUM_NC)
     {
@@ -77,7 +77,7 @@ void PeripheralsController::begin()
 
 bool PeripheralsController::isAnyDeviceConnected()
 {
-    return bluetoothService.isAnyDeviceConnected();
+    return bluetoothController.isAnyDeviceConnected();
 }
 
 void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
@@ -106,7 +106,7 @@ void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
 
 void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
 {
-    bluetoothService.notifyBattery(batteryLevel);
+    bluetoothController.notifyBattery(batteryLevel);
 }
 
 void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
@@ -121,12 +121,12 @@ void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
 
     if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
     {
-        if (!eepromService.getLogToBluetooth() || !bluetoothService.isDeltaTimesSubscribed())
+        if (!eepromService.getLogToBluetooth() || !bluetoothController.isDeltaTimesSubscribed())
         {
             return;
         }
 
-        const auto mtu = bluetoothService.getDeltaTimesMTU();
+        const auto mtu = bluetoothController.getDeltaTimesMTU();
 
         const auto minimumMTU = 100;
         if (mtu < minimumMTU)
@@ -145,7 +145,7 @@ void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
 
 void PeripheralsController::flushBleDeltaTimes(const unsigned short mtu = 512U)
 {
-    bluetoothService.notifyDeltaTimes(bleDeltaTimes);
+    bluetoothController.notifyDeltaTimes(bleDeltaTimes);
 
     vector<unsigned long> clear;
     clear.reserve(mtu / sizeof(unsigned long) + 1U);
@@ -165,11 +165,11 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
 
     if constexpr (Configurations::hasExtendedBleMetrics)
     {
-        bluetoothService.notifyHandleForces(data.driveHandleForces);
-        bluetoothService.notifyExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
+        bluetoothController.notifyHandleForces(data.driveHandleForces);
+        bluetoothController.notifyExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
     }
 
-    bluetoothService.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+    bluetoothController.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
 
     lastMetricsBroadcastTime = millis();
 

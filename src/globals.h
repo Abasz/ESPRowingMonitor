@@ -3,7 +3,7 @@
 #include "Arduino.h"
 #include "Preferences.h"
 
-#include "./peripherals/bluetooth.service.h"
+#include "./peripherals/bluetooth/bluetooth.controller.h"
 #include "./peripherals/peripherals.controller.h"
 #include "./peripherals/sd-card.service.h"
 #include "./rower/flywheel.service.h"
@@ -24,7 +24,7 @@ static const unsigned long secsPerDay = 86'400;
 extern Preferences preferences;
 extern EEPROMService eepromService;
 extern OtaUpdaterService otaService;
-extern BluetoothService bleService;
+extern BluetoothController bleController;
 extern SdCardService sdCardService;
 extern PeripheralsController peripheralController;
 extern FlywheelService flywheelService;

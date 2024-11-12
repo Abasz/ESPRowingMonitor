@@ -8,7 +8,7 @@
 #include "./include/Arduino.h"
 #include "./include/NimBLEDevice.h"
 
-#include "../../src/peripherals/bluetooth.service.h"
+#include "../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../src/peripherals/sd-card.service.interface.h"
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
@@ -17,7 +17,7 @@
 
 using namespace fakeit;
 
-TEST_CASE("BluetoothServer OtaRxCallbacks onWrite method should", "[ota]")
+TEST_CASE("BluetoothController OtaRxCallbacks onWrite method should", "[ota]")
 {
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISdCardService> mockSdCardService;
@@ -76,8 +76,8 @@ TEST_CASE("BluetoothServer OtaRxCallbacks onWrite method should", "[ota]")
 
     Fake(Method(mockOtaService, onData));
 
-    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
-    bluetoothService.setup();
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
+    bluetoothController.setup();
     mockNimBLECharacteristic.ClearInvocationHistory();
     NimBLECharacteristicCallbacks *otaCallback = std::move(mockOtaRxCharacteristic.get().callbacks);
 

@@ -6,18 +6,18 @@
 #include <string>
 #include <vector>
 
-#include "./include/catch_amalgamated.hpp"
-#include "./include/fakeit.hpp"
+#include "../include/catch_amalgamated.hpp"
+#include "../include/fakeit.hpp"
 
-#include "./include/Arduino.h"
-#include "./include/NimBLEDevice.h"
+#include "../include/Arduino.h"
+#include "../include/NimBLEDevice.h"
 
-#include "../../src/peripherals/bluetooth/bluetooth.controller.h"
-#include "../../src/peripherals/sd-card.service.interface.h"
-#include "../../src/utils/EEPROM.service.interface.h"
-#include "../../src/utils/configuration.h"
-#include "../../src/utils/enums.h"
-#include "../../src/utils/ota-updater.service.interface.h"
+#include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
+#include "../../../src/peripherals/sd-card/sd-card.service.interface.h"
+#include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
+#include "../../../src/utils/configuration.h"
+#include "../../../src/utils/enums.h"
+#include "../../../src/utils/ota-updater/ota-updater.service.interface.h"
 
 using namespace fakeit;
 
@@ -550,6 +550,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
         const std::vector<float> expectedBigHandleForces{1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12};
 
         When(Method(mockNimBLEService, getServer)).AlwaysReturn(&mockNimBLEServer.get());
+        When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(100);
 
         When(Method(mockHandleForcesCharacteristic, getService)).AlwaysReturn(&mockNimBLEService.get());
         When(Method(mockHandleForcesCharacteristic, getUUID)).AlwaysReturn(NimBLEUUID{CommonBleFlags::handleForcesUuid});
@@ -563,7 +564,10 @@ TEST_CASE("BluetoothController", "[callbacks]")
         {
             mockEEPROMService.ClearInvocationHistory();
 
-            When(Method(mockHandleForcesCharacteristic, getSubscribedCount)).Return(0);
+            ble_gap_conn_desc first = {0};
+            ble_gap_conn_desc second = {1};
+            mockNimBLEServer.get().callbacks->onDisconnect(&mockNimBLEServer.get(), &first);
+            mockNimBLEServer.get().callbacks->onDisconnect(&mockNimBLEServer.get(), &second);
 
             bluetoothController.notifyHandleForces(expectedHandleForces);
 
@@ -684,6 +688,9 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
         SECTION("should start a task")
         {
+            ble_gap_conn_desc first = {0};
+            mockHandleForcesCharacteristic.get().callbacks->onSubscribe(&mockHandleForcesCharacteristic.get(), &first, 0);
+
             bluetoothController.notifyHandleForces(expectedHandleForces);
 
             Verify(
@@ -817,6 +824,8 @@ TEST_CASE("BluetoothController", "[callbacks]")
         SECTION("delete task")
         {
             mockArduino.ClearInvocationHistory();
+            ble_gap_conn_desc first = {0};
+            mockHandleForcesCharacteristic.get().callbacks->onSubscribe(&mockHandleForcesCharacteristic.get(), &first, 0);
 
             bluetoothController.notifyHandleForces(expectedHandleForces);
 

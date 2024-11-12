@@ -7,7 +7,7 @@
 
 #include "./include/FastLED.h"
 
-#include "../../src/peripherals/bluetooth.service.interface.h"
+#include "../../src/peripherals/bluetooth/bluetooth.controller.interface.h"
 #include "../../src/peripherals/peripherals.controller.h"
 #include "../../src/peripherals/sd-card.service.interface.h"
 #include "../../src/utils/EEPROM.service.interface.h"
@@ -16,7 +16,7 @@ using namespace fakeit;
 
 TEST_CASE("PeripheralController", "[peripheral]")
 {
-    Mock<IBluetoothService> mockBluetoothService;
+    Mock<IBluetoothController> mockBluetoothController;
     Mock<ISdCardService> mockSdCardService;
     Mock<IEEPROMService> mockEEPROMService;
 
@@ -42,13 +42,13 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
     When(Method(mockArduino, millis)).AlwaysReturn(0);
 
-    When(Method(mockBluetoothService, getDeltaTimesMTU)).AlwaysReturn(23);
-    When(Method(mockBluetoothService, isDeltaTimesSubscribed)).AlwaysReturn(false);
-    When(Method(mockBluetoothService, isAnyDeviceConnected)).AlwaysReturn(false);
-    Fake(Method(mockBluetoothService, notifyBaseMetrics));
-    Fake(Method(mockBluetoothService, notifyDeltaTimes));
-    Fake(Method(mockBluetoothService, notifyHandleForces));
-    Fake(Method(mockBluetoothService, notifyExtendedMetrics));
+    When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(23);
+    When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(false);
+    When(Method(mockBluetoothController, isAnyDeviceConnected)).AlwaysReturn(false);
+    Fake(Method(mockBluetoothController, notifyBaseMetrics));
+    Fake(Method(mockBluetoothController, notifyDeltaTimes));
+    Fake(Method(mockBluetoothController, notifyHandleForces));
+    Fake(Method(mockBluetoothController, notifyExtendedMetrics));
 
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(false);
@@ -59,13 +59,13 @@ TEST_CASE("PeripheralController", "[peripheral]")
     Fake(Method(mockFastLED, show));
     Fake(Method(mockFastLED, mockHelperSetColor));
 
-    PeripheralsController peripheralsController(mockBluetoothService.get(), mockSdCardService.get(), mockEEPROMService.get());
+    PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
 
     SECTION("begin method should")
     {
         Fake(Method(mockSdCardService, setup));
 
-        Fake(Method(mockBluetoothService, setup));
+        Fake(Method(mockBluetoothController, setup));
 
         Fake(Method(mockFastLED, addLeds));
 
@@ -76,11 +76,11 @@ TEST_CASE("PeripheralController", "[peripheral]")
             Verify(Method(mockSdCardService, setup)).Once();
         }
 
-        SECTION("setup BluetoothService")
+        SECTION("setup BluetoothController")
         {
             peripheralsController.begin();
 
-            Verify(Method(mockBluetoothService, setup)).Once();
+            Verify(Method(mockBluetoothController, setup)).Once();
         }
 
         SECTION("setup FastLED")
@@ -94,16 +94,16 @@ TEST_CASE("PeripheralController", "[peripheral]")
     SECTION("notifyBattery method should send notification of battery level")
     {
         const auto expectedBatteryLevel = 55U;
-        Fake(Method(mockBluetoothService, notifyBattery));
+        Fake(Method(mockBluetoothController, notifyBattery));
 
         peripheralsController.notifyBattery(expectedBatteryLevel);
 
-        Verify(Method(mockBluetoothService, notifyBattery).Using(Eq(expectedBatteryLevel))).Once();
+        Verify(Method(mockBluetoothController, notifyBattery).Using(Eq(expectedBatteryLevel))).Once();
     }
 
     SECTION("isAnyDeviceConnected method should return bluetooth connection status")
     {
-        When(Method(mockBluetoothService, isAnyDeviceConnected)).Return(true, false);
+        When(Method(mockBluetoothController, isAnyDeviceConnected)).Return(true, false);
 
         REQUIRE(peripheralsController.isAnyDeviceConnected() == true);
         REQUIRE(peripheralsController.isAnyDeviceConnected() == false);
@@ -129,7 +129,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             SECTION("to green when battery level is above 80")
             {
-                PeripheralsController peripheralsControllerLedTest(mockBluetoothService.get(), mockSdCardService.get(), mockEEPROMService.get());
+                PeripheralsController peripheralsControllerLedTest(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
 
                 const auto maxBatteryLevel = 90;
                 When(Method(mockArduino, millis)).AlwaysReturn(Configurations::ledBlinkFrequency + 1U);
@@ -143,7 +143,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
             {
                 const auto minBatteryLevel = 29;
                 When(Method(mockArduino, millis)).AlwaysReturn(Configurations::ledBlinkFrequency + 1U);
-                PeripheralsController peripheralsControllerLedTest(mockBluetoothService.get(), mockSdCardService.get(), mockEEPROMService.get());
+                PeripheralsController peripheralsControllerLedTest(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
 
                 peripheralsControllerLedTest.update(minBatteryLevel);
 
@@ -154,7 +154,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
             {
                 const auto normalBatteryLevel = 55;
                 When(Method(mockArduino, millis)).AlwaysReturn(Configurations::ledBlinkFrequency + 1U);
-                PeripheralsController peripheralsControllerLedTest(mockBluetoothService.get(), mockSdCardService.get(), mockEEPROMService.get());
+                PeripheralsController peripheralsControllerLedTest(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
 
                 peripheralsControllerLedTest.update(normalBatteryLevel);
 
@@ -164,7 +164,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
             SECTION("to black (i.e. off) when the last update turned the led on")
             {
                 When(Method(mockArduino, millis)).Return(Configurations::ledBlinkFrequency + 1U, Configurations::ledBlinkFrequency + 1U, 0U, 0U, Configurations::ledBlinkFrequency + 1, Configurations::ledBlinkFrequency + 1U, 0U, Configurations::ledBlinkFrequency + 1U);
-                PeripheralsController peripheralsControllerLedTest(mockBluetoothService.get(), mockSdCardService.get(), mockEEPROMService.get());
+                PeripheralsController peripheralsControllerLedTest(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
 
                 peripheralsControllerLedTest.update(batteryLevel);
                 peripheralsControllerLedTest.update(batteryLevel);
@@ -190,7 +190,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             peripheralsController.update(batteryLevel);
 
-            Verify(Method(mockBluetoothService, notifyBaseMetrics).Using(Eq(bleRevTimeData), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
+            Verify(Method(mockBluetoothController, notifyBaseMetrics).Using(Eq(bleRevTimeData), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
         }
 
         SECTION("not notify base metric when last notification was send less than 1 seconds ago")
@@ -199,18 +199,18 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             peripheralsController.update(batteryLevel);
 
-            Verify(Method(mockBluetoothService, notifyBaseMetrics)).Never();
+            Verify(Method(mockBluetoothController, notifyBaseMetrics)).Never();
         }
 
         SECTION("notify deltaTimes when last notification was send more than 1 seconds ago, clear vector and reserve memory based on MTU")
         {
             std::vector<std::vector<unsigned long>> notifiedDeltaTimes{};
             When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval, blinkInterval * 2, blinkInterval * 2);
-            When(Method(mockBluetoothService, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
-            When(Method(mockBluetoothService, isDeltaTimesSubscribed)).AlwaysReturn(true);
+            When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
+            When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
             When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-            Fake(Method(mockBluetoothService, notifyDeltaTimes).Matching([&notifiedDeltaTimes](const std::vector<unsigned long> &deltaTimes)
-                                                                         {
+            Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&notifiedDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                            {
                 notifiedDeltaTimes.push_back(deltaTimes);
 
                 return true; }));
@@ -220,8 +220,8 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             REQUIRE_THAT(notifiedDeltaTimes, Catch::Matchers::SizeIs(1));
             REQUIRE_THAT(notifiedDeltaTimes[0], Catch::Matchers::RangeEquals(std::vector<unsigned long>{expectedDeltaTime}));
-            Verify(Method(mockBluetoothService, notifyDeltaTimes).Matching([](const std::vector<unsigned long> &deltaTimes)
-                                                                           { return deltaTimes.capacity() == minimumDeltaTimeMTU / sizeof(unsigned long) + 1U && deltaTimes.empty(); }))
+            Verify(Method(mockBluetoothController, notifyDeltaTimes).Matching([](const std::vector<unsigned long> &deltaTimes)
+                                                                              { return deltaTimes.capacity() == minimumDeltaTimeMTU / sizeof(unsigned long) + 1U && deltaTimes.empty(); }))
                 .Once();
         }
 
@@ -231,7 +231,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             peripheralsController.update(batteryLevel);
 
-            Verify(Method(mockBluetoothService, notifyBaseMetrics)).Never();
+            Verify(Method(mockBluetoothController, notifyBaseMetrics)).Never();
         }
     }
 
@@ -302,11 +302,11 @@ TEST_CASE("PeripheralController", "[peripheral]")
                     std::vector<std::vector<unsigned long>> resultDeltaTimes;
 
                     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(false);
-                    When(Method(mockBluetoothService, isDeltaTimesSubscribed)).AlwaysReturn(true);
+                    When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
                     When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval);
 
-                    Fake(Method(mockBluetoothService, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
-                                                                                 {
+                    Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                                    {
                             resultDeltaTimes.push_back(deltaTimes);
 
                             return true; }));
@@ -323,11 +323,11 @@ TEST_CASE("PeripheralController", "[peripheral]")
                     std::vector<std::vector<unsigned long>> resultDeltaTimes;
 
                     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-                    When(Method(mockBluetoothService, isDeltaTimesSubscribed)).AlwaysReturn(false);
+                    When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(false);
                     When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval);
 
-                    Fake(Method(mockBluetoothService, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
-                                                                                 {
+                    Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                                    {
                             resultDeltaTimes.push_back(deltaTimes);
 
                             return true; }));
@@ -344,12 +344,12 @@ TEST_CASE("PeripheralController", "[peripheral]")
                     std::vector<std::vector<unsigned long>> resultDeltaTimes;
 
                     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-                    When(Method(mockBluetoothService, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU - 1);
-                    When(Method(mockBluetoothService, isDeltaTimesSubscribed)).AlwaysReturn(true);
+                    When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU - 1);
+                    When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
                     When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval);
 
-                    Fake(Method(mockBluetoothService, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
-                                                                                 {
+                    Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                                    {
                             resultDeltaTimes.push_back(deltaTimes);
 
                             return true; }));
@@ -369,10 +369,10 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             When(Method(mockArduino, millis)).AlwaysReturn(blinkInterval);
             When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-            When(Method(mockBluetoothService, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
-            When(Method(mockBluetoothService, isDeltaTimesSubscribed)).AlwaysReturn(true);
-            Fake(Method(mockBluetoothService, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
-                                                                         {
+            When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
+            When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
+            Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                            {
                             resultDeltaTimes.push_back(deltaTimes);
 
                             return true; }));
@@ -394,8 +394,8 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             When(Method(mockArduino, millis)).Return(bleUpdateInterval, bleUpdateInterval * 2 - 1).AlwaysReturn(bleUpdateInterval * 3 - 1);
             When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-            When(Method(mockBluetoothService, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
-            When(Method(mockBluetoothService, isDeltaTimesSubscribed)).AlwaysReturn(true);
+            When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
+            When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
 
             auto i = 0U;
             while ((i + 1) * sizeof(unsigned long) < minimumDeltaTimeMTU - 3)
@@ -406,7 +406,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             peripheralsController.update(batteryLevel);
 
-            Verify(Method(mockBluetoothService, notifyDeltaTimes)).Once();
+            Verify(Method(mockBluetoothController, notifyDeltaTimes)).Once();
         }
     }
 
@@ -430,7 +430,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
                 peripheralsController.updateData(expectedData);
 
-                Verify(Method(mockBluetoothService, notifyBaseMetrics).Using(Eq(bleRevTimeDataCsc), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
+                Verify(Method(mockBluetoothController, notifyBaseMetrics).Using(Eq(bleRevTimeDataCsc), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
             }
 
             SECTION("when bleServiceFlag is PSC")
@@ -441,7 +441,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
                 peripheralsController.updateData(expectedData);
 
-                Verify(Method(mockBluetoothService, notifyBaseMetrics).Using(Eq(bleRevTimeDataPcs), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
+                Verify(Method(mockBluetoothController, notifyBaseMetrics).Using(Eq(bleRevTimeDataPcs), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
             }
         }
 
@@ -449,14 +449,14 @@ TEST_CASE("PeripheralController", "[peripheral]")
         {
             peripheralsController.updateData(expectedData);
 
-            Verify(Method(mockBluetoothService, notifyExtendedMetrics).Using(Eq(bleAvgStrokePowerData), Eq(expectedData.recoveryDuration), Eq(expectedData.driveDuration), Eq(lround(expectedData.dragCoefficient * 1e6)))).Once();
+            Verify(Method(mockBluetoothController, notifyExtendedMetrics).Using(Eq(bleAvgStrokePowerData), Eq(expectedData.recoveryDuration), Eq(expectedData.driveDuration), Eq(lround(expectedData.dragCoefficient * 1e6)))).Once();
         }
 
         SECTION("notify handleForces")
         {
             peripheralsController.updateData(expectedData);
 
-            Verify(Method(mockBluetoothService, notifyHandleForces).Using(Eq(expectedData.driveHandleForces))).Once();
+            Verify(Method(mockBluetoothController, notifyHandleForces).Using(Eq(expectedData.driveHandleForces))).Once();
         }
 
         SECTION("reset lastMetricsBroadcastTime")
@@ -468,7 +468,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
             peripheralsController.updateData(expectedData);
             peripheralsController.update(batteryLevel);
 
-            Verify(Method(mockBluetoothService, notifyBaseMetrics)).Once();
+            Verify(Method(mockBluetoothController, notifyBaseMetrics)).Once();
         }
 
         SECTION("when logToSdCard")

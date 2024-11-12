@@ -2,10 +2,10 @@
 
 #include <vector>
 
-class IBluetoothService
+class IBluetoothController
 {
 protected:
-    ~IBluetoothService() = default;
+    ~IBluetoothController() = default;
 
 public:
     virtual void setup() = 0;

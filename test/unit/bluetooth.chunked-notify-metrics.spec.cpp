@@ -8,7 +8,7 @@
 #include "./include/Arduino.h"
 #include "./include/NimBLEDevice.h"
 
-#include "../../src/peripherals/bluetooth.service.h"
+#include "../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../src/peripherals/sd-card.service.interface.h"
 #include "../../src/utils/EEPROM.service.interface.h"
 #include "../../src/utils/configuration.h"
@@ -17,7 +17,7 @@
 
 using namespace fakeit;
 
-TEST_CASE("BluetoothServer ChunkedNotifyMetricCallbacks onSubscribed method", "[callbacks]")
+TEST_CASE("BluetoothController ChunkedNotifyMetricCallbacks onSubscribed method", "[callbacks]")
 {
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISdCardService> mockSdCardService;
@@ -76,8 +76,8 @@ TEST_CASE("BluetoothServer ChunkedNotifyMetricCallbacks onSubscribed method", "[
         .AlwaysReturn(&mockDeltaTimesCharacteristic.get());
     Fake(Method(mockDeltaTimesCharacteristic, notify));
 
-    BluetoothService bluetoothService(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
-    bluetoothService.setup();
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
+    bluetoothController.setup();
     NimBLECharacteristicCallbacks *chunkedNotifyMetricCallback = std::move(mockDeltaTimesCharacteristic.get().callbacks);
 
     ble_gap_conn_desc first = {0};
@@ -90,7 +90,7 @@ TEST_CASE("BluetoothServer ChunkedNotifyMetricCallbacks onSubscribed method", "[
         chunkedNotifyMetricCallback->onSubscribe(&mockDeltaTimesCharacteristic.get(), &first, 0);
         chunkedNotifyMetricCallback->onSubscribe(&mockDeltaTimesCharacteristic.get(), &second, 0);
 
-        bluetoothService.getDeltaTimesMTU();
+        bluetoothController.getDeltaTimesMTU();
 
         Verify(Method(mockNimBLEServer, getPeerMTU)).Never();
     }
@@ -104,7 +104,7 @@ TEST_CASE("BluetoothServer ChunkedNotifyMetricCallbacks onSubscribed method", "[
             chunkedNotifyMetricCallback->onSubscribe(&mockDeltaTimesCharacteristic.get(), &first, 0);
             chunkedNotifyMetricCallback->onSubscribe(&mockDeltaTimesCharacteristic.get(), &second, 0);
 
-            bluetoothService.getDeltaTimesMTU();
+            bluetoothController.getDeltaTimesMTU();
 
             Verify(Method(mockNimBLEServer, getPeerMTU)).Exactly(2);
         }
@@ -119,7 +119,7 @@ TEST_CASE("BluetoothServer ChunkedNotifyMetricCallbacks onSubscribed method", "[
             chunkedNotifyMetricCallback->onSubscribe(&mockDeltaTimesCharacteristic.get(), &first, 0);
             chunkedNotifyMetricCallback->onSubscribe(&mockDeltaTimesCharacteristic.get(), &second, 0);
 
-            bluetoothService.notifyHandleForces({30.1});
+            bluetoothController.notifyHandleForces({30.1});
 
             Verify(Method(mockNimBLEServer, getPeerMTU)).Exactly(2);
         }

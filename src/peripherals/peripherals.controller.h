@@ -5,7 +5,7 @@
 #include "FastLED.h"
 
 #include "../utils/EEPROM.service.interface.h"
-#include "./bluetooth.service.interface.h"
+#include "./bluetooth/bluetooth.controller.interface.h"
 #include "./peripherals.controller.interface.h"
 #include "./sd-card.service.interface.h"
 
@@ -13,7 +13,7 @@ using std::vector;
 
 class PeripheralsController final : public IPeripheralsController
 {
-    IBluetoothService &bluetoothService;
+    IBluetoothController &bluetoothController;
     ISdCardService &sdCardService;
     IEEPROMService &eepromService;
 
@@ -39,7 +39,7 @@ class PeripheralsController final : public IPeripheralsController
     static void setupConnectionIndicatorLed();
 
 public:
-    PeripheralsController(IBluetoothService &_bluetoothService, ISdCardService &sdCardService, IEEPROMService &_eepromService);
+    PeripheralsController(IBluetoothController &_bluetoothController, ISdCardService &sdCardService, IEEPROMService &_eepromService);
 
     void begin() override;
     void update(unsigned char batteryLevel) override;
