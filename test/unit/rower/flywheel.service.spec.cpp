@@ -2,14 +2,14 @@
 #include <numeric>
 #include <vector>
 
-#include "./include/catch_amalgamated.hpp"
-#include "./include/fakeit.hpp"
+#include "../include/catch_amalgamated.hpp"
+#include "../include/fakeit.hpp"
 
-#include "./include/Arduino.h"
+#include "../include/Arduino.h"
 
-#include "./include/globals.h"
+#include "../include/globals.h"
 
-#include "../../src/rower/flywheel.service.h"
+#include "../../../src/rower/flywheel.service.h"
 
 using namespace fakeit;
 

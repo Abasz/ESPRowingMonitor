@@ -1,18 +1,18 @@
 #include <array>
 #include <string>
 
-#include "./include/catch_amalgamated.hpp"
-#include "./include/fakeit.hpp"
+#include "../include/catch_amalgamated.hpp"
+#include "../include/fakeit.hpp"
 
-#include "./include/Arduino.h"
-#include "./include/NimBLEDevice.h"
+#include "../include/Arduino.h"
+#include "../include/NimBLEDevice.h"
 
-#include "../../src/peripherals/bluetooth/bluetooth.controller.h"
-#include "../../src/peripherals/sd-card/sd-card.service.interface.h"
-#include "../../src/utils/EEPROM/EEPROM.service.interface.h"
-#include "../../src/utils/configuration.h"
-#include "../../src/utils/enums.h"
-#include "../../src/utils/ota-updater/ota-updater.service.interface.h"
+#include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
+#include "../../../src/peripherals/sd-card/sd-card.service.interface.h"
+#include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
+#include "../../../src/utils/configuration.h"
+#include "../../../src/utils/enums.h"
+#include "../../../src/utils/ota-updater/ota-updater.service.interface.h"
 
 using namespace fakeit;
 

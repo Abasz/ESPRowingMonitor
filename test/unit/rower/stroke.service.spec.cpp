@@ -1,12 +1,12 @@
 #include <fstream>
 #include <vector>
 
-#include "./include/catch_amalgamated.hpp"
+#include "../include/catch_amalgamated.hpp"
 
-#include "./include/Arduino.h"
+#include "../include/Arduino.h"
 
-#include "../../src/rower/stroke.service.h"
-#include "../../src/utils/configuration.h"
+#include "../../../src/rower/stroke.service.h"
+#include "../../../src/utils/configuration.h"
 
 using std::ifstream;
 using std::stof;
@@ -28,19 +28,19 @@ TEST_CASE("StrokeService")
         CHECK(Configurations::minimumRecoveryTime == 300'000);
     }
 
-    ifstream deltaTimesStream("test/unit/test-data/stroke.service.spec.deltaTimes.txt");
+    ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");
     REQUIRE(deltaTimesStream.good());
 
-    ifstream slopeStream("test/unit/test-data/stroke.service.spec.slope.txt");
+    ifstream slopeStream("test/unit/rower/test-data/stroke.service.spec.slope.txt");
     REQUIRE(slopeStream.good());
 
-    ifstream torqueStream("test/unit/test-data/stroke.service.spec.torque.txt");
+    ifstream torqueStream("test/unit/rower/test-data/stroke.service.spec.torque.txt");
     REQUIRE(torqueStream.good());
 
-    ifstream forceCurveStream("test/unit/test-data/stroke.service.spec.forceCurves.txt");
+    ifstream forceCurveStream("test/unit/rower/test-data/stroke.service.spec.forceCurves.txt");
     REQUIRE(forceCurveStream.good());
 
-    ifstream dragFactorStream("test/unit/test-data/stroke.service.spec.dragFactor.txt");
+    ifstream dragFactorStream("test/unit/rower/test-data/stroke.service.spec.dragFactor.txt");
     REQUIRE(dragFactorStream.good());
 
     vector<unsigned long> deltaTimes;

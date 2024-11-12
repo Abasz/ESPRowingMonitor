@@ -1,7 +1,7 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "./include/catch_amalgamated.hpp"
+#include "../include/catch_amalgamated.hpp"
 
-#include "../../src/utils/series/ts-quadratic-series.h"
+#include "../../../src/utils/series/ts-quadratic-series.h"
 #include "./regression.test-cases.spec.h"
 
 TEST_CASE("Theil Sen Quadratic Regression", "[regression]")

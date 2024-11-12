@@ -1,8 +1,8 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "./include/catch_amalgamated.hpp"
+#include "../include/catch_amalgamated.hpp"
 
-#include "../../src/utils/configuration.h"
-#include "../../src/utils/series/weighted-average-series.h"
+#include "../../../src/utils/configuration.h"
+#include "../../../src/utils/series/weighted-average-series.h"
 
 TEST_CASE("WeightedAverageSeries")
 {

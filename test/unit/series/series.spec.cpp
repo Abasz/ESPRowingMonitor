@@ -1,8 +1,8 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "./include/catch_amalgamated.hpp"
+#include "../include/catch_amalgamated.hpp"
 
-#include "../../src/utils/configuration.h"
-#include "../../src/utils/series/series.h"
+#include "../../../src/utils/configuration.h"
+#include "../../../src/utils/series/series.h"
 
 TEST_CASE("Series")
 {
