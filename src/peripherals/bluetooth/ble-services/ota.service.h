@@ -2,7 +2,7 @@
 
 #include "NimBLEDevice.h"
 
-#include "../../../utils/ota-updater.service.interface.h"
+#include "../../../utils/ota-updater/ota-updater.service.interface.h"
 #include "../callbacks/ota.callbacks.h"
 
 class BluetoothController;

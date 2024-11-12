@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "./configuration.h"
+#include "../configuration.h"
 
 using std::size_t;
 

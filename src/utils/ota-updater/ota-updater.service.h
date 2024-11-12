@@ -5,7 +5,7 @@
 
 #include "NimBLEDevice.h"
 
-#include "./enums.h"
+#include "../enums.h"
 #include "./ota-updater.service.interface.h"
 
 using std::vector;

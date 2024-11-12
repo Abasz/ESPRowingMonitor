@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./configuration.h"
+#include "../configuration.h"
 #include "./series.h"
 
 class OLSLinearSeries

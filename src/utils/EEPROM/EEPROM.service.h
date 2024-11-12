@@ -3,9 +3,9 @@
 #include "ArduinoLog.h"
 #include "Preferences.h"
 
+#include "../configuration.h"
+#include "../enums.h"
 #include "./EEPROM.service.interface.h"
-#include "./configuration.h"
-#include "./enums.h"
 
 class EEPROMService final : public IEEPROMService
 {

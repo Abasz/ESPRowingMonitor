@@ -9,10 +9,10 @@
 #include "./rower/flywheel.service.h"
 #include "./rower/stroke.controller.h"
 #include "./rower/stroke.service.h"
-#include "./utils/EEPROM.service.h"
-#include "./utils/ota-updater.service.h"
-#include "./utils/power-manager.controller.h"
-#include "./utils/power-manager.service.h"
+#include "./utils/EEPROM/EEPROM.service.h"
+#include "./utils/ota-updater/ota-updater.service.h"
+#include "./utils/power-manager/power-manager.controller.h"
+#include "./utils/power-manager/power-manager.service.h"
 
 static unsigned long lastUpdateTime = 0UL;
 

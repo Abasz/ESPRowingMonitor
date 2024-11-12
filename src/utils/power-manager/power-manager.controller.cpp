@@ -1,6 +1,6 @@
 #include "ArduinoLog.h"
 
-#include "./configuration.h"
+#include "../configuration.h"
 #include "./power-manager.controller.h"
 
 PowerManagerController::PowerManagerController(IPowerManagerService &_powerManagerService) : powerManagerService(_powerManagerService)

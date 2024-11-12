@@ -5,8 +5,8 @@
 #include "./include/Arduino.h"
 
 #include "../../src/utils/configuration.h"
-#include "../../src/utils/power-manager.controller.h"
-#include "../../src/utils/power-manager.service.interface.h"
+#include "../../src/utils/power-manager/power-manager.controller.h"
+#include "../../src/utils/power-manager/power-manager.service.interface.h"
 
 using namespace fakeit;
 

@@ -7,7 +7,7 @@
 #include "./include/globals.h"
 
 #include "../../src/utils/configuration.h"
-#include "../../src/utils/power-manager.service.h"
+#include "../../src/utils/power-manager/power-manager.service.h"
 
 using namespace fakeit;
 

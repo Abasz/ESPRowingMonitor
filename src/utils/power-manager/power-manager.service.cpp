@@ -9,7 +9,7 @@
 
 #include "globals.h"
 
-#include "./configuration.h"
+#include "../configuration.h"
 #include "./power-manager.service.h"
 
 PowerManagerService::PowerManagerService()

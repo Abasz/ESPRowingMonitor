@@ -4,7 +4,7 @@
 
 #include "FastLED.h"
 
-#include "../utils/EEPROM.service.interface.h"
+#include "../utils/EEPROM/EEPROM.service.interface.h"
 #include "./bluetooth/bluetooth.controller.interface.h"
 #include "./peripherals.controller.interface.h"
 #include "./sd-card/sd-card.service.interface.h"

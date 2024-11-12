@@ -1,6 +1,6 @@
 #include "./include/catch_amalgamated.hpp"
 
-#include "../../src/utils/ts-linear-series.h"
+#include "../../src/utils/series/ts-linear-series.h"
 #include "./regression.test-cases.spec.h"
 
 TEST_CASE("Theil Sen Linear Regression", "[regression]")

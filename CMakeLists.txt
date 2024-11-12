@@ -28,15 +28,16 @@ set(INCLUDES_UNIT_TEST
 
 # Source files for e2e tests and unit tests
 set(SOURCES_UNIT_TEST
-    "${LIB_DIR}/utils/ols-linear-series.cpp"
-    "${LIB_DIR}/utils/series.cpp"
-    "${LIB_DIR}/utils/power-manager.controller.cpp"
-    "${LIB_DIR}/utils/EEPROM.service.cpp"
-    "${LIB_DIR}/utils/ota-updater.service.cpp"
-    "${LIB_DIR}/utils/power-manager.service.cpp"
-    "${LIB_DIR}/utils/ts-quadratic-series.cpp"
-    "${LIB_DIR}/utils/weighted-average-series.cpp"
-    "${LIB_DIR}/utils/ts-linear-series.cpp"
+    "${LIB_DIR}/utils/power-manager/power-manager.controller.cpp"
+    "${LIB_DIR}/utils/power-manager/power-manager.service.cpp"
+    "${LIB_DIR}/utils/EEPROM/EEPROM.service.cpp"
+    "${LIB_DIR}/utils/ota-updater/ota-updater.service.cpp"
+
+    "${LIB_DIR}/utils/series/ols-linear-series.cpp"
+    "${LIB_DIR}/utils/series/series.cpp"
+    "${LIB_DIR}/utils/series/ts-quadratic-series.cpp"
+    "${LIB_DIR}/utils/series/weighted-average-series.cpp"
+    "${LIB_DIR}/utils/series/ts-linear-series.cpp"
 
     "${LIB_DIR}/rower/stroke.service.cpp"
     "${LIB_DIR}/rower/flywheel.service.cpp"
@@ -92,11 +93,11 @@ set(SOURCES_UNIT_TEST
 )
 
 set(SOURCES_E2E_TEST
-    "${LIB_DIR}/utils/ols-linear-series.cpp"
-    "${LIB_DIR}/utils/series.cpp"
-    "${LIB_DIR}/utils/ts-quadratic-series.cpp"
-    "${LIB_DIR}/utils/weighted-average-series.cpp"
-    "${LIB_DIR}/utils/ts-linear-series.cpp"
+    "${LIB_DIR}/utils/series/ols-linear-series.cpp"
+    "${LIB_DIR}/utils/series/series.cpp"
+    "${LIB_DIR}/utils/series/ts-quadratic-series.cpp"
+    "${LIB_DIR}/utils/series/weighted-average-series.cpp"
+    "${LIB_DIR}/utils/series/ts-linear-series.cpp"
 
     "${LIB_DIR}/rower/stroke.service.cpp"
     "${LIB_DIR}/rower/flywheel.service.cpp"

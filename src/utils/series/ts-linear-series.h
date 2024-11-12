@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "./configuration.h"
+#include "../configuration.h"
 #include "./series.h"
 
 using std::vector;

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../utils/configuration.h"
-#include "../utils/ols-linear-series.h"
-#include "../utils/ts-linear-series.h"
-#include "../utils/ts-quadratic-series.h"
-#include "../utils/weighted-average-series.h"
+#include "../utils/series/ols-linear-series.h"
+#include "../utils/series/ts-linear-series.h"
+#include "../utils/series/ts-quadratic-series.h"
+#include "../utils/series/weighted-average-series.h"
 #include "./stroke.model.h"
 #include "./stroke.service.interface.h"
 

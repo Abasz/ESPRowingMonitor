@@ -4,7 +4,7 @@
 
 #include "./include/Preferences.h"
 
-#include "../../src/utils/EEPROM.service.h"
+#include "../../src/utils/EEPROM/EEPROM.service.h"
 
 using namespace fakeit;
 

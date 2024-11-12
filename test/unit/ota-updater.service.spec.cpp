@@ -11,7 +11,7 @@
 
 #include "./include/globals.h"
 
-#include "../../src/utils/ota-updater.service.h"
+#include "../../src/utils/ota-updater/ota-updater.service.h"
 
 using namespace fakeit;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./configuration.h"
+#include "../configuration.h"
 #include "./series.h"
 
 using std::size_t;

@@ -2,7 +2,7 @@
 #include "./include/catch_amalgamated.hpp"
 
 #include "../../src/utils/configuration.h"
-#include "../../src/utils/series.h"
+#include "../../src/utils/series/series.h"
 
 TEST_CASE("Series")
 {
