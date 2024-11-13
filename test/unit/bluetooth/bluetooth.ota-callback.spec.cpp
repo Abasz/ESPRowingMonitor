@@ -1,3 +1,4 @@
+// NOLINTBEGIN(readability-magic-numbers)
 #include <array>
 #include <string>
 #include <vector>
@@ -8,19 +9,15 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
-#include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
-#include "../../../src/peripherals/sd-card/sd-card.service.interface.h"
-#include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
+#include "../../../src/peripherals/bluetooth/callbacks/ota.callbacks.h"
 #include "../../../src/utils/configuration.h"
 #include "../../../src/utils/enums.h"
 #include "../../../src/utils/ota-updater/ota-updater.service.interface.h"
 
 using namespace fakeit;
 
-TEST_CASE("BluetoothController OtaRxCallbacks onWrite method should", "[ota]")
+TEST_CASE("OtaRxCallbacks onWrite method should", "[ota]")
 {
-    Mock<IEEPROMService> mockEEPROMService;
-    Mock<ISdCardService> mockSdCardService;
     Mock<IOtaUploaderService> mockOtaService;
     Mock<NimBLECharacteristic> mockOtaRxCharacteristic;
 
@@ -30,60 +27,22 @@ TEST_CASE("BluetoothController OtaRxCallbacks onWrite method should", "[ota]")
     mockNimBLEService.Reset();
     mockNimBLECharacteristic.Reset();
 
-    When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string))).AlwaysReturn(&mockNimBLEService.get());
-    When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short))).AlwaysReturn(&mockNimBLEService.get());
-    Fake(Method(mockNimBLEServer, createServer));
-    Fake(Method(mockNimBLEServer, init));
-    Fake(Method(mockNimBLEServer, setPower));
-    Fake(Method(mockNimBLEServer, start));
-
-    When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockNimBLECharacteristic.get());
-    When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))).AlwaysReturn(&mockNimBLECharacteristic.get());
-    When(Method(mockNimBLEService, getServer)).AlwaysReturn(&mockNimBLEServer.get());
-    Fake(Method(mockNimBLEService, start));
-
-    When(Method(mockNimBLECharacteristic, getSubscribedCount)).AlwaysReturn(0);
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const unsigned short)));
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::string)));
-    Fake(Method(mockNimBLECharacteristic, notify));
-
-    Fake(Method(mockNimBLEAdvertising, start));
-    Fake(Method(mockNimBLEAdvertising, setAppearance));
-    Fake(Method(mockNimBLEAdvertising, addServiceUUID));
-
-    When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-    When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-    When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(true);
-    When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(ArduinoLogLevel::LogLevelSilent);
-
-    When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(true);
-
-    Fake(Method(mockOtaService, begin));
-
-    // Test specific mocks
-    ble_gap_conn_desc gapDescriptor = {0};
-
-    When(
-        OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))
-            .Using(CommonBleFlags::otaRxUuid, Any()))
-        .AlwaysReturn(&mockOtaRxCharacteristic.get());
-    When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(23);
+    ble_gap_conn_desc gapDescriptor{
+        .conn_handle = 0};
 
     When(Method(mockOtaRxCharacteristic, getService)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockNimBLEService, getServer)).AlwaysReturn(&mockNimBLEServer.get());
+    When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(23);
 
     When(Method(mockOtaRxCharacteristic, getValue)).AlwaysReturn({0});
-
     Fake(Method(mockOtaService, onData));
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
-    bluetoothController.setup();
+    OtaRxCallbacks otaCallback(mockOtaService.get());
     mockNimBLECharacteristic.ClearInvocationHistory();
-    NimBLECharacteristicCallbacks *otaCallback = std::move(mockOtaRxCharacteristic.get().callbacks);
 
     SECTION("get MTU")
     {
-        otaCallback->onWrite(&mockOtaRxCharacteristic.get(), &gapDescriptor);
+        otaCallback.onWrite(&mockOtaRxCharacteristic.get(), &gapDescriptor);
 
         Verify(Method(mockNimBLEServer, getPeerMTU)).Once();
     }
@@ -100,12 +59,14 @@ TEST_CASE("BluetoothController OtaRxCallbacks onWrite method should", "[ota]")
 
         std::vector<unsigned char> resultValue{};
         When(Method(mockOtaService, onData)).Do([&resultValue](const NimBLEAttValue &data, unsigned short mtu)
-                                                { resultValue.assign(data.begin(), data.end()); });
+                                                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                                                { resultValue.insert(end(resultValue), data.begin(), data.begin() + data.size()); });
 
-        otaCallback->onWrite(&mockOtaRxCharacteristic.get(), &gapDescriptor);
+        otaCallback.onWrite(&mockOtaRxCharacteristic.get(), &gapDescriptor);
 
         Verify(Method(mockOtaService, onData)).Once();
 
         REQUIRE_THAT(resultValue, Catch::Matchers::Equals(expectedVector));
     }
 }
+// NOLINTEND(readability-magic-numbers)

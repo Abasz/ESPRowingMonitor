@@ -5,7 +5,7 @@
 #include "../../../utils/enums.h"
 #include "./ota.service.h"
 
-OtaBleService::OtaBleService(BluetoothController &_bleController) : callbacks(_bleController)
+OtaBleService::OtaBleService(IOtaUploaderService &_otaService) : callbacks(_otaService)
 {
 }
 

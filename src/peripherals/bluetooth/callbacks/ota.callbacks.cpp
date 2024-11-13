@@ -6,7 +6,7 @@
 
 using std::array;
 
-OtaRxCallbacks::OtaRxCallbacks(BluetoothController &_bleController) : bleController(_bleController)
+OtaRxCallbacks::OtaRxCallbacks(IOtaUploaderService &_otaService) : otaService(_otaService)
 {
 }
 
@@ -14,5 +14,5 @@ void OtaRxCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic, ble_ga
 {
     const auto mtu = pCharacteristic->getService()->getServer()->getPeerMTU(desc->conn_handle);
 
-    bleController.otaService.onData(pCharacteristic->getValue(), mtu);
+    otaService.onData(pCharacteristic->getValue(), mtu);
 }

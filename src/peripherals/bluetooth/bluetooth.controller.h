@@ -22,7 +22,6 @@ using std::vector;
 class BluetoothController final : public IBluetoothController
 {
     friend class ControlPointCallbacks;
-    friend class OtaRxCallbacks;
     friend class ChunkedNotifyMetricCallbacks;
     friend class ServerCallbacks;
 

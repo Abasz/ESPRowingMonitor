@@ -9,7 +9,7 @@
 #include "./ble-services/device-info.service.h"
 #include "./bluetooth.controller.h"
 
-BluetoothController::BluetoothController(IEEPROMService &_eepromService, ISdCardService &_sdCardService, IOtaUploaderService &_otaService) : eepromService(_eepromService), sdCardService(_sdCardService), otaService(_otaService), serverCallbacks(*this), extendedMetricsBleService(*this), baseMetricsBleService(*this), settingsBleService(*this), otaBleService(*this)
+BluetoothController::BluetoothController(IEEPROMService &_eepromService, ISdCardService &_sdCardService, IOtaUploaderService &_otaService) : eepromService(_eepromService), sdCardService(_sdCardService), otaService(_otaService), serverCallbacks(*this), extendedMetricsBleService(*this), baseMetricsBleService(*this), settingsBleService(*this), otaBleService(_otaService)
 {
 }
 
