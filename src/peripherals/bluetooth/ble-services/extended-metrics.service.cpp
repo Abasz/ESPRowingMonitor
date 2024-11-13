@@ -7,7 +7,7 @@
 
 using std::array;
 
-ExtendedMetricBleService::ExtendedMetricBleService(BluetoothController &_bleController) : callbacks(_bleController)
+ExtendedMetricBleService::ExtendedMetricBleService() : callbacks(*this)
 {
 }
 
@@ -26,7 +26,70 @@ NimBLEService *ExtendedMetricBleService::setup(NimBLEServer *const server)
     return extendedMetricsService;
 }
 
-void ExtendedMetricBleService::extendedMetricsTask(void *parameters)
+const vector<unsigned char> &ExtendedMetricBleService::getHandleForcesClientIds() const
+{
+    return handleForcesParams.clientIds;
+}
+
+void ExtendedMetricBleService::addHandleForcesClientId(unsigned char clientId)
+{
+    handleForcesParams.clientIds.push_back(clientId);
+}
+
+const vector<unsigned char> &ExtendedMetricBleService::getDeltaTimesClientIds() const
+{
+    return deltaTimesParams.clientIds;
+}
+
+void ExtendedMetricBleService::addDeltaTimesClientId(const unsigned char clientId)
+{
+    deltaTimesParams.clientIds.push_back(clientId);
+}
+
+unsigned short ExtendedMetricBleService::getDeltaTimesMTU(const unsigned char clientId) const
+{
+    return deltaTimesParams.characteristic->getService()->getServer()->getPeerMTU(clientId);
+}
+
+unsigned short ExtendedMetricBleService::getHandleForcesMTU(const unsigned char clientId) const
+{
+    return handleForcesParams.characteristic->getService()->getServer()->getPeerMTU(clientId);
+}
+
+unsigned char ExtendedMetricBleService::removeDeltaTimesClient(const unsigned char clientId)
+{
+    const auto initialSize = deltaTimesParams.clientIds.size();
+
+    deltaTimesParams.clientIds.erase(
+        std::remove_if(
+            begin(deltaTimesParams.clientIds),
+            end(deltaTimesParams.clientIds),
+            [&](unsigned char connectionId)
+            {
+                return connectionId == clientId;
+            }),
+        cend(deltaTimesParams.clientIds));
+
+    return initialSize - deltaTimesParams.clientIds.size();
+}
+
+unsigned char ExtendedMetricBleService::removeHandleForcesClient(const unsigned char clientId)
+{
+    const auto initialSize = handleForcesParams.clientIds.size();
+    handleForcesParams.clientIds.erase(
+        std::remove_if(
+            begin(handleForcesParams.clientIds),
+            end(handleForcesParams.clientIds),
+            [&](unsigned char connectionId)
+            {
+                return connectionId == clientId;
+            }),
+        cend(handleForcesParams.clientIds));
+
+    return initialSize - handleForcesParams.clientIds.size();
+}
+
+void ExtendedMetricBleService::ExtendedMetricsParams::task(void *parameters)
 {
     {
         const auto *const params = static_cast<const ExtendedMetricBleService::ExtendedMetricsParams *>(parameters);
@@ -50,7 +113,7 @@ void ExtendedMetricBleService::extendedMetricsTask(void *parameters)
     vTaskDelete(nullptr);
 }
 
-void ExtendedMetricBleService::handleForcesTask(void *parameters)
+void ExtendedMetricBleService::HandleForcesParams::task(void *parameters)
 {
     {
         const auto *const params = static_cast<const ExtendedMetricBleService::HandleForcesParams *>(parameters);
@@ -79,7 +142,7 @@ void ExtendedMetricBleService::handleForcesTask(void *parameters)
     vTaskDelete(nullptr);
 }
 
-void ExtendedMetricBleService::deltaTimesTask(void *parameters)
+void ExtendedMetricBleService::DeltaTimesParams::task(void *parameters)
 {
     {
         const auto *const params = static_cast<const ExtendedMetricBleService::DeltaTimesParams *>(parameters);

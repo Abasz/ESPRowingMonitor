@@ -2,14 +2,14 @@
 
 #include "NimBLEDevice.h"
 
-class BluetoothController;
+class ExtendedMetricBleService;
 
 class ChunkedNotifyMetricCallbacks final : public NimBLECharacteristicCallbacks
 {
-    BluetoothController &bleController;
+    ExtendedMetricBleService &extendedMetricsBleService;
 
 public:
-    explicit ChunkedNotifyMetricCallbacks(BluetoothController &_bleController);
+    explicit ChunkedNotifyMetricCallbacks(ExtendedMetricBleService &_extendedMetricsBleService);
 
     void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue) override;
 };

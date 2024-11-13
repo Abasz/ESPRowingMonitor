@@ -2,10 +2,10 @@
 #include "NimBLEDevice.h"
 
 #include "../../../utils/enums.h"
-#include "../bluetooth.controller.h"
+#include "../ble-services/extended-metrics.service.h"
 #include "./chunked-notify.callbacks.h"
 
-ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks(BluetoothController &_bleController) : bleController(_bleController)
+ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks(ExtendedMetricBleService &_extendedMetricsBleService) : extendedMetricsBleService(_extendedMetricsBleService)
 {
 }
 
@@ -13,10 +13,10 @@ void ChunkedNotifyMetricCallbacks::onSubscribe(NimBLECharacteristic *const pChar
 {
     if (pCharacteristic->getUUID().toString() == CommonBleFlags::handleForcesUuid)
     {
-        bleController.extendedMetricsBleService.handleForcesParams.clientIds.push_back(desc->conn_handle);
+        extendedMetricsBleService.addHandleForcesClientId(desc->conn_handle);
     }
     if (pCharacteristic->getUUID().toString() == CommonBleFlags::deltaTimesUuid)
     {
-        bleController.extendedMetricsBleService.deltaTimesParams.clientIds.push_back(desc->conn_handle);
+        extendedMetricsBleService.addDeltaTimesClientId(desc->conn_handle);
     }
 }

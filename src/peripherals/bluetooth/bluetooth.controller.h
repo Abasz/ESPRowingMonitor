@@ -21,20 +21,17 @@ using std::vector;
 
 class BluetoothController final : public IBluetoothController
 {
-    friend class ChunkedNotifyMetricCallbacks;
-    friend class ServerCallbacks;
-
     IEEPROMService &eepromService;
     ISdCardService &sdCardService;
     IOtaUploaderService &otaService;
-
-    ServerCallbacks serverCallbacks;
 
     ExtendedMetricBleService extendedMetricsBleService;
     BaseMetricsBleService baseMetricsBleService;
     BatteryBleService batteryBleService;
     SettingsBleService settingsBleService;
     OtaBleService otaBleService;
+
+    ServerCallbacks serverCallbacks;
 
     void setupBleDevice();
     void setupServices();

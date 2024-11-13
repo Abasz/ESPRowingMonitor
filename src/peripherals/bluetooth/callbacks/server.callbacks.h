@@ -2,14 +2,14 @@
 
 #include "NimBLEDevice.h"
 
-class BluetoothController;
+class ExtendedMetricBleService;
 
 class ServerCallbacks final : public NimBLEServerCallbacks
 {
-    BluetoothController &bleController;
+    ExtendedMetricBleService &extendedMetricsBleService;
 
 public:
-    explicit ServerCallbacks(BluetoothController &_bleController);
+    explicit ServerCallbacks(ExtendedMetricBleService &_extendedMetricsBleService);
 
     void onConnect(NimBLEServer *pServer) override;
     void onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc) override;

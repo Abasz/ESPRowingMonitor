@@ -75,7 +75,7 @@ void BluetoothController::notifyExtendedMetrics(short avgStrokePower, unsigned i
     const auto coreStackSize = 1'800U;
 
     xTaskCreatePinnedToCore(
-        ExtendedMetricBleService::extendedMetricsTask,
+        ExtendedMetricBleService::ExtendedMetricsParams::task,
         "notifyExtendedMetrics",
         coreStackSize,
         &extendedMetricsBleService.extendedMetricsParams,
@@ -86,14 +86,16 @@ void BluetoothController::notifyExtendedMetrics(short avgStrokePower, unsigned i
 
 void BluetoothController::notifyHandleForces(const std::vector<float> &handleForces)
 {
-    if (extendedMetricsBleService.handleForcesParams.characteristic->getSubscribedCount() == 0 || handleForces.empty())
+    const auto clientIds = extendedMetricsBleService.getHandleForcesClientIds();
+
+    if (clientIds.empty() || handleForces.empty())
     {
         return;
     }
 
-    extendedMetricsBleService.handleForcesParams.mtu = std::accumulate(extendedMetricsBleService.handleForcesParams.clientIds.cbegin(), extendedMetricsBleService.handleForcesParams.clientIds.cend(), 512, [&](unsigned short previousValue, unsigned short currentValue)
+    extendedMetricsBleService.handleForcesParams.mtu = std::accumulate(cbegin(clientIds), cend(clientIds), 512, [&](unsigned short previousValue, unsigned short currentValue)
                                                                        {  
-                    const auto currentMTU = extendedMetricsBleService.handleForcesParams.characteristic->getService()->getServer()->getPeerMTU(currentValue);
+                    const auto currentMTU = extendedMetricsBleService.getHandleForcesMTU(currentValue);
                     if (currentMTU == 0)
                     {
                         return previousValue;
@@ -106,7 +108,7 @@ void BluetoothController::notifyHandleForces(const std::vector<float> &handleFor
     const auto variableStackSize = extendedMetricsBleService.handleForcesParams.mtu > extendedMetricsBleService.handleForcesParams.handleForces.size() * sizeof(float) ? extendedMetricsBleService.handleForcesParams.handleForces.size() * sizeof(float) : extendedMetricsBleService.handleForcesParams.mtu;
 
     xTaskCreatePinnedToCore(
-        ExtendedMetricBleService::handleForcesTask,
+        ExtendedMetricBleService::HandleForcesParams::task,
         "notifyHandleForces",
         coreStackSize + variableStackSize / 3,
         &extendedMetricsBleService.handleForcesParams,
@@ -127,7 +129,7 @@ void BluetoothController::notifyDeltaTimes(const std::vector<unsigned long> &del
     const auto coreStackSize = 1'850U;
 
     xTaskCreatePinnedToCore(
-        ExtendedMetricBleService::deltaTimesTask,
+        ExtendedMetricBleService::DeltaTimesParams::task,
         "notifyDeltaTimes",
         coreStackSize + extendedMetricsBleService.deltaTimesParams.deltaTimes.size() * sizeof(unsigned long) / 3,
         &extendedMetricsBleService.deltaTimesParams,

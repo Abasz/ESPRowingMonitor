@@ -6,14 +6,12 @@
 
 using std::vector;
 
-class BluetoothController;
-
 class ExtendedMetricBleService
 {
 public:
     ChunkedNotifyMetricCallbacks callbacks;
 
-    explicit ExtendedMetricBleService(BluetoothController &_bleController);
+    ExtendedMetricBleService();
 
     struct ExtendedMetricsParams
     {
@@ -22,6 +20,9 @@ public:
         unsigned short recoveryDuration = 0;
         unsigned short driveDuration = 0;
         unsigned char dragFactor = 0;
+
+        static void task(void *parameters);
+
     } extendedMetricsParams;
 
     struct HandleForcesParams
@@ -31,6 +32,8 @@ public:
         vector<float> handleForces;
         vector<unsigned char> clientIds;
 
+        static void task(void *parameters);
+
     } handleForcesParams;
 
     struct DeltaTimesParams
@@ -39,11 +42,20 @@ public:
         vector<unsigned long> deltaTimes;
         vector<unsigned char> clientIds;
 
+        static void task(void *parameters);
+
     } deltaTimesParams;
 
-    static void extendedMetricsTask(void *parameters);
-    static void handleForcesTask(void *parameters);
-    static void deltaTimesTask(void *parameters);
-
     NimBLEService *setup(NimBLEServer *server);
+
+    const vector<unsigned char> &getHandleForcesClientIds() const;
+    void addHandleForcesClientId(unsigned char clientId);
+    const vector<unsigned char> &getDeltaTimesClientIds() const;
+    void addDeltaTimesClientId(unsigned char clientId);
+
+    unsigned short getDeltaTimesMTU(unsigned char clientId) const;
+    unsigned short getHandleForcesMTU(unsigned char clientId) const;
+
+    unsigned char removeDeltaTimesClient(unsigned char clientId);
+    unsigned char removeHandleForcesClient(unsigned char clientId);
 };

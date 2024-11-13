@@ -9,7 +9,7 @@
 #include "./ble-services/device-info.service.h"
 #include "./bluetooth.controller.h"
 
-BluetoothController::BluetoothController(IEEPROMService &_eepromService, ISdCardService &_sdCardService, IOtaUploaderService &_otaService) : eepromService(_eepromService), sdCardService(_sdCardService), otaService(_otaService), serverCallbacks(*this), extendedMetricsBleService(*this), baseMetricsBleService(*this, _eepromService), settingsBleService(*this, _eepromService), otaBleService(_otaService)
+BluetoothController::BluetoothController(IEEPROMService &_eepromService, ISdCardService &_sdCardService, IOtaUploaderService &_otaService) : eepromService(_eepromService), sdCardService(_sdCardService), otaService(_otaService), baseMetricsBleService(*this, _eepromService), settingsBleService(*this, _eepromService), otaBleService(_otaService), serverCallbacks(extendedMetricsBleService)
 {
 }
 
@@ -100,14 +100,16 @@ void BluetoothController::setupAdvertisement() const
 
 unsigned short BluetoothController::getDeltaTimesMTU() const
 {
-    if (extendedMetricsBleService.deltaTimesParams.characteristic->getSubscribedCount() == 0)
+    const auto clientIds = extendedMetricsBleService.getDeltaTimesClientIds();
+
+    if (clientIds.empty())
     {
         return 0;
     }
 
-    return std::accumulate(extendedMetricsBleService.deltaTimesParams.clientIds.cbegin(), extendedMetricsBleService.deltaTimesParams.clientIds.cend(), 512, [&](unsigned short previousValue, unsigned short currentValue)
+    return std::accumulate(cbegin(clientIds), cend(clientIds), 512, [&](unsigned short previousValue, unsigned short currentValue)
                            {
-                    const auto currentMTU = extendedMetricsBleService.deltaTimesParams.characteristic->getService()->getServer()->getPeerMTU(currentValue);
+                    const auto currentMTU = extendedMetricsBleService.getDeltaTimesMTU(currentValue);
                     if (currentMTU == 0)
                     {
                         return previousValue;

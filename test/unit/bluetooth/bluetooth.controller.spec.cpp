@@ -545,8 +545,10 @@ TEST_CASE("BluetoothController", "[peripheral]")
         SECTION("should return 0 when no device is connected")
         {
             const auto expectedMTU = 0;
-
-            When(Method(mockDeltaTimesCharacteristic, getSubscribedCount)).AlwaysReturn(0);
+            ble_gap_conn_desc first = {0};
+            ble_gap_conn_desc second = {1};
+            mockNimBLEServer.get().callbacks->onDisconnect(&mockNimBLEServer.get(), &first);
+            mockNimBLEServer.get().callbacks->onDisconnect(&mockNimBLEServer.get(), &second);
 
             const auto mtu = bluetoothController.getDeltaTimesMTU();
 
