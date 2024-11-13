@@ -5,7 +5,7 @@
 #include "../../../utils/enums.h"
 #include "./settings.service.h"
 
-SettingsBleService::SettingsBleService(BluetoothController &_bleController) : callbacks(_bleController)
+SettingsBleService::SettingsBleService(IBluetoothController &_bleController, IEEPROMService &_eepromService) : callbacks(_bleController, _eepromService)
 {
 }
 

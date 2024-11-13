@@ -6,7 +6,7 @@
 
 using std::array;
 
-BaseMetricsBleService::BaseMetricsBleService(BluetoothController &_bleController) : callbacks(_bleController)
+BaseMetricsBleService::BaseMetricsBleService(IBluetoothController &_bleController, IEEPROMService &_eepromService) : callbacks(_bleController, _eepromService)
 {
 }
 

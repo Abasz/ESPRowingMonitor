@@ -9,7 +9,7 @@
 
 using std::array;
 
-ControlPointCallbacks::ControlPointCallbacks(BluetoothController &_bleController) : bleController(_bleController)
+ControlPointCallbacks::ControlPointCallbacks(IBluetoothController &_bleController, IEEPROMService &_eepromService) : bleController(_bleController), eepromService(_eepromService)
 {
 }
 
@@ -127,7 +127,7 @@ ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &mes
     }
 
     Log.infoln("New LogLevel: %d", message[1]);
-    bleController.eepromService.setLogLevel(static_cast<ArduinoLogLevel>(message[1]));
+    eepromService.setLogLevel(static_cast<ArduinoLogLevel>(message[1]));
 
     bleController.notifySettings();
 
@@ -145,7 +145,7 @@ ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue
 
     const auto shouldEnable = static_cast<bool>(message[1]);
     Log.infoln("%s SdCard logging", shouldEnable ? "Enable" : "Disable");
-    bleController.eepromService.setLogToSdCard(shouldEnable);
+    eepromService.setLogToSdCard(shouldEnable);
 
     bleController.notifySettings();
 
@@ -164,7 +164,7 @@ ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttVa
     const auto shouldEnable = static_cast<bool>(message[1]);
 
     Log.infoln("%s deltaTime logging", shouldEnable ? "Enable" : "Disable");
-    bleController.eepromService.setLogToBluetooth(shouldEnable);
+    eepromService.setLogToBluetooth(shouldEnable);
 
     bleController.notifySettings();
 
@@ -174,7 +174,7 @@ ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttVa
 void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
 {
     Log.infoln("New BLE Service: %s", message[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
-    bleController.eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
+    eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
     array<unsigned char, 3U> temp = {
         static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
         static_cast<unsigned char>(message[0]),

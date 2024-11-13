@@ -2,13 +2,14 @@
 
 #include "NimBLEDevice.h"
 
+#include "../../../utils/EEPROM/EEPROM.service.interface.h"
 #include "../../../utils/enums.h"
-
-class BluetoothController;
+#include "../bluetooth.controller.interface.h"
 
 class ControlPointCallbacks final : public NimBLECharacteristicCallbacks
 {
-    BluetoothController &bleController;
+    IBluetoothController &bleController;
+    IEEPROMService &eepromService;
 
     ResponseOpCodes processSdCardLogging(const NimBLEAttValue &message, NimBLECharacteristic *pCharacteristic);
     ResponseOpCodes processLogLevel(const NimBLEAttValue &message, NimBLECharacteristic *pCharacteristic);
@@ -16,7 +17,7 @@ class ControlPointCallbacks final : public NimBLECharacteristicCallbacks
     void processBleServiceChange(const NimBLEAttValue &message, NimBLECharacteristic *pCharacteristic);
 
 public:
-    explicit ControlPointCallbacks(BluetoothController &_bleController);
+    explicit ControlPointCallbacks(IBluetoothController &_bleController, IEEPROMService &_eepromService);
 
     void onWrite(NimBLECharacteristic *pCharacteristic) override;
 };

@@ -2,10 +2,10 @@
 
 #include "NimBLEDevice.h"
 
+#include "../../../utils/EEPROM/EEPROM.service.interface.h"
 #include "../../../utils/enums.h"
+#include "../bluetooth.controller.interface.h"
 #include "../callbacks/control-point.callbacks.h"
-
-class BluetoothController;
 
 class BaseMetricsBleService
 {
@@ -15,7 +15,7 @@ class BaseMetricsBleService
 public:
     ControlPointCallbacks callbacks;
 
-    explicit BaseMetricsBleService(BluetoothController &_bleController);
+    explicit BaseMetricsBleService(IBluetoothController &_bleController, IEEPROMService &_eepromService);
 
     struct BaseMetricsParams
     {
