@@ -29,7 +29,8 @@ RowingDataModels::FlywheelData FlywheelService::getData()
         .totalAngularDisplacement = totalAngularDisplacement,
         // TODO: These serve debugging purposes, may be deleted
         .cleanImpulseTime = lastCleanImpulseTime,
-        .rawImpulseTime = lastRawImpulseTime};
+        .rawImpulseTime = lastRawImpulseTime,
+    };
     attachRotationInterrupt();
 
     return data;

@@ -182,7 +182,8 @@ RowingDataModels::RowingMetrics StrokeService::getData()
         .recoveryDuration = recoveryDuration,
         .avgStrokePower = avgStrokePower,
         .dragCoefficient = dragCoefficient,
-        .driveHandleForces = driveHandleForces};
+        .driveHandleForces = driveHandleForces,
+    };
 }
 
 void StrokeService::processData(const RowingDataModels::FlywheelData data)

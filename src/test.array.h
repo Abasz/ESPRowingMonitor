@@ -1,3 +1,4 @@
+// NOLINTBEGIN
 #include <array>
 
 #include "Arduino.h"
@@ -1833,3 +1834,4 @@ void simulateRotation()
         simulationCount++;
     }
 }
+// NOLINTEND

@@ -23,14 +23,16 @@ class StrokeController final : public IStrokeController
         0U,
         0.0,
         0.0,
-        std::vector<float>{}};
+        std::vector<float>{},
+    };
 
     RowingDataModels::FlywheelData flywheelData{
         0UL,
         0UL,
         0ULL,
         0UL,
-        0UL};
+        0UL,
+    };
 
 public:
     StrokeController(IStrokeService &_strokeService, IFlywheelService &_flywheelService);

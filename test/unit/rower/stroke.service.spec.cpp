@@ -123,7 +123,8 @@ TEST_CASE("StrokeService")
                 .totalTime = totalTime,
                 .totalAngularDisplacement = totalAngularDisplacement,
                 .cleanImpulseTime = totalTime,
-                .rawImpulseTime = totalTime};
+                .rawImpulseTime = totalTime,
+            };
 
             strokeService.processData(data);
             const auto prevStrokeCount = rowingMetrics.strokeCount;

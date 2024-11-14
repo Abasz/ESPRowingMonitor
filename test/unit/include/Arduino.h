@@ -1,6 +1,8 @@
 // NOLINTBEGIN
 #pragma once
 
+#include <string>
+
 #include "./fakeit.hpp"
 
 #include "./Esp32-typedefs.h"
@@ -154,7 +156,7 @@ public:
     virtual inline void updateBaudRate(unsigned long baud) {}
     virtual inline const int available() { return 0; }
     virtual inline int availableForWrite() { return 0; }
-    virtual inline void printf(const char *__restrict __fmt, ...) {};
+    virtual inline void printf(const std::string __fmt, ...) {};
     virtual inline void flush() {}
     inline operator bool()
     {

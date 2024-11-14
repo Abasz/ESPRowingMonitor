@@ -42,6 +42,7 @@ typedef enum gpio_num_t
     GPIO_NUM_37 = 37,
     GPIO_NUM_38 = 38,
     GPIO_NUM_39 = 39,
+    GPIO_NUM_47 = 47,
     GPIO_NUM_MAX,
 } gpio_num_t;
 

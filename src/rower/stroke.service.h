@@ -41,8 +41,6 @@ class StrokeService final : public IStrokeService
 
     WeightedAverageSeries dragCoefficients = WeightedAverageSeries(Configurations::dragCoefficientsArrayLength);
 
-    Configurations::precision totalAngularDisplacement = 0;
-
     // advance metrics
     Configurations::precision currentAngularVelocity = 0;
     Configurations::precision currentAngularAcceleration = 0;
