@@ -8,7 +8,7 @@
 #include "../../utils/configuration.h"
 #include "./bluetooth.controller.h"
 
-BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &deviceInfoBleService) : eepromService(_eepromService), otaService(_otaService), settingsBleService(_settingsBleService), batteryBleService(_batteryBleService), deviceInfoBleService(deviceInfoBleService), baseMetricsBleService(_settingsBleService, _eepromService), otaBleService(_otaService), serverCallbacks(extendedMetricsBleService)
+BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService) : eepromService(_eepromService), otaService(_otaService), settingsBleService(_settingsBleService), batteryBleService(_batteryBleService), deviceInfoBleService(_deviceInfoBleService), otaBleService(_otaBleService), baseMetricsBleService(_settingsBleService, _eepromService), serverCallbacks(extendedMetricsBleService)
 {
 }
 
@@ -71,9 +71,9 @@ void BluetoothController::setupServices()
     }
 
     settingsBleService.setup(server)->start();
-    otaBleService.setup(server)->start();
 
-    otaService.begin(otaBleService.characteristic);
+    otaBleService.setup(server)->start();
+    otaService.begin(otaBleService.getOtaTx());
 
     deviceInfoBleService.setup(server)->start();
 

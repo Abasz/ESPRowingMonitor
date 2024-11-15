@@ -10,6 +10,7 @@
 
 #include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/device-info.service.interface.h"
+#include "../../../src/peripherals/bluetooth/ble-services/ota.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -22,10 +23,12 @@ using namespace fakeit;
 TEST_CASE("BluetoothController ChunkedNotifyMetricCallbacks onSubscribed method", "[callbacks]")
 {
     Mock<IEEPROMService> mockEEPROMService;
-    Mock<IOtaUploaderService> mockOtaService;
+    Mock<IOtaUpdaterService> mockOtaUpdaterService;
     Mock<ISettingsBleService> mockSettingsBleService;
     Mock<IBatteryBleService> mockBatteryBleService;
     Mock<IDeviceInfoBleService> mockDeviceInfoBleService;
+    Mock<IOtaBleService> mockOtaBleService;
+
     Mock<NimBLECharacteristic> mockDeltaTimesCharacteristic;
 
     mockArduino.Reset();
@@ -58,11 +61,13 @@ TEST_CASE("BluetoothController ChunkedNotifyMetricCallbacks onSubscribed method"
 
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
 
-    Fake(Method(mockOtaService, begin));
+    Fake(Method(mockOtaUpdaterService, begin));
 
     When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
 
     // Test specific mocks
     When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(23);
@@ -81,7 +86,7 @@ TEST_CASE("BluetoothController ChunkedNotifyMetricCallbacks onSubscribed method"
             .Using(CommonBleFlags::handleForcesUuid, Any()))
         .AlwaysReturn(&mockDeltaTimesCharacteristic.get());
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get());
     bluetoothController.setup();
     NimBLECharacteristicCallbacks *chunkedNotifyMetricCallback = std::move(mockDeltaTimesCharacteristic.get().callbacks);
 

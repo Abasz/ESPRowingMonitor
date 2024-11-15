@@ -11,10 +11,11 @@
 #include "../sd-card/sd-card.service.interface.h"
 #include "./ble-services/base-metrics.service.h"
 #include "./ble-services/battery.service.interface.h"
+#include "./ble-services/device-info.service.interface.h"
 #include "./ble-services/extended-metrics.service.h"
 #include "./ble-services/ota.service.h"
+#include "./ble-services/ota.service.interface.h"
 #include "./ble-services/settings.service.interface.h"
-#include "./ble-services/device-info.service.interface.h"
 #include "./bluetooth.controller.interface.h"
 #include "./callbacks/server.callbacks.h"
 
@@ -23,15 +24,15 @@ using std::vector;
 class BluetoothController final : public IBluetoothController
 {
     IEEPROMService &eepromService;
-    IOtaUploaderService &otaService;
+    IOtaUpdaterService &otaService;
 
     ISettingsBleService &settingsBleService;
     IBatteryBleService &batteryBleService;
     IDeviceInfoBleService &deviceInfoBleService;
+    IOtaBleService &otaBleService;
 
     ExtendedMetricBleService extendedMetricsBleService;
     BaseMetricsBleService baseMetricsBleService;
-    OtaBleService otaBleService;
 
     ServerCallbacks serverCallbacks;
 
@@ -40,7 +41,7 @@ class BluetoothController final : public IBluetoothController
     void setupAdvertisement() const;
 
 public:
-    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService,IDeviceInfoBleService &_deviceInfoBleService);
+    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService);
 
     void setup() override;
     void startBLEServer() override;

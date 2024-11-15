@@ -14,8 +14,9 @@ StrokeService strokeService;
 SdCardService sdCardService;
 BatteryBleService batteryBleService;
 DeviceInfoBleService deviceInfoBleService;
+OtaBleService otaBleService(otaService);
 SettingsBleService settingsBleService(sdCardService, eepromService);
-BluetoothController bleController(eepromService, otaService, settingsBleService, batteryBleService, deviceInfoBleService);
+BluetoothController bleController(eepromService, otaService, settingsBleService, batteryBleService, deviceInfoBleService, otaBleService);
 
 PeripheralsController peripheralController(bleController, sdCardService, eepromService);
 StrokeController strokeController(strokeService, flywheelService);

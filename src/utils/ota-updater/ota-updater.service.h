@@ -10,7 +10,7 @@
 
 using std::vector;
 
-class OtaUpdaterService final : public IOtaUploaderService
+class OtaUpdaterService final : public IOtaUpdaterService
 {
     NimBLECharacteristic *otaTxCharacteristic = nullptr;
 

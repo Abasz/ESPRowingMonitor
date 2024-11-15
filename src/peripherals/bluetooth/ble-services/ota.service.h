@@ -4,14 +4,17 @@
 
 #include "../../../utils/ota-updater/ota-updater.service.interface.h"
 #include "../callbacks/ota.callbacks.h"
+#include "./ota.service.interface.h"
 
-class OtaBleService
+class OtaBleService final : public IOtaBleService
 {
-public:
     OtaRxCallbacks callbacks;
-    NimBLECharacteristic *characteristic = nullptr;
+    NimBLECharacteristic *txCharacteristic = nullptr;
 
-    explicit OtaBleService(IOtaUploaderService &_otaService);
+public:
+    explicit OtaBleService(IOtaUpdaterService &_otaService);
 
-    NimBLEService *setup(NimBLEServer *server);
+    NimBLEService *setup(NimBLEServer *server) override;
+
+    NimBLECharacteristic *getOtaTx() const override;
 };

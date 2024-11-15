@@ -5,10 +5,10 @@
 
 class OtaRxCallbacks final : public NimBLECharacteristicCallbacks
 {
-    IOtaUploaderService &otaService;
+    IOtaUpdaterService &otaService;
 
 public:
-    explicit OtaRxCallbacks(IOtaUploaderService &_otaService);
+    explicit OtaRxCallbacks(IOtaUpdaterService &_otaService);
 
     void onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc) override;
 };

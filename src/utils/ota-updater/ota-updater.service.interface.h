@@ -2,10 +2,10 @@
 
 #include "NimBLEDevice.h"
 
-class IOtaUploaderService
+class IOtaUpdaterService
 {
 protected:
-    ~IOtaUploaderService() = default;
+    ~IOtaUpdaterService() = default;
 
 public:
     virtual void begin(NimBLECharacteristic *newOtaTxCharacteristic) = 0;

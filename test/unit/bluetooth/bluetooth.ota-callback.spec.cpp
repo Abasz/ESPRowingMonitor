@@ -10,22 +10,17 @@
 #include "../include/NimBLEDevice.h"
 
 #include "../../../src/peripherals/bluetooth/callbacks/ota.callbacks.h"
-#include "../../../src/utils/configuration.h"
-#include "../../../src/utils/enums.h"
 #include "../../../src/utils/ota-updater/ota-updater.service.interface.h"
 
 using namespace fakeit;
 
 TEST_CASE("OtaRxCallbacks onWrite method should", "[ota]")
 {
-    Mock<IOtaUploaderService> mockOtaService;
-    Mock<NimBLECharacteristic> mockOtaRxCharacteristic;
-
-    mockArduino.Reset();
     mockNimBLEServer.Reset();
-    mockNimBLEAdvertising.Reset();
     mockNimBLEService.Reset();
-    mockNimBLECharacteristic.Reset();
+
+    Mock<IOtaUpdaterService> mockOtaService;
+    Mock<NimBLECharacteristic> mockOtaRxCharacteristic;
 
     ble_gap_conn_desc gapDescriptor{
         .conn_handle = 0};
@@ -38,7 +33,6 @@ TEST_CASE("OtaRxCallbacks onWrite method should", "[ota]")
     Fake(Method(mockOtaService, onData));
 
     OtaRxCallbacks otaCallback(mockOtaService.get());
-    mockNimBLECharacteristic.ClearInvocationHistory();
 
     SECTION("get MTU")
     {

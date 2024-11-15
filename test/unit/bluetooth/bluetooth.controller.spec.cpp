@@ -10,6 +10,7 @@
 
 #include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/device-info.service.interface.h"
+#include "../../../src/peripherals/bluetooth/ble-services/ota.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -24,10 +25,11 @@ TEST_CASE("BluetoothController", "[peripheral]")
     const auto serviceFlag = BleServiceFlag::CpsService;
 
     Mock<IEEPROMService> mockEEPROMService;
-    Mock<IOtaUploaderService> mockOtaService;
+    Mock<IOtaUpdaterService> mockOtaUpdaterService;
     Mock<ISettingsBleService> mockSettingsBleService;
     Mock<IBatteryBleService> mockBatteryBleService;
     Mock<IDeviceInfoBleService> mockDeviceInfoBleService;
+    Mock<IOtaBleService> mockOtaBleService;
 
     mockNimBLEServer.Reset();
     mockNimBLEAdvertising.Reset();
@@ -47,6 +49,8 @@ TEST_CASE("BluetoothController", "[peripheral]")
     When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
     Fake(Method(mockNimBLEService, start));
 
     Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
@@ -61,9 +65,9 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(serviceFlag);
 
-    Fake(Method(mockOtaService, begin));
+    Fake(Method(mockOtaUpdaterService, begin));
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get());
 
     SECTION("startBLEServer method should start advertisement")
     {
@@ -326,47 +330,24 @@ TEST_CASE("BluetoothController", "[peripheral]")
         {
             mockNimBLEServer.ClearInvocationHistory();
 
-            Mock<NimBLEService> mockOtaBleService;
+            Mock<NimBLEService> mockOtaService;
             Mock<NimBLECharacteristic> mockTxCharacteristic;
             Mock<NimBLECharacteristic> mockRxCharacteristic;
 
-            const unsigned int txProperties = NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ;
-
-            When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string)).Using(CommonBleFlags::otaServiceUuid)).AlwaysReturn(&mockOtaBleService.get());
-            When(
-                OverloadedMethod(mockOtaBleService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::otaTxUuid, txProperties))
-                .AlwaysReturn(&mockTxCharacteristic.get());
-            When(
-                OverloadedMethod(mockOtaBleService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::otaRxUuid, NIMBLE_PROPERTY::WRITE))
-                .AlwaysReturn(&mockRxCharacteristic.get());
-            Fake(Method(mockOtaBleService, start));
-            Fake(Method(mockRxCharacteristic, setCallbacks));
+            When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockOtaService.get());
+            Fake(Method(mockOtaService, start));
 
             bluetoothController.setup();
 
             SECTION("BLE service")
             {
-                Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string)).Using(CommonBleFlags::otaServiceUuid)).Once();
-
+                Verify(Method(mockOtaBleService, setup)).Once();
                 Verify(Method(mockNimBLEServer, start)).Once();
             }
-            SECTION("service with the txCharacteristic")
+            SECTION("service with the OtaBleService txCharacteristic")
             {
-                Verify(Method(mockOtaService, begin).Using(&mockTxCharacteristic.get())).Once();
-            }
-            SECTION("tx characteristic")
-            {
-                Verify(
-                    OverloadedMethod(mockOtaBleService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))
-                        .Using(CommonBleFlags::otaTxUuid, txProperties))
-                    .Once();
-            }
-            SECTION("rx characteristic")
-            {
-                Verify(
-                    OverloadedMethod(mockOtaBleService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))
-                        .Using(CommonBleFlags::otaRxUuid, NIMBLE_PROPERTY::WRITE))
-                    .Once();
+                Verify(Method(mockOtaUpdaterService, begin)).Once();
+                Verify(Method(mockOtaBleService, getOtaTx)).Once();
             }
         }
 

@@ -1,5 +1,4 @@
-// NOLINTBEGIN(readability-magic-numbers)
-#include <numeric>
+// NOLINTBEGIN(readability-magic-numbers, cppcoreguidelines-pro-bounds-pointer-arithmetic)
 #include <vector>
 
 #include "./include/catch_amalgamated.hpp"
@@ -535,8 +534,6 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
                         otaService.onData(endRequest, 256);
 
-                        // Verify(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).Once();
-
                         REQUIRE_THAT(resultResponse, Catch::Matchers::SizeIs(sizeof(OtaResponseOpCodes)));
                         REQUIRE(resultResponse[0] == expectedResult);
                     }
@@ -552,4 +549,4 @@ TEST_CASE("OtaUpdaterService", "[ota]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(readability-magic-numbers, cppcoreguidelines-pro-bounds-pointer-arithmetic)

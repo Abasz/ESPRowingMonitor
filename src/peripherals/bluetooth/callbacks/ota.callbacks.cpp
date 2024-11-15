@@ -6,7 +6,7 @@
 
 using std::array;
 
-OtaRxCallbacks::OtaRxCallbacks(IOtaUploaderService &_otaService) : otaService(_otaService)
+OtaRxCallbacks::OtaRxCallbacks(IOtaUpdaterService &_otaService) : otaService(_otaService)
 {
 }
 
