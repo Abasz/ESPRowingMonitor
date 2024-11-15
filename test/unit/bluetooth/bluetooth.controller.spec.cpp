@@ -8,6 +8,7 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -24,6 +25,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     Mock<IEEPROMService> mockEEPROMService;
     Mock<IOtaUploaderService> mockOtaService;
     Mock<ISettingsBleService> mockSettingsBleService;
+    Mock<IBatteryBleService> mockBatteryBleService;
 
     mockNimBLEServer.Reset();
     mockNimBLEAdvertising.Reset();
@@ -40,6 +42,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockNimBLECharacteristic.get());
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))).AlwaysReturn(&mockNimBLECharacteristic.get());
 
+    When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     Fake(Method(mockNimBLEService, start));
 
@@ -57,7 +60,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
     Fake(Method(mockOtaService, begin));
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get());
 
     SECTION("startBLEServer method should start advertisement")
     {
@@ -130,30 +133,15 @@ TEST_CASE("BluetoothController", "[peripheral]")
         SECTION("should create battery service and related characteristics")
         {
             mockNimBLEServer.ClearInvocationHistory();
-            const unsigned int expectedNimBLEProperty = NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY;
+            Mock<NimBLEService> mockBatteryNimBLEService;
 
-            Mock<NimBLEService> mockBatteryService;
-            When(
-                OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short))
-                    .Using(CommonBleFlags::batterySvcUuid))
-                .AlwaysReturn(&mockBatteryService.get());
-            When(
-                OverloadedMethod(mockBatteryService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::batteryLevelUuid, expectedNimBLEProperty))
-                .AlwaysReturn(&mockNimBLECharacteristic.get());
-            Fake(Method(mockBatteryService, start));
+            When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockBatteryNimBLEService.get());
+            Fake(Method(mockBatteryNimBLEService, start));
 
             bluetoothController.setup();
 
-            Verify(
-                OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short))
-                    .Using(CommonBleFlags::batterySvcUuid))
-                .Once();
-            Verify(
-                OverloadedMethod(mockBatteryService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::batteryLevelUuid, expectedNimBLEProperty))
-                .Once();
-            Verify(Method(mockBatteryService, start)).Once();
+            Verify(Method(mockSettingsBleService, setup).Using(Ne(nullptr)));
+            Verify(Method(mockBatteryNimBLEService, start)).Once();
         }
 
         SECTION("should select measurement service (CPS vs. CSC) based on settings")

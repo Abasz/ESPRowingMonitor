@@ -10,7 +10,7 @@
 #include "../../utils/ota-updater/ota-updater.service.interface.h"
 #include "../sd-card/sd-card.service.interface.h"
 #include "./ble-services/base-metrics.service.h"
-#include "./ble-services/battery.service.h"
+#include "./ble-services/battery.service.interface.h"
 #include "./ble-services/extended-metrics.service.h"
 #include "./ble-services/ota.service.h"
 #include "./ble-services/settings.service.interface.h"
@@ -25,10 +25,10 @@ class BluetoothController final : public IBluetoothController
     IOtaUploaderService &otaService;
 
     ISettingsBleService &settingsBleService;
+    IBatteryBleService &batteryBleService;
 
     ExtendedMetricBleService extendedMetricsBleService;
     BaseMetricsBleService baseMetricsBleService;
-    BatteryBleService batteryBleService;
     OtaBleService otaBleService;
 
     ServerCallbacks serverCallbacks;
@@ -38,7 +38,7 @@ class BluetoothController final : public IBluetoothController
     void setupAdvertisement() const;
 
 public:
-    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService);
+    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService);
 
     void setup() override;
     void startBLEServer() override;

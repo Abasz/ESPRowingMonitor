@@ -8,10 +8,10 @@
 
 void BluetoothController::notifyBattery(const unsigned char batteryLevel) const
 {
-    batteryBleService.characteristic->setValue(batteryLevel);
-    if (batteryBleService.characteristic->getSubscribedCount() > 0)
+    batteryBleService.setBatteryLevel(batteryLevel);
+    if (batteryBleService.isSubscribed())
     {
-        batteryBleService.characteristic->notify();
+        batteryBleService.broadcastBatteryLevel();
     }
 }
 

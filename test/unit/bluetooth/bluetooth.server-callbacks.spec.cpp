@@ -8,6 +8,7 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -22,6 +23,7 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
     Mock<IEEPROMService> mockEEPROMService;
     Mock<IOtaUploaderService> mockOtaService;
     Mock<ISettingsBleService> mockSettingsBleService;
+    Mock<IBatteryBleService> mockBatteryBleService;
     Mock<NimBLECharacteristic> mockDeltaTimesCharacteristic;
 
     mockArduino.Reset();
@@ -57,6 +59,7 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
     Fake(Method(mockOtaService, begin));
 
     When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
 
     // Test specific mocks
 
@@ -78,7 +81,7 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
         .AlwaysReturn(&mockDeltaTimesCharacteristic.get());
     Fake(Method(mockDeltaTimesCharacteristic, notify));
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get());
     bluetoothController.setup();
     mockNimBLEAdvertising.ClearInvocationHistory();
     NimBLEServerCallbacks *serverCallback = std::move(mockNimBLEServer.get().callbacks);

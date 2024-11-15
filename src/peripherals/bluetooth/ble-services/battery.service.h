@@ -2,10 +2,16 @@
 
 #include "NimBLEDevice.h"
 
-class BatteryBleService
+#include "./battery.service.interface.h"
+
+class BatteryBleService final : public IBatteryBleService
 {
-public:
     NimBLECharacteristic *characteristic = nullptr;
 
-    NimBLEService *setup(NimBLEServer *server);
+public:
+    NimBLEService *setup(NimBLEServer *server) override;
+
+    bool isSubscribed() const override;
+    void broadcastBatteryLevel() const override;
+    void setBatteryLevel(unsigned char batteryLevel) const override;
 };

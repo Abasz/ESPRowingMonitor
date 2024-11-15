@@ -12,6 +12,7 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -26,6 +27,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Mock<IEEPROMService> mockEEPROMService;
     Mock<IOtaUploaderService> mockOtaService;
     Mock<ISettingsBleService> mockSettingsBleService;
+    Mock<IBatteryBleService> mockBatteryBleService;
     Mock<NimBLECharacteristic> mockBatteryLevelCharacteristic;
     Mock<NimBLECharacteristic> mockSettingsCharacteristic;
     Mock<NimBLECharacteristic> mockHandleForcesCharacteristic;
@@ -64,13 +66,9 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Fake(Method(mockOtaService, begin));
 
     When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
 
     // Test specific mocks
-
-    When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(Eq(CommonBleFlags::batteryLevelUuid), Any())).AlwaysReturn(&mockBatteryLevelCharacteristic.get());
-    When(Method(mockBatteryLevelCharacteristic, getSubscribedCount)).AlwaysReturn(0);
-    Fake(Method(mockBatteryLevelCharacteristic, notify));
-    Fake(OverloadedMethod(mockBatteryLevelCharacteristic, setValue, void(const unsigned short)));
 
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(Eq(CommonBleFlags::settingsUuid), Any())).AlwaysReturn(&mockSettingsCharacteristic.get());
     When(Method(mockSettingsCharacteristic, getSubscribedCount)).AlwaysReturn(0);
@@ -82,36 +80,42 @@ TEST_CASE("BluetoothController", "[callbacks]")
     When(Method(mockHandleForcesCharacteristic, setCallbacks)).AlwaysDo([&mockHandleForcesCharacteristic](NimBLECharacteristicCallbacks *callbacks)
                                                                         { mockHandleForcesCharacteristic.get().callbacks = callbacks; });
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get());
     bluetoothController.setup();
     NimBLECharacteristicCallbacks *handleForcesCallback = std::move(mockHandleForcesCharacteristic.get().callbacks);
 
     SECTION("notifyBattery method should")
     {
         const auto expectedBatteryLevel = 66;
+
+        Fake(Method(mockBatteryBleService, setBatteryLevel));
+        Fake(Method(mockBatteryBleService, broadcastBatteryLevel));
+
         SECTION("set new battery level")
         {
+            Fake(Method(mockBatteryBleService, isSubscribed));
+
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
-            Verify(OverloadedMethod(mockBatteryLevelCharacteristic, setValue, void(const unsigned short)).Using(Eq(expectedBatteryLevel)));
+            Verify(Method(mockBatteryBleService, setBatteryLevel).Using(expectedBatteryLevel));
         }
 
         SECTION("not notify if there are no subscribers")
         {
-            When(Method(mockBatteryLevelCharacteristic, getSubscribedCount)).Return(0);
+            When(Method(mockBatteryBleService, isSubscribed)).Return(0);
 
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
-            VerifyNoOtherInvocations(Method(mockBatteryLevelCharacteristic, notify));
+            VerifyNoOtherInvocations(Method(mockBatteryBleService, broadcastBatteryLevel));
         }
 
         SECTION("notify if there are subscribers")
         {
-            When(Method(mockBatteryLevelCharacteristic, getSubscribedCount)).Return(1);
+            When(Method(mockBatteryBleService, isSubscribed)).Return(1);
 
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
-            Verify(Method(mockBatteryLevelCharacteristic, notify));
+            Verify(Method(mockBatteryBleService, broadcastBatteryLevel));
         }
     }
 
