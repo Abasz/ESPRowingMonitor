@@ -4,9 +4,10 @@
 
 #include "../../../utils/configuration.h"
 #include "../../../utils/enums.h"
+
 #include "./device-info.service.h"
 
-NimBLEService *DeviceInfoBleService::setup(NimBLEServer *const server)
+NimBLEService *DeviceInfoBleService::setup(NimBLEServer *const server) const
 {
     Log.traceln("Setting up Device Info Service");
     auto *deviceInfoService = server->createService(CommonBleFlags::deviceInfoSvcUuid);

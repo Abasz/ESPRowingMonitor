@@ -2,8 +2,10 @@
 
 #include "NimBLEDevice.h"
 
-class DeviceInfoBleService
+#include "./device-info.service.interface.h"
+
+class DeviceInfoBleService final : public IDeviceInfoBleService
 {
 public:
-    static NimBLEService *setup(NimBLEServer *server);
+    NimBLEService *setup(NimBLEServer *server) const override;
 };

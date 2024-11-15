@@ -6,10 +6,9 @@
 #include "NimBLEDevice.h"
 
 #include "../../utils/configuration.h"
-#include "./ble-services/device-info.service.h"
 #include "./bluetooth.controller.h"
 
-BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService) : eepromService(_eepromService), otaService(_otaService), settingsBleService(_settingsBleService), batteryBleService(_batteryBleService), baseMetricsBleService(_settingsBleService, _eepromService), otaBleService(_otaService), serverCallbacks(extendedMetricsBleService)
+BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &deviceInfoBleService) : eepromService(_eepromService), otaService(_otaService), settingsBleService(_settingsBleService), batteryBleService(_batteryBleService), deviceInfoBleService(deviceInfoBleService), baseMetricsBleService(_settingsBleService, _eepromService), otaBleService(_otaService), serverCallbacks(extendedMetricsBleService)
 {
 }
 
@@ -76,7 +75,7 @@ void BluetoothController::setupServices()
 
     otaService.begin(otaBleService.characteristic);
 
-    DeviceInfoBleService::setup(server)->start();
+    deviceInfoBleService.setup(server)->start();
 
     Log.verboseln("Starting BLE Server");
 

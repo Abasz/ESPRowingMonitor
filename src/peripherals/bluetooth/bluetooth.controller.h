@@ -14,6 +14,7 @@
 #include "./ble-services/extended-metrics.service.h"
 #include "./ble-services/ota.service.h"
 #include "./ble-services/settings.service.interface.h"
+#include "./ble-services/device-info.service.interface.h"
 #include "./bluetooth.controller.interface.h"
 #include "./callbacks/server.callbacks.h"
 
@@ -26,6 +27,7 @@ class BluetoothController final : public IBluetoothController
 
     ISettingsBleService &settingsBleService;
     IBatteryBleService &batteryBleService;
+    IDeviceInfoBleService &deviceInfoBleService;
 
     ExtendedMetricBleService extendedMetricsBleService;
     BaseMetricsBleService baseMetricsBleService;
@@ -38,7 +40,7 @@ class BluetoothController final : public IBluetoothController
     void setupAdvertisement() const;
 
 public:
-    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService);
+    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService,IDeviceInfoBleService &_deviceInfoBleService);
 
     void setup() override;
     void startBLEServer() override;

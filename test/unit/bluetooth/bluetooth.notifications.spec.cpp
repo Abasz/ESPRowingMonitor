@@ -13,6 +13,7 @@
 #include "../include/NimBLEDevice.h"
 
 #include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
+#include "../../../src/peripherals/bluetooth/ble-services/device-info.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -28,6 +29,8 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Mock<IOtaUploaderService> mockOtaService;
     Mock<ISettingsBleService> mockSettingsBleService;
     Mock<IBatteryBleService> mockBatteryBleService;
+    Mock<IDeviceInfoBleService> mockDeviceInfoBleService;
+
     Mock<NimBLECharacteristic> mockBatteryLevelCharacteristic;
     Mock<NimBLECharacteristic> mockSettingsCharacteristic;
     Mock<NimBLECharacteristic> mockHandleForcesCharacteristic;
@@ -67,6 +70,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
     When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
 
     // Test specific mocks
 
@@ -80,7 +84,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
     When(Method(mockHandleForcesCharacteristic, setCallbacks)).AlwaysDo([&mockHandleForcesCharacteristic](NimBLECharacteristicCallbacks *callbacks)
                                                                         { mockHandleForcesCharacteristic.get().callbacks = callbacks; });
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get());
     bluetoothController.setup();
     NimBLECharacteristicCallbacks *handleForcesCallback = std::move(mockHandleForcesCharacteristic.get().callbacks);
 

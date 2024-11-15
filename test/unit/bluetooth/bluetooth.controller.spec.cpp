@@ -9,6 +9,7 @@
 #include "../include/NimBLEDevice.h"
 
 #include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
+#include "../../../src/peripherals/bluetooth/ble-services/device-info.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -26,6 +27,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     Mock<IOtaUploaderService> mockOtaService;
     Mock<ISettingsBleService> mockSettingsBleService;
     Mock<IBatteryBleService> mockBatteryBleService;
+    Mock<IDeviceInfoBleService> mockDeviceInfoBleService;
 
     mockNimBLEServer.Reset();
     mockNimBLEAdvertising.Reset();
@@ -44,6 +46,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
     When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     Fake(Method(mockNimBLEService, start));
 
     Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
@@ -60,7 +63,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
     Fake(Method(mockOtaService, begin));
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get());
 
     SECTION("startBLEServer method should start advertisement")
     {
@@ -369,58 +372,15 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
         SECTION("should setup device information service")
         {
-            const unsigned int expectedProperty = NIMBLE_PROPERTY::READ;
-
             mockNimBLEServer.ClearInvocationHistory();
-
-            Mock<NimBLEService> mockDeviceInfoService;
-            Mock<NimBLECharacteristic> mockDeviceInfoCharacteristic;
-
-            When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(CommonBleFlags::deviceInfoSvcUuid)).AlwaysReturn(&mockDeviceInfoService.get());
-            When(
-                OverloadedMethod(mockDeviceInfoService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)))
-                .AlwaysReturn(&mockDeviceInfoCharacteristic.get());
-            Fake(OverloadedMethod(mockDeviceInfoCharacteristic, setValue, void(const std::string)));
-            Fake(Method(mockDeviceInfoService, start));
+            Mock<NimBLEService> mockDeviceInfoNimBLEService;
+            When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockDeviceInfoNimBLEService.get());
+            Fake(Method(mockDeviceInfoNimBLEService, start));
 
             bluetoothController.setup();
 
-            Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(CommonBleFlags::deviceInfoSvcUuid)).Once();
-            Verify(
-                OverloadedMethod(mockDeviceInfoService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::manufacturerNameSvcUuid, expectedProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockDeviceInfoService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::modelNumberSvcUuid, expectedProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockDeviceInfoService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::serialNumberSvcUuid, expectedProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockDeviceInfoService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::firmwareNumberSvcUuid, expectedProperty))
-                .Once();
-
-            Verify(
-                OverloadedMethod(mockDeviceInfoCharacteristic, setValue, void(const std::string))
-                    .Using(Configurations::deviceName))
-                .Once();
-            Verify(
-                OverloadedMethod(mockDeviceInfoCharacteristic, setValue, void(const std::string))
-                    .Using(Configurations::modelNumber))
-                .Once();
-            Verify(
-                OverloadedMethod(mockDeviceInfoCharacteristic, setValue, void(const std::string))
-                    .Using(Configurations::serialNumber))
-                .Once();
-            Verify(
-                OverloadedMethod(mockDeviceInfoCharacteristic, setValue, void(const std::string))
-                    .Using(Configurations::firmwareVersion))
-                .Once();
-
-            Verify(Method(mockDeviceInfoService, start)).Once();
+            Verify(Method(mockDeviceInfoBleService, setup)).Once();
+            Verify(Method(mockDeviceInfoNimBLEService, start)).Once();
         }
 
         SECTION("should start server")
