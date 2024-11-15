@@ -1,5 +1,4 @@
 #include <array>
-#include <string>
 
 #include "../include/catch_amalgamated.hpp"
 #include "../include/fakeit.hpp"
@@ -7,11 +6,10 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
-#include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
+#include "../../../src/peripherals/bluetooth//ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/callbacks/control-point.callbacks.h"
 #include "../../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
-#include "../../../src/utils/configuration.h"
 #include "../../../src/utils/enums.h"
 #include "../../../src/utils/ota-updater/ota-updater.service.interface.h"
 
@@ -19,19 +17,11 @@ using namespace fakeit;
 
 TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 {
-    Mock<IEEPROMService> mockEEPROMService;
-    Mock<IBluetoothController> mockBleController;
-    Mock<NimBLECharacteristic> mockControlPointCharacteristic;
-
     mockArduino.Reset();
-    mockNimBLEServer.Reset();
-    mockNimBLEAdvertising.Reset();
-    mockNimBLEService.Reset();
-    mockNimBLECharacteristic.Reset();
 
-    Fake(Method(mockNimBLEAdvertising, start));
-    Fake(Method(mockNimBLEAdvertising, setAppearance));
-    Fake(Method(mockNimBLEAdvertising, addServiceUUID));
+    Mock<IEEPROMService> mockEEPROMService;
+    Mock<ISettingsBleService> mockSettingsBleService;
+    Mock<NimBLECharacteristic> mockControlPointCharacteristic;
 
     Fake(Method(mockControlPointCharacteristic, indicate));
     Fake(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>)));
@@ -41,9 +31,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
     Fake(Method(mockEEPROMService, setLogToSdCard));
     Fake(Method(mockEEPROMService, setLogToBluetooth));
 
-    Fake(Method(mockBleController, notifySettings));
+    Fake(Method(mockSettingsBleService, broadcastSettings));
 
-    ControlPointCallbacks controlPointCallback(mockBleController.get(), mockEEPROMService.get());
+    ControlPointCallbacks controlPointCallback(mockSettingsBleService.get(), mockEEPROMService.get());
 
     SECTION("indicate OperationFailed response when request is empty")
     {
@@ -149,7 +139,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             SECTION("notify new settings")
             {
-                Verify(Method(mockBleController, notifySettings)).Once();
+                Verify(Method(mockSettingsBleService, broadcastSettings)).Once();
             }
         }
     }
@@ -223,7 +213,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             SECTION("notify new settings")
             {
-                Verify(Method(mockBleController, notifySettings)).Once();
+                Verify(Method(mockSettingsBleService, broadcastSettings)).Once();
             }
 
             SECTION("restart device")
@@ -300,7 +290,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             SECTION("notify new settings")
             {
-                Verify(Method(mockBleController, notifySettings)).Once();
+                Verify(Method(mockSettingsBleService, broadcastSettings)).Once();
             }
         }
     }
@@ -372,7 +362,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             SECTION("notify new settings")
             {
-                Verify(Method(mockBleController, notifySettings)).Once();
+                Verify(Method(mockSettingsBleService, broadcastSettings)).Once();
             }
         }
     }

@@ -12,8 +12,8 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
-#include "../../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
 #include "../../../src/utils/configuration.h"
 #include "../../../src/utils/enums.h"
@@ -24,8 +24,8 @@ using namespace fakeit;
 TEST_CASE("BluetoothController", "[callbacks]")
 {
     Mock<IEEPROMService> mockEEPROMService;
-    Mock<ISdCardService> mockSdCardService;
     Mock<IOtaUploaderService> mockOtaService;
+    Mock<ISettingsBleService> mockSettingsBleService;
     Mock<NimBLECharacteristic> mockBatteryLevelCharacteristic;
     Mock<NimBLECharacteristic> mockSettingsCharacteristic;
     Mock<NimBLECharacteristic> mockHandleForcesCharacteristic;
@@ -53,19 +53,17 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const unsigned short)));
     Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::string)));
     Fake(Method(mockNimBLECharacteristic, notify));
+    Fake(Method(mockNimBLECharacteristic, setCallbacks));
 
     Fake(Method(mockNimBLEAdvertising, start));
     Fake(Method(mockNimBLEAdvertising, setAppearance));
     Fake(Method(mockNimBLEAdvertising, addServiceUUID));
 
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-    When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-    When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(true);
-    When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(ArduinoLogLevel::LogLevelSilent);
-
-    When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(true);
 
     Fake(Method(mockOtaService, begin));
+
+    When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
 
     // Test specific mocks
 
@@ -81,7 +79,10 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(Eq(CommonBleFlags::handleForcesUuid), Any())).AlwaysReturn(&mockHandleForcesCharacteristic.get());
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
+    When(Method(mockHandleForcesCharacteristic, setCallbacks)).AlwaysDo([&mockHandleForcesCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                                        { mockHandleForcesCharacteristic.get().callbacks = callbacks; });
+
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get());
     bluetoothController.setup();
     NimBLECharacteristicCallbacks *handleForcesCallback = std::move(mockHandleForcesCharacteristic.get().callbacks);
 
@@ -111,145 +112,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
             Verify(Method(mockBatteryLevelCharacteristic, notify));
-        }
-    }
-
-    SECTION("notifySettings method should")
-    {
-        const auto logToBluetooth = true;
-        const auto logToSdCard = true;
-        const auto logLevel = ArduinoLogLevel::LogLevelSilent;
-        const auto logFileOpen = true;
-        const unsigned char expectedSettings =
-            ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetooth) + 1 : 0) << 0U) |
-            ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCard) + 1 : 0) << 2U) |
-            (static_cast<unsigned char>(logLevel) << 4U);
-
-        When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(logToBluetooth);
-        When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCard);
-        When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(logLevel);
-        When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(logFileOpen);
-
-        SECTION("get current settings state")
-        {
-            mockEEPROMService.ClearInvocationHistory();
-            mockSdCardService.ClearInvocationHistory();
-
-            bluetoothController.notifySettings();
-
-            Verify(Method(mockEEPROMService, getLogToBluetooth)).Once();
-            Verify(Method(mockEEPROMService, getLogToSdCard)).Once();
-            Verify(Method(mockEEPROMService, getLogLevel)).Once();
-            Verify(Method(mockSdCardService, isLogFileOpen)).Once();
-
-            SECTION("and calculate correct setting binary value")
-            {
-                SECTION("when logToBluetooth is disabled")
-                {
-                    const auto logToBluetoothTest = false;
-
-                    const unsigned char expectedSettings =
-                        ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetoothTest) + 1 : 0) << 0U) |
-                        ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCard) + 1 : 0) << 2U) |
-                        (static_cast<unsigned char>(logLevel) << 4U);
-
-                    When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(logToBluetoothTest);
-                    When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCard);
-                    When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(logLevel);
-                    When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(logFileOpen);
-
-                    bluetoothController.notifySettings();
-
-                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                               .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})))
-                        .Once();
-                }
-
-                SECTION("when logToBluetooth is disabled")
-                {
-                    const auto logToBluetoothTest = false;
-
-                    const unsigned char expectedSettings =
-                        ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetoothTest) + 1 : 0) << 0U) |
-                        ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCard) + 1 : 0) << 2U) |
-                        (static_cast<unsigned char>(logLevel) << 4U);
-
-                    When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(logToBluetoothTest);
-
-                    bluetoothController.notifySettings();
-
-                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                               .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})))
-                        .Once();
-                }
-
-                SECTION("when logToSdCard is disabled")
-                {
-                    const auto logToSdCardTest = false;
-
-                    const unsigned char expectedSettings =
-                        ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetooth) + 1 : 0) << 0U) |
-                        ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCardTest) + 1 : 0) << 2U) |
-                        (static_cast<unsigned char>(logLevel) << 4U);
-
-                    When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCardTest);
-
-                    bluetoothController.notifySettings();
-
-                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                               .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})))
-                        .Once();
-                }
-
-                SECTION("when logToSdCard is disabled and logLevel is Verbose")
-                {
-                    const auto logLevelTest = ArduinoLogLevel::LogLevelSilent;
-                    const auto logToSdCardTest = false;
-
-                    const unsigned char expectedSettings =
-                        ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetooth) + 1 : 0) << 0U) |
-                        ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCardTest) + 1 : 0) << 2U) |
-                        (static_cast<unsigned char>(logLevelTest) << 4U);
-
-                    When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCardTest);
-                    When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(logLevelTest);
-
-                    bluetoothController.notifySettings();
-
-                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                               .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})))
-                        .Once();
-                }
-            }
-        }
-
-        SECTION("set new settings")
-        {
-            mockSettingsCharacteristic.ClearInvocationHistory();
-
-            bluetoothController.notifySettings();
-
-            Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                       .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})))
-                .Once();
-        }
-
-        SECTION("not notify if there are no subscribers")
-        {
-            When(Method(mockSettingsCharacteristic, getSubscribedCount)).Return(0);
-
-            bluetoothController.notifySettings();
-
-            Verify(Method(mockSettingsCharacteristic, notify)).Never();
-        }
-
-        SECTION("notify if there are subscribers")
-        {
-            When(Method(mockSettingsCharacteristic, getSubscribedCount)).Return(1);
-
-            bluetoothController.notifySettings();
-
-            Verify(Method(mockSettingsCharacteristic, notify));
         }
     }
 

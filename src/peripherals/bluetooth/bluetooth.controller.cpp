@@ -9,7 +9,7 @@
 #include "./ble-services/device-info.service.h"
 #include "./bluetooth.controller.h"
 
-BluetoothController::BluetoothController(IEEPROMService &_eepromService, ISdCardService &_sdCardService, IOtaUploaderService &_otaService) : eepromService(_eepromService), sdCardService(_sdCardService), otaService(_otaService), baseMetricsBleService(*this, _eepromService), settingsBleService(*this, _eepromService), otaBleService(_otaService), serverCallbacks(extendedMetricsBleService)
+BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService) : eepromService(_eepromService), otaService(_otaService), settingsBleService(_settingsBleService), baseMetricsBleService(_settingsBleService, _eepromService), otaBleService(_otaService), serverCallbacks(extendedMetricsBleService)
 {
 }
 
@@ -71,7 +71,7 @@ void BluetoothController::setupServices()
         batteryBleService.setup(server)->start();
     }
 
-    settingsBleService.setup(server, getSettings())->start();
+    settingsBleService.setup(server)->start();
     otaBleService.setup(server)->start();
 
     otaService.begin(otaBleService.characteristic);
@@ -121,18 +121,4 @@ unsigned short BluetoothController::getDeltaTimesMTU() const
 bool BluetoothController::isDeltaTimesSubscribed() const
 {
     return extendedMetricsBleService.deltaTimesParams.characteristic->getSubscribedCount() > 0;
-}
-
-std::array<unsigned char, SettingsBleService::settingsArrayLength> BluetoothController::getSettings() const
-{
-    const unsigned char settings =
-        ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToBluetooth()) + 1 : 0) << 0U) |
-        ((Configurations::supportSdCardLogging && sdCardService.isLogFileOpen() ? static_cast<unsigned char>(eepromService.getLogToSdCard()) + 1 : 0) << 2U) |
-        (static_cast<unsigned char>(eepromService.getLogLevel()) << 4U);
-
-    std::array<unsigned char, SettingsBleService::settingsArrayLength> temp = {
-        settings,
-    };
-
-    return temp;
 }

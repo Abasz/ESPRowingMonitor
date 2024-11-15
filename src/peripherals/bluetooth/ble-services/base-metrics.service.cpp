@@ -3,10 +3,11 @@
 #include "ArduinoLog.h"
 
 #include "./base-metrics.service.h"
+#include "./settings.service.interface.h"
 
 using std::array;
 
-BaseMetricsBleService::BaseMetricsBleService(IBluetoothController &_bleController, IEEPROMService &_eepromService) : callbacks(_bleController, _eepromService)
+BaseMetricsBleService::BaseMetricsBleService(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService) : callbacks(_settingsBleService, _eepromService)
 {
 }
 

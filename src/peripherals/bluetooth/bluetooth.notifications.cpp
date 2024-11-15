@@ -137,12 +137,3 @@ void BluetoothController::notifyDeltaTimes(const std::vector<unsigned long> &del
         NULL,
         0);
 }
-
-void BluetoothController::notifySettings() const
-{
-    settingsBleService.characteristic->setValue(getSettings());
-    if (settingsBleService.characteristic->getSubscribedCount() > 0)
-    {
-        settingsBleService.characteristic->notify();
-    }
-}

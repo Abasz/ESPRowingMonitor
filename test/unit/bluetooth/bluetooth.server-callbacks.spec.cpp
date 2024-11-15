@@ -8,8 +8,8 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
-#include "../../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
 #include "../../../src/utils/configuration.h"
 #include "../../../src/utils/enums.h"
@@ -20,8 +20,8 @@ using namespace fakeit;
 TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
 {
     Mock<IEEPROMService> mockEEPROMService;
-    Mock<ISdCardService> mockSdCardService;
     Mock<IOtaUploaderService> mockOtaService;
+    Mock<ISettingsBleService> mockSettingsBleService;
     Mock<NimBLECharacteristic> mockDeltaTimesCharacteristic;
 
     mockArduino.Reset();
@@ -46,19 +46,17 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
     Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
     Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const unsigned short)));
     Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::string)));
+    Fake(Method(mockNimBLECharacteristic, setCallbacks));
 
     Fake(Method(mockNimBLEAdvertising, start));
     Fake(Method(mockNimBLEAdvertising, setAppearance));
     Fake(Method(mockNimBLEAdvertising, addServiceUUID));
 
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-    When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-    When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(true);
-    When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(ArduinoLogLevel::LogLevelSilent);
-
-    When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(true);
 
     Fake(Method(mockOtaService, begin));
+
+    When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
 
     // Test specific mocks
 
@@ -66,6 +64,8 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
 
     When(Method(mockDeltaTimesCharacteristic, getSubscribedCount)).AlwaysReturn(1);
     When(Method(mockDeltaTimesCharacteristic, getService)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockDeltaTimesCharacteristic, setCallbacks)).AlwaysDo([&mockDeltaTimesCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                                      { mockDeltaTimesCharacteristic.get().callbacks = callbacks; });
     Fake(Method(mockDeltaTimesCharacteristic, notify));
 
     When(
@@ -78,7 +78,7 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
         .AlwaysReturn(&mockDeltaTimesCharacteristic.get());
     Fake(Method(mockDeltaTimesCharacteristic, notify));
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockSdCardService.get(), mockOtaService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaService.get(), mockSettingsBleService.get());
     bluetoothController.setup();
     mockNimBLEAdvertising.ClearInvocationHistory();
     NimBLEServerCallbacks *serverCallback = std::move(mockNimBLEServer.get().callbacks);

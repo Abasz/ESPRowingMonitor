@@ -59,6 +59,8 @@ set(SOURCES_UNIT_TEST
     "${LIB_DIR}/peripherals/bluetooth/bluetooth.controller.cpp"
     "${LIB_DIR}/peripherals/bluetooth/bluetooth.notifications.cpp"
 
+    "${UNIT_TEST_DIR}/bluetooth/ble-services/settings.service.spec.cpp"
+
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.control-point.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.controller.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.notifications.spec.cpp"

@@ -180,7 +180,7 @@ public:
     virtual void setValue(const std::array<unsigned char, 7U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 11U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 14U> s) = 0;
-    void setCallbacks(NimBLECharacteristicCallbacks *pCallbacks)
+    virtual void setCallbacks(NimBLECharacteristicCallbacks *pCallbacks)
     {
         callbacks = pCallbacks;
     };

@@ -15,7 +15,7 @@ class BaseMetricsBleService
 public:
     ControlPointCallbacks callbacks;
 
-    explicit BaseMetricsBleService(IBluetoothController &_bleController, IEEPROMService &_eepromService);
+    explicit BaseMetricsBleService(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService);
 
     struct BaseMetricsParams
     {

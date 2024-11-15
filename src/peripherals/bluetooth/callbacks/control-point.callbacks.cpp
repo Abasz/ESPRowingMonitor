@@ -9,7 +9,7 @@
 
 using std::array;
 
-ControlPointCallbacks::ControlPointCallbacks(IBluetoothController &_bleController, IEEPROMService &_eepromService) : bleController(_bleController), eepromService(_eepromService)
+ControlPointCallbacks::ControlPointCallbacks(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService) : settingsBleService(_settingsBleService), eepromService(_eepromService)
 {
 }
 
@@ -129,7 +129,7 @@ ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &mes
     Log.infoln("New LogLevel: %d", message[1]);
     eepromService.setLogLevel(static_cast<ArduinoLogLevel>(message[1]));
 
-    bleController.notifySettings();
+    settingsBleService.broadcastSettings();
 
     return ResponseOpCodes::Successful;
 }
@@ -147,7 +147,7 @@ ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue
     Log.infoln("%s SdCard logging", shouldEnable ? "Enable" : "Disable");
     eepromService.setLogToSdCard(shouldEnable);
 
-    bleController.notifySettings();
+    settingsBleService.broadcastSettings();
 
     return ResponseOpCodes::Successful;
 }
@@ -166,7 +166,7 @@ ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttVa
     Log.infoln("%s deltaTime logging", shouldEnable ? "Enable" : "Disable");
     eepromService.setLogToBluetooth(shouldEnable);
 
-    bleController.notifySettings();
+    settingsBleService.broadcastSettings();
 
     return ResponseOpCodes::Successful;
 }
@@ -182,7 +182,7 @@ void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &messag
     pCharacteristic->setValue(temp);
     pCharacteristic->indicate();
 
-    bleController.notifySettings();
+    settingsBleService.broadcastSettings();
 
     Log.verboseln("Restarting device in 5s");
     delay(100);

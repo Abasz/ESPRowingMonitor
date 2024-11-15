@@ -1,20 +1,28 @@
 #pragma once
 
+#include <array>
+
 #include "NimBLEDevice.h"
 
 #include "../../../utils/EEPROM/EEPROM.service.interface.h"
+#include "../../sd-card/sd-card.service.interface.h"
 #include "../bluetooth.controller.interface.h"
 #include "../callbacks/control-point.callbacks.h"
+#include "./settings.service.interface.h"
 
-class SettingsBleService
+class SettingsBleService final : public ISettingsBleService
 {
-public:
-    static constexpr unsigned char settingsArrayLength = 1U;
+    ISdCardService &sdCardService;
+    IEEPROMService &eepromService;
 
     ControlPointCallbacks callbacks;
     NimBLECharacteristic *characteristic = nullptr;
 
-    explicit SettingsBleService(IBluetoothController &_bleController, IEEPROMService &_eepromService);
+    std::array<unsigned char, ISettingsBleService::settingsArrayLength> getSettings() const;
 
-    NimBLEService *setup(NimBLEServer *server, std::array<unsigned char, settingsArrayLength> settings);
+public:
+    explicit SettingsBleService(ISdCardService &_sdCardService, IEEPROMService &_eepromService);
+
+    NimBLEService *setup(NimBLEServer *server) override;
+    void broadcastSettings() const override;
 };

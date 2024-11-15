@@ -13,7 +13,7 @@
 #include "./ble-services/battery.service.h"
 #include "./ble-services/extended-metrics.service.h"
 #include "./ble-services/ota.service.h"
-#include "./ble-services/settings.service.h"
+#include "./ble-services/settings.service.interface.h"
 #include "./bluetooth.controller.interface.h"
 #include "./callbacks/server.callbacks.h"
 
@@ -22,13 +22,13 @@ using std::vector;
 class BluetoothController final : public IBluetoothController
 {
     IEEPROMService &eepromService;
-    ISdCardService &sdCardService;
     IOtaUploaderService &otaService;
+
+    ISettingsBleService &settingsBleService;
 
     ExtendedMetricBleService extendedMetricsBleService;
     BaseMetricsBleService baseMetricsBleService;
     BatteryBleService batteryBleService;
-    SettingsBleService settingsBleService;
     OtaBleService otaBleService;
 
     ServerCallbacks serverCallbacks;
@@ -37,10 +37,8 @@ class BluetoothController final : public IBluetoothController
     void setupServices();
     void setupAdvertisement() const;
 
-    std::array<unsigned char, SettingsBleService::settingsArrayLength> getSettings() const;
-
 public:
-    explicit BluetoothController(IEEPROMService &_eepromService, ISdCardService &_sdCardService, IOtaUploaderService &_otaService);
+    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUploaderService &_otaService, ISettingsBleService &_settingsBleService);
 
     void setup() override;
     void startBLEServer() override;
@@ -51,7 +49,6 @@ public:
     void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) override;
     void notifyHandleForces(const std::vector<float> &handleForces) override;
     void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;
-    void notifySettings() const override;
 
     unsigned short getDeltaTimesMTU() const override;
     bool isDeltaTimesSubscribed() const override;

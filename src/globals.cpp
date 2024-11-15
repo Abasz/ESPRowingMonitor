@@ -5,12 +5,15 @@
 Preferences preferences;
 
 EEPROMService eepromService(preferences);
-SdCardService sdCardService;
 OtaUpdaterService otaService;
-BluetoothController bleController(eepromService, sdCardService, otaService);
+PowerManagerService powerManagerService;
+
 FlywheelService flywheelService;
 StrokeService strokeService;
-PowerManagerService powerManagerService;
+
+SdCardService sdCardService;
+SettingsBleService settingsBleService(sdCardService, eepromService);
+BluetoothController bleController(eepromService, otaService, settingsBleService);
 
 PeripheralsController peripheralController(bleController, sdCardService, eepromService);
 StrokeController strokeController(strokeService, flywheelService);

@@ -76,7 +76,17 @@
 			"iostream": "cpp",
 			"mutex": "cpp",
 			"thread": "cpp",
-			"variant": "cpp"
+			"variant": "cpp",
+			"strstream": "cpp",
+			"bit": "cpp",
+			"charconv": "cpp",
+			"compare": "cpp",
+			"concepts": "cpp",
+			"netfwd": "cpp",
+			"numbers": "cpp",
+			"semaphore": "cpp",
+			"stop_token": "cpp",
+			"format": "cpp"
 		},
 		"C_Cpp.codeAnalysis.clangTidy.args": [
 			// "-extra-arg=test/unit/include"

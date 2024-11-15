@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "Preferences.h"
 
+#include "./peripherals/bluetooth/ble-services/settings.service.h"
 #include "./peripherals/bluetooth/bluetooth.controller.h"
 #include "./peripherals/peripherals.controller.h"
 #include "./peripherals/sd-card/sd-card.service.h"
@@ -24,14 +25,17 @@ static const unsigned long secsPerDay = 86'400;
 extern Preferences preferences;
 extern EEPROMService eepromService;
 extern OtaUpdaterService otaService;
-extern BluetoothController bleController;
-extern SdCardService sdCardService;
-extern PeripheralsController peripheralController;
+extern PowerManagerService powerManagerService;
+extern PowerManagerController powerManagerController;
+
 extern FlywheelService flywheelService;
 extern StrokeService strokeService;
 extern StrokeController strokeController;
-extern PowerManagerService powerManagerService;
-extern PowerManagerController powerManagerController;
+
+extern SettingsBleService settingsBleService;
+extern SdCardService sdCardService;
+extern BluetoothController bleController;
+extern PeripheralsController peripheralController;
 
 IRAM_ATTR void rotationInterrupt();
 
