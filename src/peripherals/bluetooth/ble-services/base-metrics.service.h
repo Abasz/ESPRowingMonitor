@@ -6,16 +6,11 @@
 #include "../../../utils/enums.h"
 #include "../bluetooth.controller.interface.h"
 #include "../callbacks/control-point.callbacks.h"
+#include "./base-metrics.service.interface.h"
 
-class BaseMetricsBleService
+class BaseMetricsBleService final : public IBaseMetricsBleService
 {
-    NimBLEService *setupCscServices(NimBLEServer *server);
-    NimBLEService *setupPscServices(NimBLEServer *server);
-
-public:
     ControlPointCallbacks callbacks;
-
-    explicit BaseMetricsBleService(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService);
 
     struct BaseMetricsParams
     {
@@ -28,8 +23,19 @@ public:
         short avgStrokePower = 0;
     } parameters;
 
+    NimBLEService *setupCscServices(NimBLEServer *server);
+    NimBLEService *setupPscServices(NimBLEServer *server);
+
     static void pscTask(void *parameters);
     static void cscTask(void *parameters);
+    static void (*broadcastTask)(void *);
 
-    NimBLEService *setup(NimBLEServer *server, BleServiceFlag bleServiceFlag);
+public:
+    explicit BaseMetricsBleService(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService);
+
+    NimBLEService *setup(NimBLEServer *server, BleServiceFlag bleServiceFlag) override;
+
+    void broadcastBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) override;
+
+    bool isSubscribed() override;
 };

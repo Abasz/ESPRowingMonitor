@@ -12,6 +12,7 @@ protected:
 public:
     virtual void attachRotationInterrupt() = 0;
     virtual void detachRotationInterrupt() = 0;
+    virtual void abort(int errorCode) = 0;
 };
 
 extern fakeit::Mock<Globals> mockGlobals;

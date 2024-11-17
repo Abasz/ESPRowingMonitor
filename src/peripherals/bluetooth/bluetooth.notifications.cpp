@@ -4,6 +4,7 @@
 #include "NimBLEDevice.h"
 
 #include "../../utils/configuration.h"
+#include "./ble-services/base-metrics.service.interface.h"
 #include "./bluetooth.controller.h"
 
 void BluetoothController::notifyBattery(const unsigned char batteryLevel) const
@@ -17,46 +18,12 @@ void BluetoothController::notifyBattery(const unsigned char batteryLevel) const
 
 void BluetoothController::notifyBaseMetrics(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower)
 {
-    if (baseMetricsBleService.parameters.characteristic->getSubscribedCount() == 0)
+    if (!baseMetricsBleService.isSubscribed())
     {
         return;
     }
 
-    baseMetricsBleService.parameters.revTime = revTime;
-    baseMetricsBleService.parameters.revCount = revCount;
-    baseMetricsBleService.parameters.strokeTime = strokeTime;
-    baseMetricsBleService.parameters.strokeCount = strokeCount;
-    baseMetricsBleService.parameters.avgStrokePower = avgStrokePower;
-
-    const auto coreStackSize = 2'048U;
-
-    if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
-    {
-        xTaskCreatePinnedToCore(
-            BaseMetricsBleService::pscTask,
-            "notifyClients",
-            coreStackSize,
-            &baseMetricsBleService.parameters,
-            1,
-            NULL,
-            0);
-
-        return;
-    }
-
-    if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
-    {
-        xTaskCreatePinnedToCore(
-            BaseMetricsBleService::cscTask,
-            "notifyClients",
-            coreStackSize,
-            &baseMetricsBleService.parameters,
-            1,
-            NULL,
-            0);
-
-        return;
-    }
+    baseMetricsBleService.broadcastBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
 }
 
 void BluetoothController::notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor)

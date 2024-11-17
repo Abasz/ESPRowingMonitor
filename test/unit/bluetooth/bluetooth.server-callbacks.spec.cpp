@@ -8,6 +8,7 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-services/base-metrics.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/device-info.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/ota.service.interface.h"
@@ -28,6 +29,7 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
     Mock<IBatteryBleService> mockBatteryBleService;
     Mock<IDeviceInfoBleService> mockDeviceInfoBleService;
     Mock<IOtaBleService> mockOtaBleService;
+    Mock<IBaseMetricsBleService> mockBaseMetricsBleService;
 
     Mock<NimBLECharacteristic> mockDeltaTimesCharacteristic;
 
@@ -68,6 +70,7 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
     When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
+    When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
 
     // Test specific mocks
 
@@ -90,7 +93,7 @@ TEST_CASE("BluetoothController ServerCallbacks", "[callbacks]")
         .AlwaysReturn(&mockDeltaTimesCharacteristic.get());
     Fake(Method(mockDeltaTimesCharacteristic, notify));
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get(), mockBaseMetricsBleService.get());
     bluetoothController.setup();
     mockNimBLEAdvertising.ClearInvocationHistory();
     NimBLEServerCallbacks *serverCallback = std::move(mockNimBLEServer.get().callbacks);

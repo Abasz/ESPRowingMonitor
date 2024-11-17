@@ -1,5 +1,7 @@
 #include <array>
 
+#include "esp_err.h"
+
 #include "ArduinoLog.h"
 
 #include "./base-metrics.service.h"
@@ -9,12 +11,69 @@ using std::array;
 
 BaseMetricsBleService::BaseMetricsBleService(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService) : callbacks(_settingsBleService, _eepromService)
 {
+    broadcastTask = [](void *parameters)
+    {
+        Log.errorln("Base metrics ble service has not been setup, restarting");
+
+        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+    };
 }
 
 NimBLEService *BaseMetricsBleService::setup(NimBLEServer *server, const BleServiceFlag bleServiceFlag)
 {
-    return bleServiceFlag == BleServiceFlag::CscService ? setupCscServices(server) : setupPscServices(server);
+
+    switch (bleServiceFlag)
+    {
+    case BleServiceFlag::CscService:
+        broadcastTask = cscTask;
+
+        return setupCscServices(server);
+
+    case BleServiceFlag::CpsService:
+        broadcastTask = pscTask;
+
+        return setupPscServices(server);
+    }
+
+    broadcastTask = pscTask;
+    return setupPscServices(server);
 }
+
+void BaseMetricsBleService::broadcastBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower)
+{
+    parameters.revTime = revTime;
+    parameters.revCount = revCount;
+    parameters.strokeTime = strokeTime;
+    parameters.strokeCount = strokeCount;
+    parameters.avgStrokePower = avgStrokePower;
+
+    const auto coreStackSize = 2'048U;
+
+    xTaskCreatePinnedToCore(
+        BaseMetricsBleService::broadcastTask,
+        "notifyClients",
+        coreStackSize,
+        &parameters,
+        1,
+        NULL,
+        0);
+}
+
+bool BaseMetricsBleService::isSubscribed()
+{
+    if (parameters.characteristic == nullptr)
+    {
+        Log.errorln("Base metrics ble service has not been setup, restarting");
+
+        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+
+        return false;
+    }
+
+    return parameters.characteristic->getSubscribedCount() > 0;
+}
+
+void (*BaseMetricsBleService::broadcastTask)(void *);
 
 void BaseMetricsBleService::cscTask(void *parameters)
 {

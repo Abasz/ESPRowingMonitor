@@ -63,6 +63,7 @@ set(SOURCES_UNIT_TEST
     "${UNIT_TEST_DIR}/bluetooth/ble-services/battery.service.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/ble-services/device-info.service.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/ble-services/ota.service.spec.cpp"
+    "${UNIT_TEST_DIR}/bluetooth/ble-services/base-metrics.service.spec.cpp"
 
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.control-point.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.controller.spec.cpp"

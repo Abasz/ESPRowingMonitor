@@ -12,6 +12,7 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-services/base-metrics.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/device-info.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/ota.service.interface.h"
@@ -32,9 +33,8 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Mock<IBatteryBleService> mockBatteryBleService;
     Mock<IDeviceInfoBleService> mockDeviceInfoBleService;
     Mock<IOtaBleService> mockOtaBleService;
+    Mock<IBaseMetricsBleService> mockBaseMetricsBleService;
 
-    Mock<NimBLECharacteristic> mockBatteryLevelCharacteristic;
-    Mock<NimBLECharacteristic> mockSettingsCharacteristic;
     Mock<NimBLECharacteristic> mockHandleForcesCharacteristic;
 
     mockArduino.Reset();
@@ -44,21 +44,15 @@ TEST_CASE("BluetoothController", "[callbacks]")
     mockNimBLECharacteristic.Reset();
 
     When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string))).AlwaysReturn(&mockNimBLEService.get());
-    When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short))).AlwaysReturn(&mockNimBLEService.get());
     Fake(Method(mockNimBLEServer, createServer));
     Fake(Method(mockNimBLEServer, init));
     Fake(Method(mockNimBLEServer, setPower));
     Fake(Method(mockNimBLEServer, start));
 
-    When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockNimBLECharacteristic.get());
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))).AlwaysReturn(&mockNimBLECharacteristic.get());
     When(Method(mockNimBLEService, getServer)).AlwaysReturn(&mockNimBLEServer.get());
     Fake(Method(mockNimBLEService, start));
 
-    When(Method(mockNimBLECharacteristic, getSubscribedCount)).AlwaysReturn(0);
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const unsigned short)));
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::string)));
     Fake(Method(mockNimBLECharacteristic, notify));
     Fake(Method(mockNimBLECharacteristic, setCallbacks));
 
@@ -75,20 +69,16 @@ TEST_CASE("BluetoothController", "[callbacks]")
     When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
+    When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
 
     // Test specific mocks
-
-    When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(Eq(CommonBleFlags::settingsUuid), Any())).AlwaysReturn(&mockSettingsCharacteristic.get());
-    When(Method(mockSettingsCharacteristic, getSubscribedCount)).AlwaysReturn(0);
-    Fake(Method(mockSettingsCharacteristic, notify));
-    Fake(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
 
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(Eq(CommonBleFlags::handleForcesUuid), Any())).AlwaysReturn(&mockHandleForcesCharacteristic.get());
 
     When(Method(mockHandleForcesCharacteristic, setCallbacks)).AlwaysDo([&mockHandleForcesCharacteristic](NimBLECharacteristicCallbacks *callbacks)
                                                                         { mockHandleForcesCharacteristic.get().callbacks = callbacks; });
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get(), mockBaseMetricsBleService.get());
     bluetoothController.setup();
     NimBLECharacteristicCallbacks *handleForcesCallback = std::move(mockHandleForcesCharacteristic.get().callbacks);
 
@@ -134,122 +124,25 @@ TEST_CASE("BluetoothController", "[callbacks]")
         const unsigned short strokeTime = 30'100U;
         const unsigned short strokeCount = 2'000U;
         const short avgStrokePower = 300;
-        const auto expectedStackSize = 2'048U;
 
-        When(Method(mockNimBLECharacteristic, getSubscribedCount)).AlwaysReturn(1);
-        Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 11U>)));
-        Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 14U>)));
-        Fake(Method(mockArduino, xTaskCreatePinnedToCore));
-        Fake(Method(mockArduino, vTaskDelete));
+        Fake(Method(mockBaseMetricsBleService, broadcastBaseMetrics));
 
-        SECTION("not notify if there are no subscribers")
+        SECTION("not broadcast if there are no subscribers")
         {
-            mockEEPROMService.ClearInvocationHistory();
-            When(Method(mockNimBLECharacteristic, getSubscribedCount)).Return(0);
+            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(0);
 
             bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
 
-            Verify(Method(mockEEPROMService, getBleServiceFlag)).Never();
-            Verify(Method(mockNimBLECharacteristic, notify)).Never();
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 11U>))).Never();
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 14U>))).Never();
+            Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics)).Never();
         }
 
-        SECTION("select correct service for notification")
+        SECTION("broadcast new base metrics with the correct parameters")
         {
-            mockNimBLECharacteristic.ClearInvocationHistory();
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
+            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(1);
 
             bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
 
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 11U>))).Never();
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 14U>))).Once();
-
-            mockNimBLECharacteristic.ClearInvocationHistory();
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
-
-            bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
-
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 11U>))).Once();
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 14U>))).Never();
-        }
-
-        SECTION("notify PSC with the correct binary data")
-        {
-            const auto length = 14U;
-            std::array<unsigned char, length> expectedData = {
-                static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
-                static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
-
-                static_cast<unsigned char>(avgStrokePower),
-                static_cast<unsigned char>(avgStrokePower >> 8),
-
-                static_cast<unsigned char>(revCount),
-                static_cast<unsigned char>(revCount >> 8),
-                static_cast<unsigned char>(revCount >> 16),
-                static_cast<unsigned char>(revCount >> 24),
-                static_cast<unsigned char>(revTime),
-                static_cast<unsigned char>(revTime >> 8),
-
-                static_cast<unsigned char>(strokeCount),
-                static_cast<unsigned char>(strokeCount >> 8),
-                static_cast<unsigned char>(strokeTime),
-                static_cast<unsigned char>(strokeTime >> 8),
-            };
-            mockNimBLECharacteristic.ClearInvocationHistory();
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-
-            bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
-
-            Verify(Method(mockArduino, xTaskCreatePinnedToCore).Using(Ne(nullptr), StrEq("notifyClients"), Eq(expectedStackSize), Ne(nullptr), Eq(1U), Any(), Eq(0))).Once();
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 11U>))).Never();
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 14U>)).Using(Eq(expectedData))).Once();
-        }
-
-        SECTION("notify CSC with the correct binary data")
-        {
-            const auto length = 11U;
-            std::array<unsigned char, length> expectedData = {
-                CSCSensorBleFlags::cscMeasurementFeaturesFlag,
-
-                static_cast<unsigned char>(revCount),
-                static_cast<unsigned char>(revCount >> 8),
-                static_cast<unsigned char>(revCount >> 16),
-                static_cast<unsigned char>(revCount >> 24),
-
-                static_cast<unsigned char>(revTime),
-                static_cast<unsigned char>(revTime >> 8),
-
-                static_cast<unsigned char>(strokeCount),
-                static_cast<unsigned char>(strokeCount >> 8),
-                static_cast<unsigned char>(strokeTime),
-                static_cast<unsigned char>(strokeTime >> 8)};
-            mockNimBLECharacteristic.ClearInvocationHistory();
-
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
-
-            bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
-
-            Verify(Method(mockArduino, xTaskCreatePinnedToCore).Using(Ne(nullptr), StrEq("notifyClients"), Eq(expectedStackSize), Ne(nullptr), Eq(1U), Any(), Eq(0))).Once();
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 11U>)).Using(Eq(expectedData))).Once();
-            Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 14U>))).Never();
-        }
-
-        SECTION("delete task")
-        {
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-            mockArduino.ClearInvocationHistory();
-
-            bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
-
-            Verify(Method(mockArduino, vTaskDelete).Using(nullptr)).Once();
-
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
-            mockArduino.ClearInvocationHistory();
-
-            bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
-
-            Verify(Method(mockArduino, vTaskDelete).Using(nullptr)).Once();
+            Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(revTime, revCount, strokeTime, strokeCount, avgStrokePower)).Once();
         }
     }
 
@@ -277,7 +170,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
             bluetoothController.notifyExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
 
-            Verify(Method(mockEEPROMService, getBleServiceFlag)).Never();
             Verify(Method(mockNimBLECharacteristic, notify)).Never();
             Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 7U>))).Never();
         }
@@ -362,7 +254,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
             bluetoothController.notifyDeltaTimes(expectedDeltaTimes);
 
-            Verify(Method(mockEEPROMService, getBleServiceFlag)).Never();
             Verify(Method(mockNimBLECharacteristic, notify)).Never();
             Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const unsigned char *data, size_t length))).Never();
         }
@@ -373,7 +264,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
             bluetoothController.notifyDeltaTimes({});
 
-            Verify(Method(mockEEPROMService, getBleServiceFlag)).Never();
             Verify(Method(mockNimBLECharacteristic, notify)).Never();
             Verify(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const unsigned char *data, size_t length))).Never();
         }
@@ -445,7 +335,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
             bluetoothController.notifyHandleForces(expectedHandleForces);
 
-            Verify(Method(mockEEPROMService, getBleServiceFlag)).Never();
             Verify(Method(mockHandleForcesCharacteristic, notify)).Never();
             Verify(OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const unsigned char *data, size_t length))).Never();
         }
@@ -456,7 +345,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
             bluetoothController.notifyHandleForces({});
 
-            Verify(Method(mockEEPROMService, getBleServiceFlag)).Never();
             Verify(Method(mockHandleForcesCharacteristic, notify)).Never();
             Verify(OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const unsigned char *data, size_t length))).Never();
         }

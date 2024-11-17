@@ -8,6 +8,7 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-services/base-metrics.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/device-info.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/ota.service.interface.h"
@@ -30,6 +31,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     Mock<IBatteryBleService> mockBatteryBleService;
     Mock<IDeviceInfoBleService> mockDeviceInfoBleService;
     Mock<IOtaBleService> mockOtaBleService;
+    Mock<IBaseMetricsBleService> mockBaseMetricsBleService;
 
     mockNimBLEServer.Reset();
     mockNimBLEAdvertising.Reset();
@@ -37,13 +39,11 @@ TEST_CASE("BluetoothController", "[peripheral]")
     mockNimBLECharacteristic.Reset();
 
     When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string))).AlwaysReturn(&mockNimBLEService.get());
-    When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short))).AlwaysReturn(&mockNimBLEService.get());
     Fake(Method(mockNimBLEServer, createServer));
     Fake(Method(mockNimBLEServer, init));
     Fake(Method(mockNimBLEServer, setPower));
     Fake(Method(mockNimBLEServer, start));
 
-    When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockNimBLECharacteristic.get());
     When(OverloadedMethod(mockNimBLEService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))).AlwaysReturn(&mockNimBLECharacteristic.get());
 
     When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
@@ -51,11 +51,9 @@ TEST_CASE("BluetoothController", "[peripheral]")
     When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
+    When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     Fake(Method(mockNimBLEService, start));
 
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const unsigned short)));
-    Fake(OverloadedMethod(mockNimBLECharacteristic, setValue, void(const std::string)));
     Fake(Method(mockNimBLECharacteristic, setCallbacks));
 
     Fake(Method(mockNimBLEAdvertising, start));
@@ -67,7 +65,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
     Fake(Method(mockOtaUpdaterService, begin));
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get(), mockBaseMetricsBleService.get());
 
     SECTION("startBLEServer method should start advertisement")
     {
@@ -151,114 +149,17 @@ TEST_CASE("BluetoothController", "[peripheral]")
             Verify(Method(mockBatteryNimBLEService, start)).Once();
         }
 
-        SECTION("should select measurement service (CPS vs. CSC) based on settings")
+        SECTION("should setup base metrics service")
         {
             mockNimBLEServer.ClearInvocationHistory();
-
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-
-            bluetoothController.setup();
-
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
+            Mock<NimBLEService> mockBaseMetricsNimBLEService;
+            When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockBaseMetricsNimBLEService.get());
+            Fake(Method(mockBaseMetricsNimBLEService, start));
 
             bluetoothController.setup();
 
-            Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(PSCSensorBleFlags::cyclingPowerSvcUuid)).Once();
-            Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid)).Once();
-        }
-
-        SECTION("should correctly setup CPS service")
-        {
-            const unsigned int expectedMeasurementProperty = NIMBLE_PROPERTY::NOTIFY;
-            const unsigned int expectedFlagsProperty = NIMBLE_PROPERTY::READ;
-            const unsigned int expectedControlPointProperty = NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE;
-
-            mockNimBLEServer.ClearInvocationHistory();
-
-            Mock<NimBLEService> mockCpsService;
-            Mock<NimBLECharacteristic> mockCpsCharacteristic;
-
-            When(Method(mockCpsCharacteristic, setCallbacks)).Do([&mockCpsCharacteristic](NimBLECharacteristicCallbacks *callbacks)
-                                                                 { mockCpsCharacteristic.get().callbacks = callbacks; });
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-            When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(PSCSensorBleFlags::cyclingPowerSvcUuid)).AlwaysReturn(&mockCpsService.get());
-            When(OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockCpsCharacteristic.get());
-            Fake(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned short)));
-            Fake(Method(mockCpsService, start));
-
-            bluetoothController.setup();
-
-            Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (unsigned short)).Using(PSCSensorBleFlags::cyclingPowerSvcUuid)).Once();
-            Verify(
-                OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(PSCSensorBleFlags::pscMeasurementUuid, expectedMeasurementProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(PSCSensorBleFlags::pscFeatureUuid, expectedFlagsProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::sensorLocationUuid, expectedFlagsProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(PSCSensorBleFlags::pscControlPointUuid, expectedControlPointProperty))
-                .Once();
-
-            Verify(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned short)).Using(PSCSensorBleFlags::pscFeaturesFlag)).Once();
-            Verify(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned short)).Using(CommonBleFlags::sensorLocationFlag)).Once();
-
-            REQUIRE(mockCpsCharacteristic.get().callbacks != nullptr);
-
-            Verify(Method(mockCpsService, start)).Once();
-        }
-
-        SECTION("should correctly setup CSC service")
-        {
-            const unsigned int expectedMeasurementProperty = NIMBLE_PROPERTY::NOTIFY;
-            const unsigned int expectedFlagsProperty = NIMBLE_PROPERTY::READ;
-            const unsigned int expectedControlPointProperty = NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE;
-
-            mockNimBLEServer.ClearInvocationHistory();
-
-            Mock<NimBLEService> mockCscService;
-            Mock<NimBLECharacteristic> mockCscCharacteristic;
-
-            When(Method(mockCscCharacteristic, setCallbacks)).Do([&mockCscCharacteristic](NimBLECharacteristicCallbacks *callbacks)
-                                                                 { mockCscCharacteristic.get().callbacks = callbacks; });
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
-            When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid)).AlwaysReturn(&mockCscService.get());
-            When(OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockCscCharacteristic.get());
-            Fake(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned short)));
-            Fake(Method(mockCscService, start));
-
-            bluetoothController.setup();
-
-            Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (unsigned short)).Using(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid)).Once();
-            Verify(
-                OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CSCSensorBleFlags::cscMeasurementUuid, expectedMeasurementProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CSCSensorBleFlags::cscFeatureUuid, expectedFlagsProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CommonBleFlags::sensorLocationUuid, expectedFlagsProperty))
-                .Once();
-            Verify(
-                OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
-                    .Using(CSCSensorBleFlags::cscControlPointUuid, expectedControlPointProperty))
-                .Once();
-
-            Verify(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned short)).Using(CSCSensorBleFlags::cscFeaturesFlag)).Once();
-            Verify(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned short)).Using(CommonBleFlags::sensorLocationFlag)).Once();
-
-            REQUIRE(mockCscCharacteristic.get().callbacks != nullptr);
-
-            Verify(Method(mockCscService, start)).Once();
+            Verify(Method(mockBaseMetricsBleService, setup).Using(Ne(nullptr), serviceFlag));
+            Verify(Method(mockBaseMetricsNimBLEService, start)).Once();
         }
 
         SECTION("should setup extended BLE metrics service")
