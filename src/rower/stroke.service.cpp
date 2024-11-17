@@ -112,9 +112,19 @@ void StrokeService::driveUpdate()
 {
     if (driveHandleForces.size() >= Configurations::driveHandleForcesMaxCapacity)
     {
-        driveHandleForces.clear();
+        driveEnd();
+        if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
+        {
+            dragCoefficient = 0;
+            dragCoefficients.reset();
+        }
+        recoveryStart();
+
         Log.warningln("driveHandleForces variable data point size exceeded max capacity indicating an extremely long drive phase. With plausible stroke detection settings this should not happen. Resetting variable to avoid crash...");
+
+        return;
     }
+
     driveHandleForces.push_back(static_cast<float>(currentTorque) / Configurations::sprocketRadius);
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
