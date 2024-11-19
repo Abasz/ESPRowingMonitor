@@ -99,7 +99,7 @@ unsigned char PowerManagerService::setupBatteryMeasurement() const
     delay(500);
     unsigned char i = 0;
     unsigned short sum = 0;
-    for (; i < Configurations::initialBatteryLevelMeasurementCount; i++)
+    for (; i < Configurations::initialBatteryLevelMeasurementCount; ++i)
     {
         sum += measureBattery();
         delay(100);

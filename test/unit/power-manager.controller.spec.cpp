@@ -12,6 +12,8 @@ using namespace fakeit;
 
 TEST_CASE("PowerManagerController", "[utils]")
 {
+    mockArduino.Reset();
+
     const unsigned long deepSleepTimeout = Configurations::deepSleepTimeout * 1'000UL;
     const unsigned long batteryMeasurementFrequency = Configurations::batteryMeasurementFrequency * 1'000UL;
 
@@ -44,7 +46,6 @@ TEST_CASE("PowerManagerController", "[utils]")
         {
             const auto now = lastRevTime + deepSleepTimeout + 1;
 
-            mockArduino.Reset();
             When(Method(mockArduino, micros)).AlwaysReturn(now);
 
             powerManagerController.update(lastRevTime, false);
@@ -56,7 +57,6 @@ TEST_CASE("PowerManagerController", "[utils]")
         {
             const auto now = lastRevTime + deepSleepTimeout + 1;
 
-            mockArduino.Reset();
             When(Method(mockArduino, micros)).AlwaysReturn(now);
 
             powerManagerController.update(lastRevTime, true);
@@ -68,7 +68,6 @@ TEST_CASE("PowerManagerController", "[utils]")
         {
             const auto now = lastRevTime + deepSleepTimeout - 1;
 
-            mockArduino.Reset();
             When(Method(mockArduino, micros)).AlwaysReturn(now);
 
             powerManagerController.update(lastRevTime, false);
@@ -80,7 +79,6 @@ TEST_CASE("PowerManagerController", "[utils]")
         {
             const auto now = batteryMeasurementFrequency + 1;
 
-            mockArduino.Reset();
             When(Method(mockArduino, micros)).AlwaysReturn(now);
 
             powerManagerController.update(0, true);
@@ -93,7 +91,6 @@ TEST_CASE("PowerManagerController", "[utils]")
         {
             const auto now = batteryMeasurementFrequency - 1;
 
-            mockArduino.Reset();
             When(Method(mockArduino, micros)).AlwaysReturn(now);
 
             powerManagerController.update(0, true);
@@ -107,7 +104,6 @@ TEST_CASE("PowerManagerController", "[utils]")
         const unsigned char batteryLevel = 75;
         const auto now = batteryMeasurementFrequency + 1;
 
-        mockArduino.Reset();
         Mock<IPowerManagerService> mockPowerManagerService;
         PowerManagerController powerManagerController(mockPowerManagerService.get());
         Fake(Method(mockPowerManagerService, goToSleep));
@@ -125,7 +121,6 @@ TEST_CASE("PowerManagerController", "[utils]")
         const unsigned char batteryLevelNew = 70;
         const auto now = batteryMeasurementFrequency + 1;
 
-        mockArduino.Reset();
         Mock<IPowerManagerService> mockPowerManagerService;
         PowerManagerController powerManagerController(mockPowerManagerService.get());
         Fake(Method(mockPowerManagerService, goToSleep));

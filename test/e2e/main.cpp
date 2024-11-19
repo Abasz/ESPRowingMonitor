@@ -53,7 +53,7 @@ int main(int argc, const char *argv[])
         unsigned long timeThreshold = maxTimeThreshold;
         const size_t impulseCount = 20'000;
         bool direction = false;
-        for (size_t i = 0; i < impulseCount; i++)
+        for (size_t i = 0; i < impulseCount; ++i)
         {
             now += timeThreshold;
 

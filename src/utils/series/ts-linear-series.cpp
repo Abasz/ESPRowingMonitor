@@ -55,7 +55,7 @@ Configurations::precision TSLinearSeries::coefficientB()
         while (i < seriesX.size() - 1)
         {
             intercepts.push((seriesY[i] - (a * seriesX[i])));
-            i++;
+            ++i;
         }
         b = intercepts.median();
         shouldRecalculateB = false;
@@ -118,7 +118,7 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
         {
             const auto result = calculateSlope(i, slopes.size());
             slopes[i].push_back(result);
-            i++;
+            ++i;
         }
     }
 

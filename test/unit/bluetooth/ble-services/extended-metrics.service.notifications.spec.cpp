@@ -269,7 +269,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
                 extendedMetricBleService.addHandleForcesClientId(0);
                 const auto expectedMTU = 512U;
 
-                for (size_t i = 0; expectedMTU - i > 23; i++)
+                for (size_t i = 0; expectedMTU - i > 23; ++i)
                 {
                     const unsigned short expectedChunkSize = (expectedMTU - i - 3U - 2U) / sizeof(float);
                     const unsigned char expectedNumberOfNotifies = expectedBigHandleForces.size() / expectedChunkSize;
@@ -312,7 +312,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
             extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
 
-            for (unsigned char i = 0; i < expectedNumberOfNotifies; i++)
+            for (unsigned char i = 0; i < expectedNumberOfNotifies; ++i)
             {
                 INFO("Number of total notifies: " << (int)expectedNumberOfNotifies << " Current notify: " << i + 1U);
                 REQUIRE(results[i].at(0) == expectedNumberOfNotifies);
@@ -340,7 +340,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
             extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
 
-            for (size_t i = 0; i < expectedNumberOfNotifies; i++)
+            for (size_t i = 0; i < expectedNumberOfNotifies; ++i)
             {
                 std::vector<float> parsedHandleForces{};
                 size_t numOfFloats = (results[i].size() - 2) / sizeof(float);

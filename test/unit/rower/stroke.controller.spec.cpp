@@ -1,5 +1,3 @@
-
-#include <numeric>
 #include <vector>
 
 #include "../include/catch_amalgamated.hpp"

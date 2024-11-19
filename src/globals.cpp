@@ -1,3 +1,5 @@
+#include <array>
+
 #include "Arduino.h"
 
 #include "globals.h"
@@ -55,11 +57,10 @@ void printTimestamp(Print *const _logOutput)
     const unsigned long minutes = (secs / secsPerMin) % secsPerMin;
     const unsigned long hours = (secs % secsPerDay) / secsPerHour;
 
-    // NOLINTBEGIN
-    char timestamp[20];
-    sprintf(timestamp, "%02d:%02d:%02d.%06d ", hours, minutes, seconds, microSeconds);
-    _logOutput->print(timestamp);
-    // NOLINTEND
+    std::array<char, 20> timestamp{};
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    snprintf(timestamp.data(), timestamp.size(), "%02lu:%02lu:%02lu.%06lu ", hours, minutes, seconds, microSeconds);
+    _logOutput->print(timestamp.data());
 }
 
 void printLogLevel(Print *const _logOutput, const int logLevel)

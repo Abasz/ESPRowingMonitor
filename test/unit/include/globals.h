@@ -2,8 +2,6 @@
 
 #include "./fakeit.hpp"
 
-#include "./Arduino.h"
-
 class Globals
 {
 protected:

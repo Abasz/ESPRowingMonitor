@@ -76,7 +76,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
             seriesA[i].push_back(calculateA(i, j, seriesX.size() - 1));
             j++;
         }
-        i++;
+        ++i;
     }
     a = seriesAMedian();
 
@@ -88,7 +88,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
         linearResidue.push(
             seriesXPointI,
             seriesY[i] - a * (seriesXPointI * seriesXPointI));
-        i++;
+        ++i;
     }
     b = linearResidue.coefficientA();
     c = linearResidue.coefficientB();
@@ -157,7 +157,7 @@ Configurations::precision TSQuadraticSeries::goodnessOfFit() const
         sse += (seriesY[i] - projectedX) * (seriesY[i] - projectedX);
         const auto averageY = seriesY.average();
         sst += (seriesY[i] - averageY) * (seriesY[i] - averageY);
-        i++;
+        ++i;
     }
 
     if (sst == 0 || sse > sst)

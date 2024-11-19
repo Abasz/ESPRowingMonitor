@@ -219,7 +219,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     {
         angularVelocityMatrix[i].push(angularDistances.firstDerivativeAtPosition(i), angularGoodnessOfFit);
         angularAccelerationMatrix[i].push(angularDistances.secondDerivativeAtPosition(i), angularGoodnessOfFit);
-        i++;
+        ++i;
     }
 
     currentAngularVelocity = angularVelocityMatrix[0].average();

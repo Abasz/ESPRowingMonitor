@@ -28,7 +28,7 @@ TEST_CASE("WeightedAverageSeries")
             const auto extremeHighMaxCapacity = 1'200;
             WeightedAverageSeries weightedAverageSeriesMaxCapacity(0, extremeHighMaxCapacity);
 
-            for (auto i = 0U; i < 999; i++)
+            for (auto i = 0U; i < 999; ++i)
             {
                 weightedAverageSeriesMaxCapacity.push(0.1, 0.1);
             }
@@ -38,7 +38,7 @@ TEST_CASE("WeightedAverageSeries")
 
         SECTION("should set maxCapacity to maxAllocationCapacity when that is below 1000")
         {
-            for (auto i = 0U; i < maxCapacity - 1; i++)
+            for (auto i = 0U; i < maxCapacity - 1; ++i)
             {
                 weightedAverageSeries.push(0.1, 0.1);
             }
@@ -48,7 +48,7 @@ TEST_CASE("WeightedAverageSeries")
         SECTION("should use default allocator (i.e. double) when new capacity would be below maxCapacity")
         {
             const auto initialCapacity = weightedAverageSeries.capacity();
-            for (auto i = 0U; i < initialCapacity + 1; i++)
+            for (auto i = 0U; i < initialCapacity + 1; ++i)
             {
                 weightedAverageSeries.push(0.1, 0.1);
             }
@@ -64,7 +64,7 @@ TEST_CASE("WeightedAverageSeries")
                 capacityStep *= 2;
             }
 
-            for (auto i = 0U; i < capacityStep + 1; i++)
+            for (auto i = 0U; i < capacityStep + 1; ++i)
             {
                 weightedAverageSeries.push(0.1, 0.1);
             }
@@ -73,7 +73,7 @@ TEST_CASE("WeightedAverageSeries")
 
         SECTION("should increase capacity by 10 when required new capacity exceeds maxCapacity")
         {
-            for (auto i = 0U; i < maxCapacity + 1; i++)
+            for (auto i = 0U; i < maxCapacity + 1; ++i)
             {
                 weightedAverageSeries.push(0.1, 0.1);
             }

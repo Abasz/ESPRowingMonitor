@@ -22,12 +22,14 @@ const std::vector<unsigned long> deltaTimes = {
 
 TEST_CASE("FlywheelService", "[rower]")
 {
+    mockGlobals.Reset();
+    mockArduino.Reset();
+
+    Fake(Method(mockGlobals, detachRotationInterrupt));
+    Fake(Method(mockGlobals, attachRotationInterrupt));
+
     SECTION("setup method should setup interrupts")
     {
-        mockGlobals.Reset();
-        Fake(Method(mockGlobals, attachRotationInterrupt));
-
-        mockArduino.Reset();
         Fake(Method(mockArduino, pinMode));
 
         FlywheelService flywheelService;
@@ -60,10 +62,6 @@ TEST_CASE("FlywheelService", "[rower]")
 
         SECTION("should disable and then reenable interrupts when reading data")
         {
-            mockGlobals.Reset();
-            Fake(Method(mockGlobals, detachRotationInterrupt));
-            Fake(Method(mockGlobals, attachRotationInterrupt));
-
             FlywheelService flywheelService;
 
             flywheelService.getData();
@@ -77,10 +75,10 @@ TEST_CASE("FlywheelService", "[rower]")
             RowingDataModels::FlywheelData expected{
                 .rawImpulseCount = static_cast<unsigned long>(deltaTimes.size()),
                 .deltaTime = deltaTimes.back(),
-                .totalTime = std::accumulate(deltaTimes.cbegin(), deltaTimes.cend(), 0UL),
+                .totalTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
                 .totalAngularDisplacement = Configurations::angularDisplacementPerImpulse * (double)deltaTimes.size(),
-                .cleanImpulseTime = std::accumulate(deltaTimes.cbegin(), deltaTimes.cend(), 0UL),
-                .rawImpulseTime = std::accumulate(deltaTimes.cbegin(), deltaTimes.cend(), 0UL),
+                .cleanImpulseTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
+                .rawImpulseTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
             };
 
             FlywheelService flywheelService;

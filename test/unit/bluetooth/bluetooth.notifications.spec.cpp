@@ -77,7 +77,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
         SECTION("not notify if there are no subscribers")
         {
-            When(Method(mockBatteryBleService, isSubscribed)).Return(0);
+            When(Method(mockBatteryBleService, isSubscribed)).Return(false);
 
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
@@ -86,7 +86,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
         SECTION("notify if there are subscribers")
         {
-            When(Method(mockBatteryBleService, isSubscribed)).Return(1);
+            When(Method(mockBatteryBleService, isSubscribed)).Return(true);
 
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
@@ -106,7 +106,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
         SECTION("not broadcast if there are no subscribers")
         {
-            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(0);
+            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(false);
 
             bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
 
@@ -115,7 +115,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
         SECTION("broadcast new base metrics with the correct parameters")
         {
-            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(1);
+            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
 
             bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
 

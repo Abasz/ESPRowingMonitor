@@ -4,8 +4,6 @@
 
 #include "./include/Arduino.h"
 
-#include "./include/globals.h"
-
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/power-manager/power-manager.service.h"
 
@@ -13,10 +11,11 @@ using namespace fakeit;
 
 TEST_CASE("PowerManagerService", "[utils]")
 {
+    mockArduino.Reset();
+
     PowerManagerService powerManager;
     const auto analogVoltage = static_cast<unsigned int>(round((Configurations::batteryVoltageMax - 0.1) * 1000));
 
-    mockArduino.Reset();
     When(Method(mockArduino, analogReadMilliVolts)).AlwaysReturn(analogVoltage);
     When(Method(mockArduino, esp_sleep_get_wakeup_cause)).AlwaysReturn(ESP_SLEEP_WAKEUP_UNDEFINED);
     Fake(Method(mockArduino, pinMode));

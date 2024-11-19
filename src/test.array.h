@@ -1815,7 +1815,7 @@ void simulateRotation()
 #endif
 
     lastTestRevTime = micros();
-    i++;
+    ++i;
 
     now += lastDelta;
 

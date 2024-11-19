@@ -352,7 +352,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
             while ((i + 1) * sizeof(unsigned long) < minimumDeltaTimeMTU - 3)
             {
                 peripheralsController.updateDeltaTime(expectedDeltaTime + i);
-                i++;
+                ++i;
             }
 
             REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::SizeIs(1));
@@ -371,7 +371,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
             while ((i + 1) * sizeof(unsigned long) < minimumDeltaTimeMTU - 3)
             {
                 peripheralsController.updateDeltaTime(expectedDeltaTime + i);
-                i++;
+                ++i;
             }
 
             peripheralsController.update(batteryLevel);

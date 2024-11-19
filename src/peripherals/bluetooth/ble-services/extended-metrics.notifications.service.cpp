@@ -148,7 +148,7 @@ void ExtendedMetricBleService::HandleForcesParams::task(void *parameters)
 
             params->characteristic->setValue(temp.data(), temp.size());
             params->characteristic->notify();
-            i++;
+            ++i;
         }
     }
     vTaskDelete(nullptr);
