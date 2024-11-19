@@ -1,11 +1,12 @@
-#include <array>
+#include <numeric>
+#include <vector>
 
 #include "ArduinoLog.h"
 
 #include "../../../utils/enums.h"
 #include "./extended-metrics.service.h"
 
-using std::array;
+using std::vector;
 
 ExtendedMetricBleService::ExtendedMetricBleService() : callbacks(*this)
 {
@@ -46,13 +47,23 @@ void ExtendedMetricBleService::addDeltaTimesClientId(const unsigned char clientI
     deltaTimesParams.clientIds.push_back(clientId);
 }
 
-unsigned short ExtendedMetricBleService::getDeltaTimesMTU(const unsigned char clientId) const
+unsigned short ExtendedMetricBleService::getDeltaTimesClientMtu(const unsigned char clientId) const
 {
+    if (deltaTimesParams.characteristic == nullptr)
+    {
+        return 0;
+    }
+
     return deltaTimesParams.characteristic->getService()->getServer()->getPeerMTU(clientId);
 }
 
-unsigned short ExtendedMetricBleService::getHandleForcesMTU(const unsigned char clientId) const
+unsigned short ExtendedMetricBleService::getClientHandleForcesMtu(const unsigned char clientId) const
 {
+    if (handleForcesParams.characteristic == nullptr)
+    {
+        return 0;
+    }
+
     return handleForcesParams.characteristic->getService()->getServer()->getPeerMTU(clientId);
 }
 
@@ -89,67 +100,17 @@ unsigned char ExtendedMetricBleService::removeHandleForcesClient(const unsigned 
     return initialSize - handleForcesParams.clientIds.size();
 }
 
-void ExtendedMetricBleService::ExtendedMetricsParams::task(void *parameters)
+bool ExtendedMetricBleService::isExtendedMetricsSubscribed() const
 {
+    if (extendedMetricsParams.characteristic == nullptr)
     {
-        const auto *const params = static_cast<const ExtendedMetricBleService::ExtendedMetricsParams *>(parameters);
-
-        const auto length = 7U;
-        array<unsigned char, length> temp = {
-            static_cast<unsigned char>(params->avgStrokePower),
-            static_cast<unsigned char>(params->avgStrokePower >> 8),
-
-            static_cast<unsigned char>(params->driveDuration),
-            static_cast<unsigned char>(params->driveDuration >> 8),
-            static_cast<unsigned char>(params->recoveryDuration),
-            static_cast<unsigned char>(params->recoveryDuration >> 8),
-
-            params->dragFactor,
-        };
-
-        params->characteristic->setValue(temp);
-        params->characteristic->notify();
+        return false;
     }
-    vTaskDelete(nullptr);
+
+    return extendedMetricsParams.characteristic->getSubscribedCount() > 0;
 }
 
-void ExtendedMetricBleService::HandleForcesParams::task(void *parameters)
+unsigned short ExtendedMetricBleService::calculateHandleForcesChunkSize(unsigned short mtu)
 {
-    {
-        const auto *const params = static_cast<const ExtendedMetricBleService::HandleForcesParams *>(parameters);
-
-        const unsigned char chunkSize = (params->mtu - 3 - 2) / sizeof(float);
-        const unsigned char split = params->handleForces.size() / chunkSize + (params->handleForces.size() % chunkSize == 0 ? 0 : 1);
-
-        auto i = 0UL;
-        Log.verboseln("MTU of extended: %d, chunk size(bytes): %d, number of chunks: %d", params->mtu, chunkSize, split);
-
-        while (i < split)
-        {
-            const auto end = (i + 1U) * chunkSize < params->handleForces.size() ? chunkSize * sizeof(float) : (params->handleForces.size() - i * chunkSize) * sizeof(float);
-            std::vector<unsigned char> temp(end + 2);
-
-            temp[0] = split;
-            temp[1] = i + 1;
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            memcpy(temp.data() + 2, params->handleForces.data() + i * chunkSize, end);
-
-            params->characteristic->setValue(temp.data(), temp.size());
-            params->characteristic->notify();
-            i++;
-        }
-    }
-    vTaskDelete(nullptr);
-}
-
-void ExtendedMetricBleService::DeltaTimesParams::task(void *parameters)
-{
-    {
-        const auto *const params = static_cast<const ExtendedMetricBleService::DeltaTimesParams *>(parameters);
-
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
-        params->characteristic->setValue((const unsigned char *)params->deltaTimes.data(), params->deltaTimes.size() * sizeof(unsigned long));
-        params->characteristic->notify();
-    }
-    vTaskDelete(nullptr);
+    return (mtu - 3U - 2U) / sizeof(float);
 }

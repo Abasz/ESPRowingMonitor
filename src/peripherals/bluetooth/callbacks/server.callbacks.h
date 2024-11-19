@@ -2,14 +2,14 @@
 
 #include "NimBLEDevice.h"
 
-class ExtendedMetricBleService;
+#include "../ble-services/extended-metrics.service.interface.h"
 
 class ServerCallbacks final : public NimBLEServerCallbacks
 {
-    ExtendedMetricBleService &extendedMetricsBleService;
+    IExtendedMetricBleService &extendedMetricsBleService;
 
 public:
-    explicit ServerCallbacks(ExtendedMetricBleService &_extendedMetricsBleService);
+    explicit ServerCallbacks(IExtendedMetricBleService &_extendedMetricsBleService);
 
     void onConnect(NimBLEServer *pServer) override;
     void onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc) override;

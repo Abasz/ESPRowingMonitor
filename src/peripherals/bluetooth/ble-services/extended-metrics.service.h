@@ -1,17 +1,17 @@
 #pragma once
 
+#include <vector>
+
 #include "NimBLEDevice.h"
 
 #include "../callbacks/chunked-notify.callbacks.h"
+#include "./extended-metrics.service.interface.h"
 
 using std::vector;
 
-class ExtendedMetricBleService
+class ExtendedMetricBleService final : public IExtendedMetricBleService
 {
-public:
     ChunkedNotifyMetricCallbacks callbacks;
-
-    ExtendedMetricBleService();
 
     struct ExtendedMetricsParams
     {
@@ -28,7 +28,7 @@ public:
     struct HandleForcesParams
     {
         NimBLECharacteristic *characteristic = nullptr;
-        unsigned short mtu = 512U;
+        unsigned short chunkSize = (512U - 3 - 2) / sizeof(float);
         vector<float> handleForces;
         vector<unsigned char> clientIds;
 
@@ -46,16 +46,27 @@ public:
 
     } deltaTimesParams;
 
-    NimBLEService *setup(NimBLEServer *server);
+    static unsigned short calculateHandleForcesChunkSize(unsigned short mtu);
+    unsigned short getClientHandleForcesMtu(unsigned char clientId) const;
 
-    const vector<unsigned char> &getHandleForcesClientIds() const;
-    void addHandleForcesClientId(unsigned char clientId);
-    const vector<unsigned char> &getDeltaTimesClientIds() const;
-    void addDeltaTimesClientId(unsigned char clientId);
+public:
+    ExtendedMetricBleService();
 
-    unsigned short getDeltaTimesMTU(unsigned char clientId) const;
-    unsigned short getHandleForcesMTU(unsigned char clientId) const;
+    NimBLEService *setup(NimBLEServer *server) override;
 
-    unsigned char removeDeltaTimesClient(unsigned char clientId);
-    unsigned char removeHandleForcesClient(unsigned char clientId);
+    const vector<unsigned char> &getHandleForcesClientIds() const override;
+    void addHandleForcesClientId(unsigned char clientId) override;
+    const vector<unsigned char> &getDeltaTimesClientIds() const override;
+    void addDeltaTimesClientId(unsigned char clientId) override;
+
+    unsigned short getDeltaTimesClientMtu(unsigned char clientId) const override;
+
+    void broadcastHandleForces(const std::vector<float> &handleForces) override;
+    void broadcastDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;
+    void broadcastExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) override;
+
+    unsigned char removeDeltaTimesClient(unsigned char clientId) override;
+    unsigned char removeHandleForcesClient(unsigned char clientId) override;
+
+    bool isExtendedMetricsSubscribed() const override;
 };

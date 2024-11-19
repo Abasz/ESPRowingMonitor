@@ -8,7 +8,7 @@
 #include "../../utils/configuration.h"
 #include "./bluetooth.controller.h"
 
-BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService) : eepromService(_eepromService), otaService(_otaService), settingsBleService(_settingsBleService), batteryBleService(_batteryBleService), deviceInfoBleService(_deviceInfoBleService), otaBleService(_otaBleService), baseMetricsBleService(_baseMetricsBleService), serverCallbacks(extendedMetricsBleService)
+BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService, IExtendedMetricBleService &_extendedMetricsBleService) : eepromService(_eepromService), otaService(_otaService), settingsBleService(_settingsBleService), batteryBleService(_batteryBleService), deviceInfoBleService(_deviceInfoBleService), otaBleService(_otaBleService), baseMetricsBleService(_baseMetricsBleService), extendedMetricsBleService(_extendedMetricsBleService), serverCallbacks(_extendedMetricsBleService)
 {
 }
 
@@ -97,7 +97,7 @@ void BluetoothController::setupAdvertisement() const
     }
 }
 
-unsigned short BluetoothController::getDeltaTimesMTU() const
+unsigned short BluetoothController::calculateDeltaTimesMtu() const
 {
     const auto clientIds = extendedMetricsBleService.getDeltaTimesClientIds();
 
@@ -106,18 +106,64 @@ unsigned short BluetoothController::getDeltaTimesMTU() const
         return 0;
     }
 
-    return std::accumulate(cbegin(clientIds), cend(clientIds), 512, [&](unsigned short previousValue, unsigned short currentValue)
+    return std::accumulate(cbegin(clientIds), cend(clientIds), 512, [&](unsigned short previousMTU, unsigned short clientId)
                            {
-                    const auto currentMTU = extendedMetricsBleService.getDeltaTimesMTU(currentValue);
+                    const auto currentMTU = extendedMetricsBleService.getDeltaTimesClientMtu(clientId);
                     if (currentMTU == 0)
                     {
-                        return previousValue;
+                        return previousMTU;
                     }
 
-                    return std::min(previousValue, currentMTU); });
+                    return std::min(previousMTU, currentMTU); });
 }
 
-bool BluetoothController::isDeltaTimesSubscribed() const
+void BluetoothController::notifyBattery(const unsigned char batteryLevel) const
 {
-    return extendedMetricsBleService.deltaTimesParams.characteristic->getSubscribedCount() > 0;
+    batteryBleService.setBatteryLevel(batteryLevel);
+    if (batteryBleService.isSubscribed())
+    {
+        batteryBleService.broadcastBatteryLevel();
+    }
+}
+
+void BluetoothController::notifyBaseMetrics(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower)
+{
+    if (!baseMetricsBleService.isSubscribed())
+    {
+        return;
+    }
+
+    baseMetricsBleService.broadcastBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+}
+
+void BluetoothController::notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor)
+{
+    if (!extendedMetricsBleService.isExtendedMetricsSubscribed())
+    {
+        return;
+    }
+
+    extendedMetricsBleService.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
+}
+
+void BluetoothController::notifyHandleForces(const std::vector<float> &handleForces)
+{
+    const auto isSubscribed = !extendedMetricsBleService.getHandleForcesClientIds().empty();
+    if (!isSubscribed || handleForces.empty())
+    {
+        return;
+    }
+
+    extendedMetricsBleService.broadcastHandleForces(handleForces);
+}
+
+void BluetoothController::notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes)
+{
+    const auto isSubscribed = !extendedMetricsBleService.getDeltaTimesClientIds().empty();
+    if (!isSubscribed || deltaTimes.empty())
+    {
+        return;
+    }
+
+    extendedMetricsBleService.broadcastDeltaTimes(deltaTimes);
 }

@@ -12,8 +12,7 @@
 #include "./ble-services/base-metrics.service.interface.h"
 #include "./ble-services/battery.service.interface.h"
 #include "./ble-services/device-info.service.interface.h"
-#include "./ble-services/extended-metrics.service.h"
-#include "./ble-services/ota.service.h"
+#include "./ble-services/extended-metrics.service.interface.h"
 #include "./ble-services/ota.service.interface.h"
 #include "./ble-services/settings.service.interface.h"
 #include "./bluetooth.controller.interface.h"
@@ -31,8 +30,7 @@ class BluetoothController final : public IBluetoothController
     IDeviceInfoBleService &deviceInfoBleService;
     IOtaBleService &otaBleService;
     IBaseMetricsBleService &baseMetricsBleService;
-
-    ExtendedMetricBleService extendedMetricsBleService;
+    IExtendedMetricBleService &extendedMetricsBleService;
 
     ServerCallbacks serverCallbacks;
 
@@ -41,7 +39,7 @@ class BluetoothController final : public IBluetoothController
     void setupAdvertisement() const;
 
 public:
-    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService);
+    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService, IExtendedMetricBleService &_extendedMetricsBleService);
 
     void setup() override;
     void startBLEServer() override;
@@ -53,7 +51,6 @@ public:
     void notifyHandleForces(const std::vector<float> &handleForces) override;
     void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;
 
-    unsigned short getDeltaTimesMTU() const override;
-    bool isDeltaTimesSubscribed() const override;
+    unsigned short calculateDeltaTimesMtu() const override;
     bool isAnyDeviceConnected() override;
 };

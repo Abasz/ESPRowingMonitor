@@ -51,7 +51,7 @@ void PeripheralsController::update(const unsigned char batteryLevel)
     {
         if (now - lastDeltaTimesBroadcastTime > bleUpdateInterval)
         {
-            flushBleDeltaTimes(bluetoothController.getDeltaTimesMTU());
+            flushBleDeltaTimes(bluetoothController.calculateDeltaTimesMtu());
         }
     }
 }
@@ -121,15 +121,10 @@ void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
 
     if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
     {
-        if (!eepromService.getLogToBluetooth() || !bluetoothController.isDeltaTimesSubscribed())
-        {
-            return;
-        }
-
-        const auto mtu = bluetoothController.getDeltaTimesMTU();
+        const auto mtu = bluetoothController.calculateDeltaTimesMtu();
 
         const auto minimumMTU = 100;
-        if (mtu < minimumMTU)
+        if (!eepromService.getLogToBluetooth() || mtu < minimumMTU)
         {
             return;
         }

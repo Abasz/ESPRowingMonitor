@@ -1,7 +1,4 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include <array>
-#include <string>
-
 #include "./include/catch_amalgamated.hpp"
 #include "./include/fakeit.hpp"
 
@@ -16,12 +13,12 @@ using namespace fakeit;
 
 TEST_CASE("PeripheralController", "[peripheral]")
 {
+    mockFastLED.Reset();
+    mockArduino.Reset();
+
     Mock<IBluetoothController> mockBluetoothController;
     Mock<ISdCardService> mockSdCardService;
     Mock<IEEPROMService> mockEEPROMService;
-
-    mockFastLED.Reset();
-    mockArduino.Reset();
 
     const auto expectedDeltaTime = 10000;
     const auto minimumDeltaTimeMTU = 100;
@@ -42,8 +39,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
     When(Method(mockArduino, millis)).AlwaysReturn(0);
 
-    When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(23);
-    When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(false);
+    When(Method(mockBluetoothController, calculateDeltaTimesMtu)).AlwaysReturn(23);
     When(Method(mockBluetoothController, isAnyDeviceConnected)).AlwaysReturn(false);
     Fake(Method(mockBluetoothController, notifyBaseMetrics));
     Fake(Method(mockBluetoothController, notifyDeltaTimes));
@@ -206,8 +202,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
         {
             std::vector<std::vector<unsigned long>> notifiedDeltaTimes{};
             When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval, blinkInterval * 2, blinkInterval * 2);
-            When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
-            When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
+            When(Method(mockBluetoothController, calculateDeltaTimesMtu)).AlwaysReturn(minimumDeltaTimeMTU);
             When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
             Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&notifiedDeltaTimes](const std::vector<unsigned long> &deltaTimes)
                                                                             {
@@ -302,28 +297,6 @@ TEST_CASE("PeripheralController", "[peripheral]")
                     std::vector<std::vector<unsigned long>> resultDeltaTimes;
 
                     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(false);
-                    When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
-                    When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval);
-
-                    Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
-                                                                                    {
-                            resultDeltaTimes.push_back(deltaTimes);
-
-                            return true; }));
-
-                    peripheralsController.updateDeltaTime(expectedDeltaTime);
-
-                    peripheralsController.update(batteryLevel);
-                    REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::SizeIs(1));
-                    REQUIRE_THAT(resultDeltaTimes[0], Catch::Matchers::IsEmpty());
-                }
-
-                SECTION("no client has subscribed")
-                {
-                    std::vector<std::vector<unsigned long>> resultDeltaTimes;
-
-                    When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-                    When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(false);
                     When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval);
 
                     Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
@@ -344,8 +317,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
                     std::vector<std::vector<unsigned long>> resultDeltaTimes;
 
                     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-                    When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU - 1);
-                    When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
+                    When(Method(mockBluetoothController, calculateDeltaTimesMtu)).AlwaysReturn(minimumDeltaTimeMTU - 1);
                     When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval);
 
                     Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
@@ -369,8 +341,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             When(Method(mockArduino, millis)).AlwaysReturn(blinkInterval);
             When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-            When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
-            When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
+            When(Method(mockBluetoothController, calculateDeltaTimesMtu)).AlwaysReturn(minimumDeltaTimeMTU);
             Fake(Method(mockBluetoothController, notifyDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
                                                                             {
                             resultDeltaTimes.push_back(deltaTimes);
@@ -394,8 +365,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             When(Method(mockArduino, millis)).Return(bleUpdateInterval, bleUpdateInterval * 2 - 1).AlwaysReturn(bleUpdateInterval * 3 - 1);
             When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(true);
-            When(Method(mockBluetoothController, getDeltaTimesMTU)).AlwaysReturn(minimumDeltaTimeMTU);
-            When(Method(mockBluetoothController, isDeltaTimesSubscribed)).AlwaysReturn(true);
+            When(Method(mockBluetoothController, calculateDeltaTimesMtu)).AlwaysReturn(minimumDeltaTimeMTU);
 
             auto i = 0U;
             while ((i + 1) * sizeof(unsigned long) < minimumDeltaTimeMTU - 3)

@@ -6,6 +6,7 @@
 #include "./peripherals/bluetooth/ble-services/base-metrics.service.h"
 #include "./peripherals/bluetooth/ble-services/battery.service.h"
 #include "./peripherals/bluetooth/ble-services/device-info.service.h"
+#include "./peripherals/bluetooth/ble-services/extended-metrics.service.h"
 #include "./peripherals/bluetooth/ble-services/ota.service.h"
 #include "./peripherals/bluetooth/ble-services/settings.service.h"
 #include "./peripherals/bluetooth/bluetooth.controller.h"
@@ -41,8 +42,11 @@ extern BatteryBleService batteryBleService;
 extern DeviceInfoBleService deviceInfoBleService;
 extern OtaBleService otaBleService;
 extern BaseMetricsBleService baseMetricsBleService;
+extern ExtendedMetricBleService extendedMetricsBleService;
 extern SdCardService sdCardService;
+
 extern BluetoothController bleController;
+
 extern PeripheralsController peripheralController;
 
 IRAM_ATTR void rotationInterrupt();

@@ -4,16 +4,15 @@
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
-#include "../ble-services/extended-metrics.service.h"
 #include "./server.callbacks.h"
 
-ServerCallbacks::ServerCallbacks(ExtendedMetricBleService &_extendedMetricsBleService) : extendedMetricsBleService(_extendedMetricsBleService)
+ServerCallbacks::ServerCallbacks(IExtendedMetricBleService &_extendedMetricsBleService) : extendedMetricsBleService(_extendedMetricsBleService)
 {
 }
 
 void ServerCallbacks::onConnect(NimBLEServer *pServer)
 {
-    if (NimBLEDevice::getServer()->getConnectedCount() < 2)
+    if (pServer->getConnectedCount() < 2)
     {
         Log.verboseln("Device connected");
         NimBLEDevice::getAdvertising()->start();

@@ -48,6 +48,7 @@ set(SOURCES_UNIT_TEST
 
     "${LIB_DIR}/peripherals/bluetooth/ble-services/base-metrics.service.cpp"
     "${LIB_DIR}/peripherals/bluetooth/ble-services/extended-metrics.service.cpp"
+    "${LIB_DIR}/peripherals/bluetooth/ble-services/extended-metrics.notifications.service.cpp"
     "${LIB_DIR}/peripherals/bluetooth/ble-services/battery.service.cpp"
     "${LIB_DIR}/peripherals/bluetooth/ble-services/ota.service.cpp"
     "${LIB_DIR}/peripherals/bluetooth/ble-services/settings.service.cpp"
@@ -57,14 +58,15 @@ set(SOURCES_UNIT_TEST
     "${LIB_DIR}/peripherals/bluetooth/callbacks/ota.callbacks.cpp"
     "${LIB_DIR}/peripherals/bluetooth/callbacks/server.callbacks.cpp"
     "${LIB_DIR}/peripherals/bluetooth/bluetooth.controller.cpp"
-    "${LIB_DIR}/peripherals/bluetooth/bluetooth.notifications.cpp"
 
     "${UNIT_TEST_DIR}/bluetooth/ble-services/settings.service.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/ble-services/battery.service.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/ble-services/device-info.service.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/ble-services/ota.service.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/ble-services/base-metrics.service.spec.cpp"
-
+    "${UNIT_TEST_DIR}/bluetooth/ble-services/extended-metrics.service.spec.cpp"
+    "${UNIT_TEST_DIR}/bluetooth/ble-services/extended-metrics.service.notifications.spec.cpp"
+    
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.control-point.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.controller.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.notifications.spec.cpp"

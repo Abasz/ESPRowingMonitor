@@ -18,7 +18,6 @@ public:
     virtual void notifyHandleForces(const std::vector<float> &handleForces) = 0;
     virtual void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes) = 0;
 
-    virtual unsigned short getDeltaTimesMTU() const = 0;
-    virtual bool isDeltaTimesSubscribed() const = 0;
+    virtual unsigned short calculateDeltaTimesMtu() const = 0;
     virtual bool isAnyDeviceConnected() = 0;
 };

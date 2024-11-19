@@ -2,10 +2,9 @@
 #include "NimBLEDevice.h"
 
 #include "../../../utils/enums.h"
-#include "../ble-services/extended-metrics.service.h"
 #include "./chunked-notify.callbacks.h"
 
-ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks(ExtendedMetricBleService &_extendedMetricsBleService) : extendedMetricsBleService(_extendedMetricsBleService)
+ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks(IExtendedMetricBleService &_extendedMetricsBleService) : extendedMetricsBleService(_extendedMetricsBleService)
 {
 }
 
