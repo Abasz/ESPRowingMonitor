@@ -117,15 +117,7 @@ unsigned short BluetoothController::calculateDeltaTimesMtu() const
         return 0;
     }
 
-    return std::accumulate(cbegin(clientIds), cend(clientIds), 512, [&](unsigned short previousMTU, unsigned short clientId)
-                           {
-                    const auto currentMTU = extendedMetricsBleService.getDeltaTimesClientMtu(clientId);
-                    if (currentMTU == 0)
-                    {
-                        return previousMTU;
-                    }
-
-                    return std::min(previousMTU, currentMTU); });
+    return extendedMetricsBleService.calculateMtu(clientIds);
 }
 
 void BluetoothController::notifyBattery(const unsigned char batteryLevel) const

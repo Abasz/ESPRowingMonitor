@@ -256,30 +256,59 @@ TEST_CASE("ExtendedMetricBleService", "[ble-service]")
         REQUIRE_THAT(clientIds, Catch::Matchers::Equals(expectedClientIds));
     }
 
-    SECTION("getClientDeltaTimesMtu method should")
+    SECTION("calculateMtu method should")
     {
+        ExtendedMetricBleService extendedMetricBleService;
+
+        const std::vector<unsigned char> clientIds{0, 1};
+
         SECTION("return the mtu for the given client ID list")
         {
-            ExtendedMetricBleService extendedMetricBleService;
             const auto expectedMtu = 99;
-
             When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(99);
-            When(Method(mockExtendedMetricsCharacteristic, getService)).AlwaysReturn(&mockExtendedMetricService.get());
-            When(Method(mockExtendedMetricService, getServer)).AlwaysReturn(&mockNimBLEServer.get());
-            extendedMetricBleService.setup(&mockNimBLEServer.get());
 
-            const auto mtu = extendedMetricBleService.getDeltaTimesClientMtu(0);
+            const auto mtu = extendedMetricBleService.calculateMtu(clientIds);
 
             REQUIRE(mtu == expectedMtu);
         }
 
-        SECTION("should return zero if deltaTimes characteristics is nullptr")
+        SECTION("return the lowest MTU")
         {
-            ExtendedMetricBleService extendedMetricBleServiceNoSetup;
+            const auto expectedMtu = 23U;
+            When(Method(mockNimBLEServer, getPeerMTU)).Return(expectedMtu, 100);
 
-            const auto mtu = extendedMetricBleServiceNoSetup.getDeltaTimesClientMtu(0);
+            const auto mtu = extendedMetricBleService.calculateMtu(clientIds);
 
-            REQUIRE(mtu == 0);
+            REQUIRE(mtu == expectedMtu);
+        }
+
+        SECTION("return 512 as MTU even if device reports higher")
+        {
+            const auto expectedMtu = 512U;
+            When(Method(mockNimBLEServer, getPeerMTU)).Return(1'200, 1'000);
+
+            const auto mtu = extendedMetricBleService.calculateMtu(clientIds);
+
+            REQUIRE(mtu == expectedMtu);
+        }
+
+        SECTION("ignore zero MTU when calculating minimum")
+        {
+            const auto expectedMtu = 23U;
+            When(Method(mockNimBLEServer, getPeerMTU)).Return(0, expectedMtu);
+
+            const auto mtu = extendedMetricBleService.calculateMtu(clientIds);
+
+            REQUIRE(mtu == expectedMtu);
+        }
+
+        SECTION("return max MTU when clientId list is empty")
+        {
+            const auto expectedMaxMtu = 512U;
+
+            const auto mtu = extendedMetricBleService.calculateMtu({});
+
+            REQUIRE(mtu == expectedMaxMtu);
         }
     }
 }

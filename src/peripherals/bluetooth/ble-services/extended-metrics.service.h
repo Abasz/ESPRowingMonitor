@@ -46,9 +46,6 @@ class ExtendedMetricBleService final : public IExtendedMetricBleService
 
     } deltaTimesParams;
 
-    static unsigned short calculateHandleForcesChunkSize(unsigned short mtu);
-    unsigned short getClientHandleForcesMtu(unsigned char clientId) const;
-
 public:
     ExtendedMetricBleService();
 
@@ -59,7 +56,7 @@ public:
     const vector<unsigned char> &getDeltaTimesClientIds() const override;
     void addDeltaTimesClientId(unsigned char clientId) override;
 
-    unsigned short getDeltaTimesClientMtu(unsigned char clientId) const override;
+    unsigned short calculateMtu(const std::vector<unsigned char> &clientIds) const override;
 
     void broadcastHandleForces(const std::vector<float> &handleForces) override;
     void broadcastDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;

@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "ArduinoLog.h"
+#include "NimBLEDevice.h"
 
 #include "../../../utils/enums.h"
 #include "./extended-metrics.service.h"
@@ -47,24 +48,19 @@ void ExtendedMetricBleService::addDeltaTimesClientId(const unsigned char clientI
     deltaTimesParams.clientIds.push_back(clientId);
 }
 
-unsigned short ExtendedMetricBleService::getDeltaTimesClientMtu(const unsigned char clientId) const
+unsigned short ExtendedMetricBleService::calculateMtu(const std::vector<unsigned char> &clientIds) const
 {
-    if (deltaTimesParams.characteristic == nullptr)
-    {
-        return 0;
-    }
+    auto *server = NimBLEDevice::getServer();
 
-    return deltaTimesParams.characteristic->getService()->getServer()->getPeerMTU(clientId);
-}
+    return std::accumulate(cbegin(clientIds), cend(clientIds), 512, [&](unsigned short previousMtu, unsigned short clientId)
+                           {
+                    const auto currentMTU = server->getPeerMTU(clientId);
+                    if (currentMTU == 0)
+                    {
+                        return previousMtu;
+                    }
 
-unsigned short ExtendedMetricBleService::getClientHandleForcesMtu(const unsigned char clientId) const
-{
-    if (handleForcesParams.characteristic == nullptr)
-    {
-        return 0;
-    }
-
-    return handleForcesParams.characteristic->getService()->getServer()->getPeerMTU(clientId);
+                    return std::min(previousMtu, currentMTU); });
 }
 
 unsigned char ExtendedMetricBleService::removeDeltaTimesClient(const unsigned char clientId)
@@ -108,9 +104,4 @@ bool ExtendedMetricBleService::isExtendedMetricsSubscribed() const
     }
 
     return extendedMetricsParams.characteristic->getSubscribedCount() > 0;
-}
-
-unsigned short ExtendedMetricBleService::calculateHandleForcesChunkSize(unsigned short mtu)
-{
-    return (mtu - 3U - 2U) / sizeof(float);
 }

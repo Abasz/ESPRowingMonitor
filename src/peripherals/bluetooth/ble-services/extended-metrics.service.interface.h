@@ -19,7 +19,7 @@ public:
     virtual const vector<unsigned char> &getDeltaTimesClientIds() const = 0;
     virtual void addDeltaTimesClientId(unsigned char clientId) = 0;
 
-    virtual unsigned short getDeltaTimesClientMtu(unsigned char clientId) const = 0;
+    virtual unsigned short calculateMtu(const std::vector<unsigned char> &clientIds) const = 0;
 
     virtual void broadcastHandleForces(const std::vector<float> &handleForces) = 0;
     virtual void broadcastDeltaTimes(const std::vector<unsigned long> &deltaTimes) = 0;

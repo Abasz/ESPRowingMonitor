@@ -133,13 +133,11 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
         Mock<NimBLECharacteristic> mockHandleForcesCharacteristic;
 
-        When(Method(mockExtendedMetricService, getServer)).AlwaysReturn(&mockNimBLEServer.get());
         When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(100);
 
         When(OverloadedMethod(mockExtendedMetricService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::handleForcesUuid, Any())).AlwaysReturn(&mockHandleForcesCharacteristic.get());
 
         Fake(Method(mockHandleForcesCharacteristic, setCallbacks));
-        When(Method(mockHandleForcesCharacteristic, getService)).AlwaysReturn(&mockExtendedMetricService.get());
         Fake(OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const unsigned char *data, size_t length)));
         Fake(Method(mockHandleForcesCharacteristic, notify));
 
@@ -148,57 +146,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
         ExtendedMetricBleService extendedMetricBleService;
         extendedMetricBleService.setup(&mockNimBLEServer.get());
-
-        SECTION("calculate MTU")
-        {
-            SECTION("and return the lowest MTU")
-            {
-                const auto expectedMTU = 23U;
-
-                When(Method(mockNimBLEServer, getPeerMTU)).Return(expectedMTU, 100);
-                extendedMetricBleService.addHandleForcesClientId(0);
-                extendedMetricBleService.addHandleForcesClientId(1);
-
-                extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
-
-                Verify(
-                    OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const unsigned char *data, size_t length))
-                        .Using(Any(), Eq(expectedMTU - 3U - 2U - ((expectedMTU - 3U) % sizeof(float)))))
-                    .AtLeastOnce();
-            }
-
-            SECTION("and return 512 as MTU even if device reports higher")
-            {
-                const auto expectedMTU = 512U;
-
-                When(Method(mockNimBLEServer, getPeerMTU)).Return(1200, 1000);
-                extendedMetricBleService.addHandleForcesClientId(0);
-                extendedMetricBleService.addHandleForcesClientId(1);
-
-                extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
-
-                Verify(
-                    OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const unsigned char *data, size_t length))
-                        .Using(Any(), Eq(expectedMTU - 3U - 2U - ((expectedMTU - 3U) % sizeof(float)))))
-                    .AtLeastOnce();
-            }
-
-            SECTION("and ignore zero MTU when calculating minimum")
-            {
-                const auto expectedMTU = 23U;
-
-                When(Method(mockNimBLEServer, getPeerMTU)).Return(0, expectedMTU);
-                extendedMetricBleService.addHandleForcesClientId(0);
-                extendedMetricBleService.addHandleForcesClientId(1);
-
-                extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
-
-                Verify(
-                    OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const unsigned char *data, size_t length))
-                        .Using(Any(), Eq(expectedMTU - 3U - 2U - ((expectedMTU - 3U) % sizeof(float)))))
-                    .AtLeastOnce();
-            }
-        }
 
         SECTION("calculate stack size for the task")
         {

@@ -311,45 +311,23 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
         SECTION("should return 0 when no device is connected")
         {
-            const auto expectedMTU = 0;
+            const auto expectedMtu = 0;
             When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).Return({});
 
             const auto mtu = bluetoothController.calculateDeltaTimesMtu();
 
-            REQUIRE(mtu == expectedMTU);
+            REQUIRE(mtu == expectedMtu);
         }
 
-        SECTION("should return the lowest MTU")
+        SECTION("should return calculated Mtu when device is connected")
         {
-            const auto expectedMTU = 23;
-
-            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientMtu)).Return(expectedMTU, 100);
+            const auto expectedMtu = 100;
+            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).Return({0, 1});
+            When(Method(mockExtendedMetricsBleService, calculateMtu)).Return(expectedMtu);
 
             const auto mtu = bluetoothController.calculateDeltaTimesMtu();
 
-            REQUIRE(mtu == expectedMTU);
-        }
-
-        SECTION("should return 512 as MTU even if device reports higher")
-        {
-            const auto expectedMTU = 512;
-
-            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientMtu)).Return(1200, 1000);
-
-            const auto mtu = bluetoothController.calculateDeltaTimesMtu();
-
-            REQUIRE(mtu == expectedMTU);
-        }
-
-        SECTION("should ignore zero MTU when calculating minimum")
-        {
-            const auto expectedMTU = 23;
-
-            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientMtu)).Return(0, expectedMTU);
-
-            const auto mtu = bluetoothController.calculateDeltaTimesMtu();
-
-            REQUIRE(mtu == expectedMTU);
+            REQUIRE(mtu == expectedMtu);
         }
     }
 }

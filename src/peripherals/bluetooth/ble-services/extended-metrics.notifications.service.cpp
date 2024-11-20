@@ -22,17 +22,9 @@ void ExtendedMetricBleService::broadcastHandleForces(const vector<float> &handle
         return;
     }
 
-    const unsigned short mtu = std::accumulate(cbegin(handleForcesParams.clientIds), cend(handleForcesParams.clientIds), 512, [&](unsigned short previousMTU, unsigned short clientId)
-                                               {
-        const auto currentMTU = getClientHandleForcesMtu(clientId);
-        if (currentMTU == 0)
-        {
-            return previousMTU;
-        }
+    const unsigned short mtu = calculateMtu(handleForcesParams.clientIds);
 
-        return std::min(previousMTU, currentMTU); });
-
-    handleForcesParams.chunkSize = calculateHandleForcesChunkSize(mtu);
+    handleForcesParams.chunkSize = (mtu - 3U - 2U) / sizeof(float);
     handleForcesParams.handleForces = handleForces;
 
     const auto coreStackSize = 2'048U;
