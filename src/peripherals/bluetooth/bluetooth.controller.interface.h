@@ -16,9 +16,8 @@ public:
     virtual void stopServer() = 0;
 
     virtual void notifyBattery(unsigned char batteryLevel) const = 0;
-    virtual void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes) = 0;
+    virtual void notifyNewDeltaTime(unsigned long deltaTime) = 0;
     virtual void notifyNewMetrics(const RowingDataModels::RowingMetrics &data) = 0;
 
-    virtual unsigned short calculateDeltaTimesMtu() const = 0;
     virtual bool isAnyDeviceConnected() = 0;
 };

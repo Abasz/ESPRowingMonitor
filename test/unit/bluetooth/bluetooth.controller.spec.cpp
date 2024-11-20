@@ -37,17 +37,19 @@ TEST_CASE("BluetoothController", "[peripheral]")
     Mock<IExtendedMetricBleService> mockExtendedMetricsBleService;
 
     const auto serviceFlag = BleServiceFlag::CpsService;
+    const auto minimumDeltaTimeMtu = 100;
     const RowingDataModels::RowingMetrics expectedData{
         .distance = 100,
-        .lastRevTime = 2000,
-        .lastStrokeTime = 1600,
+        .lastRevTime = 2'000,
+        .lastStrokeTime = 1'600,
         .strokeCount = 10,
-        .driveDuration = 1001,
-        .recoveryDuration = 1003,
+        .driveDuration = 1'001,
+        .recoveryDuration = 1'003,
         .avgStrokePower = 70,
         .dragCoefficient = 0.00001,
         .driveHandleForces = {1.1, 2.2, 100.1},
     };
+    const std::vector<unsigned char> emptyClientIds{};
 
     Fake(Method(mockNimBLEServer, createServer));
     Fake(Method(mockNimBLEServer, init));
@@ -64,8 +66,11 @@ TEST_CASE("BluetoothController", "[peripheral]")
     When(Method(mockBaseMetricsBleService, isSubscribed)).AlwaysReturn(false);
 
     When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
-    When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).AlwaysReturn({});
+    When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).AlwaysReturn(emptyClientIds);
+    When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(emptyClientIds);
+    When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(0);
     When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).AlwaysReturn(false);
+    Fake(Method(mockExtendedMetricsBleService, broadcastDeltaTimes));
 
     Fake(Method(mockNimBLEService, start));
 
@@ -82,11 +87,13 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
     SECTION("update method")
     {
+        const auto expectedDeltaTime = 10'000;
+
         When(Method(mockArduino, millis)).Return(0);
         bluetoothController.notifyNewMetrics(expectedData);
         mockBaseMetricsBleService.ClearInvocationHistory();
 
-        SECTION("when there are subscribers and when last notification was send more than 1 seconds ago should notify with last available base metric ")
+        SECTION("when there are subscribers and when last notification was send more than 1 seconds ago should notify with last available base metric")
         {
             const auto bleFlag = BleServiceFlag::CpsService;
 
@@ -97,8 +104,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
             const unsigned short bleStrokeCountData = expectedData.strokeCount;
             const short bleAvgStrokePowerData = static_cast<short>(lround(expectedData.avgStrokePower));
 
-            When(Method(mockArduino, millis)).Return(1001);
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(bleFlag);
+            When(Method(mockArduino, millis)).Return(1'001);
             When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
             Fake(Method(mockBaseMetricsBleService, broadcastBaseMetrics));
 
@@ -119,12 +125,76 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
         SECTION("not notify base metric when there are no subscribers")
         {
-            When(Method(mockArduino, millis)).Return(1001);
+            When(Method(mockArduino, millis)).Return(1'001);
             When(Method(mockBaseMetricsBleService, isSubscribed)).Return(false);
 
             bluetoothController.update();
 
             Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics)).Never();
+        }
+
+        SECTION("broadcast deltaTimes when last notification was send more than 1 seconds ago and MTU is above minimum, clear vector and reserve memory based on MTU")
+        {
+            const auto blinkInterval = Configurations::ledBlinkFrequency + 1U;
+
+            std::vector<std::vector<unsigned long>> notifiedDeltaTimes{};
+            When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval);
+            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn({0});
+            When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu);
+            Fake(Method(mockExtendedMetricsBleService, broadcastDeltaTimes).Matching([&notifiedDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                                     {
+                notifiedDeltaTimes.push_back(deltaTimes);
+
+                return true; }));
+            bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+
+            bluetoothController.update();
+
+            REQUIRE_THAT(notifiedDeltaTimes, Catch::Matchers::SizeIs(1));
+            REQUIRE_THAT(notifiedDeltaTimes[0], Catch::Matchers::RangeEquals(std::vector<unsigned long>{expectedDeltaTime}));
+            Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes).Matching([](const std::vector<unsigned long> &deltaTimes)
+                                                                                       { return deltaTimes.capacity() == minimumDeltaTimeMtu / sizeof(unsigned long) + 1U && deltaTimes.empty(); }))
+                .Once();
+        }
+
+        SECTION("not broadcast deltaTimes when")
+        {
+            bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+
+            SECTION("last notification was send less than 1 seconds ago")
+            {
+                When(Method(mockArduino, millis)).AlwaysReturn(999);
+                When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu);
+                When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn({0});
+                bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+
+                bluetoothController.update();
+
+                Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).Never();
+            }
+
+            SECTION("no client is connected")
+            {
+                When(Method(mockArduino, millis)).AlwaysReturn(1'001);
+                When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).Return({0}).AlwaysReturn(emptyClientIds);
+                When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu);
+                bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+
+                bluetoothController.update();
+
+                Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).Never();
+            }
+
+            SECTION("deltaTimes vector is empty")
+            {
+                When(Method(mockArduino, millis)).AlwaysReturn(1'001);
+                When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu);
+                When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn({0});
+
+                bluetoothController.update();
+
+                Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).Never();
+            }
         }
     }
 
@@ -301,33 +371,6 @@ TEST_CASE("BluetoothController", "[peripheral]")
             const auto isConnected = bluetoothController.isAnyDeviceConnected();
 
             REQUIRE(isConnected == false);
-        }
-    }
-
-    SECTION("calculateDeltaTimesMtu method")
-    {
-        std::vector<unsigned char> clientIds{0, 1};
-        When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).Return(clientIds);
-
-        SECTION("should return 0 when no device is connected")
-        {
-            const auto expectedMtu = 0;
-            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).Return({});
-
-            const auto mtu = bluetoothController.calculateDeltaTimesMtu();
-
-            REQUIRE(mtu == expectedMtu);
-        }
-
-        SECTION("should return calculated Mtu when device is connected")
-        {
-            const auto expectedMtu = 100;
-            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).Return({0, 1});
-            When(Method(mockExtendedMetricsBleService, calculateMtu)).Return(expectedMtu);
-
-            const auto mtu = bluetoothController.calculateDeltaTimesMtu();
-
-            REQUIRE(mtu == expectedMtu);
         }
     }
 }

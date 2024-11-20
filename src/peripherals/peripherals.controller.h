@@ -19,17 +19,14 @@ class PeripheralsController final : public IPeripheralsController
     IEEPROMService &eepromService;
 
     unsigned int lastConnectedDeviceCheckTime = 0;
-    unsigned int lastDeltaTimesBroadcastTime = 0UL;
 
     vector<unsigned long> sdDeltaTimes;
-    vector<unsigned long> bleDeltaTimes;
 
     unsigned char ledState = HIGH;
     CRGB::HTMLColorCode ledColor = CRGB::Black;
     inline static std::array<CRGB, 1> leds;
 
     void updateLed(CRGB::HTMLColorCode newLedColor);
-    void flushBleDeltaTimes(unsigned short mtu);
     static void setupConnectionIndicatorLed();
 
 public:

@@ -10,6 +10,11 @@
 
 BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService, IExtendedMetricBleService &_extendedMetricsBleService) : eepromService(_eepromService), otaService(_otaService), settingsBleService(_settingsBleService), batteryBleService(_batteryBleService), deviceInfoBleService(_deviceInfoBleService), otaBleService(_otaBleService), baseMetricsBleService(_baseMetricsBleService), extendedMetricsBleService(_extendedMetricsBleService), serverCallbacks(_extendedMetricsBleService)
 {
+    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    {
+        const auto maxMtu = 512 / sizeof(unsigned long);
+        bleDeltaTimes.reserve(maxMtu);
+    }
 }
 
 void BluetoothController::update()
@@ -20,6 +25,15 @@ void BluetoothController::update()
     {
         baseMetricsBleService.broadcastBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
         lastMetricsBroadcastTime = now;
+    }
+
+    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    {
+        const auto &clientIds = extendedMetricsBleService.getDeltaTimesClientIds();
+        if (now - lastDeltaTimesBroadcastTime > bleUpdateInterval && !bleDeltaTimes.empty() && !clientIds.empty())
+        {
+            flushBleDeltaTimes(extendedMetricsBleService.calculateMtu(clientIds));
+        }
     }
 }
 
@@ -108,18 +122,6 @@ void BluetoothController::setupAdvertisement() const
     }
 }
 
-unsigned short BluetoothController::calculateDeltaTimesMtu() const
-{
-    const auto clientIds = extendedMetricsBleService.getDeltaTimesClientIds();
-
-    if (clientIds.empty())
-    {
-        return 0;
-    }
-
-    return extendedMetricsBleService.calculateMtu(clientIds);
-}
-
 void BluetoothController::notifyBattery(const unsigned char batteryLevel) const
 {
     batteryBleService.setBatteryLevel(batteryLevel);
@@ -129,15 +131,28 @@ void BluetoothController::notifyBattery(const unsigned char batteryLevel) const
     }
 }
 
-void BluetoothController::notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes)
+void BluetoothController::notifyNewDeltaTime(unsigned long deltaTime)
 {
-    const auto isSubscribed = !extendedMetricsBleService.getDeltaTimesClientIds().empty();
-    if (!isSubscribed || deltaTimes.empty())
+    const auto &clientIds = extendedMetricsBleService.getDeltaTimesClientIds();
+    if (clientIds.empty())
     {
         return;
     }
 
-    extendedMetricsBleService.broadcastDeltaTimes(deltaTimes);
+    const auto mtu = extendedMetricsBleService.calculateMtu(clientIds);
+
+    const auto minimumMtu = 100U;
+    if (mtu < minimumMtu)
+    {
+        return;
+    }
+
+    bleDeltaTimes.push_back(deltaTime);
+
+    if ((bleDeltaTimes.size() + 1U) * sizeof(unsigned long) > mtu - 3U)
+    {
+        flushBleDeltaTimes(mtu);
+    }
 }
 
 void BluetoothController::notifyNewMetrics(const RowingDataModels::RowingMetrics &data)
@@ -169,4 +184,15 @@ void BluetoothController::notifyNewMetrics(const RowingDataModels::RowingMetrics
     }
 
     lastMetricsBroadcastTime = millis();
+}
+
+void BluetoothController::flushBleDeltaTimes(const unsigned short mtu = 512U)
+{
+    extendedMetricsBleService.broadcastDeltaTimes(bleDeltaTimes);
+
+    vector<unsigned long> clear;
+    clear.reserve(mtu / sizeof(unsigned long) + 1U);
+    bleDeltaTimes.swap(clear);
+
+    lastDeltaTimesBroadcastTime = millis();
 }

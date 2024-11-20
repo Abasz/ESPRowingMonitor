@@ -15,6 +15,7 @@
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
+#include "../../../src/utils/configuration.h"
 #include "../../../src/utils/enums.h"
 #include "../../../src/utils/ota-updater/ota-updater.service.interface.h"
 
@@ -38,15 +39,17 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
     const RowingDataModels::RowingMetrics expectedData{
         .distance = 100,
-        .lastRevTime = 2000,
-        .lastStrokeTime = 1600,
+        .lastRevTime = 2'000,
+        .lastStrokeTime = 1'600,
         .strokeCount = 10,
-        .driveDuration = 1001,
-        .recoveryDuration = 1003,
+        .driveDuration = 1'001,
+        .recoveryDuration = 1'003,
         .avgStrokePower = 70,
         .dragCoefficient = 0.00001,
         .driveHandleForces = {1.1, 2.2, 100.1},
     };
+    const unsigned int bleUpdateInterval = 1'000 + 1;
+    const std::vector<unsigned char> emptyClientIds{};
 
     When(Method(mockArduino, millis)).AlwaysReturn(0);
 
@@ -70,7 +73,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
     When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
-    When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
 
     When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockBaseMetricsBleService, isSubscribed)).AlwaysReturn(true);
@@ -78,9 +80,11 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
     When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).AlwaysReturn({0});
+    When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(emptyClientIds);
     When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).AlwaysReturn(true);
     Fake(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics));
     Fake(Method(mockExtendedMetricsBleService, broadcastHandleForces));
+    When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(0);
 
     BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get(), mockBaseMetricsBleService.get(), mockExtendedMetricsBleService.get());
 
@@ -188,11 +192,11 @@ TEST_CASE("BluetoothController", "[callbacks]")
             {
                 const RowingDataModels::RowingMetrics driveForcesEmptyData{
                     .distance = 100,
-                    .lastRevTime = 2000,
-                    .lastStrokeTime = 1600,
+                    .lastRevTime = 2'000,
+                    .lastStrokeTime = 1'600,
                     .strokeCount = 10,
-                    .driveDuration = 1001,
-                    .recoveryDuration = 1003,
+                    .driveDuration = 1'001,
+                    .recoveryDuration = 1'003,
                     .avgStrokePower = 70,
                     .dragCoefficient = 0.00001,
                     .driveHandleForces = {},
@@ -246,8 +250,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
         SECTION("reset lastMetricsBroadcastTime")
         {
-            const unsigned int bleUpdateInterval = 1'000;
-
             When(Method(mockArduino, millis)).Return(bleUpdateInterval, bleUpdateInterval * 2 - 1);
             When(Method(mockBaseMetricsBleService, isSubscribed)).AlwaysReturn(true);
 
@@ -259,36 +261,110 @@ TEST_CASE("BluetoothController", "[callbacks]")
         }
     }
 
-    SECTION("notifyDeltaTimes method should")
+    SECTION("notifyNewDeltaTime method should")
     {
-        std::vector<unsigned long> expectedDeltaTimes{10000, 11000, 12000, 11000};
+        std::vector<unsigned long> expectedDeltaTimes{10'000, 11'000, 12'000, 11'000};
+        const auto expectedDeltaTime = 10'000UL;
+        const auto minimumDeltaTimeMtu = 100;
+        const std::vector<unsigned char> clientIds{0};
 
-        When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).Return({0});
         Fake(Method(mockExtendedMetricsBleService, broadcastDeltaTimes));
 
-        SECTION("not notify if there are no subscribers")
+        SECTION("ignore new value when no client is connected")
         {
-            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).Return({});
+            std::vector<std::vector<unsigned long>> resultDeltaTimes;
 
-            bluetoothController.notifyDeltaTimes(expectedDeltaTimes);
+            When(Method(mockArduino, millis)).AlwaysReturn(bleUpdateInterval);
+            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(emptyClientIds);
+            When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu);
+            When(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).AlwaysDo([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                                      {
+                            resultDeltaTimes.push_back(deltaTimes);
 
-            Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).Never();
+                            return true; });
+
+            bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+            bluetoothController.update();
+
+            Verify(Method(mockExtendedMetricsBleService, calculateMtu)).Never();
+            REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::IsEmpty());
         }
 
-        SECTION("not notify if deltaTimes vector is empty")
+        SECTION("ignore new value when client MTU is below 100")
         {
-            bluetoothController.notifyDeltaTimes({});
+            std::vector<std::vector<unsigned long>> resultDeltaTimes;
 
-            Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).Never();
+            When(Method(mockArduino, millis)).AlwaysReturn(bleUpdateInterval);
+            When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu - 1);
+            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(clientIds);
+            When(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).AlwaysDo([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                                      {
+                            resultDeltaTimes.push_back(deltaTimes);
+
+                            return true; });
+
+            bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+            bluetoothController.update();
+
+            REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::IsEmpty());
         }
 
-        SECTION("broadcast deltaTimes when vector is not empty and there are subscribers")
+        SECTION("add new value to deltaTimes array when client MTU is at least 100")
         {
-            bluetoothController.notifyDeltaTimes(expectedDeltaTimes);
+            std::vector<std::vector<unsigned long>> resultDeltaTimes;
 
-            Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes).Using(expectedDeltaTimes)).Once();
+            When(Method(mockArduino, millis)).AlwaysReturn(bleUpdateInterval + 1);
+            When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu);
+            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(clientIds);
+            When(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).AlwaysDo([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                                      {
+                            resultDeltaTimes.push_back(deltaTimes);
+
+                            return true; });
+
+            bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+            bluetoothController.update();
+
+            REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::SizeIs(1));
+        }
+
+        SECTION("flush deltaTimes via bluetooth when client MTU capacity is reached")
+        {
+            std::vector<std::vector<unsigned long>> resultDeltaTimes;
+
+            When(Method(mockArduino, millis)).AlwaysReturn(bleUpdateInterval);
+            When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu);
+            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(clientIds);
+            Fake(Method(mockExtendedMetricsBleService, broadcastDeltaTimes).Matching([&resultDeltaTimes](const std::vector<unsigned long> &deltaTimes)
+                                                                                     {
+                                    resultDeltaTimes.push_back(deltaTimes);
+
+                                    return true; }));
+
+            auto i = 0U;
+            while ((i + 1) * sizeof(unsigned long) < minimumDeltaTimeMtu - 3)
+            {
+                bluetoothController.notifyNewDeltaTime(expectedDeltaTime + i);
+                ++i;
+            }
+
+            REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::SizeIs(1));
+            REQUIRE_THAT(resultDeltaTimes[0], Catch::Matchers::SizeIs(i));
+        }
+
+        SECTION("reset lastDeltaTimesBroadcastTime after flushing deltaTimes via bluetooth")
+        {
+            When(Method(mockArduino, millis)).Return(bleUpdateInterval, bleUpdateInterval, (bleUpdateInterval - 1) * 2);
+            When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(clientIds);
+            When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(minimumDeltaTimeMtu);
+
+            bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+            bluetoothController.update();
+            bluetoothController.notifyNewDeltaTime(expectedDeltaTime);
+            bluetoothController.update();
+
+            Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes)).Once();
         }
     }
 }
-
 // NOLINTEND(readability-magic-numbers)

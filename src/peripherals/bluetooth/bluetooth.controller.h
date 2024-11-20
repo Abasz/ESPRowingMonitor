@@ -36,6 +36,7 @@ class BluetoothController final : public IBluetoothController
     ServerCallbacks serverCallbacks;
 
     unsigned int lastMetricsBroadcastTime = 0UL;
+    unsigned int lastDeltaTimesBroadcastTime = 0UL;
 
     unsigned short bleRevTimeData = 0;
     unsigned int bleRevCountData = 0;
@@ -43,9 +44,14 @@ class BluetoothController final : public IBluetoothController
     unsigned short bleStrokeCountData = 0;
     short bleAvgStrokePowerData = 0;
 
+    const unsigned char minimumMtu = 100;
+    
+    vector<unsigned long> bleDeltaTimes;
+
     void setupBleDevice();
     void setupServices();
     void setupAdvertisement() const;
+    void flushBleDeltaTimes(unsigned short mtu);
 
 public:
     explicit BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService, IExtendedMetricBleService &_extendedMetricsBleService);
@@ -57,9 +63,8 @@ public:
     void stopServer() override;
 
     void notifyBattery(unsigned char batteryLevel) const override;
-    void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;
+    void notifyNewDeltaTime(unsigned long deltaTime) override;
     void notifyNewMetrics(const RowingDataModels::RowingMetrics &data) override;
 
-    unsigned short calculateDeltaTimesMtu() const override;
     bool isAnyDeviceConnected() override;
 };

@@ -9,12 +9,6 @@ PeripheralsController::PeripheralsController(IBluetoothController &_bluetoothCon
     {
         sdDeltaTimes.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
     }
-
-    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
-    {
-        const auto maxMTU = 512 / sizeof(unsigned long);
-        bleDeltaTimes.reserve(maxMTU);
-    }
 }
 
 void PeripheralsController::update(const unsigned char batteryLevel)
@@ -39,15 +33,6 @@ void PeripheralsController::update(const unsigned char batteryLevel)
             }
             updateLed(ledColor);
             lastConnectedDeviceCheckTime = now;
-        }
-    }
-
-    const unsigned int bleUpdateInterval = 1'000;
-    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
-    {
-        if (now - lastDeltaTimesBroadcastTime > bleUpdateInterval)
-        {
-            flushBleDeltaTimes(bluetoothController.calculateDeltaTimesMtu());
         }
     }
 }
@@ -117,32 +102,11 @@ void PeripheralsController::updateDeltaTime(const unsigned long deltaTime)
 
     if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
     {
-        const auto mtu = bluetoothController.calculateDeltaTimesMtu();
-
-        const auto minimumMTU = 100;
-        if (!eepromService.getLogToBluetooth() || mtu < minimumMTU)
+        if (eepromService.getLogToBluetooth())
         {
-            return;
-        }
-
-        bleDeltaTimes.push_back(deltaTime);
-
-        if ((bleDeltaTimes.size() + 1U) * sizeof(unsigned long) > mtu - 3U)
-        {
-            flushBleDeltaTimes(mtu);
+            bluetoothController.notifyNewDeltaTime(deltaTime);
         }
     }
-}
-
-void PeripheralsController::flushBleDeltaTimes(const unsigned short mtu = 512U)
-{
-    bluetoothController.notifyDeltaTimes(bleDeltaTimes);
-
-    vector<unsigned long> clear;
-    clear.reserve(mtu / sizeof(unsigned long) + 1U);
-    bleDeltaTimes.swap(clear);
-
-    lastDeltaTimesBroadcastTime = millis();
 }
 
 void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &data)
