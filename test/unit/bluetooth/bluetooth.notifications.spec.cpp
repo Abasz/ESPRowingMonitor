@@ -4,6 +4,7 @@
 #include "../include/catch_amalgamated.hpp"
 #include "../include/fakeit.hpp"
 
+#include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
 #include "../../../src/peripherals/bluetooth/ble-services/base-metrics.service.interface.h"
@@ -21,6 +22,7 @@ using namespace fakeit;
 
 TEST_CASE("BluetoothController", "[callbacks]")
 {
+    mockArduino.Reset();
     mockNimBLEServer.Reset();
     mockNimBLEAdvertising.Reset();
     mockNimBLEService.Reset();
@@ -33,6 +35,20 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Mock<IOtaBleService> mockOtaBleService;
     Mock<IBaseMetricsBleService> mockBaseMetricsBleService;
     Mock<IExtendedMetricBleService> mockExtendedMetricsBleService;
+
+    const RowingDataModels::RowingMetrics expectedData{
+        .distance = 100,
+        .lastRevTime = 2000,
+        .lastStrokeTime = 1600,
+        .strokeCount = 10,
+        .driveDuration = 1001,
+        .recoveryDuration = 1003,
+        .avgStrokePower = 70,
+        .dragCoefficient = 0.00001,
+        .driveHandleForces = {1.1, 2.2, 100.1},
+    };
+
+    When(Method(mockArduino, millis)).AlwaysReturn(0);
 
     Fake(Method(mockNimBLEServer, createServer));
     Fake(Method(mockNimBLEServer, init));
@@ -54,8 +70,17 @@ TEST_CASE("BluetoothController", "[callbacks]")
     When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
-    When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+
+    When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockBaseMetricsBleService, isSubscribed)).AlwaysReturn(true);
+    Fake(Method(mockBaseMetricsBleService, broadcastBaseMetrics));
+
+    When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
+    When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).AlwaysReturn({0});
+    When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).AlwaysReturn(true);
+    Fake(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics));
+    Fake(Method(mockExtendedMetricsBleService, broadcastHandleForces));
 
     BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get(), mockBaseMetricsBleService.get(), mockExtendedMetricsBleService.get());
 
@@ -68,7 +93,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
         SECTION("set new battery level")
         {
-            Fake(Method(mockBatteryBleService, isSubscribed));
+            When(Method(mockBatteryBleService, isSubscribed)).Return(true);
 
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
@@ -94,60 +119,143 @@ TEST_CASE("BluetoothController", "[callbacks]")
         }
     }
 
-    SECTION("notifyBaseMetrics method should")
+    SECTION("notifyNewMetrics method should")
     {
-        const unsigned short revTime = 31'000U;
-        const unsigned int revCount = 360'000U;
-        const unsigned short strokeTime = 30'100U;
-        const unsigned short strokeCount = 2'000U;
-        const short avgStrokePower = 300;
+        const short bleAvgStrokePowerData = static_cast<short>(lround(expectedData.avgStrokePower));
 
-        Fake(Method(mockBaseMetricsBleService, broadcastBaseMetrics));
-
-        SECTION("not broadcast if there are no subscribers")
+        SECTION("convert metrics to BLE compliant format")
         {
-            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(false);
+            const auto secInMicroSec = 1e6L;
+            const unsigned int bleRevCountData = lround(expectedData.distance);
+            const unsigned short bleStrokeTimeData = lroundl((expectedData.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
+            const unsigned short bleStrokeCountData = expectedData.strokeCount;
 
-            bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+            SECTION("when bleServiceFlag is CSC")
+            {
+                const unsigned short bleRevTimeDataCsc = lroundl((expectedData.lastRevTime / secInMicroSec) * 1'024) % USHRT_MAX;
+
+                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
+
+                bluetoothController.notifyNewMetrics(expectedData);
+
+                Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(Eq(bleRevTimeDataCsc), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
+            }
+
+            SECTION("when bleServiceFlag is PSC")
+            {
+                const unsigned short bleRevTimeDataPcs = lroundl((expectedData.lastRevTime / secInMicroSec) * 2'048) % USHRT_MAX;
+
+                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
+
+                bluetoothController.notifyNewMetrics(expectedData);
+
+                Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(Eq(bleRevTimeDataPcs), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
+            }
+        }
+
+        SECTION("when extended metrics is")
+        {
+            SECTION("not subscribed should not broadcast")
+            {
+                When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).Return(false);
+
+                bluetoothController.notifyNewMetrics(expectedData);
+
+                Verify(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics)).Never();
+            }
+            SECTION("subscribed should broadcast with the correct parameters")
+            {
+                When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).Return(true);
+
+                bluetoothController.notifyNewMetrics(expectedData);
+
+                Verify(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics).Using(Eq(bleAvgStrokePowerData), Eq(expectedData.recoveryDuration), Eq(expectedData.driveDuration), Eq(lround(expectedData.dragCoefficient * 1e6)))).Once();
+            }
+        }
+
+        SECTION("when notify handleForces is")
+        {
+            SECTION("not subscribed should not broadcast")
+            {
+                When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).Return({});
+
+                bluetoothController.notifyNewMetrics(expectedData);
+
+                Verify(Method(mockExtendedMetricsBleService, broadcastHandleForces)).Never();
+            }
+
+            SECTION("empty should not broadcast")
+            {
+                const RowingDataModels::RowingMetrics driveForcesEmptyData{
+                    .distance = 100,
+                    .lastRevTime = 2000,
+                    .lastStrokeTime = 1600,
+                    .strokeCount = 10,
+                    .driveDuration = 1001,
+                    .recoveryDuration = 1003,
+                    .avgStrokePower = 70,
+                    .dragCoefficient = 0.00001,
+                    .driveHandleForces = {},
+                };
+
+                When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).Return({0});
+
+                bluetoothController.notifyNewMetrics(driveForcesEmptyData);
+
+                Verify(Method(mockExtendedMetricsBleService, broadcastHandleForces)).Never();
+            }
+
+            SECTION("subscribed and not empty should broadcast with the correct parameters")
+            {
+                When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).Return({0});
+
+                bluetoothController.notifyNewMetrics(expectedData);
+
+                Verify(Method(mockExtendedMetricsBleService, broadcastHandleForces).Using(Eq(expectedData.driveHandleForces))).Once();
+            }
+        }
+
+        SECTION("when base metrics is")
+        {
+            Fake(Method(mockBaseMetricsBleService, broadcastBaseMetrics));
+
+            SECTION("not subscribed should not subscribers")
+            {
+                When(Method(mockBaseMetricsBleService, isSubscribed)).Return(false);
+
+                bluetoothController.notifyNewMetrics(expectedData);
+
+                Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics)).Never();
+            }
+
+            SECTION("subscribed should broadcast with the correct parameters")
+            {
+                const auto secInMicroSec = 1e6L;
+                const unsigned int bleRevCountData = lround(expectedData.distance);
+                const unsigned short bleRevTimeDataPcs = lroundl((expectedData.lastRevTime / secInMicroSec) * 2'048) % USHRT_MAX;
+                const unsigned short bleStrokeTimeData = lroundl((expectedData.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
+                const unsigned short bleStrokeCountData = expectedData.strokeCount;
+
+                When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
+
+                bluetoothController.notifyNewMetrics(expectedData);
+
+                Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(bleRevTimeDataPcs, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData)).Once();
+            }
+        }
+
+        SECTION("reset lastMetricsBroadcastTime")
+        {
+            const unsigned int bleUpdateInterval = 1'000;
+
+            When(Method(mockArduino, millis)).Return(bleUpdateInterval, bleUpdateInterval * 2 - 1);
+            When(Method(mockBaseMetricsBleService, isSubscribed)).AlwaysReturn(true);
+
+            bluetoothController.notifyNewMetrics(expectedData);
+            mockBaseMetricsBleService.ClearInvocationHistory();
+            bluetoothController.update();
 
             Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics)).Never();
-        }
-
-        SECTION("broadcast new base metrics with the correct parameters")
-        {
-            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
-
-            bluetoothController.notifyBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
-
-            Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(revTime, revCount, strokeTime, strokeCount, avgStrokePower)).Once();
-        }
-    }
-
-    SECTION("notifyExtendedMetrics method should")
-    {
-        const unsigned int recoveryDuration = 4'000'000;
-        const unsigned int driveDuration = 3'000'000;
-        const unsigned char dragFactor = 110;
-        const short avgStrokePower = 300;
-
-        Fake(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics));
-
-        SECTION("not broadcast if there are no subscribers")
-        {
-            When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).AlwaysReturn(false);
-
-            bluetoothController.notifyExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
-
-            Verify(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics)).Never();
-        }
-
-        SECTION("broadcast ExtendedMetrics when there are subscribers")
-        {
-            When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).AlwaysReturn(true);
-
-            bluetoothController.notifyExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
-
-            Verify(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics).Using(avgStrokePower, recoveryDuration, driveDuration, dragFactor)).Once();
         }
     }
 
@@ -181,36 +289,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
             Verify(Method(mockExtendedMetricsBleService, broadcastDeltaTimes).Using(expectedDeltaTimes)).Once();
         }
     }
-
-    SECTION("notifyHandleForces method should")
-    {
-        const std::vector<float> expectedHandleForces{1.1, 3.3, 500.4, 300.4};
-
-        When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).Return({0});
-        Fake(Method(mockExtendedMetricsBleService, broadcastHandleForces));
-
-        SECTION("not notify if there are no subscribers")
-        {
-            When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).Return({});
-
-            bluetoothController.notifyHandleForces(expectedHandleForces);
-
-            Verify(Method(mockExtendedMetricsBleService, broadcastHandleForces)).Never();
-        }
-
-        SECTION("not notify if handleForces vector is empty")
-        {
-            bluetoothController.notifyHandleForces({});
-
-            Verify(Method(mockExtendedMetricsBleService, broadcastHandleForces)).Never();
-        }
-
-        SECTION("broadcast handleForces when vector is not empty and there are subscribers")
-        {
-            bluetoothController.notifyHandleForces(expectedHandleForces);
-
-            Verify(Method(mockExtendedMetricsBleService, broadcastHandleForces).Using(expectedHandleForces)).Once();
-        }
-    }
 }
+
 // NOLINTEND(readability-magic-numbers)

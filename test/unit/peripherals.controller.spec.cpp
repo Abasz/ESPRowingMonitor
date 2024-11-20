@@ -7,6 +7,7 @@
 #include "../../src/peripherals/bluetooth/bluetooth.controller.interface.h"
 #include "../../src/peripherals/peripherals.controller.h"
 #include "../../src/peripherals/sd-card/sd-card.service.interface.h"
+#include "../../src/rower/stroke.model.h"
 #include "../../src/utils/EEPROM/EEPROM.service.interface.h"
 
 using namespace fakeit;
@@ -41,10 +42,9 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
     When(Method(mockBluetoothController, calculateDeltaTimesMtu)).AlwaysReturn(23);
     When(Method(mockBluetoothController, isAnyDeviceConnected)).AlwaysReturn(false);
-    Fake(Method(mockBluetoothController, notifyBaseMetrics));
     Fake(Method(mockBluetoothController, notifyDeltaTimes));
-    Fake(Method(mockBluetoothController, notifyHandleForces));
-    Fake(Method(mockBluetoothController, notifyExtendedMetrics));
+    Fake(Method(mockBluetoothController, notifyNewMetrics));
+    Fake(Method(mockBluetoothController, update));
 
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(false);
@@ -169,33 +169,13 @@ TEST_CASE("PeripheralController", "[peripheral]")
             }
         }
 
-        SECTION("notify with last available base metric when last notification was send more than 1 seconds ago")
+        SECTION("call update on BluetoothController")
         {
-            const auto bleFlag = BleServiceFlag::CpsService;
-
-            const auto secInMicroSec = 1e6L;
-            const unsigned short bleRevTimeData = lroundl((expectedData.lastRevTime / secInMicroSec) * (bleFlag == BleServiceFlag::CpsService ? 2'048 : 1'024)) % USHRT_MAX;
-            const unsigned int bleRevCountData = lround(expectedData.distance);
-            const unsigned short bleStrokeTimeData = lroundl((expectedData.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
-            const unsigned short bleStrokeCountData = expectedData.strokeCount;
-            const short bleAvgStrokePowerData = static_cast<short>(lround(expectedData.avgStrokePower));
-
-            When(Method(mockArduino, millis)).Return(0, 0, 1001);
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(bleFlag);
-            peripheralsController.updateData(expectedData);
+            Fake(Method(mockBluetoothController, update));
 
             peripheralsController.update(batteryLevel);
 
-            Verify(Method(mockBluetoothController, notifyBaseMetrics).Using(Eq(bleRevTimeData), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
-        }
-
-        SECTION("not notify base metric when last notification was send less than 1 seconds ago")
-        {
-            When(Method(mockArduino, millis)).Return(0, 999);
-
-            peripheralsController.update(batteryLevel);
-
-            Verify(Method(mockBluetoothController, notifyBaseMetrics)).Never();
+            Verify(Method(mockBluetoothController, update)).Once();
         }
 
         SECTION("notify deltaTimes when last notification was send more than 1 seconds ago, clear vector and reserve memory based on MTU")
@@ -226,7 +206,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             peripheralsController.update(batteryLevel);
 
-            Verify(Method(mockBluetoothController, notifyBaseMetrics)).Never();
+            Verify(Method(mockBluetoothController, notifyDeltaTimes)).Never();
         }
     }
 
@@ -382,63 +362,13 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
     SECTION("updateData method should")
     {
-        const short bleAvgStrokePowerData = static_cast<short>(lround(expectedData.avgStrokePower));
-
-        SECTION("convert metrics to BLE compliant format")
-        {
-            const auto secInMicroSec = 1e6L;
-            const unsigned int bleRevCountData = lround(expectedData.distance);
-            const unsigned short bleStrokeTimeData = lroundl((expectedData.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
-            const unsigned short bleStrokeCountData = expectedData.strokeCount;
-
-            SECTION("when bleServiceFlag is CSC")
-            {
-
-                const unsigned short bleRevTimeDataCsc = lroundl((expectedData.lastRevTime / secInMicroSec) * 1'024) % USHRT_MAX;
-
-                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
-
-                peripheralsController.updateData(expectedData);
-
-                Verify(Method(mockBluetoothController, notifyBaseMetrics).Using(Eq(bleRevTimeDataCsc), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
-            }
-
-            SECTION("when bleServiceFlag is PSC")
-            {
-                const unsigned short bleRevTimeDataPcs = lroundl((expectedData.lastRevTime / secInMicroSec) * 2'048) % USHRT_MAX;
-
-                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-
-                peripheralsController.updateData(expectedData);
-
-                Verify(Method(mockBluetoothController, notifyBaseMetrics).Using(Eq(bleRevTimeDataPcs), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
-            }
-        }
-
-        SECTION("notify extended metrics")
+        SECTION("notify new data to bluetooth controller")
         {
             peripheralsController.updateData(expectedData);
 
-            Verify(Method(mockBluetoothController, notifyExtendedMetrics).Using(Eq(bleAvgStrokePowerData), Eq(expectedData.recoveryDuration), Eq(expectedData.driveDuration), Eq(lround(expectedData.dragCoefficient * 1e6)))).Once();
-        }
-
-        SECTION("notify handleForces")
-        {
-            peripheralsController.updateData(expectedData);
-
-            Verify(Method(mockBluetoothController, notifyHandleForces).Using(Eq(expectedData.driveHandleForces))).Once();
-        }
-
-        SECTION("reset lastMetricsBroadcastTime")
-        {
-            const unsigned int bleUpdateInterval = 1'000;
-
-            When(Method(mockArduino, millis)).Return(bleUpdateInterval, bleUpdateInterval * 2 - 1).AlwaysReturn(bleUpdateInterval * 3 - 1);
-
-            peripheralsController.updateData(expectedData);
-            peripheralsController.update(batteryLevel);
-
-            Verify(Method(mockBluetoothController, notifyBaseMetrics)).Once();
+            Verify(Method(mockBluetoothController, notifyNewMetrics).Matching([&expectedData](const RowingDataModels::RowingMetrics &data)
+                                                                              { return expectedData.avgStrokePower == data.avgStrokePower && expectedData.distance == data.distance && expectedData.dragCoefficient == data.dragCoefficient && expectedData.driveDuration == data.driveDuration && expectedData.driveHandleForces == data.driveHandleForces && expectedData.lastRevTime == data.lastRevTime && expectedData.lastStrokeTime == data.lastStrokeTime && expectedData.recoveryDuration == data.recoveryDuration && expectedData.strokeCount == data.strokeCount; }))
+                .Once();
         }
 
         SECTION("when logToSdCard")

@@ -12,6 +12,17 @@ BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUpd
 {
 }
 
+void BluetoothController::update()
+{
+    const auto now = millis();
+    const unsigned int bleUpdateInterval = 1'000;
+    if (now - lastMetricsBroadcastTime > bleUpdateInterval && baseMetricsBleService.isSubscribed())
+    {
+        baseMetricsBleService.broadcastBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+        lastMetricsBroadcastTime = now;
+    }
+}
+
 bool BluetoothController::isAnyDeviceConnected()
 {
     return NimBLEDevice::getServer()->getConnectedCount() > 0;
@@ -126,37 +137,6 @@ void BluetoothController::notifyBattery(const unsigned char batteryLevel) const
     }
 }
 
-void BluetoothController::notifyBaseMetrics(const unsigned short revTime, const unsigned int revCount, const unsigned short strokeTime, const unsigned short strokeCount, const short avgStrokePower)
-{
-    if (!baseMetricsBleService.isSubscribed())
-    {
-        return;
-    }
-
-    baseMetricsBleService.broadcastBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
-}
-
-void BluetoothController::notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor)
-{
-    if (!extendedMetricsBleService.isExtendedMetricsSubscribed())
-    {
-        return;
-    }
-
-    extendedMetricsBleService.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
-}
-
-void BluetoothController::notifyHandleForces(const std::vector<float> &handleForces)
-{
-    const auto isSubscribed = !extendedMetricsBleService.getHandleForcesClientIds().empty();
-    if (!isSubscribed || handleForces.empty())
-    {
-        return;
-    }
-
-    extendedMetricsBleService.broadcastHandleForces(handleForces);
-}
-
 void BluetoothController::notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes)
 {
     const auto isSubscribed = !extendedMetricsBleService.getDeltaTimesClientIds().empty();
@@ -166,4 +146,35 @@ void BluetoothController::notifyDeltaTimes(const std::vector<unsigned long> &del
     }
 
     extendedMetricsBleService.broadcastDeltaTimes(deltaTimes);
+}
+
+void BluetoothController::notifyNewMetrics(const RowingDataModels::RowingMetrics &data)
+{
+    const auto secInMicroSec = 1e6L;
+    bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2'048 : 1'024)) % USHRT_MAX;
+    bleRevCountData = lround(data.distance);
+    bleStrokeTimeData = lroundl((data.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
+    bleStrokeCountData = data.strokeCount;
+    bleAvgStrokePowerData = static_cast<short>(lround(data.avgStrokePower));
+
+    if constexpr (Configurations::hasExtendedBleMetrics)
+    {
+        const auto isSubscribed = !extendedMetricsBleService.getHandleForcesClientIds().empty();
+        if (isSubscribed && !data.driveHandleForces.empty())
+        {
+            extendedMetricsBleService.broadcastHandleForces(data.driveHandleForces);
+        }
+
+        if (extendedMetricsBleService.isExtendedMetricsSubscribed())
+        {
+            extendedMetricsBleService.broadcastExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
+        }
+    }
+
+    if (baseMetricsBleService.isSubscribed())
+    {
+        baseMetricsBleService.broadcastBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+    }
+
+    lastMetricsBroadcastTime = millis();
 }

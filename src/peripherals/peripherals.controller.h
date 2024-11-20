@@ -4,6 +4,7 @@
 
 #include "FastLED.h"
 
+#include "../rower/stroke.model.h"
 #include "../utils/EEPROM/EEPROM.service.interface.h"
 #include "./bluetooth/bluetooth.controller.interface.h"
 #include "./peripherals.controller.interface.h"
@@ -18,14 +19,7 @@ class PeripheralsController final : public IPeripheralsController
     IEEPROMService &eepromService;
 
     unsigned int lastConnectedDeviceCheckTime = 0;
-    unsigned int lastMetricsBroadcastTime = 0UL;
     unsigned int lastDeltaTimesBroadcastTime = 0UL;
-
-    unsigned short bleRevTimeData = 0;
-    unsigned int bleRevCountData = 0;
-    unsigned short bleStrokeTimeData = 0;
-    unsigned short bleStrokeCountData = 0;
-    short bleAvgStrokePowerData = 0;
 
     vector<unsigned long> sdDeltaTimes;
     vector<unsigned long> bleDeltaTimes;

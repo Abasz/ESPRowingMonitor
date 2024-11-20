@@ -19,6 +19,8 @@ PeripheralsController::PeripheralsController(IBluetoothController &_bluetoothCon
 
 void PeripheralsController::update(const unsigned char batteryLevel)
 {
+    bluetoothController.update();
+
     const auto now = millis();
     if constexpr (Configurations::ledPin != GPIO_NUM_NC)
     {
@@ -41,12 +43,6 @@ void PeripheralsController::update(const unsigned char batteryLevel)
     }
 
     const unsigned int bleUpdateInterval = 1'000;
-    if (now - lastMetricsBroadcastTime > bleUpdateInterval)
-    {
-        bluetoothController.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
-        lastMetricsBroadcastTime = now;
-    }
-
     if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
     {
         if (now - lastDeltaTimesBroadcastTime > bleUpdateInterval)
@@ -151,22 +147,7 @@ void PeripheralsController::flushBleDeltaTimes(const unsigned short mtu = 512U)
 
 void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &data)
 {
-    const auto secInMicroSec = 1e6L;
-    bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2'048 : 1'024)) % USHRT_MAX;
-    bleRevCountData = lround(data.distance);
-    bleStrokeTimeData = lroundl((data.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
-    bleStrokeCountData = data.strokeCount;
-    bleAvgStrokePowerData = static_cast<short>(lround(data.avgStrokePower));
-
-    if constexpr (Configurations::hasExtendedBleMetrics)
-    {
-        bluetoothController.notifyHandleForces(data.driveHandleForces);
-        bluetoothController.notifyExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
-    }
-
-    bluetoothController.notifyBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
-
-    lastMetricsBroadcastTime = millis();
+    bluetoothController.notifyNewMetrics(data);
 
     if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
     {

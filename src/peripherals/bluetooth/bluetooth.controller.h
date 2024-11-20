@@ -5,6 +5,7 @@
 
 #include "NimBLEDevice.h"
 
+#include "../../rower/stroke.model.h"
 #include "../../utils/EEPROM/EEPROM.service.interface.h"
 #include "../../utils/enums.h"
 #include "../../utils/ota-updater/ota-updater.service.interface.h"
@@ -34,6 +35,14 @@ class BluetoothController final : public IBluetoothController
 
     ServerCallbacks serverCallbacks;
 
+    unsigned int lastMetricsBroadcastTime = 0UL;
+
+    unsigned short bleRevTimeData = 0;
+    unsigned int bleRevCountData = 0;
+    unsigned short bleStrokeTimeData = 0;
+    unsigned short bleStrokeCountData = 0;
+    short bleAvgStrokePowerData = 0;
+
     void setupBleDevice();
     void setupServices();
     void setupAdvertisement() const;
@@ -41,15 +50,15 @@ class BluetoothController final : public IBluetoothController
 public:
     explicit BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService, IExtendedMetricBleService &_extendedMetricsBleService);
 
+    void update() override;
+
     void setup() override;
     void startBLEServer() override;
     void stopServer() override;
 
     void notifyBattery(unsigned char batteryLevel) const override;
-    void notifyBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) override;
-    void notifyExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) override;
-    void notifyHandleForces(const std::vector<float> &handleForces) override;
     void notifyDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;
+    void notifyNewMetrics(const RowingDataModels::RowingMetrics &data) override;
 
     unsigned short calculateDeltaTimesMtu() const override;
     bool isAnyDeviceConnected() override;
