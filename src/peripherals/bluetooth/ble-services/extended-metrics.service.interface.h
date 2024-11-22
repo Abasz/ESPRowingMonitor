@@ -4,6 +4,8 @@
 
 #include "NimBLEDevice.h"
 
+#include "../../../utils/configuration.h"
+
 using std::vector;
 
 class IExtendedMetricBleService
@@ -23,7 +25,7 @@ public:
 
     virtual void broadcastHandleForces(const std::vector<float> &handleForces) = 0;
     virtual void broadcastDeltaTimes(const std::vector<unsigned long> &deltaTimes) = 0;
-    virtual void broadcastExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) = 0;
+    virtual void broadcastExtendedMetrics(Configurations::precision avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, Configurations::precision dragCoefficient) = 0;
 
     virtual unsigned char removeDeltaTimesClient(unsigned char clientId) = 0;
     virtual unsigned char removeHandleForcesClient(unsigned char clientId) = 0;

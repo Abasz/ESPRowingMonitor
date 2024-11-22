@@ -4,6 +4,7 @@
 
 #include "../../../utils/EEPROM/EEPROM.service.interface.h"
 #include "../../../utils/enums.h"
+#include "../ble-metrics.model.h"
 #include "../bluetooth.controller.interface.h"
 #include "../callbacks/control-point.callbacks.h"
 #include "./base-metrics.service.interface.h"
@@ -16,11 +17,7 @@ class BaseMetricsBleService final : public IBaseMetricsBleService
     {
         NimBLECharacteristic *characteristic = nullptr;
 
-        unsigned short revTime = 0;
-        unsigned int revCount = 0;
-        unsigned short strokeTime = 0;
-        unsigned short strokeCount = 0;
-        short avgStrokePower = 0;
+        BleMetricsModel::BleMetricsData data = {};
     } parameters;
 
     NimBLEService *setupCscServices(NimBLEServer *server);
@@ -35,7 +32,7 @@ public:
 
     NimBLEService *setup(NimBLEServer *server, BleServiceFlag bleServiceFlag) override;
 
-    void broadcastBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) override;
+    void broadcastBaseMetrics(const BleMetricsModel::BleMetricsData &data) override;
 
     bool isSubscribed() override;
 };

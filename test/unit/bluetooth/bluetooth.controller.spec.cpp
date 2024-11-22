@@ -5,6 +5,7 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../../../src/peripherals/bluetooth/ble-metrics.model.h"
 #include "../../../src/peripherals/bluetooth/ble-services/base-metrics.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/battery.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/device-info.service.interface.h"
@@ -95,22 +96,29 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
         SECTION("when there are subscribers and when last notification was send more than 1 seconds ago should notify with last available base metric")
         {
-            const auto bleFlag = BleServiceFlag::CpsService;
+            const BleMetricsModel::BleMetricsData expectedBleData{
+                .revTime = expectedData.lastRevTime,
+                .distance = expectedData.distance,
+                .strokeTime = expectedData.lastStrokeTime,
+                .strokeCount = expectedData.strokeCount,
+                .avgStrokePower = expectedData.avgStrokePower,
+            };
 
-            const auto secInMicroSec = 1e6L;
-            const unsigned short bleRevTimeData = lroundl((expectedData.lastRevTime / secInMicroSec) * (bleFlag == BleServiceFlag::CpsService ? 2'048 : 1'024)) % USHRT_MAX;
-            const unsigned int bleRevCountData = lround(expectedData.distance);
-            const unsigned short bleStrokeTimeData = lroundl((expectedData.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
-            const unsigned short bleStrokeCountData = expectedData.strokeCount;
-            const short bleAvgStrokePowerData = static_cast<short>(lround(expectedData.avgStrokePower));
-
-            When(Method(mockArduino, millis)).Return(1'001);
+            When(Method(mockArduino, millis))
+                .Return(1'001);
             When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
             Fake(Method(mockBaseMetricsBleService, broadcastBaseMetrics));
 
             bluetoothController.update();
 
-            Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(Eq(bleRevTimeData), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
+            Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics)
+                       .Matching([&expectedBleData](const BleMetricsModel::BleMetricsData &data)
+                                 { return data.revTime == expectedBleData.revTime &&
+                                          data.distance == expectedBleData.distance &&
+                                          data.strokeTime == expectedBleData.strokeTime &&
+                                          data.strokeCount == expectedBleData.strokeCount &&
+                                          data.avgStrokePower == expectedBleData.avgStrokePower; }))
+                .Once();
         }
 
         SECTION("not notify base metric when last notification was send less than 1 seconds ago")

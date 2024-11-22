@@ -9,6 +9,7 @@
 #include "../../include/Arduino.h"
 #include "../../include/NimBLEDevice.h"
 
+#include "../../../../src/peripherals/bluetooth/ble-metrics.model.h"
 #include "../../../../src/peripherals/bluetooth/ble-services/base-metrics.service.h"
 #include "../../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -119,7 +120,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                 Fake(Method(mockCpsCharacteristic, notify));
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CpsService);
 
-                baseMetricsBleService.broadcastBaseMetrics(1, 1, 1, 1, 1);
+                baseMetricsBleService.broadcastBaseMetrics({1, 1, 1, 1, 1});
 
                 Verify(OverloadedMethod(mockCpsCharacteristic, setValue, void(const std::array<unsigned char, 14U>))).Once();
             }
@@ -214,7 +215,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                 Fake(Method(mockCscCharacteristic, notify));
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CscService);
 
-                baseMetricsBleService.broadcastBaseMetrics(1, 1, 1, 1, 1);
+                baseMetricsBleService.broadcastBaseMetrics({1, 1, 1, 1, 1});
 
                 Verify(OverloadedMethod(mockCscCharacteristic, setValue, void(const std::array<unsigned char, 11U>))).Once();
             }
@@ -257,11 +258,14 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
     SECTION("broadcastBaseMetrics method should")
     {
-        const unsigned short revTime = 31'000U;
-        const unsigned int revCount = 360'000U;
-        const unsigned short strokeTime = 30'100U;
-        const unsigned short strokeCount = 2'000U;
-        const short avgStrokePower = 300;
+        const auto secInMicroSec = 1e6L;
+        BleMetricsModel::BleMetricsData metrics{
+            .revTime = 13'110'000ULL,
+            .distance = 2120.4325233,
+            .strokeTime = 13'310'000ULL,
+            .strokeCount = 2'001U,
+            .avgStrokePower = 301.1111,
+        };
         const auto expectedStackSize = 2'048U;
 
         BaseMetricsBleService baseMetricsBleService(mockMockSettingsBleService.get(), mockEEPROMService.get());
@@ -277,37 +281,42 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
         {
             baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CscService);
 
-            baseMetricsBleService.broadcastBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+            baseMetricsBleService.broadcastBaseMetrics(metrics);
 
             Verify(Method(mockArduino, xTaskCreatePinnedToCore).Using(Ne(nullptr), StrEq("notifyClients"), Eq(expectedStackSize), Ne(nullptr), Eq(1U), Any(), Eq(0))).Once();
         }
 
         SECTION("notify PSC with the correct binary data")
         {
+            const auto expectedRevTime = static_cast<unsigned short>(lroundl((metrics.revTime / secInMicroSec) * 2'048) % USHRT_MAX);
+            const auto expectedDistance = static_cast<unsigned int>(lround(metrics.distance));
+            const auto expectedStrokeTime = static_cast<unsigned short>(lroundl((metrics.strokeTime / secInMicroSec) * 1'024) % USHRT_MAX);
+            const auto expectedAvgStrokePower = static_cast<short>(lround(metrics.avgStrokePower));
+
             const auto length = 14U;
             std::array<unsigned char, length> expectedData = {
                 static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
                 static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
 
-                static_cast<unsigned char>(avgStrokePower),
-                static_cast<unsigned char>(avgStrokePower >> 8),
+                static_cast<unsigned char>(expectedAvgStrokePower),
+                static_cast<unsigned char>(expectedAvgStrokePower >> 8),
 
-                static_cast<unsigned char>(revCount),
-                static_cast<unsigned char>(revCount >> 8),
-                static_cast<unsigned char>(revCount >> 16),
-                static_cast<unsigned char>(revCount >> 24),
-                static_cast<unsigned char>(revTime),
-                static_cast<unsigned char>(revTime >> 8),
+                static_cast<unsigned char>(expectedDistance),
+                static_cast<unsigned char>(expectedDistance >> 8),
+                static_cast<unsigned char>(expectedDistance >> 16),
+                static_cast<unsigned char>(expectedDistance >> 24),
+                static_cast<unsigned char>(expectedRevTime),
+                static_cast<unsigned char>(expectedRevTime >> 8),
 
-                static_cast<unsigned char>(strokeCount),
-                static_cast<unsigned char>(strokeCount >> 8),
-                static_cast<unsigned char>(strokeTime),
-                static_cast<unsigned char>(strokeTime >> 8),
+                static_cast<unsigned char>(metrics.strokeCount),
+                static_cast<unsigned char>(metrics.strokeCount >> 8),
+                static_cast<unsigned char>(expectedStrokeTime),
+                static_cast<unsigned char>(expectedStrokeTime >> 8),
             };
 
             baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CpsService);
 
-            baseMetricsBleService.broadcastBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+            baseMetricsBleService.broadcastBaseMetrics(metrics);
 
             Verify(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, length>)).Using(Eq(expectedData))).Once();
             Verify(Method(mockBaseMetricsCharacteristic, notify)).Once();
@@ -315,26 +324,31 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
         SECTION("notify CSC with the correct binary data")
         {
+            const auto expectedRevTime = static_cast<unsigned short>(lroundl((metrics.revTime / secInMicroSec) * 1'024) % USHRT_MAX);
+            const auto expectedDistance = static_cast<unsigned int>(lround(metrics.distance));
+            const auto expectedStrokeTime = static_cast<unsigned short>(lroundl((metrics.strokeTime / secInMicroSec) * 1'024) % USHRT_MAX);
+
             const auto length = 11U;
             std::array<unsigned char, length> expectedData = {
                 CSCSensorBleFlags::cscMeasurementFeaturesFlag,
 
-                static_cast<unsigned char>(revCount),
-                static_cast<unsigned char>(revCount >> 8),
-                static_cast<unsigned char>(revCount >> 16),
-                static_cast<unsigned char>(revCount >> 24),
+                static_cast<unsigned char>(expectedDistance),
+                static_cast<unsigned char>(expectedDistance >> 8),
+                static_cast<unsigned char>(expectedDistance >> 16),
+                static_cast<unsigned char>(expectedDistance >> 24),
 
-                static_cast<unsigned char>(revTime),
-                static_cast<unsigned char>(revTime >> 8),
+                static_cast<unsigned char>(expectedRevTime),
+                static_cast<unsigned char>(expectedRevTime >> 8),
 
-                static_cast<unsigned char>(strokeCount),
-                static_cast<unsigned char>(strokeCount >> 8),
-                static_cast<unsigned char>(strokeTime),
-                static_cast<unsigned char>(strokeTime >> 8)};
+                static_cast<unsigned char>(metrics.strokeCount),
+                static_cast<unsigned char>(metrics.strokeCount >> 8),
+                static_cast<unsigned char>(expectedStrokeTime),
+                static_cast<unsigned char>(expectedStrokeTime >> 8),
+            };
 
             baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CscService);
 
-            baseMetricsBleService.broadcastBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+            baseMetricsBleService.broadcastBaseMetrics(metrics);
 
             Verify(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, length>)).Using(Eq(expectedData))).Once();
             Verify(Method(mockBaseMetricsCharacteristic, notify)).Once();
@@ -344,7 +358,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
         {
             baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CscService);
 
-            baseMetricsBleService.broadcastBaseMetrics(revTime, revCount, strokeTime, strokeCount, avgStrokePower);
+            baseMetricsBleService.broadcastBaseMetrics(metrics);
 
             Verify(Method(mockArduino, vTaskDelete).Using(nullptr)).Once();
         }

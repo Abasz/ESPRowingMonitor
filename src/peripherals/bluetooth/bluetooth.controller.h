@@ -10,6 +10,7 @@
 #include "../../utils/enums.h"
 #include "../../utils/ota-updater/ota-updater.service.interface.h"
 #include "../sd-card/sd-card.service.interface.h"
+#include "./ble-metrics.model.h"
 #include "./ble-services/base-metrics.service.interface.h"
 #include "./ble-services/battery.service.interface.h"
 #include "./ble-services/device-info.service.interface.h"
@@ -38,14 +39,10 @@ class BluetoothController final : public IBluetoothController
     unsigned int lastMetricsBroadcastTime = 0UL;
     unsigned int lastDeltaTimesBroadcastTime = 0UL;
 
-    unsigned short bleRevTimeData = 0;
-    unsigned int bleRevCountData = 0;
-    unsigned short bleStrokeTimeData = 0;
-    unsigned short bleStrokeCountData = 0;
-    short bleAvgStrokePowerData = 0;
+    BleMetricsModel::BleMetricsData bleData = {};
 
-    const unsigned char minimumMtu = 100;
-    
+    unsigned char minimumMtu = 100;
+
     vector<unsigned long> bleDeltaTimes;
 
     void setupBleDevice();

@@ -38,14 +38,14 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Mock<IExtendedMetricBleService> mockExtendedMetricsBleService;
 
     const RowingDataModels::RowingMetrics expectedData{
-        .distance = 100,
-        .lastRevTime = 2'000,
-        .lastStrokeTime = 1'600,
-        .strokeCount = 10,
-        .driveDuration = 1'001,
-        .recoveryDuration = 1'003,
-        .avgStrokePower = 70,
-        .dragCoefficient = 0.00001,
+        .distance = 101.121,
+        .lastRevTime = 2'000'000ULL,
+        .lastStrokeTime = 1'600'000ULL,
+        .strokeCount = 10U,
+        .driveDuration = 1'001'000U,
+        .recoveryDuration = 1'003'000U,
+        .avgStrokePower = 70.1212,
+        .dragCoefficient = 110 / 1e6,
         .driveHandleForces = {1.1, 2.2, 100.1},
     };
     const unsigned int bleUpdateInterval = 1'000 + 1;
@@ -125,38 +125,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
     SECTION("notifyNewMetrics method should")
     {
-        const short bleAvgStrokePowerData = static_cast<short>(lround(expectedData.avgStrokePower));
-
-        SECTION("convert metrics to BLE compliant format")
-        {
-            const auto secInMicroSec = 1e6L;
-            const unsigned int bleRevCountData = lround(expectedData.distance);
-            const unsigned short bleStrokeTimeData = lroundl((expectedData.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
-            const unsigned short bleStrokeCountData = expectedData.strokeCount;
-
-            SECTION("when bleServiceFlag is CSC")
-            {
-                const unsigned short bleRevTimeDataCsc = lroundl((expectedData.lastRevTime / secInMicroSec) * 1'024) % USHRT_MAX;
-
-                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
-
-                bluetoothController.notifyNewMetrics(expectedData);
-
-                Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(Eq(bleRevTimeDataCsc), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
-            }
-
-            SECTION("when bleServiceFlag is PSC")
-            {
-                const unsigned short bleRevTimeDataPcs = lroundl((expectedData.lastRevTime / secInMicroSec) * 2'048) % USHRT_MAX;
-
-                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
-
-                bluetoothController.notifyNewMetrics(expectedData);
-
-                Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(Eq(bleRevTimeDataPcs), Eq(bleRevCountData), Eq(bleStrokeTimeData), Eq(bleStrokeCountData), Eq(bleAvgStrokePowerData))).Once();
-            }
-        }
-
         SECTION("when extended metrics is")
         {
             SECTION("not subscribed should not broadcast")
@@ -173,7 +141,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
                 bluetoothController.notifyNewMetrics(expectedData);
 
-                Verify(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics).Using(Eq(bleAvgStrokePowerData), Eq(expectedData.recoveryDuration), Eq(expectedData.driveDuration), Eq(lround(expectedData.dragCoefficient * 1e6)))).Once();
+                Verify(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics).Using(Eq(expectedData.avgStrokePower), Eq(expectedData.recoveryDuration), Eq(expectedData.driveDuration), Eq(expectedData.dragCoefficient))).Once();
             }
         }
 
@@ -234,17 +202,25 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
             SECTION("subscribed should broadcast with the correct parameters")
             {
-                const auto secInMicroSec = 1e6L;
-                const unsigned int bleRevCountData = lround(expectedData.distance);
-                const unsigned short bleRevTimeDataPcs = lroundl((expectedData.lastRevTime / secInMicroSec) * 2'048) % USHRT_MAX;
-                const unsigned short bleStrokeTimeData = lroundl((expectedData.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
-                const unsigned short bleStrokeCountData = expectedData.strokeCount;
-
+                const BleMetricsModel::BleMetricsData expectedBleData{
+                    .revTime = expectedData.lastRevTime,
+                    .distance = expectedData.distance,
+                    .strokeTime = expectedData.lastStrokeTime,
+                    .strokeCount = expectedData.strokeCount,
+                    .avgStrokePower = expectedData.avgStrokePower,
+                };
                 When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
 
                 bluetoothController.notifyNewMetrics(expectedData);
 
-                Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics).Using(bleRevTimeDataPcs, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData)).Once();
+                Verify(Method(mockBaseMetricsBleService, broadcastBaseMetrics)
+                           .Matching([&expectedBleData](const BleMetricsModel::BleMetricsData &data)
+                                     { return data.revTime == expectedBleData.revTime &&
+                                              data.distance == expectedBleData.distance &&
+                                              data.strokeTime == expectedBleData.strokeTime &&
+                                              data.strokeCount == expectedBleData.strokeCount &&
+                                              data.avgStrokePower == expectedBleData.avgStrokePower; }))
+                    .Once();
             }
         }
 

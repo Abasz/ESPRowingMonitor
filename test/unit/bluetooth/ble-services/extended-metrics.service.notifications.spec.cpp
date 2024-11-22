@@ -39,10 +39,13 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
         const auto secInMicroSec = 1e6;
         const unsigned int recoveryDuration = 4'000'000;
         const unsigned int driveDuration = 3'000'000;
-        const unsigned char dragFactor = 110;
-        const short avgStrokePower = 300;
-        const unsigned short calculatedRecoveryDuration = lround(recoveryDuration / secInMicroSec * 4'096);
-        const unsigned short calculatedDriveDuration = lround(driveDuration / secInMicroSec * 4'096);
+        const Configurations::precision dragCoefficient = 110 / 1e6;
+        const Configurations::precision avgStrokePower = 301.123455;
+
+        const unsigned short expectedRecoveryDuration = lroundl(recoveryDuration / secInMicroSec * 4'096);
+        const unsigned short expectedDriveDuration = lroundl(driveDuration / secInMicroSec * 4'096);
+        const auto expectedAvgStrokePower = static_cast<short>(lround(avgStrokePower));
+        const auto expectedDragFactor = static_cast<unsigned char>(lround(dragCoefficient * 1e6));
         const auto expectedStackSize = 1'800U;
 
         Fake(OverloadedMethod(mockExtendedMetricsCharacteristic, setValue, void(const std::array<unsigned char, 7U>)));
@@ -55,23 +58,20 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
         SECTION("convert recovery and drive duration to a 16bit unsigned short in seconds with a resolution of 4096")
         {
-            const unsigned short expectedRecoveryDuration = lroundl(recoveryDuration / secInMicroSec * 4'096);
-            const unsigned short expectedDriveDuration = lroundl(driveDuration / secInMicroSec * 4'096);
-
             const auto length = 7U;
             std::array<unsigned char, length> expectedData = {
-                static_cast<unsigned char>(avgStrokePower),
-                static_cast<unsigned char>(avgStrokePower >> 8),
+                static_cast<unsigned char>(expectedAvgStrokePower),
+                static_cast<unsigned char>(expectedAvgStrokePower >> 8),
 
                 static_cast<unsigned char>(expectedDriveDuration),
                 static_cast<unsigned char>(expectedDriveDuration >> 8),
                 static_cast<unsigned char>(expectedRecoveryDuration),
                 static_cast<unsigned char>(expectedRecoveryDuration >> 8),
 
-                dragFactor,
+                expectedDragFactor,
             };
 
-            extendedMetricBleService.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
+            extendedMetricBleService.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragCoefficient);
 
             Verify(OverloadedMethod(mockExtendedMetricsCharacteristic, setValue, void(const std::array<unsigned char, 7U>)).Using(Eq(expectedData))).Once();
         }
@@ -80,18 +80,18 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
         {
             const auto length = 7U;
             std::array<unsigned char, length> expectedData = {
-                static_cast<unsigned char>(avgStrokePower),
-                static_cast<unsigned char>(avgStrokePower >> 8),
+                static_cast<unsigned char>(expectedAvgStrokePower),
+                static_cast<unsigned char>(expectedAvgStrokePower >> 8),
 
-                static_cast<unsigned char>(calculatedDriveDuration),
-                static_cast<unsigned char>(calculatedDriveDuration >> 8),
-                static_cast<unsigned char>(calculatedRecoveryDuration),
-                static_cast<unsigned char>(calculatedRecoveryDuration >> 8),
+                static_cast<unsigned char>(expectedDriveDuration),
+                static_cast<unsigned char>(expectedDriveDuration >> 8),
+                static_cast<unsigned char>(expectedRecoveryDuration),
+                static_cast<unsigned char>(expectedRecoveryDuration >> 8),
 
-                dragFactor,
+                expectedDragFactor,
             };
 
-            extendedMetricBleService.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
+            extendedMetricBleService.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragCoefficient);
 
             Verify(
                 Method(mockArduino, xTaskCreatePinnedToCore)
@@ -107,7 +107,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
         {
             mockArduino.ClearInvocationHistory();
 
-            extendedMetricBleService.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
+            extendedMetricBleService.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragCoefficient);
 
             Verify(Method(mockArduino, vTaskDelete).Using(nullptr)).Once();
         }
@@ -119,7 +119,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
             ExtendedMetricBleService extendedMetricBleServiceNoSetup;
             Fake(Method(mockGlobals, abort));
 
-            extendedMetricBleServiceNoSetup.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragFactor);
+            extendedMetricBleServiceNoSetup.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragCoefficient);
 
             Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }

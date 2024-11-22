@@ -39,13 +39,9 @@ NimBLEService *BaseMetricsBleService::setup(NimBLEServer *server, const BleServi
     return setupPscServices(server);
 }
 
-void BaseMetricsBleService::broadcastBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower)
+void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetricsData &data)
 {
-    parameters.revTime = revTime;
-    parameters.revCount = revCount;
-    parameters.strokeTime = strokeTime;
-    parameters.strokeCount = strokeCount;
-    parameters.avgStrokePower = avgStrokePower;
+    parameters.data = data;
 
     const auto coreStackSize = 2'048U;
 
@@ -79,22 +75,29 @@ void BaseMetricsBleService::cscTask(void *parameters)
 {
     {
         const auto *const params = static_cast<const BaseMetricsBleService::BaseMetricsParams *>(parameters);
+
+        const auto secInMicroSec = 1e6L;
+        const auto revTime = static_cast<unsigned short>(lroundl((params->data.revTime / secInMicroSec) * 1'024) % USHRT_MAX);
+        const auto revCount = static_cast<unsigned int>(lround(params->data.distance));
+        const auto strokeTime = static_cast<unsigned short>(lroundl((params->data.strokeTime / secInMicroSec) * 1'024) % USHRT_MAX);
+
         const auto length = 11U;
         array<unsigned char, length> temp = {
             CSCSensorBleFlags::cscMeasurementFeaturesFlag,
 
-            static_cast<unsigned char>(params->revCount),
-            static_cast<unsigned char>(params->revCount >> 8),
-            static_cast<unsigned char>(params->revCount >> 16),
-            static_cast<unsigned char>(params->revCount >> 24),
+            static_cast<unsigned char>(revCount),
+            static_cast<unsigned char>(revCount >> 8),
+            static_cast<unsigned char>(revCount >> 16),
+            static_cast<unsigned char>(revCount >> 24),
 
-            static_cast<unsigned char>(params->revTime),
-            static_cast<unsigned char>(params->revTime >> 8),
+            static_cast<unsigned char>(revTime),
+            static_cast<unsigned char>(revTime >> 8),
 
-            static_cast<unsigned char>(params->strokeCount),
-            static_cast<unsigned char>(params->strokeCount >> 8),
-            static_cast<unsigned char>(params->strokeTime),
-            static_cast<unsigned char>(params->strokeTime >> 8)};
+            static_cast<unsigned char>(params->data.strokeCount),
+            static_cast<unsigned char>(params->data.strokeCount >> 8),
+            static_cast<unsigned char>(strokeTime),
+            static_cast<unsigned char>(strokeTime >> 8),
+        };
         params->characteristic->setValue(temp);
         params->characteristic->notify();
     }
@@ -106,25 +109,31 @@ void BaseMetricsBleService::pscTask(void *parameters)
     {
         const auto *const params = static_cast<const BaseMetricsBleService::BaseMetricsParams *>(parameters);
 
+        const auto secInMicroSec = 1e6L;
+        const auto revTime = static_cast<unsigned short>(lroundl((params->data.revTime / secInMicroSec) * 2'048) % USHRT_MAX);
+        const auto revCount = static_cast<unsigned int>(lround(params->data.distance));
+        const auto strokeTime = static_cast<unsigned short>(lroundl((params->data.strokeTime / secInMicroSec) * 1'024) % USHRT_MAX);
+        const auto avgStrokePower = static_cast<short>(lround(params->data.avgStrokePower));
+
         const auto length = 14U;
         array<unsigned char, length> temp = {
             static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag),
             static_cast<unsigned char>(PSCSensorBleFlags::pscMeasurementFeaturesFlag >> 8),
 
-            static_cast<unsigned char>(params->avgStrokePower),
-            static_cast<unsigned char>(params->avgStrokePower >> 8),
+            static_cast<unsigned char>(avgStrokePower),
+            static_cast<unsigned char>(avgStrokePower >> 8),
 
-            static_cast<unsigned char>(params->revCount),
-            static_cast<unsigned char>(params->revCount >> 8),
-            static_cast<unsigned char>(params->revCount >> 16),
-            static_cast<unsigned char>(params->revCount >> 24),
-            static_cast<unsigned char>(params->revTime),
-            static_cast<unsigned char>(params->revTime >> 8),
+            static_cast<unsigned char>(revCount),
+            static_cast<unsigned char>(revCount >> 8),
+            static_cast<unsigned char>(revCount >> 16),
+            static_cast<unsigned char>(revCount >> 24),
+            static_cast<unsigned char>(revTime),
+            static_cast<unsigned char>(revTime >> 8),
 
-            static_cast<unsigned char>(params->strokeCount),
-            static_cast<unsigned char>(params->strokeCount >> 8),
-            static_cast<unsigned char>(params->strokeTime),
-            static_cast<unsigned char>(params->strokeTime >> 8),
+            static_cast<unsigned char>(params->data.strokeCount),
+            static_cast<unsigned char>(params->data.strokeCount >> 8),
+            static_cast<unsigned char>(strokeTime),
+            static_cast<unsigned char>(strokeTime >> 8),
         };
 
         params->characteristic->setValue(temp);

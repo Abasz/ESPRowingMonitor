@@ -65,7 +65,7 @@ void ExtendedMetricBleService::broadcastDeltaTimes(const vector<unsigned long> &
         0);
 }
 
-void ExtendedMetricBleService::broadcastExtendedMetrics(const short avgStrokePower, const unsigned int recoveryDuration, const unsigned int driveDuration, const unsigned char dragFactor)
+void ExtendedMetricBleService::broadcastExtendedMetrics(const Configurations::precision avgStrokePower, const unsigned int recoveryDuration, const unsigned int driveDuration, const Configurations::precision dragCoefficient)
 {
     if (extendedMetricsParams.characteristic == nullptr)
     {
@@ -76,11 +76,10 @@ void ExtendedMetricBleService::broadcastExtendedMetrics(const short avgStrokePow
         return;
     }
 
-    const auto secInMicroSec = 1e6;
     extendedMetricsParams.avgStrokePower = avgStrokePower;
-    extendedMetricsParams.recoveryDuration = lround(recoveryDuration / secInMicroSec * 4'096);
-    extendedMetricsParams.driveDuration = lround(driveDuration / secInMicroSec * 4'096);
-    extendedMetricsParams.dragFactor = dragFactor;
+    extendedMetricsParams.recoveryDuration = recoveryDuration;
+    extendedMetricsParams.driveDuration = driveDuration;
+    extendedMetricsParams.dragCoefficient = dragCoefficient;
 
     const auto coreStackSize = 1'800U;
 
@@ -99,17 +98,23 @@ void ExtendedMetricBleService::ExtendedMetricsParams::task(void *parameters)
     {
         const auto *const params = static_cast<const ExtendedMetricBleService::ExtendedMetricsParams *>(parameters);
 
+        const auto secInMicroSec = 1e6;
+        const auto avgStrokePower = static_cast<short>(lround(params->avgStrokePower));
+        const auto recoveryDuration = static_cast<unsigned short>(lround(params->recoveryDuration / secInMicroSec * 4'096));
+        const auto driveDuration = static_cast<unsigned short>(lround(params->driveDuration / secInMicroSec * 4'096));
+        const auto dragFactor = static_cast<unsigned char>(lround(params->dragCoefficient * 1e6));
+
         const auto length = 7U;
         std::array<unsigned char, length> temp = {
-            static_cast<unsigned char>(params->avgStrokePower),
-            static_cast<unsigned char>(params->avgStrokePower >> 8),
+            static_cast<unsigned char>(avgStrokePower),
+            static_cast<unsigned char>(avgStrokePower >> 8),
 
-            static_cast<unsigned char>(params->driveDuration),
-            static_cast<unsigned char>(params->driveDuration >> 8),
-            static_cast<unsigned char>(params->recoveryDuration),
-            static_cast<unsigned char>(params->recoveryDuration >> 8),
+            static_cast<unsigned char>(driveDuration),
+            static_cast<unsigned char>(driveDuration >> 8),
+            static_cast<unsigned char>(recoveryDuration),
+            static_cast<unsigned char>(recoveryDuration >> 8),
 
-            params->dragFactor,
+            dragFactor,
         };
 
         params->characteristic->setValue(temp);

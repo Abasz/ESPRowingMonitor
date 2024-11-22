@@ -4,6 +4,7 @@
 
 #include "../../../utils/EEPROM/EEPROM.service.interface.h"
 #include "../../../utils/enums.h"
+#include "../ble-metrics.model.h"
 #include "../bluetooth.controller.interface.h"
 #include "../callbacks/control-point.callbacks.h"
 
@@ -15,7 +16,7 @@ protected:
 public:
     virtual NimBLEService *setup(NimBLEServer *server, BleServiceFlag bleServiceFlag) = 0;
 
-    virtual void broadcastBaseMetrics(unsigned short revTime, unsigned int revCount, unsigned short strokeTime, unsigned short strokeCount, short avgStrokePower) = 0;
+    virtual void broadcastBaseMetrics(const BleMetricsModel::BleMetricsData &data) = 0;
 
     virtual bool isSubscribed() = 0;
 };

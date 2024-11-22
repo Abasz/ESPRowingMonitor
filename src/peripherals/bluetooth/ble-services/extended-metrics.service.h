@@ -16,10 +16,11 @@ class ExtendedMetricBleService final : public IExtendedMetricBleService
     struct ExtendedMetricsParams
     {
         NimBLECharacteristic *characteristic = nullptr;
-        short avgStrokePower = 0;
-        unsigned short recoveryDuration = 0;
-        unsigned short driveDuration = 0;
-        unsigned char dragFactor = 0;
+
+        Configurations::precision avgStrokePower = 0;
+        unsigned int recoveryDuration = 0;
+        unsigned int driveDuration = 0;
+        Configurations::precision dragCoefficient = 0;
 
         static void task(void *parameters);
 
@@ -60,7 +61,7 @@ public:
 
     void broadcastHandleForces(const std::vector<float> &handleForces) override;
     void broadcastDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;
-    void broadcastExtendedMetrics(short avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, unsigned char dragFactor) override;
+    void broadcastExtendedMetrics(Configurations::precision avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, Configurations::precision dragCoefficient) override;
 
     unsigned char removeDeltaTimesClient(unsigned char clientId) override;
     unsigned char removeHandleForcesClient(unsigned char clientId) override;

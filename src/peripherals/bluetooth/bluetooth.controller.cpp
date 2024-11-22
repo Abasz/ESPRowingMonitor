@@ -23,7 +23,7 @@ void BluetoothController::update()
     const unsigned int bleUpdateInterval = 1'000;
     if (now - lastMetricsBroadcastTime > bleUpdateInterval && baseMetricsBleService.isSubscribed())
     {
-        baseMetricsBleService.broadcastBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+        baseMetricsBleService.broadcastBaseMetrics(bleData);
         lastMetricsBroadcastTime = now;
     }
 
@@ -157,12 +157,13 @@ void BluetoothController::notifyNewDeltaTime(unsigned long deltaTime)
 
 void BluetoothController::notifyNewMetrics(const RowingDataModels::RowingMetrics &data)
 {
-    const auto secInMicroSec = 1e6L;
-    bleRevTimeData = lroundl((data.lastRevTime / secInMicroSec) * (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService ? 2'048 : 1'024)) % USHRT_MAX;
-    bleRevCountData = lround(data.distance);
-    bleStrokeTimeData = lroundl((data.lastStrokeTime / secInMicroSec) * 1'024) % USHRT_MAX;
-    bleStrokeCountData = data.strokeCount;
-    bleAvgStrokePowerData = static_cast<short>(lround(data.avgStrokePower));
+    bleData = {
+        .revTime = data.lastRevTime,
+        .distance = data.distance,
+        .strokeTime = data.lastStrokeTime,
+        .strokeCount = data.strokeCount,
+        .avgStrokePower = data.avgStrokePower,
+    };
 
     if constexpr (Configurations::hasExtendedBleMetrics)
     {
@@ -174,13 +175,13 @@ void BluetoothController::notifyNewMetrics(const RowingDataModels::RowingMetrics
 
         if (extendedMetricsBleService.isExtendedMetricsSubscribed())
         {
-            extendedMetricsBleService.broadcastExtendedMetrics(bleAvgStrokePowerData, data.recoveryDuration, data.driveDuration, lround(data.dragCoefficient * 1e6));
+            extendedMetricsBleService.broadcastExtendedMetrics(data.avgStrokePower, data.recoveryDuration, data.driveDuration, data.dragCoefficient);
         }
     }
 
     if (baseMetricsBleService.isSubscribed())
     {
-        baseMetricsBleService.broadcastBaseMetrics(bleRevTimeData, bleRevCountData, bleStrokeTimeData, bleStrokeCountData, bleAvgStrokePowerData);
+        baseMetricsBleService.broadcastBaseMetrics(bleData);
     }
 
     lastMetricsBroadcastTime = millis();
