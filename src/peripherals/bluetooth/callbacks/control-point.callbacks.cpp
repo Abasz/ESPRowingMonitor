@@ -57,7 +57,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic)
     {
         Log.infoln("Change BLE Service");
 
-        if (message.size() == 2 && message[1] >= 0 && message[1] <= 1)
+        if (message.size() == 2 && message[1] >= 0 && message[1] <= 2)
         {
             processBleServiceChange(message, pCharacteristic);
 
@@ -107,9 +107,9 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic)
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);
         array<unsigned char, 3U> response = {
-            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+            eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? static_cast<unsigned char>(SettingsOpCodes::ResponseCodeFtms) : static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(ResponseOpCodes::UnsupportedOpCode)};
+            static_cast<unsigned char>(eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode)};
         pCharacteristic->setValue(response);
     }
     break;
@@ -173,7 +173,23 @@ ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttVa
 
 void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
 {
-    Log.infoln("New BLE Service: %s", message[1] == static_cast<unsigned char>(BleServiceFlag::CscService) ? "CSC" : "CPS");
+    std::string flagString;
+    switch (static_cast<BleServiceFlag>(message[1]))
+    {
+    case BleServiceFlag::CpsService:
+        flagString = "CPS";
+        break;
+
+    case BleServiceFlag::CscService:
+        flagString = "CSC";
+        break;
+
+    case BleServiceFlag::FtmsService:
+        flagString = "FTMS";
+        break;
+    }
+
+    Log.infoln("New BLE Service: %s", flagString.c_str());
     eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
     array<unsigned char, 3U> temp = {
         static_cast<unsigned char>(SettingsOpCodes::ResponseCode),

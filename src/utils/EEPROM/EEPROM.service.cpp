@@ -104,9 +104,9 @@ void EEPROMService::setLogToSdCard(const bool shouldLogToSdCard)
 void EEPROMService::setBleServiceFlag(const BleServiceFlag newServiceFlag)
 {
     const auto intBleServiceFlag = static_cast<unsigned char>(newServiceFlag);
-    if (intBleServiceFlag < 0 || intBleServiceFlag > 1)
+    if (intBleServiceFlag < 0 || intBleServiceFlag > 2)
     {
-        Log.errorln("Invalid BLE Service setting, should be between 0 or 1");
+        Log.errorln("Invalid BLE Service setting, should be between 0 or 2");
         return;
     }
 

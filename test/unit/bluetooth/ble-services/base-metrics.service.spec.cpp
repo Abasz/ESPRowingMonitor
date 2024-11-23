@@ -260,12 +260,18 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
     {
         const auto secInMicroSec = 1e6L;
         BleMetricsModel::BleMetricsData metrics{
-            .revTime = 13'110'000ULL,
-            .distance = 2120.4325233,
-            .strokeTime = 13'310'000ULL,
-            .strokeCount = 2'001U,
-            .avgStrokePower = 301.1111,
+            .revTime = 40'000'000ULL,
+            .previousRevTime = 30'000'000ULL,
+            .distance = 400.01223,
+            .previousDistance = 200.123123,
+            .strokeTime = 40'000'000ULL,
+            .previousStrokeTime = 30'000'000ULL,
+            .strokeCount = 4,
+            .previousStrokeCount = 2,
+            .avgStrokePower = 100.11212,
+            .dragCoefficient = 110 / 1e6,
         };
+
         const auto expectedStackSize = 2'048U;
 
         BaseMetricsBleService baseMetricsBleService(mockMockSettingsBleService.get(), mockEEPROMService.get());
@@ -352,6 +358,99 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
             Verify(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, length>)).Using(Eq(expectedData))).Once();
             Verify(Method(mockBaseMetricsCharacteristic, notify)).Once();
+        }
+
+        SECTION("notify FTMS with the correct binary data")
+        {
+            SECTION("when stroke rate is below UCHAR_MAX")
+            {
+                const auto distance = static_cast<unsigned int>(lround(metrics.distance / 100U));
+                const auto avgStrokePower = static_cast<short>(lround(metrics.avgStrokePower));
+                const auto dragFactor = static_cast<unsigned char>(lround(metrics.dragCoefficient * 1e6));
+                const unsigned char strokeRate = static_cast<unsigned char>(lroundl((metrics.strokeCount - metrics.previousStrokeCount) / ((metrics.strokeTime - metrics.previousStrokeTime) / secInMicroSec / 60U)));
+                const auto pace500m = static_cast<unsigned short>(lroundl(500U / (((metrics.distance - metrics.previousDistance) / 100U) / ((metrics.revTime - metrics.previousRevTime) / secInMicroSec))));
+
+                const auto length = 14U;
+                std::array<unsigned char, length> expectedData = {
+                    static_cast<unsigned char>(FTMSSensorBleFlags::ftmsMeasurementFeaturesFlag),
+                    static_cast<unsigned char>(FTMSSensorBleFlags::ftmsMeasurementFeaturesFlag >> 8),
+
+                    // Stroke rate is with a resolution of 0.5. While this works for a rower it will not work for a kayak erg (as kayak stroke rate can be up to 160spm)
+                    static_cast<unsigned char>(strokeRate * 2),
+                    static_cast<unsigned char>(metrics.strokeCount),
+                    static_cast<unsigned char>(metrics.strokeCount >> 8),
+
+                    static_cast<unsigned char>(distance),
+                    static_cast<unsigned char>(distance >> 8),
+                    static_cast<unsigned char>(distance >> 16),
+
+                    static_cast<unsigned char>(pace500m),
+                    static_cast<unsigned char>(pace500m >> 8),
+
+                    static_cast<unsigned char>(avgStrokePower),
+                    static_cast<unsigned char>(avgStrokePower >> 8),
+
+                    static_cast<unsigned char>(dragFactor),
+                    static_cast<unsigned char>(dragFactor >> 8),
+                };
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                baseMetricsBleService.broadcastBaseMetrics(metrics);
+
+                Verify(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, length>)).Using(Eq(expectedData))).Once();
+                Verify(Method(mockBaseMetricsCharacteristic, notify)).Once();
+            }
+
+            SECTION("when stroke rate with a resolution of 0.5 is above UCHAR_MAX")
+            {
+                BleMetricsModel::BleMetricsData metricsMaxStroke{
+                    .revTime = 40'000'000ULL,
+                    .previousRevTime = 30'000'000ULL,
+                    .distance = 400.01223,
+                    .previousDistance = 200.123123,
+                    .strokeTime = 40'000'000ULL,
+                    .previousStrokeTime = 30'000'000ULL,
+                    .strokeCount = 24,
+                    .previousStrokeCount = 2,
+                    .avgStrokePower = 100.11212,
+                    .dragCoefficient = 110 / 1e6,
+                };
+
+                const auto distance = static_cast<unsigned int>(lround(metricsMaxStroke.distance / 100U));
+                const auto avgStrokePower = static_cast<short>(lround(metricsMaxStroke.avgStrokePower));
+                const auto dragFactor = static_cast<unsigned char>(lround(metricsMaxStroke.dragCoefficient * 1e6));
+                const auto pace500m = static_cast<unsigned short>(lroundl(500U / (((metricsMaxStroke.distance - metricsMaxStroke.previousDistance) / 100U) / ((metricsMaxStroke.revTime - metricsMaxStroke.previousRevTime) / secInMicroSec))));
+
+                const auto length = 14U;
+                std::array<unsigned char, length> expectedData = {
+                    static_cast<unsigned char>(FTMSSensorBleFlags::ftmsMeasurementFeaturesFlag),
+                    static_cast<unsigned char>(FTMSSensorBleFlags::ftmsMeasurementFeaturesFlag >> 8),
+
+                    // Stroke rate is with a resolution of 0.5. While this works for a rower it will not work for a kayak erg (as kayak stroke rate can be up to 160spm)
+                    static_cast<unsigned char>(UCHAR_MAX),
+                    static_cast<unsigned char>(metricsMaxStroke.strokeCount),
+                    static_cast<unsigned char>(metricsMaxStroke.strokeCount >> 8),
+
+                    static_cast<unsigned char>(distance),
+                    static_cast<unsigned char>(distance >> 8),
+                    static_cast<unsigned char>(distance >> 16),
+
+                    static_cast<unsigned char>(pace500m),
+                    static_cast<unsigned char>(pace500m >> 8),
+
+                    static_cast<unsigned char>(avgStrokePower),
+                    static_cast<unsigned char>(avgStrokePower >> 8),
+
+                    static_cast<unsigned char>(dragFactor),
+                    static_cast<unsigned char>(dragFactor >> 8),
+                };
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                baseMetricsBleService.broadcastBaseMetrics(metricsMaxStroke);
+
+                Verify(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, length>)).Using(Eq(expectedData))).Once();
+                Verify(Method(mockBaseMetricsCharacteristic, notify)).Once();
+            }
         }
 
         SECTION("delete task")

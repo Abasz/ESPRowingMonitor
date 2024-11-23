@@ -79,6 +79,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     Fake(Method(mockNimBLEAdvertising, stop));
     Fake(Method(mockNimBLEAdvertising, setAppearance));
     Fake(Method(mockNimBLEAdvertising, addServiceUUID));
+    Fake(Method(mockNimBLEAdvertising, setServiceData));
 
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(serviceFlag);
 
@@ -228,6 +229,8 @@ TEST_CASE("BluetoothController", "[peripheral]")
             cpsDeviceName.append(" (CPS)");
             auto cscDeviceName = Configurations::deviceName;
             cscDeviceName.append(" (CSC)");
+            auto ftmsDeviceName = Configurations::deviceName;
+            ftmsDeviceName.append(" (FTMS)");
 
             When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
 
@@ -240,6 +243,12 @@ TEST_CASE("BluetoothController", "[peripheral]")
             bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, init).Using(cscDeviceName)).Once();
+
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::FtmsService);
+
+            bluetoothController.setup();
+
+            Verify(Method(mockNimBLEServer, init).Using(ftmsDeviceName)).Once();
         }
 
         SECTION("should set BLE power")
@@ -358,6 +367,43 @@ TEST_CASE("BluetoothController", "[peripheral]")
             bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, start)).Once();
+        }
+
+        SECTION("should setup correct appearance when")
+        {
+            SECTION("BleServiceFlag is CpsService")
+            {
+                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
+
+                bluetoothController.setup();
+
+                Verify(Method(mockNimBLEAdvertising, setAppearance).Using(PSCSensorBleFlags::bleAppearanceCyclingPower)).Once();
+                Verify(Method(mockNimBLEAdvertising, addServiceUUID).Using(PSCSensorBleFlags::cyclingPowerSvcUuid)).Once();
+            }
+
+            SECTION("BleServiceFlag is CscService")
+            {
+                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CscService);
+
+                bluetoothController.setup();
+
+                Verify(Method(mockNimBLEAdvertising, setAppearance).Using(CSCSensorBleFlags::bleAppearanceCyclingSpeedCadence)).Once();
+                Verify(Method(mockNimBLEAdvertising, addServiceUUID).Using(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid)).Once();
+            }
+
+            SECTION("BleServiceFlag is FtmsService")
+            {
+                const std::string ftmsType{
+                    1U,
+                    FTMSTypeField::RowerSupported,
+                    FTMSTypeField::RowerSupported >> 8};
+                When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::FtmsService);
+
+                bluetoothController.setup();
+
+                Verify(Method(mockNimBLEAdvertising, addServiceUUID).Using(FTMSSensorBleFlags::FtmsSvcUuid)).Once();
+                Verify(Method(mockNimBLEAdvertising, setServiceData).Using(FTMSSensorBleFlags::FtmsSvcUuid, ftmsType)).Once();
+            }
         }
     }
 

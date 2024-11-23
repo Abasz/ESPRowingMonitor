@@ -53,24 +53,51 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             .Once();
     }
 
-    SECTION("indicate UnsupportedOpCode when unkown OpCode is sent")
+    SECTION("when unkown OpCode is sent")
     {
-        const auto unsupportedOpCode = 60;
+        SECTION("and BleServiceFlag is not FtmsService indicate UnsupportedOpCode")
+        {
+            const auto unsupportedOpCode = 60;
 
-        std::array<unsigned char, 3U> unsupportedOperationResponse = {
-            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-            static_cast<unsigned char>(unsupportedOpCode),
-            static_cast<unsigned char>(ResponseOpCodes::UnsupportedOpCode)};
+            std::array<unsigned char, 3U> unsupportedOperationFtmsResponse = {
+                static_cast<unsigned char>(SettingsOpCodes::ResponseCodeFtms),
+                static_cast<unsigned char>(unsupportedOpCode),
+                static_cast<unsigned char>(ResponseOpCodes::ControlNotPermitted),
+            };
 
-        When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
 
-        controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
 
-        Verify(Method(mockControlPointCharacteristic, getValue)).Once();
-        Verify(Method(mockControlPointCharacteristic, indicate)).Once();
-        Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
-                   .Using(Eq(unsupportedOperationResponse)))
-            .Once();
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(unsupportedOperationFtmsResponse)))
+                .Once();
+        }
+
+        SECTION("and BleServiceFlag is FtmsService indicate ControlNotPermitted")
+        {
+            const auto unsupportedOpCode = 60;
+
+            std::array<unsigned char, 3U> unsupportedOperationFtmsResponse = {
+                static_cast<unsigned char>(SettingsOpCodes::ResponseCodeFtms),
+                static_cast<unsigned char>(unsupportedOpCode),
+                static_cast<unsigned char>(ResponseOpCodes::ControlNotPermitted),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(unsupportedOperationFtmsResponse)))
+                .Once();
+        }
     }
 
     SECTION("handle SetLogLevel request")
@@ -153,7 +180,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 static_cast<unsigned char>(SettingsOpCodes::ChangeBleService),
                 static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService), 10});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService), 3});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
 
@@ -188,7 +215,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
                 static_cast<unsigned char>(SettingsOpCodes::ChangeBleService),
                 static_cast<unsigned char>(ResponseOpCodes::Successful)};
-            const auto expectedBleService = BleServiceFlag::CscService;
+            const auto expectedBleService = BleServiceFlag::FtmsService;
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService), static_cast<unsigned char>(expectedBleService)});
             Fake(Method(mockEEPROMService, setLogLevel));

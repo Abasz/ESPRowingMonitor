@@ -210,6 +210,7 @@ public:
     virtual bool stop() = 0;
     virtual void setAppearance(unsigned short appearance) = 0;
     virtual void addServiceUUID(unsigned short uuid) = 0;
+    virtual void setServiceData(const unsigned short uuid, const std::string data) = 0;
 };
 extern fakeit::Mock<NimBLEAdvertising> mockNimBLEAdvertising;
 

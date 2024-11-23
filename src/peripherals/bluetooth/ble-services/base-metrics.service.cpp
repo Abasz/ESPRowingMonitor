@@ -34,6 +34,11 @@ NimBLEService *BaseMetricsBleService::setup(NimBLEServer *server, const BleServi
         broadcastTask = pscTask;
 
         return setupPscServices(server);
+
+    case BleServiceFlag::FtmsService:
+        broadcastTask = ftmsTask;
+
+        return setupFtmsServices(server);
     }
 
     std::unreachable();
@@ -142,6 +147,48 @@ void BaseMetricsBleService::pscTask(void *parameters)
     vTaskDelete(NULL);
 }
 
+void BaseMetricsBleService::ftmsTask(void *parameters)
+{
+    {
+        const auto *const params = static_cast<const BaseMetricsBleService::BaseMetricsParams *>(parameters);
+
+        const auto secInMicroSec = 1e6L;
+        const auto dragFactor = static_cast<unsigned char>(lround(params->data.dragCoefficient * 1e6));
+        const unsigned char strokeRate = static_cast<unsigned char>(lroundl((params->data.strokeCount - params->data.previousStrokeCount) / ((params->data.strokeTime - params->data.previousStrokeTime) / secInMicroSec / 60U)));
+        const auto pace500m = static_cast<unsigned short>(lroundl(500U / (((params->data.distance - params->data.previousDistance) / 100U) / ((params->data.revTime - params->data.previousRevTime) / secInMicroSec))));
+        const auto distance = static_cast<unsigned int>(lround(params->data.distance / 100U));
+        const auto avgStrokePower = static_cast<short>(lround(params->data.avgStrokePower));
+
+        const auto length = 14U;
+        array<unsigned char, length> temp = {
+            static_cast<unsigned char>(FTMSSensorBleFlags::ftmsMeasurementFeaturesFlag),
+            static_cast<unsigned char>(FTMSSensorBleFlags::ftmsMeasurementFeaturesFlag >> 8),
+
+            // Stroke rate is with a resolution of 0.5. While this works for a rower it will not work for a kayak erg in all cases (as kayak stroke rate can be up to 160spm)
+            static_cast<unsigned char>(strokeRate * 2 > UCHAR_MAX ? UCHAR_MAX : strokeRate * 2),
+            static_cast<unsigned char>(params->data.strokeCount),
+            static_cast<unsigned char>(params->data.strokeCount >> 8),
+
+            static_cast<unsigned char>(distance),
+            static_cast<unsigned char>(distance >> 8),
+            static_cast<unsigned char>(distance >> 16),
+
+            static_cast<unsigned char>(pace500m),
+            static_cast<unsigned char>(pace500m >> 8),
+
+            static_cast<unsigned char>(avgStrokePower),
+            static_cast<unsigned char>(avgStrokePower >> 8),
+
+            static_cast<unsigned char>(dragFactor),
+            static_cast<unsigned char>(dragFactor >> 8),
+        };
+
+        params->characteristic->setValue(temp);
+        params->characteristic->notify();
+    }
+    vTaskDelete(NULL);
+}
+
 NimBLEService *BaseMetricsBleService::setupCscServices(NimBLEServer *const server)
 {
     Log.infoln("Setting up Cycling Speed and Cadence Profile");
@@ -179,4 +226,18 @@ NimBLEService *BaseMetricsBleService::setupPscServices(NimBLEServer *const serve
     pscService->createCharacteristic(PSCSensorBleFlags::pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&callbacks);
 
     return pscService;
+}
+
+NimBLEService *BaseMetricsBleService::setupFtmsServices(NimBLEServer *const server)
+{
+    Log.infoln("Setting up Fitness Machine Profile");
+
+    auto *ftmsService = server->createService(FTMSSensorBleFlags::FtmsSvcUuid);
+    parameters.characteristic = ftmsService->createCharacteristic(FTMSSensorBleFlags::rowerDataUuid, NIMBLE_PROPERTY::NOTIFY);
+
+    ftmsService
+        ->createCharacteristic(FTMSSensorBleFlags::FtmsFeaturesUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(FTMSSensorBleFlags::ftmsFeaturesFlag);
+
+    return ftmsService;
 }

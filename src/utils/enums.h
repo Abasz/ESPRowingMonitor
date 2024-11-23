@@ -19,7 +19,8 @@ enum class CyclePhase : unsigned char
 enum class BleServiceFlag : unsigned char
 {
     CpsService,
-    CscService
+    CscService,
+    FtmsService
 };
 
 enum class BleSignalStrength : unsigned char
@@ -63,7 +64,8 @@ enum class SettingsOpCodes : unsigned char
     ChangeBleService = 18U,
     SetDeltaTimeLogging = 19U,
     SetSdCardLogging = 20U,
-    ResponseCode = 32U
+    ResponseCode = 32U,
+    ResponseCodeFtms = 128U,
 };
 
 enum class ResponseOpCodes : unsigned char
@@ -72,6 +74,7 @@ enum class ResponseOpCodes : unsigned char
     UnsupportedOpCode,
     InvalidParameter,
     OperationFailed,
+    ControlNotPermitted
 };
 
 enum class OtaResponseOpCodes : unsigned char
@@ -212,6 +215,57 @@ public:
     static constexpr unsigned short OffsetCompensationIndicator = (0x01U << 12U);
 };
 
+class FTMSFeaturesFlags
+{
+public:
+    static constexpr unsigned int AverageSpeedSupported = (0x01U << 0U);
+    static constexpr unsigned int CadenceSupported = (0x01U << 1U);
+    static constexpr unsigned int TotalDistanceSupported = (0x01U << 2U);
+    static constexpr unsigned int InclinationSupported = (0x01U << 3U);
+    static constexpr unsigned int ElevationGainSupported = (0x01U << 4U);
+    static constexpr unsigned int PaceSupported = (0x01U << 5U);
+    static constexpr unsigned int StepCountSupported = (0x01U << 6U);
+    static constexpr unsigned int ResistanceLevelSupported = (0x01U << 7U);
+    static constexpr unsigned int StrideCountSupported = (0x01U << 8U);
+    static constexpr unsigned int ExpendedEnergySupported = (0x01U << 9U);
+    static constexpr unsigned int HeartRateMeasurementSupported = (0x01U << 10U);
+    static constexpr unsigned int MetabolicEquivalentSupported = (0x01U << 11U);
+    static constexpr unsigned int ElapsedTimeSupported = (0x01U << 12U);
+    static constexpr unsigned int RemainingTimeSupported = (0x01U << 13U);
+    static constexpr unsigned int PowerMeasurementSupported = (0x01U << 14U);
+    static constexpr unsigned int ForceOnBeltAndPowerOutputSupported = (0x01U << 15U);
+    static constexpr unsigned int UserDataRetentionSupported = (0x01U << 16U);
+};
+
+class FTMSMeasurementFeaturesFlags
+{
+public:
+    static constexpr unsigned short MoreDataPresent = (0x01U << 0U);
+    static constexpr unsigned short AverageStrokeRatePresent = (0x01U << 1U);
+    static constexpr unsigned short TotalDistancePresent = (0x01U << 2U);
+    static constexpr unsigned short InstantaneousPacePresent = (0x01U << 3U);
+    static constexpr unsigned short AveragePacePresent = (0x01U << 4U);
+    static constexpr unsigned short InstantaneousPowerPresent = (0x01U << 5U);
+    static constexpr unsigned short AveragePowerPresent = (0x01U << 6U);
+    static constexpr unsigned short ResistanceLevelPresent = (0x01U << 7U);
+    static constexpr unsigned short ExpendedEnergyPresent = (0x01U << 8U);
+    static constexpr unsigned short HeartRatePresent = (0x01U << 9U);
+    static constexpr unsigned short MetabolicEquivalentPresent = (0x01U << 10U);
+    static constexpr unsigned short ElapsedTimePresent = (0x01U << 11U);
+    static constexpr unsigned short RemainingTimePresent = (0x01U << 12U);
+};
+
+class FTMSTypeField
+{
+public:
+    static constexpr unsigned short TreadmillSupported = (0x01U << 0U);
+    static constexpr unsigned short CrossTrainerSupported = (0x01U << 1U);
+    static constexpr unsigned short StepClimberSupported = (0x01U << 2U);
+    static constexpr unsigned short StairClimberSupported = (0x01U << 3U);
+    static constexpr unsigned short RowerSupported = (0x01U << 4U);
+    static constexpr unsigned short IndoorBikeSupported = (0x01U << 5U);
+};
+
 class CSCSensorBleFlags
 {
 public:
@@ -239,6 +293,18 @@ public:
     static constexpr unsigned short pscControlPointUuid = 0x2A66;
     static constexpr unsigned short pscFeatureUuid = 0x2A65;
     static constexpr unsigned short bleAppearanceCyclingPower = 1156;
+};
+
+class FTMSSensorBleFlags
+{
+public:
+    static constexpr unsigned short ftmsMeasurementFeaturesFlag =
+        FTMSMeasurementFeaturesFlags::TotalDistancePresent | FTMSMeasurementFeaturesFlags::InstantaneousPacePresent | FTMSMeasurementFeaturesFlags::InstantaneousPowerPresent | FTMSMeasurementFeaturesFlags::ResistanceLevelPresent;
+    static constexpr unsigned int ftmsFeaturesFlag =
+        FTMSFeaturesFlags::TotalDistanceSupported | FTMSFeaturesFlags::PaceSupported | FTMSFeaturesFlags::ResistanceLevelSupported | FTMSFeaturesFlags::PowerMeasurementSupported;
+    static constexpr unsigned short FtmsSvcUuid = 0x1826;
+    static const unsigned short FtmsFeaturesUuid = 0x2ACC;
+    static const unsigned short rowerDataUuid = 0x2AD1;
 };
 
 class CommonBleFlags

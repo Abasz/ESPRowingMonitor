@@ -64,7 +64,29 @@ void BluetoothController::setupBleDevice()
 {
     Log.verboseln("Initializing BLE device");
 
-    const auto deviceName = Configurations::deviceName + " (" + std::string(eepromService.getBleServiceFlag() == BleServiceFlag::CscService ? "CSC)" : "CPS)");
+    auto deviceName = Configurations::deviceName + " (";
+    ;
+
+    switch (eepromService.getBleServiceFlag())
+    {
+    case BleServiceFlag::CscService:
+        deviceName.append("CSC)");
+
+        break;
+
+    case BleServiceFlag::CpsService:
+        deviceName.append("CPS)");
+
+        break;
+
+    case BleServiceFlag::FtmsService:
+        deviceName.append("FTMS)");
+
+        break;
+    default:
+        std::unreachable();
+    }
+
     NimBLEDevice::init(deviceName);
     NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_ADV);
     NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_DEFAULT);
@@ -111,15 +133,32 @@ void BluetoothController::setupServices()
 void BluetoothController::setupAdvertisement() const
 {
     auto *pAdvertising = NimBLEDevice::getAdvertising();
-    if (eepromService.getBleServiceFlag() == BleServiceFlag::CpsService)
+
+    switch (eepromService.getBleServiceFlag())
     {
+    case BleServiceFlag::CpsService:
         pAdvertising->setAppearance(PSCSensorBleFlags::bleAppearanceCyclingPower);
         pAdvertising->addServiceUUID(PSCSensorBleFlags::cyclingPowerSvcUuid);
-    }
-    if (eepromService.getBleServiceFlag() == BleServiceFlag::CscService)
-    {
+
+        return;
+
+    case BleServiceFlag::CscService:
         pAdvertising->setAppearance(CSCSensorBleFlags::bleAppearanceCyclingSpeedCadence);
         pAdvertising->addServiceUUID(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
+
+        return;
+
+    case BleServiceFlag::FtmsService:
+        pAdvertising->addServiceUUID(FTMSSensorBleFlags::FtmsSvcUuid);
+
+        const std::string ftmsType{
+            1U,
+            FTMSTypeField::RowerSupported,
+            FTMSTypeField::RowerSupported >> 8,
+        };
+        pAdvertising->setServiceData(FTMSSensorBleFlags::FtmsSvcUuid, ftmsType);
+
+        return;
     }
 }
 
@@ -160,10 +199,15 @@ void BluetoothController::notifyNewMetrics(const RowingDataModels::RowingMetrics
 {
     bleData = {
         .revTime = data.lastRevTime,
+        .previousRevTime = bleData.revTime,
         .distance = data.distance,
+        .previousDistance = bleData.distance,
         .strokeTime = data.lastStrokeTime,
+        .previousStrokeTime = bleData.strokeTime,
         .strokeCount = data.strokeCount,
+        .previousStrokeCount = bleData.strokeCount,
         .avgStrokePower = data.avgStrokePower,
+        .dragCoefficient = data.dragCoefficient,
     };
 
     if constexpr (Configurations::hasExtendedBleMetrics)

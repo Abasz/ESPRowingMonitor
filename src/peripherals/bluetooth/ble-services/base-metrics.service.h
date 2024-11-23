@@ -22,9 +22,12 @@ class BaseMetricsBleService final : public IBaseMetricsBleService
 
     NimBLEService *setupCscServices(NimBLEServer *server);
     NimBLEService *setupPscServices(NimBLEServer *server);
+    NimBLEService *setupFtmsServices(NimBLEServer *server);
 
     static void pscTask(void *parameters);
     static void cscTask(void *parameters);
+    static void ftmsTask(void *parameters);
+
     static void (*broadcastTask)(void *);
 
 public:
