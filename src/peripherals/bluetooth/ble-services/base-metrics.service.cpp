@@ -1,4 +1,5 @@
 #include <array>
+#include <utility>
 
 #include "esp_err.h"
 
@@ -35,8 +36,7 @@ NimBLEService *BaseMetricsBleService::setup(NimBLEServer *server, const BleServi
         return setupPscServices(server);
     }
 
-    broadcastTask = pscTask;
-    return setupPscServices(server);
+    std::unreachable();
 }
 
 void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetricsData &data)

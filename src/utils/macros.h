@@ -2,6 +2,7 @@
 
 #include <array>
 #include <string_view>
+#include <utility>
 
 #if defined(UNIT_TEST)
     #include "../../test/unit/include/test.settings.h"
@@ -15,62 +16,24 @@
 using std::string_view;
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-constexpr string_view getCompileMonth()
+consteval std::string_view getCompileMonth()
 {
-    constexpr auto month = string_view(__DATE__).substr(0, 3);
-    if (month == "Jan")
+    constexpr auto month = std::string_view(__DATE__).substr(0, 3);
+
+    constexpr std::array<std::pair<std::string_view, std::string_view>, 12> monthMap = {{{"Jan", "01"}, {"Feb", "02"}, {"Mar", "03"}, {"Apr", "04"}, {"May", "05"}, {"Jun", "06"}, {"Jul", "07"}, {"Aug", "08"}, {"Sep", "09"}, {"Oct", "10"}, {"Nov", "11"}, {"Dec", "12"}}};
+
+    for (const auto &[key, value] : monthMap)
     {
-        return "01";
-    }
-    if (month == "Feb")
-    {
-        return "02";
-    }
-    if (month == "Mar")
-    {
-        return "03";
-    }
-    if (month == "Apr")
-    {
-        return "04";
-    }
-    if (month == "May")
-    {
-        return "05";
-    }
-    if (month == "Jun")
-    {
-        return "06";
-    }
-    if (month == "Jul")
-    {
-        return "07";
-    }
-    if (month == "Aug")
-    {
-        return "08";
-    }
-    if (month == "Sep")
-    {
-        return "09";
-    }
-    if (month == "Oct")
-    {
-        return "10";
-    }
-    if (month == "Nov")
-    {
-        return "11";
-    }
-    if (month == "Dec")
-    {
-        return "12";
+        if (month == key)
+        {
+            return value;
+        }
     }
 
-    return "00";
+    std::unreachable();
 }
 
-constexpr std::array<char, 8> getCompileDate()
+consteval std::array<char, 8> getCompileDate()
 {
     constexpr auto day = string_view(__DATE__).substr(4, 2);
     constexpr auto month = getCompileMonth();

@@ -1,5 +1,6 @@
 #include "esp_ota_ops.h"
 
+#include "Arduino.h"
 #include "ArduinoLog.h"
 
 #include "globals.h"

@@ -27,7 +27,7 @@ PeripheralsController peripheralController(bleController, sdCardService, eepromS
 StrokeController strokeController(strokeService, flywheelService);
 PowerManagerController powerManagerController(powerManagerService);
 
-IRAM_ATTR void rotationInterrupt()
+void IRAM_ATTR rotationInterrupt()
 {
     flywheelService.processRotation(micros());
 }

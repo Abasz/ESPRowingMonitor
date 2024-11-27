@@ -1,4 +1,3 @@
-// NOLINTBEGIN(cppcoreguidelines-avoid-do-while)
 #include "./include/catch_amalgamated.hpp"
 #include "./include/fakeit.hpp"
 
@@ -124,4 +123,3 @@ TEST_CASE("PowerManagerService", "[utils]")
         }
     }
 }
-// NOLINTEND(cppcoreguidelines-avoid-do-while)

@@ -1,4 +1,5 @@
-// NOLINTBEGIN(readability-magic-numbers, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// NOLINTBEGIN(readability-magic-numbers)
+#include <span>
 #include <vector>
 
 #include "./include/catch_amalgamated.hpp"
@@ -98,7 +99,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
             std::vector<unsigned char> resultResponse;
 
             When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                             { resultResponse.push_back(data[0]); });
+                                                                                                                                             { 
+                            const auto temp = std::span<const unsigned char>(data, length);
+                            resultResponse.push_back(temp[0]); });
 
             otaService.onData(emptyRequest, 256);
 
@@ -114,7 +117,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
             std::vector<unsigned char> resultResponse;
 
             When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                             { resultResponse.push_back(data[0]); });
+                                                                                                                                             { 
+                            const auto temp = std::span<const unsigned char>(data, length);
+                            resultResponse.push_back(temp[0]); });
 
             otaService.onData(invalidRequest, 256);
 
@@ -129,7 +134,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
         {
             std::vector<unsigned char> otaResponseOpCodes;
             When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&otaResponseOpCodes](const unsigned char *data, size_t length)
-                                                                                                                                             { otaResponseOpCodes.insert(cend(otaResponseOpCodes), data, data + sizeof(unsigned char)); });
+                                                                                                                                             { 
+                            const auto temp = std::span<const unsigned char>(data, length);
+                            otaResponseOpCodes.insert(cend(otaResponseOpCodes), cbegin(temp), cend(temp)); });
 
             otaService.onData(abortRequest, 256);
 
@@ -148,7 +155,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                 std::vector<unsigned char> resultResponse;
 
                 When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length))).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                { resultResponse.insert(cend(resultResponse), data + 1, data + 1 + sizeof(unsigned int)); });
+                                                                                                                                { 
+                            const auto temp = std::span<const unsigned char>(data, length);
+                            resultResponse.insert(cend(resultResponse), cbegin(temp) + 1, cbegin(temp) + 1 + sizeof(unsigned int)); });
 
                 otaService.onData(beginRequest, expectedMtu);
 
@@ -173,7 +182,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                 std::vector<unsigned char> resultResponse;
 
                 When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                                 { resultResponse.push_back(data[0]); });
+                                                                                                                                                 { 
+                            const auto temp = std::span<const unsigned char>(data, length);
+                            resultResponse.push_back(temp[0]); });
 
                 otaService.onData(invalidBeginRequest, 256);
 
@@ -214,7 +225,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         When(Method(mockUpdate, getError)).Return(UPDATE_ERROR_SIZE);
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length))).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                        { resultResponse.insert(cend(resultResponse), data, data + length); });
+                                                                                                                                        {
+                         const auto temp = std::span<const unsigned char>(data, length);
+                         resultResponse.insert(cend(resultResponse), cbegin(temp), cend(temp)); });
 
                         otaService.onData(beginRequest, 256);
 
@@ -230,7 +243,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         When(Method(mockUpdate, getError)).Return(UPDATE_ERROR_NO_PARTITION);
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length))).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                        { resultResponse.insert(cend(resultResponse), data, data + length); });
+                                                                                                                                        {
+                         const auto temp = std::span<const unsigned char>(data, length);
+                         resultResponse.insert(cend(resultResponse), cbegin(temp), cend(temp)); });
 
                         otaService.onData(beginRequest, 256);
 
@@ -246,7 +261,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         When(Method(mockUpdate, getError)).Return(UPDATE_ERROR_BAD_ARGUMENT);
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length))).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                        { resultResponse.insert(cend(resultResponse), data, data + length); });
+                                                                                                                                        { 
+                         const auto temp = std::span<const unsigned char>(data, length);
+                         resultResponse.insert(cend(resultResponse), cbegin(temp), cend(temp)); });
 
                         otaService.onData(beginRequest, 256);
 
@@ -274,7 +291,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         std::vector<unsigned char> resultResponse;
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length))).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                        { resultResponse.insert(cend(resultResponse), data, data + length); });
+                                                                                                                                        {
+                         const auto temp = std::span<const unsigned char>(data, length);
+                         resultResponse.insert(cend(resultResponse), cbegin(temp), cend(temp)); });
 
                         otaService.onData(beginRequest, mtu);
 
@@ -299,7 +318,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                 std::vector<unsigned char> resultResponse;
 
                 When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                                 { resultResponse.push_back(data[0]); });
+                                                                                                                                                 { 
+                                 const auto temp = std::span<const unsigned char>(data, length);
+                                 resultResponse.push_back(temp[0]); });
                 When(Method(mockUpdate, isRunning)).AlwaysReturn(false);
 
                 otaService.onData(packageRequest, 256);
@@ -361,7 +382,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                 SECTION("should send OtaResponseOpCodes::Ok after writing to OTA partition")
                 {
                     When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                                     { resultResponse.push_back(data[0]); });
+                                                                                                                                                     { 
+                                     const auto temp = std::span<const unsigned char>(data, length);
+                                     resultResponse.push_back(temp[0]); });
 
                     otaService.onData(flushPackageRequest, mtu);
 
@@ -376,7 +399,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                     When(Method(mockUpdate, hasError)).Return(true);
                     When(Method(mockUpdate, getError)).Return(UPDATE_ERROR_MAGIC_BYTE);
                     When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                                     { resultResponse.push_back(data[0]); });
+                                                                                                                                                     { 
+                                     const auto temp = std::span<const unsigned char>(data, length);
+                                     resultResponse.push_back(temp[0]); });
 
                     otaService.onData(flushPackageRequest, mtu);
 
@@ -391,7 +416,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                     When(Method(mockUpdate, hasError)).Return(true);
                     When(Method(mockUpdate, getError)).Return(UPDATE_ERROR_ERASE);
                     When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                                     { resultResponse.push_back(data[0]); });
+                                                                                                                                                     { 
+                                     const auto temp = std::span<const unsigned char>(data, length);
+                                     resultResponse.push_back(temp[0]); });
 
                     otaService.onData(flushPackageRequest, mtu);
 
@@ -412,7 +439,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
             std::vector<unsigned char> resultResponse;
 
             When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                             { resultResponse.push_back(data[0]); });
+                                                                                                                                             { 
+                             const auto temp = std::span<const unsigned char>(data, length);
+                             resultResponse.push_back(temp[0]); });
             When(Method(mockUpdate, isRunning)).AlwaysReturn(false);
 
             otaService.onData(invalidEndRequest, 256);
@@ -436,7 +465,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
             When(Method(mockUpdate, isRunning)).AlwaysReturn(true);
             When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                             { resultResponse.push_back(data[0]); });
+                                                                                                                                             { 
+                             const auto temp = std::span<const unsigned char>(data, length);
+                             resultResponse.push_back(temp[0]); });
 
             otaService.onData(invalidEndRequest, 256);
             otaService.onData(tooLongEndRequest, 256);
@@ -491,7 +522,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         std::vector<unsigned char> resultResponse;
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                                         { resultResponse.push_back(data[0]); });
+                                                                                                                                                         { 
+                                         const auto temp = std::span<const unsigned char>(data, length);
+                                         resultResponse.push_back(temp[0]); });
                         When(Method(mockUpdate, getError)).Return(UPDATE_ERROR_MD5);
 
                         otaService.onData(endRequest, 256);
@@ -508,7 +541,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         std::vector<unsigned char> resultResponse;
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                                         { resultResponse.push_back(data[0]); });
+                                                                                                                                                         { 
+                                         const auto temp = std::span<const unsigned char>(data, length);
+                                         resultResponse.push_back(temp[0]); });
                         When(Method(mockUpdate, getError)).Return(UPDATE_ERROR_ACTIVATE);
 
                         otaService.onData(endRequest, 256);
@@ -530,7 +565,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         std::vector<unsigned char> resultResponse;
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
-                                                                                                                                                         { resultResponse.push_back(data[0]); });
+                                                                                                                                                         { 
+                                         const auto temp = std::span<const unsigned char>(data, length);
+                                         resultResponse.push_back(temp[0]); });
 
                         otaService.onData(endRequest, 256);
 
@@ -549,4 +586,4 @@ TEST_CASE("OtaUpdaterService", "[ota]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// NOLINTEND(readability-magic-numbers)

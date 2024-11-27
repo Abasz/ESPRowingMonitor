@@ -1,5 +1,6 @@
 // NOLINTBEGIN(readability-magic-numbers)
 #include <array>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -46,15 +47,16 @@ TEST_CASE("OtaRxCallbacks onWrite method should", "[ota]")
         const auto expectedMtu = 256U;
         NimBLEAttValue expectedValue = {1, 2, 3, 4};
         std::vector<unsigned char> expectedVector;
-        expectedVector.assign(expectedValue.begin(), expectedValue.end());
+        expectedVector.assign(expectedValue.data(), expectedValue.end());
 
         When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(expectedMtu);
         When(Method(mockOtaRxCharacteristic, getValue)).AlwaysReturn(expectedValue);
 
         std::vector<unsigned char> resultValue{};
         When(Method(mockOtaService, onData)).Do([&resultValue](const NimBLEAttValue &data, unsigned short mtu)
-                                                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                                                { resultValue.insert(end(resultValue), data.begin(), data.begin() + data.size()); });
+                                                { 
+                                                    const auto temp = std::span<const unsigned char>(data.data(), data.size());
+                                                    resultValue.insert(cend(resultValue), cbegin(temp), cend(temp)); });
 
         otaCallback.onWrite(&mockOtaRxCharacteristic.get(), &gapDescriptor);
 

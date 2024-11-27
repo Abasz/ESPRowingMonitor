@@ -1,14 +1,14 @@
 #pragma once
 
 #include <deque>
-#include <vector>
+#include <span>
 
 #include "NimBLEDevice.h"
 
 #include "../enums.h"
 #include "./ota-updater.service.interface.h"
 
-using std::vector;
+using std::span;
 
 class OtaUpdaterService final : public IOtaUpdaterService
 {
@@ -19,9 +19,9 @@ class OtaUpdaterService final : public IOtaUpdaterService
     const unsigned char blePackageHeaderSize = 3;
     const unsigned char bufferCapacity = 40;
 
-    void handleBegin(const vector<unsigned char> &payload);
-    void handlePackage(const vector<unsigned char> &payload);
-    void handleEnd(const vector<unsigned char> &payload);
+    void handleBegin(const span<const unsigned char> &payload);
+    void handlePackage(const span<const unsigned char> &payload);
+    void handleEnd(const span<const unsigned char> &payload);
     void handleInstall();
     void handleError(OtaResponseOpCodes errorCode);
     void send(unsigned char head);

@@ -62,42 +62,42 @@ typedef enum
 class NimBLEAttValue
 {
 private:
-    std::vector<unsigned char> data;
+    std::vector<unsigned char> _data;
 
 public:
     NimBLEAttValue(std::initializer_list<unsigned char> initList)
     {
-        data.assign(cbegin(initList), cend(initList));
+        _data.assign(cbegin(initList), cend(initList));
     }
 
     size_t size() const
     {
-        return data.size();
+        return _data.size();
     }
 
-    const unsigned char *begin() const
+    const unsigned char *data() const
     {
-        return data.data();
+        return _data.data();
     }
 
     const unsigned char *end() const
     {
-        return &data.back() + 1;
+        return &_data.back() + 1;
     }
 
     const unsigned char &operator[](size_t index) const
     {
-        return data[index];
+        return _data[index];
     }
 
     void push_back(unsigned char newElement)
     {
-        data.push_back(newElement);
+        _data.push_back(newElement);
     }
 
     void insert(std::vector<unsigned char> &newRange)
     {
-        data.insert(std::cend(data), cbegin(newRange), cend(newRange));
+        _data.insert(std::cend(_data), cbegin(newRange), cend(newRange));
     }
 };
 

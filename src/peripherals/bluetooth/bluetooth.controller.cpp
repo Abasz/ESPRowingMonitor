@@ -1,6 +1,7 @@
 #include <array>
 #include <numeric>
 #include <string>
+#include <utility>
 
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"

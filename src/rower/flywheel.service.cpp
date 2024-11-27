@@ -66,8 +66,8 @@ void FlywheelService::processRotation(const unsigned long now)
     //     return;
 
     cleanDeltaTime = currentDeltaTime /* lastDeltaTime */;
-    totalTime += cleanDeltaTime;
+    totalTime = totalTime + cleanDeltaTime;
     impulseCount = impulseCount + 1;
     lastCleanImpulseTime = now;
-    totalAngularDisplacement += Configurations::angularDisplacementPerImpulse;
+    totalAngularDisplacement = totalAngularDisplacement + Configurations::angularDisplacementPerImpulse;
 }

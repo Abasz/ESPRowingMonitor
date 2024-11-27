@@ -1,5 +1,6 @@
 // NOLINTBEGIN(readability-magic-numbers)
 #include <array>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -363,8 +364,9 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
             std::vector<unsigned char> results;
             When(OverloadedMethod(mockExtendedMetricsCharacteristic, setValue, void(const unsigned char *data, size_t length)))
                 .Do([&results](const unsigned char *data, size_t length)
-                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    { results.insert(end(results), data, data + length); });
+                    {
+                        const auto temp = std::span<const unsigned char>(data, length);
+                        results.insert(cend(results), cbegin(temp), cend(temp)); });
 
             extendedMetricBleService.broadcastDeltaTimes(expectedDeltaTimes);
 

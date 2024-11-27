@@ -18,7 +18,7 @@ extern fakeit::Mock<Globals> mockGlobals;
 void attachRotationInterrupt();
 void detachRotationInterrupt();
 
-constexpr bool isOdd(unsigned long number)
+consteval bool isOdd(unsigned long number)
 {
     return number % 2 != 0;
 };

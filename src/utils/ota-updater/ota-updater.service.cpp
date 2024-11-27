@@ -1,5 +1,5 @@
 #include <array>
-#include <vector>
+#include <span>
 
 #include "ArduinoLog.h"
 #include "Update.h"
@@ -8,7 +8,7 @@
 
 #include "./ota-updater.service.h"
 
-using std::vector;
+using std::span;
 
 OtaUpdaterService::OtaUpdaterService()
 {
@@ -39,26 +39,27 @@ void OtaUpdaterService::onData(const NimBLEAttValue &data, const unsigned short 
 
     Log.verboseln("OTA onData request code: %d", data[0]);
 
-    vector<unsigned char> payload;
-    payload.reserve(data.size() - 1);
-    if (data.size() > 2)
-    {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        payload.assign(data.begin() + 1, data.end());
-    }
-
     switch (data[0])
     {
     case static_cast<unsigned char>(OtaRequestOpCodes::Begin):
+    {
         setMtu(newMtu);
-        handleBegin(payload);
-        break;
+        span<const unsigned char>::iterator iterator(data.data());
+        handleBegin(span<const unsigned char>(iterator + 1, data.size() - 1));
+    }
+    break;
     case static_cast<unsigned char>(OtaRequestOpCodes::Package):
-        handlePackage(payload);
-        break;
+    {
+        span<const unsigned char>::iterator iterator(data.data());
+        handlePackage(span<const unsigned char>(iterator + 1, data.size() - 1));
+    }
+    break;
     case static_cast<unsigned char>(OtaRequestOpCodes::End):
-        handleEnd(payload);
-        break;
+    {
+        span<const unsigned char>::iterator iterator(data.data());
+        handleEnd(span<const unsigned char>(iterator + 1, data.size() - 1));
+    }
+    break;
     case static_cast<unsigned char>(OtaRequestOpCodes::Abort):
         terminateUpload();
         send(static_cast<unsigned char>(OtaResponseOpCodes::Ok));
@@ -74,7 +75,7 @@ void OtaUpdaterService::begin(NimBLECharacteristic *newOtaTxCharacteristic)
     otaTxCharacteristic = newOtaTxCharacteristic;
 }
 
-void OtaUpdaterService::handleBegin(const vector<unsigned char> &payload)
+void OtaUpdaterService::handleBegin(const span<const unsigned char> &payload)
 {
     if (isUpdating())
     {
@@ -138,7 +139,7 @@ void OtaUpdaterService::handleBegin(const vector<unsigned char> &payload)
     detachRotationInterrupt();
 }
 
-void OtaUpdaterService::handlePackage(const vector<unsigned char> &payload)
+void OtaUpdaterService::handlePackage(const span<const unsigned char> &payload)
 {
     if (!isUpdating())
     {
@@ -174,7 +175,7 @@ void OtaUpdaterService::handlePackage(const vector<unsigned char> &payload)
     }
 }
 
-void OtaUpdaterService::handleEnd(const vector<unsigned char> &payload)
+void OtaUpdaterService::handleEnd(const span<const unsigned char> &payload)
 {
     if (!isUpdating())
     {

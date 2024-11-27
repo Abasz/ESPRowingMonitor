@@ -1,4 +1,3 @@
-// NOLINTBEGIN(cppcoreguidelines-avoid-do-while)
 #include "./include/catch_amalgamated.hpp"
 #include "./include/fakeit.hpp"
 
@@ -135,4 +134,3 @@ TEST_CASE("PowerManagerController", "[utils]")
         REQUIRE(powerManagerController.getPreviousBatteryLevel() == batteryLevelInitial);
     }
 }
-// NOLINTEND(cppcoreguidelines-avoid-do-while)
