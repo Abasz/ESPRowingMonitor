@@ -7,13 +7,11 @@ using std::size_t;
 
 class WeightedAverageSeries
 {
-    unsigned char maxSeriesLength = 0;
-    unsigned short maxAllocationCapacity = 1'000;
     Series weightSeries;
     Series weightedSeries;
 
 public:
-    explicit WeightedAverageSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
+    constexpr explicit WeightedAverageSeries(const unsigned char _maxSeriesLength = 0, const unsigned short _maxAllocationCapacity = 1'000) : weightSeries(_maxSeriesLength, _maxAllocationCapacity), weightedSeries(_maxSeriesLength, _maxAllocationCapacity) {}
 
     size_t size() const;
     size_t capacity() const;

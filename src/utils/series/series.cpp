@@ -4,11 +4,6 @@
 
 using std::vector;
 
-Series::Series(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxAllocationCapacity(_maxAllocationCapacity)
-{
-    seriesArray.reserve(_maxSeriesLength > 0 ? _maxSeriesLength : Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin);
-}
-
 const Configurations::precision &Series::operator[](size_t index) const
 {
     return seriesArray[index];

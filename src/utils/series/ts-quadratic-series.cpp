@@ -6,14 +6,6 @@
 
 using std::vector;
 
-TSQuadraticSeries::TSQuadraticSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxSeriesAInnerLength(((_maxSeriesLength - 2) * (_maxSeriesLength - 1)) / 2), maxSeriesALength(calculateMaxSeriesALength()), maxAllocationCapacity(_maxAllocationCapacity), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity)
-{
-    if (_maxSeriesLength > 0)
-    {
-        seriesA.reserve(_maxSeriesLength - 3);
-    }
-}
-
 Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(const unsigned char position) const
 {
     if (seriesX.size() < 3 || position >= seriesX.size())
@@ -181,16 +173,4 @@ Configurations::precision TSQuadraticSeries::projectX(Configurations::precision 
     }
 
     return ((a * pointX * pointX) + (b * pointX) + c);
-}
-
-constexpr unsigned short TSQuadraticSeries::calculateMaxSeriesALength() const
-{
-    unsigned char baseValue = maxSeriesAInnerLength;
-    unsigned short sum = baseValue;
-    for (unsigned char i = 0; i < maxSeriesLength - 3; ++i)
-    {
-        baseValue -= maxSeriesLength - i - 2;
-        sum += baseValue;
-    }
-    return sum;
 }

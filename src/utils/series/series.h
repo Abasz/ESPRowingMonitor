@@ -8,13 +8,16 @@ using std::size_t;
 
 class Series
 {
-    unsigned char maxSeriesLength = 0;
-    unsigned short maxAllocationCapacity = 1'000;
+    unsigned char maxSeriesLength;
+    unsigned short maxAllocationCapacity;
     Configurations::precision seriesSum = 0;
     std::vector<Configurations::precision> seriesArray;
 
 public:
-    explicit Series(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
+    constexpr explicit Series(const unsigned char _maxSeriesLength = 0, const unsigned short _maxAllocationCapacity = 1'000) : maxSeriesLength(_maxSeriesLength), maxAllocationCapacity(_maxAllocationCapacity)
+    {
+        seriesArray.reserve(_maxSeriesLength > 0 ? _maxSeriesLength : Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin);
+    }
 
     const Configurations::precision &operator[](size_t index) const;
 

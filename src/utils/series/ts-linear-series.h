@@ -9,8 +9,8 @@ using std::vector;
 
 class TSLinearSeries
 {
-    unsigned char maxSeriesLength = 0;
-    unsigned short maxSlopeSeriesLength = 0;
+    unsigned char maxSeriesLength;
+    unsigned short maxSlopeSeriesLength = ((maxSeriesLength - 2) * (maxSeriesLength - 1)) / 2;
     bool shouldRecalculateB = true;
     bool shouldRecalculateA = true;
     Configurations::precision a = 0;
@@ -23,7 +23,13 @@ class TSLinearSeries
     Configurations::precision calculateSlope(unsigned char pointOne, unsigned char pointTwo) const;
 
 public:
-    explicit TSLinearSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
+    constexpr explicit TSLinearSeries(const unsigned char _maxSeriesLength = 0, const unsigned short _maxAllocationCapacity = 1'000) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity)
+    {
+        if (_maxSeriesLength > 0)
+        {
+            slopes.reserve(_maxSeriesLength);
+        }
+    }
 
     Configurations::precision yAtSeriesBegin() const;
     Configurations::precision median() const;

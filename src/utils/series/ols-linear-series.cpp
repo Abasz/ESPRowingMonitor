@@ -1,7 +1,5 @@
 #include "./ols-linear-series.h"
 
-OLSLinearSeries::OLSLinearSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesXSquare(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity), seriesYSquare(_maxSeriesLength, _maxAllocationCapacity), seriesXY(_maxSeriesLength, _maxAllocationCapacity) {}
-
 void OLSLinearSeries::reset()
 {
     seriesX.reset();

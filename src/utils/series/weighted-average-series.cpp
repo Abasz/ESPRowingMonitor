@@ -2,8 +2,6 @@
 
 #include "./weighted-average-series.h"
 
-WeightedAverageSeries::WeightedAverageSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxAllocationCapacity(_maxAllocationCapacity), weightSeries(_maxSeriesLength, _maxAllocationCapacity), weightedSeries(_maxSeriesLength, _maxAllocationCapacity) {}
-
 size_t WeightedAverageSeries::size() const
 {
     return weightedSeries.size();

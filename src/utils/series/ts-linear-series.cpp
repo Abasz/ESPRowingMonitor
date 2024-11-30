@@ -6,14 +6,6 @@
 
 using std::vector;
 
-TSLinearSeries::TSLinearSeries(const unsigned char _maxSeriesLength, unsigned short _maxAllocationCapacity) : maxSeriesLength(_maxSeriesLength), maxSlopeSeriesLength(((_maxSeriesLength - 2) * (_maxSeriesLength - 1)) / 2), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity)
-{
-    if (_maxSeriesLength > 0)
-    {
-        slopes.reserve(_maxSeriesLength);
-    }
-}
-
 Configurations::precision TSLinearSeries::calculateSlope(const unsigned char pointOne, const unsigned char pointTwo) const
 {
     const auto seriesXPointOne = seriesX[pointOne];

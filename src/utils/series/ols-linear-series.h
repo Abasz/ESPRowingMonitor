@@ -5,7 +5,6 @@
 
 class OLSLinearSeries
 {
-    unsigned char maxSeriesLength = 0;
     Series seriesX;
     Series seriesXSquare;
     Series seriesY;
@@ -13,7 +12,7 @@ class OLSLinearSeries
     Series seriesXY;
 
 public:
-    explicit OLSLinearSeries(unsigned char _maxSeriesLength = 0, unsigned short _maxAllocationCapacity = 1'000);
+    constexpr explicit OLSLinearSeries(const unsigned char _maxSeriesLength = 0, const unsigned short _maxAllocationCapacity = 1'000) : seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesXSquare(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity), seriesYSquare(_maxSeriesLength, _maxAllocationCapacity), seriesXY(_maxSeriesLength, _maxAllocationCapacity) {}
 
     Configurations::precision yAtSeriesBegin() const;
     Configurations::precision slope() const;
