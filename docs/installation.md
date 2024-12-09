@@ -7,6 +7,10 @@ As a first step the platformio.ini file needs the exact board name. There is a [
 
 Once platformio.ini is set up, upload can be performed with the VSCode platformio extension or by running `platformio run -t upload` after connecting the board via USB.
 
+## Over-the-Air update
+
+Please see dedicated page [OTA page](custom-ble-services.md)
+
 ## Circuit
 
 Basically any ESP32 development board can be used, but this project was developed and tested on the [Firebeetle 2 Dev Board](https://www.dfrobot.com/product-2231.html).
@@ -21,14 +25,20 @@ Currently there are two specific boards that are set up and supported:
 
 1. Firebeetle 2
 2. ESP32 Devkit 1.0
+3. Lolin S3 mini
 
 The FireBeetle board takes advantage of its internal connection between the battery and the ADC pin to measure battery level without additional circuitry and the RGB LED that changes color based on the measured battery level as well as uses features such as a digital switch (using a transistor) for the hall sensor power so battery consumption in deepsleep is minimal. To wake the device up a wakeup interrupt is set to a separate pin (on my machine this is connected to a reed switch on the handle chain sprocket). These settings can be enabled in the board profile (please refer to the [Settings](docs/settings.md) page).
 
-Also for the this board I designed a [3D printable box](https://www.printables.com/model/441912-firebeetle-2-esp32-e-box-for-esp-rowing-monitor). You can find some pictures of the setup below.
+Also for the the Firebeetle2 and Lolin S3 mini board I designed a 3D printable box:
+[Firebeetle](https://www.printables.com/model/441912-firebeetle-2-esp32-e-box-for-esp-rowing-monitor).
+[Lolin S3 mini print in place case](https://www.printables.com/model/1002665-wemos-lolin-s3-mini-case)
+
+You can find some pictures of the setup below.
 
 ![Firebeetle box open](imgs/firebeetle-box-open.jpg)
 ![Firebeetle box closed](imgs/firebeetle-box-closed.jpg)
 ![Firebeetle box open blinking](imgs/firebeetle-box-open-blink.jpg)
+![Lolin S3 Mini case](imgs/lolin-s3-mini-case.jpg)
 
 ### Generic Air Rower
 
