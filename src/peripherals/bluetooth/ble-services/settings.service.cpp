@@ -4,6 +4,7 @@
 
 #include "../../../utils/configuration.h"
 #include "../../../utils/enums.h"
+#include "../ble-metrics.model.h"
 #include "./settings.service.h"
 #include "settings.service.h"
 
@@ -26,6 +27,8 @@ NimBLEService *SettingsBleService::setup(NimBLEServer *const server)
 
 void SettingsBleService::broadcastSettings() const
 {
+    ASSERT_SETUP_CALLED(characteristic);
+
     characteristic->setValue(getSettings());
     if (characteristic->getSubscribedCount() > 0)
     {

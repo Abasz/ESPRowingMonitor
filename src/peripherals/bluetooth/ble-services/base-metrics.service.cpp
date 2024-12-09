@@ -5,6 +5,7 @@
 
 #include "ArduinoLog.h"
 
+#include "../ble-metrics.model.h"
 #include "./base-metrics.service.h"
 #include "./settings.service.interface.h"
 
@@ -14,9 +15,7 @@ BaseMetricsBleService::BaseMetricsBleService(ISettingsBleService &_settingsBleSe
 {
     broadcastTask = [](void *parameters)
     {
-        Log.errorln("Base metrics ble service has not been setup, restarting");
-
-        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
+        ASSERT_SETUP_FAILED(__CLASS_NAME__);
     };
 }
 
@@ -46,6 +45,8 @@ NimBLEService *BaseMetricsBleService::setup(NimBLEServer *server, const BleServi
 
 void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetricsData &data)
 {
+    ASSERT_SETUP_CALLED(parameters.characteristic);
+
     parameters.data = data;
 
     const auto coreStackSize = 2'048U;
@@ -62,14 +63,7 @@ void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetri
 
 bool BaseMetricsBleService::isSubscribed()
 {
-    if (parameters.characteristic == nullptr)
-    {
-        Log.errorln("Base metrics ble service has not been setup, restarting");
-
-        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-
-        return false;
-    }
+    ASSERT_SETUP_CALLED(parameters.characteristic);
 
     return parameters.characteristic->getSubscribedCount() > 0;
 }

@@ -120,7 +120,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
             ExtendedMetricBleService extendedMetricBleServiceNoSetup;
             Fake(Method(mockGlobals, abort));
 
-            extendedMetricBleServiceNoSetup.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragCoefficient);
+            REQUIRE_THROWS(extendedMetricBleServiceNoSetup.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragCoefficient));
 
             Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }
@@ -328,7 +328,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
             ExtendedMetricBleService extendedMetricBleServiceNoSetup;
             Fake(Method(mockGlobals, abort));
 
-            extendedMetricBleServiceNoSetup.broadcastHandleForces(expectedHandleForces);
+            REQUIRE_THROWS(extendedMetricBleServiceNoSetup.broadcastHandleForces(expectedHandleForces));
 
             Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }
@@ -401,7 +401,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
             ExtendedMetricBleService extendedMetricBleServiceNoSetup;
             Fake(Method(mockGlobals, abort));
 
-            extendedMetricBleServiceNoSetup.broadcastDeltaTimes(expectedDeltaTimes);
+            REQUIRE_THROWS(extendedMetricBleServiceNoSetup.broadcastDeltaTimes(expectedDeltaTimes));
 
             Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }

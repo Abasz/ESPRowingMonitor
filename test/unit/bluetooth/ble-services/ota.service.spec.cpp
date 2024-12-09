@@ -4,7 +4,10 @@
 #include "../../include/catch_amalgamated.hpp"
 #include "../../include/fakeit.hpp"
 
+#include "./esp_err.h"
+
 #include "../../include/NimBLEDevice.h"
+#include "../../include/globals.h"
 
 #include "../../../../src/peripherals/bluetooth/ble-services/ota.service.h"
 #include "../../../../src/utils/configuration.h"
@@ -16,6 +19,7 @@ using namespace fakeit;
 TEST_CASE("OtaBleService", "[ble-service]")
 {
     mockNimBLEServer.Reset();
+    mockGlobals.Reset();
 
     Mock<IOtaUpdaterService> mockOtaUpdaterService;
     Mock<NimBLECharacteristic> mockOtaTxCharacteristic;
@@ -67,16 +71,18 @@ TEST_CASE("OtaBleService", "[ble-service]")
         }
     }
 
-    SECTION("getOtaTx method should return")
+    SECTION("getOtaTx method should")
     {
-        SECTION("nullptr when called before begin method is called")
+        SECTION("call abort when called before begin method is called")
         {
-            auto *const txCharacteristic = otaBleService.getOtaTx();
+            Fake(Method(mockGlobals, abort));
 
-            REQUIRE(txCharacteristic == nullptr);
+            REQUIRE_THROWS(otaBleService.getOtaTx());
+
+            Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }
 
-        SECTION("stored transfer characteristic when called after begin method")
+        SECTION("return stored transfer characteristic when called after begin method")
         {
             otaBleService.setup(&mockNimBLEServer.get());
 

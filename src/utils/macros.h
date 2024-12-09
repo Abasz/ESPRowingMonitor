@@ -44,6 +44,19 @@ consteval std::array<char, 8> getCompileDate()
     return {year[0], year[1], year[2], year[3], month[0], month[1], day[0] == spaceChar ? zeroChar : day[0], day[1]};
 }
 
+consteval std::string_view extractClassName(const std::string_view className)
+{
+    auto end = className.find("::");
+    if (end == std::string_view::npos)
+    {
+        return "UnknownClass";
+    }
+
+    const auto start = className.rfind(" ", end) + 1;
+
+    return className.substr(start, end - start);
+}
+
 #define PRECISION_FLOAT 0
 #define PRECISION_DOUBLE 1
 #define STROKE_DETECTION_TORQUE 0
@@ -58,6 +71,8 @@ consteval std::array<char, 8> getCompileDate()
 #define VAL(str) #str
 #define TOSTRING(str) VAL(str)
 #define EMPTY(...) (true __VA_OPT__(&&false))
+// NOLINTNEXTLINE(bugprone-reserved-identifier)
+#define __CLASS_NAME__ extractClassName(__PRETTY_FUNCTION__)
 
 #if !defined(DEFAULT_CPS_LOGGING_LEVEL)
     #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace

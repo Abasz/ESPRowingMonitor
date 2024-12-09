@@ -229,7 +229,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
             BaseMetricsBleService baseMetricsBleServiceNoSetup(mockMockSettingsBleService.get(), mockEEPROMService.get());
             Fake(Method(mockGlobals, abort));
 
-            baseMetricsBleServiceNoSetup.isSubscribed();
+            REQUIRE_THROWS(baseMetricsBleServiceNoSetup.isSubscribed());
 
             Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }

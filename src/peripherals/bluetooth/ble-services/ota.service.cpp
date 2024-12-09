@@ -3,6 +3,7 @@
 #include "ArduinoLog.h"
 
 #include "../../../utils/enums.h"
+#include "../ble-metrics.model.h"
 #include "./ota.service.h"
 
 OtaBleService::OtaBleService(IOtaUpdaterService &_otaService) : callbacks(_otaService)
@@ -22,5 +23,7 @@ NimBLEService *OtaBleService::setup(NimBLEServer *const server)
 
 NimBLECharacteristic *OtaBleService::getOtaTx() const
 {
+    ASSERT_SETUP_CALLED(txCharacteristic);
+
     return txCharacteristic;
 }

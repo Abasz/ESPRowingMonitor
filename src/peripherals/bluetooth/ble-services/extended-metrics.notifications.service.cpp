@@ -2,25 +2,17 @@
 #include <numeric>
 #include <vector>
 
-#include "esp_err.h"
-
 #include "ArduinoLog.h"
 
 #include "../../../utils/enums.h"
+#include "../ble-metrics.model.h"
 #include "./extended-metrics.service.h"
 
 using std::vector;
 
 void ExtendedMetricBleService::broadcastHandleForces(const vector<float> &handleForces)
 {
-    if (handleForcesParams.characteristic == nullptr)
-    {
-        Log.errorln("Extended metrics ble service has not been setup, restarting");
-
-        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-
-        return;
-    }
+    ASSERT_SETUP_CALLED(handleForcesParams.characteristic);
 
     const unsigned short mtu = calculateMtu(handleForcesParams.clientIds);
 
@@ -42,14 +34,7 @@ void ExtendedMetricBleService::broadcastHandleForces(const vector<float> &handle
 
 void ExtendedMetricBleService::broadcastDeltaTimes(const vector<unsigned long> &deltaTimes)
 {
-    if (deltaTimesParams.characteristic == nullptr)
-    {
-        Log.errorln("Extended metrics ble service has not been setup, restarting");
-
-        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-
-        return;
-    }
+    ASSERT_SETUP_CALLED(deltaTimesParams.characteristic);
 
     deltaTimesParams.deltaTimes = deltaTimes;
 
@@ -67,14 +52,7 @@ void ExtendedMetricBleService::broadcastDeltaTimes(const vector<unsigned long> &
 
 void ExtendedMetricBleService::broadcastExtendedMetrics(const Configurations::precision avgStrokePower, const unsigned int recoveryDuration, const unsigned int driveDuration, const Configurations::precision dragCoefficient)
 {
-    if (extendedMetricsParams.characteristic == nullptr)
-    {
-        Log.errorln("Extended metrics ble service has not been setup, restarting");
-
-        ESP_ERROR_CHECK(ESP_ERR_NOT_FOUND);
-
-        return;
-    }
+    ASSERT_SETUP_CALLED(extendedMetricsParams.characteristic);
 
     extendedMetricsParams.avgStrokePower = avgStrokePower;
     extendedMetricsParams.recoveryDuration = recoveryDuration;
