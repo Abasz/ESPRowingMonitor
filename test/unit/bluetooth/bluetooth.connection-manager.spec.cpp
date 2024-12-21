@@ -5,18 +5,18 @@
 #include "../include/NimBLEDevice.h"
 
 #include "../../../src/peripherals/bluetooth/ble-services/extended-metrics.service.interface.h"
-#include "../../../src/peripherals/bluetooth/callbacks/chunked-notify.callbacks.h"
+#include "../../../src/peripherals/bluetooth/callbacks/connection-manager.callbacks.h"
 #include "../../../src/utils/enums.h"
 
 using namespace fakeit;
 
-TEST_CASE("ChunkedNotifyMetricCallbacks onSubscribed method", "[callbacks]")
+TEST_CASE("ConnectionManagerCallbacks onSubscribed method", "[callbacks]")
 {
     mockNimBLECharacteristic.Reset();
 
     ble_gap_conn_desc first = {0};
 
-    ChunkedNotifyMetricCallbacks chunkedNotifyMetricCallback;
+    ConnectionManagerCallbacks chunkedNotifyMetricCallback;
 
     SECTION("should add new connection's client ID to client ID list when subscribing")
     {

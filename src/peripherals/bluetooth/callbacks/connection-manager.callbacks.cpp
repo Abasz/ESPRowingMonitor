@@ -2,14 +2,14 @@
 #include "NimBLEDevice.h"
 
 #include "../../../utils/enums.h"
-#include "./chunked-notify.callbacks.h"
+#include "./connection-manager.callbacks.h"
 
-ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks()
+ConnectionManagerCallbacks::ConnectionManagerCallbacks()
 {
     clientIds.reserve(Configurations::maxConnectionCount);
 }
 
-void ChunkedNotifyMetricCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue)
+void ConnectionManagerCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue)
 {
     if (subValue > 0)
     {
@@ -29,7 +29,7 @@ void ChunkedNotifyMetricCallbacks::onSubscribe(NimBLECharacteristic *const pChar
         cend(clientIds));
 }
 
-const vector<unsigned char> &ChunkedNotifyMetricCallbacks::getClientIds() const
+const vector<unsigned char> &ConnectionManagerCallbacks::getClientIds() const
 {
     return clientIds;
 }

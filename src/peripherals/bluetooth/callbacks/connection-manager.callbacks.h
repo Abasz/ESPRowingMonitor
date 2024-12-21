@@ -7,12 +7,12 @@
 #include "../../../utils/configuration.h"
 #include "../ble-services/extended-metrics.service.interface.h"
 
-class ChunkedNotifyMetricCallbacks final : public NimBLECharacteristicCallbacks
+class ConnectionManagerCallbacks final : public NimBLECharacteristicCallbacks
 {
     std::vector<unsigned char> clientIds;
 
 public:
-    explicit ChunkedNotifyMetricCallbacks();
+    explicit ConnectionManagerCallbacks();
 
     void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue) override;
 
