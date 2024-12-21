@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "NimBLEDevice.h"
 
 #include "../../../utils/EEPROM/EEPROM.service.interface.h"
@@ -18,5 +20,5 @@ public:
 
     virtual void broadcastBaseMetrics(const BleMetricsModel::BleMetricsData &data) = 0;
 
-    virtual bool isSubscribed() = 0;
+    virtual const std::vector<unsigned char> &getClientIds() const = 0;
 };

@@ -22,7 +22,7 @@ void BluetoothController::update()
 {
     const auto now = millis();
     const unsigned int bleUpdateInterval = 1'000;
-    if (now - lastMetricsBroadcastTime > bleUpdateInterval && baseMetricsBleService.isSubscribed())
+    if (now - lastMetricsBroadcastTime > bleUpdateInterval && !baseMetricsBleService.getClientIds().empty())
     {
         baseMetricsBleService.broadcastBaseMetrics(bleData);
         lastMetricsBroadcastTime = now;
@@ -225,7 +225,8 @@ void BluetoothController::notifyNewMetrics(const RowingDataModels::RowingMetrics
         }
     }
 
-    if (baseMetricsBleService.isSubscribed())
+    const auto isBaseMetricsSubscribed = !baseMetricsBleService.getClientIds().empty();
+    if (isBaseMetricsSubscribed)
     {
         baseMetricsBleService.broadcastBaseMetrics(bleData);
     }

@@ -21,12 +21,12 @@ using namespace fakeit;
 TEST_CASE("BaseMetricsBleService", "[ble-service]")
 {
     mockNimBLEServer.Reset();
-    mockGlobals.Reset();
     mockArduino.Reset();
 
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISettingsBleService> mockMockSettingsBleService;
     Mock<NimBLECharacteristic> mockBaseMetricsCharacteristic;
+    Mock<NimBLECharacteristic> mockControlPointCharacteristic;
     Mock<NimBLEService> mockBaseMetricService;
 
     When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short))).AlwaysReturn(&mockBaseMetricService.get());
@@ -35,6 +35,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
     Fake(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const unsigned short)));
     Fake(Method(mockBaseMetricsCharacteristic, setCallbacks));
+    Fake(Method(mockControlPointCharacteristic, setCallbacks));
 
     SECTION("setup method")
     {
@@ -47,6 +48,8 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
             When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(PSCSensorBleFlags::cyclingPowerSvcUuid)).AlwaysReturn(&mockCpsService.get());
             When(OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockCpsCharacteristic.get());
+            When(OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(PSCSensorBleFlags::pscControlPointUuid, Any())).AlwaysReturn(&mockControlPointCharacteristic.get());
+
             Fake(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned short)));
             Fake(Method(mockCpsCharacteristic, setCallbacks));
 
@@ -59,7 +62,12 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
             SECTION("setup CPS measurement characteristic with correct parameters")
             {
+                Mock<NimBLECharacteristic> mockCpsMeasurementCharacteristic;
+
                 const unsigned int expectedMeasurementProperty = NIMBLE_PROPERTY::NOTIFY;
+
+                When(OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(PSCSensorBleFlags::pscMeasurementUuid, Any())).AlwaysReturn(&mockCpsMeasurementCharacteristic.get());
+                Fake(Method(mockCpsMeasurementCharacteristic, setCallbacks));
 
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CpsService);
 
@@ -67,6 +75,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                     OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
                         .Using(PSCSensorBleFlags::pscMeasurementUuid, expectedMeasurementProperty))
                     .Once();
+                Verify(Method(mockCpsMeasurementCharacteristic, setCallbacks)).Once();
             }
 
             SECTION("setup CPS features characteristic with correct parameters")
@@ -99,8 +108,8 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
             {
                 const unsigned int expectedControlPointProperty = NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE;
 
-                When(Method(mockCpsCharacteristic, setCallbacks)).Do([&mockCpsCharacteristic](NimBLECharacteristicCallbacks *callbacks)
-                                                                     { mockCpsCharacteristic.get().callbacks = callbacks; });
+                When(Method(mockControlPointCharacteristic, setCallbacks)).Do([&mockControlPointCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                                              { mockControlPointCharacteristic.get().callbacks = callbacks; });
 
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CpsService);
 
@@ -109,7 +118,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                         .Using(PSCSensorBleFlags::pscControlPointUuid, expectedControlPointProperty))
                     .Once();
 
-                REQUIRE(mockCpsCharacteristic.get().callbacks != nullptr);
+                REQUIRE(mockControlPointCharacteristic.get().callbacks != nullptr);
             }
 
             SECTION("set pscTask to the broadcastTask")
@@ -133,6 +142,8 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
             When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid)).AlwaysReturn(&mockCscService.get());
             When(OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockCscCharacteristic.get());
+            When(OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(CSCSensorBleFlags::cscControlPointUuid, Any())).AlwaysReturn(&mockControlPointCharacteristic.get());
+
             Fake(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned short)));
             Fake(Method(mockCscCharacteristic, setCallbacks));
 
@@ -145,7 +156,12 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
             SECTION("setup CSC measurement characteristic with correct parameters")
             {
+                Mock<NimBLECharacteristic> mockCscMeasurementCharacteristic;
+
                 const unsigned int expectedMeasurementProperty = NIMBLE_PROPERTY::NOTIFY;
+
+                When(OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(CSCSensorBleFlags::cscMeasurementUuid, Any())).AlwaysReturn(&mockCscMeasurementCharacteristic.get());
+                Fake(Method(mockCscMeasurementCharacteristic, setCallbacks));
 
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CscService);
 
@@ -153,6 +169,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                     OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
                         .Using(CSCSensorBleFlags::cscMeasurementUuid, expectedMeasurementProperty))
                     .Once();
+                Verify(Method(mockCscMeasurementCharacteristic, setCallbacks)).Once();
             }
 
             SECTION("setup CSC features characteristic with correct parameters")
@@ -185,8 +202,8 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
             {
                 const unsigned int expectedControlPointProperty = NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE;
 
-                When(Method(mockCscCharacteristic, setCallbacks)).Do([&mockCscCharacteristic](NimBLECharacteristicCallbacks *callbacks)
-                                                                     { mockCscCharacteristic.get().callbacks = callbacks; });
+                When(Method(mockControlPointCharacteristic, setCallbacks)).Do([&mockControlPointCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                                              { mockControlPointCharacteristic.get().callbacks = callbacks; });
 
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CscService);
 
@@ -195,7 +212,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                         .Using(CSCSensorBleFlags::cscControlPointUuid, expectedControlPointProperty))
                     .Once();
 
-                REQUIRE(mockCscCharacteristic.get().callbacks != nullptr);
+                REQUIRE(mockControlPointCharacteristic.get().callbacks != nullptr);
             }
 
             SECTION("should return the created settings NimBLEService")
@@ -228,6 +245,8 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
             When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(FTMSSensorBleFlags::ftmsSvcUuid)).AlwaysReturn(&mockFtmsService.get());
             When(OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockFtmsCharacteristic.get());
+            When(OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(FTMSSensorBleFlags::ftmsControlPointUuid, Any())).AlwaysReturn(&mockControlPointCharacteristic.get());
+
             Fake(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const unsigned short)));
             Fake(Method(mockFtmsCharacteristic, setCallbacks));
 
@@ -240,7 +259,12 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
             SECTION("setup FTMS rower data characteristic with correct parameters")
             {
+                Mock<NimBLECharacteristic> mockFtmsMeasurementCharacteristic;
+
                 const unsigned int expectedMeasurementProperty = NIMBLE_PROPERTY::NOTIFY;
+
+                When(OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(FTMSSensorBleFlags::rowerDataUuid, Any())).AlwaysReturn(&mockFtmsMeasurementCharacteristic.get());
+                Fake(Method(mockFtmsMeasurementCharacteristic, setCallbacks));
 
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
 
@@ -248,6 +272,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                     OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
                         .Using(FTMSSensorBleFlags::rowerDataUuid, expectedMeasurementProperty))
                     .Once();
+                Verify(Method(mockFtmsMeasurementCharacteristic, setCallbacks)).Once();
             }
 
             SECTION("setup FTMS features characteristic with correct parameters")
@@ -267,8 +292,8 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
             {
                 const unsigned int expectedControlPointProperty = NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE;
 
-                When(Method(mockFtmsCharacteristic, setCallbacks)).Do([&mockFtmsCharacteristic](NimBLECharacteristicCallbacks *callbacks)
-                                                                      { mockFtmsCharacteristic.get().callbacks = callbacks; });
+                When(Method(mockControlPointCharacteristic, setCallbacks)).Do([&mockControlPointCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                                              { mockControlPointCharacteristic.get().callbacks = callbacks; });
 
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
 
@@ -277,7 +302,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                         .Using(FTMSSensorBleFlags::ftmsControlPointUuid, expectedControlPointProperty))
                     .Once();
 
-                REQUIRE(mockFtmsCharacteristic.get().callbacks != nullptr);
+                REQUIRE(mockControlPointCharacteristic.get().callbacks != nullptr);
             }
 
             SECTION("should return the created service NimBLEService")
@@ -302,38 +327,22 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
         }
     }
 
-    SECTION("isSubscribed method should")
+    SECTION("getClientIds method should get baseMetrics subscriber client ID list")
     {
-        SECTION("trigger ESP_ERR_NOT_FOUND if BaseMetricsBleService setup() method was not called")
-        {
-            BaseMetricsBleService baseMetricsBleServiceNoSetup(mockMockSettingsBleService.get(), mockEEPROMService.get());
-            Fake(Method(mockGlobals, abort));
-
-            REQUIRE_THROWS(baseMetricsBleServiceNoSetup.isSubscribed());
-
-            Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
-        }
+        When(Method(mockBaseMetricsCharacteristic, setCallbacks)).Do([&mockBaseMetricsCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                                     { mockBaseMetricsCharacteristic.get().callbacks = callbacks; })
+            .Do([](NimBLECharacteristicCallbacks *callbacks) {});
 
         BaseMetricsBleService baseMetricsBleService(mockMockSettingsBleService.get(), mockEEPROMService.get());
         baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::CscService);
 
-        SECTION("true when there are subscribers")
-        {
-            When(Method(mockBaseMetricsCharacteristic, getSubscribedCount)).Return(1);
+        const std::vector<unsigned char> expectedClientIds{0, 1};
+        std::for_each(cbegin(expectedClientIds), cend(expectedClientIds), [&mockBaseMetricsCharacteristic](unsigned char clientId)
+                      { mockBaseMetricsCharacteristic.get().subscribe(clientId, 1); });
 
-            const auto isSubscribed = baseMetricsBleService.isSubscribed();
+        const auto clientIds = baseMetricsBleService.getClientIds();
 
-            REQUIRE(isSubscribed == true);
-        }
-
-        SECTION("false when there are no subscribers")
-        {
-            When(Method(mockBaseMetricsCharacteristic, getSubscribedCount)).Return(0);
-
-            const auto isSubscribed = baseMetricsBleService.isSubscribed();
-
-            REQUIRE(isSubscribed == false);
-        }
+        REQUIRE_THAT(clientIds, Catch::Matchers::Equals(expectedClientIds));
     }
 
     SECTION("broadcastBaseMetrics method should")

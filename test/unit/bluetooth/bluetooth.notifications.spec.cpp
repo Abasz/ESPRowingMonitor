@@ -75,7 +75,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
     When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
 
     When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
-    When(Method(mockBaseMetricsBleService, isSubscribed)).AlwaysReturn(true);
+    When(Method(mockBaseMetricsBleService, getClientIds)).AlwaysReturn({0});
     Fake(Method(mockBaseMetricsBleService, broadcastBaseMetrics));
 
     When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
@@ -193,7 +193,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
             SECTION("not subscribed should not subscribers")
             {
-                When(Method(mockBaseMetricsBleService, isSubscribed)).Return(false);
+                When(Method(mockBaseMetricsBleService, getClientIds)).Return(emptyClientIds);
 
                 bluetoothController.notifyNewMetrics(expectedData);
 
@@ -209,7 +209,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
                     .strokeCount = expectedData.strokeCount,
                     .avgStrokePower = expectedData.avgStrokePower,
                 };
-                When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
+                When(Method(mockBaseMetricsBleService, getClientIds)).Return({0});
 
                 bluetoothController.notifyNewMetrics(expectedData);
 
@@ -227,7 +227,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
         SECTION("reset lastMetricsBroadcastTime")
         {
             When(Method(mockArduino, millis)).Return(bleUpdateInterval, bleUpdateInterval * 2 - 1);
-            When(Method(mockBaseMetricsBleService, isSubscribed)).AlwaysReturn(true);
+            When(Method(mockBaseMetricsBleService, getClientIds)).AlwaysReturn({0});
 
             bluetoothController.notifyNewMetrics(expectedData);
             mockBaseMetricsBleService.ClearInvocationHistory();

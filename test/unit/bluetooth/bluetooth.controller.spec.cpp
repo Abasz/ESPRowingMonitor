@@ -64,7 +64,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     When(Method(mockOtaBleService, getOtaTx)).AlwaysReturn(&mockNimBLECharacteristic.get());
 
     When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
-    When(Method(mockBaseMetricsBleService, isSubscribed)).AlwaysReturn(false);
+    When(Method(mockBaseMetricsBleService, getClientIds)).AlwaysReturn(emptyClientIds);
 
     When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).AlwaysReturn(emptyClientIds);
@@ -107,7 +107,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
             When(Method(mockArduino, millis))
                 .Return(1'001);
-            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
+            When(Method(mockBaseMetricsBleService, getClientIds)).Return({0});
             Fake(Method(mockBaseMetricsBleService, broadcastBaseMetrics));
 
             bluetoothController.update();
@@ -125,7 +125,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
         SECTION("not notify base metric when last notification was send less than 1 seconds ago")
         {
             When(Method(mockArduino, millis)).Return(999);
-            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(true);
+            When(Method(mockBaseMetricsBleService, getClientIds)).Return({0});
 
             bluetoothController.update();
 
@@ -135,7 +135,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
         SECTION("not notify base metric when there are no subscribers")
         {
             When(Method(mockArduino, millis)).Return(1'001);
-            When(Method(mockBaseMetricsBleService, isSubscribed)).Return(false);
+            When(Method(mockBaseMetricsBleService, getClientIds)).Return(emptyClientIds);
 
             bluetoothController.update();
 

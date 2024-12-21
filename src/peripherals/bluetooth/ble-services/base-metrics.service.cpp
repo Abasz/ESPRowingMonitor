@@ -11,7 +11,7 @@
 
 using std::array;
 
-BaseMetricsBleService::BaseMetricsBleService(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService) : callbacks(_settingsBleService, _eepromService)
+BaseMetricsBleService::BaseMetricsBleService(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService) : controlPointCallbacks(_settingsBleService, _eepromService)
 {
     broadcastTask = [](void *parameters)
     {
@@ -61,11 +61,9 @@ void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetri
         0);
 }
 
-bool BaseMetricsBleService::isSubscribed()
+const vector<unsigned char> &BaseMetricsBleService::getClientIds() const
 {
-    ASSERT_SETUP_CALLED(parameters.characteristic);
-
-    return parameters.characteristic->getSubscribedCount() > 0;
+    return connectionManager.getClientIds();
 }
 
 void (*BaseMetricsBleService::broadcastTask)(void *);
@@ -189,6 +187,7 @@ NimBLEService *BaseMetricsBleService::setupCscServices(NimBLEServer *const serve
 
     auto *cscService = server->createService(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
     parameters.characteristic = cscService->createCharacteristic(CSCSensorBleFlags::cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
+    parameters.characteristic->setCallbacks(&connectionManager);
 
     cscService
         ->createCharacteristic(CSCSensorBleFlags::cscFeatureUuid, NIMBLE_PROPERTY::READ)
@@ -198,7 +197,7 @@ NimBLEService *BaseMetricsBleService::setupCscServices(NimBLEServer *const serve
         ->createCharacteristic(CommonBleFlags::sensorLocationUuid, NIMBLE_PROPERTY::READ)
         ->setValue(CommonBleFlags::sensorLocationFlag);
 
-    cscService->createCharacteristic(CSCSensorBleFlags::cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&callbacks);
+    cscService->createCharacteristic(CSCSensorBleFlags::cscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
     return cscService;
 }
@@ -208,6 +207,7 @@ NimBLEService *BaseMetricsBleService::setupPscServices(NimBLEServer *const serve
     Log.infoln("Setting up Cycling Power Profile");
     auto *pscService = server->createService(PSCSensorBleFlags::cyclingPowerSvcUuid);
     parameters.characteristic = pscService->createCharacteristic(PSCSensorBleFlags::pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
+    parameters.characteristic->setCallbacks(&connectionManager);
 
     pscService
         ->createCharacteristic(PSCSensorBleFlags::pscFeatureUuid, NIMBLE_PROPERTY::READ)
@@ -217,7 +217,7 @@ NimBLEService *BaseMetricsBleService::setupPscServices(NimBLEServer *const serve
         ->createCharacteristic(CommonBleFlags::sensorLocationUuid, NIMBLE_PROPERTY::READ)
         ->setValue(CommonBleFlags::sensorLocationFlag);
 
-    pscService->createCharacteristic(PSCSensorBleFlags::pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&callbacks);
+    pscService->createCharacteristic(PSCSensorBleFlags::pscControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
     return pscService;
 }
@@ -227,10 +227,10 @@ NimBLEService *BaseMetricsBleService::setupFtmsServices(NimBLEServer *const serv
     Log.infoln("Setting up Fitness Machine Profile");
 
     auto *ftmsService = server->createService(FTMSSensorBleFlags::ftmsSvcUuid);
-
     parameters.characteristic = ftmsService->createCharacteristic(FTMSSensorBleFlags::rowerDataUuid, NIMBLE_PROPERTY::NOTIFY);
+    parameters.characteristic->setCallbacks(&connectionManager);
 
-    ftmsService->createCharacteristic(FTMSSensorBleFlags::ftmsControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&callbacks);
+    ftmsService->createCharacteristic(FTMSSensorBleFlags::ftmsControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
     ftmsService
         ->createCharacteristic(FTMSSensorBleFlags::ftmsFeaturesUuid, NIMBLE_PROPERTY::READ)
