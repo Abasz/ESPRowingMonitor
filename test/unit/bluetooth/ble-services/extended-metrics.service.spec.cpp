@@ -93,43 +93,28 @@ TEST_CASE("ExtendedMetricBleService", "[ble-service]")
                 OverloadedMethod(mockExtendedMetricService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))
                     .Using(CommonBleFlags::extendedMetricsUuid, expectedMeasurementProperty))
                 .Once();
+            Verify(Method(mockExtendedMetricsCharacteristic, setCallbacks)).Once();
         }
     }
 
-    SECTION("isExtendedMetricsSubscribed method should")
+    SECTION("getExtendedMetricsClientId method should get extendedMetrics client ID list")
     {
+        Mock<NimBLECharacteristic> mockCharacteristic;
+
+        When(OverloadedMethod(mockExtendedMetricService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::extendedMetricsUuid, Any())).AlwaysReturn(&mockCharacteristic.get());
+        When(Method(mockCharacteristic, setCallbacks)).Do([&mockCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                          { mockCharacteristic.get().callbacks = callbacks; });
+
         ExtendedMetricBleService extendedMetricBleService;
         extendedMetricBleService.setup(&mockNimBLEServer.get());
 
-        SECTION("return false when extendedMetricBleService setup() method was not called")
-        {
-            mockGlobals.ClearInvocationHistory();
+        const std::vector<unsigned char> expectedClientIds{0, 1};
+        std::for_each(cbegin(expectedClientIds), cend(expectedClientIds), [&mockCharacteristic](unsigned char clientId)
+                      { mockCharacteristic.get().subscribe(clientId, 1); });
 
-            ExtendedMetricBleService extendedMetricBleServiceNoSetup;
-            Fake(Method(mockGlobals, abort));
+        const auto clientIds = extendedMetricBleService.getExtendedMetricsClientIds();
 
-            const auto isSubscribed = extendedMetricBleServiceNoSetup.isExtendedMetricsSubscribed();
-
-            REQUIRE(isSubscribed == false);
-        }
-
-        SECTION("true when there are subscribers")
-        {
-            When(Method(mockExtendedMetricsCharacteristic, getSubscribedCount)).Return(1);
-
-            const auto isSubscribed = extendedMetricBleService.isExtendedMetricsSubscribed();
-
-            REQUIRE(isSubscribed == true);
-        }
-
-        SECTION("false when there are no subscribers")
-        {
-            When(Method(mockExtendedMetricsCharacteristic, getSubscribedCount)).Return(0);
-
-            const auto isSubscribed = extendedMetricBleService.isExtendedMetricsSubscribed();
-
-            REQUIRE(isSubscribed == false);
-        }
+        REQUIRE_THAT(clientIds, Catch::Matchers::Equals(expectedClientIds));
     }
 
     SECTION("getHandleForcesClientId method should get handleForces client ID list")

@@ -69,8 +69,8 @@ TEST_CASE("BluetoothController", "[peripheral]")
     When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).AlwaysReturn(emptyClientIds);
     When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(emptyClientIds);
+    When(Method(mockExtendedMetricsBleService, getExtendedMetricsClientIds)).AlwaysReturn(emptyClientIds);
     When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(0);
-    When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).AlwaysReturn(false);
     Fake(Method(mockExtendedMetricsBleService, broadcastDeltaTimes));
 
     Fake(Method(mockNimBLEService, start));

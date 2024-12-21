@@ -14,6 +14,7 @@ class ExtendedMetricBleService final : public IExtendedMetricBleService
     struct ExtendedMetricsParams
     {
         NimBLECharacteristic *characteristic = nullptr;
+        ChunkedNotifyMetricCallbacks callbacks;
 
         Configurations::precision avgStrokePower = 0;
         unsigned int recoveryDuration = 0;
@@ -53,12 +54,11 @@ public:
 
     const vector<unsigned char> &getHandleForcesClientIds() const override;
     const vector<unsigned char> &getDeltaTimesClientIds() const override;
+    const vector<unsigned char> &getExtendedMetricsClientIds() const override;
 
     unsigned short calculateMtu(const std::vector<unsigned char> &clientIds) const override;
 
     void broadcastHandleForces(const std::vector<float> &handleForces) override;
     void broadcastDeltaTimes(const std::vector<unsigned long> &deltaTimes) override;
     void broadcastExtendedMetrics(Configurations::precision avgStrokePower, unsigned int recoveryDuration, unsigned int driveDuration, Configurations::precision dragCoefficient) override;
-
-    bool isExtendedMetricsSubscribed() const override;
 };

@@ -212,13 +212,14 @@ void BluetoothController::notifyNewMetrics(const RowingDataModels::RowingMetrics
 
     if constexpr (Configurations::hasExtendedBleMetrics)
     {
-        const auto isSubscribed = !extendedMetricsBleService.getHandleForcesClientIds().empty();
-        if (isSubscribed && !data.driveHandleForces.empty())
+        const auto isHandleForcesSubscribed = !extendedMetricsBleService.getHandleForcesClientIds().empty();
+        if (isHandleForcesSubscribed && !data.driveHandleForces.empty())
         {
             extendedMetricsBleService.broadcastHandleForces(data.driveHandleForces);
         }
 
-        if (extendedMetricsBleService.isExtendedMetricsSubscribed())
+        const auto isExtendedSubscribed = !extendedMetricsBleService.getExtendedMetricsClientIds().empty();
+        if (isExtendedSubscribed)
         {
             extendedMetricsBleService.broadcastExtendedMetrics(data.avgStrokePower, data.recoveryDuration, data.driveDuration, data.dragCoefficient);
         }

@@ -24,6 +24,7 @@ NimBLEService *ExtendedMetricBleService::setup(NimBLEServer *const server)
     deltaTimesParams.characteristic->setCallbacks(&deltaTimesParams.callbacks);
 
     extendedMetricsParams.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
+    extendedMetricsParams.characteristic->setCallbacks(&extendedMetricsParams.callbacks);
 
     return extendedMetricsService;
 }
@@ -36,6 +37,11 @@ const vector<unsigned char> &ExtendedMetricBleService::getHandleForcesClientIds(
 const vector<unsigned char> &ExtendedMetricBleService::getDeltaTimesClientIds() const
 {
     return deltaTimesParams.callbacks.getClientIds();
+}
+
+const vector<unsigned char> &ExtendedMetricBleService::getExtendedMetricsClientIds() const
+{
+    return extendedMetricsParams.callbacks.getClientIds();
 }
 
 unsigned short ExtendedMetricBleService::calculateMtu(const std::vector<unsigned char> &clientIds) const
@@ -51,14 +57,4 @@ unsigned short ExtendedMetricBleService::calculateMtu(const std::vector<unsigned
                     }
 
                     return std::min(previousMtu, currentMTU); });
-}
-
-bool ExtendedMetricBleService::isExtendedMetricsSubscribed() const
-{
-    if (extendedMetricsParams.characteristic == nullptr)
-    {
-        return false;
-    }
-
-    return extendedMetricsParams.characteristic->getSubscribedCount() > 0;
 }

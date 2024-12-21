@@ -81,7 +81,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
     When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockExtendedMetricsBleService, getHandleForcesClientIds)).AlwaysReturn({0});
     When(Method(mockExtendedMetricsBleService, getDeltaTimesClientIds)).AlwaysReturn(emptyClientIds);
-    When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).AlwaysReturn(true);
+    When(Method(mockExtendedMetricsBleService, getExtendedMetricsClientIds)).AlwaysReturn(emptyClientIds);
     Fake(Method(mockExtendedMetricsBleService, broadcastExtendedMetrics));
     Fake(Method(mockExtendedMetricsBleService, broadcastHandleForces));
     When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(0);
@@ -129,7 +129,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
         {
             SECTION("not subscribed should not broadcast")
             {
-                When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).Return(false);
+                When(Method(mockExtendedMetricsBleService, getExtendedMetricsClientIds)).AlwaysReturn(emptyClientIds);
 
                 bluetoothController.notifyNewMetrics(expectedData);
 
@@ -137,7 +137,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
             }
             SECTION("subscribed should broadcast with the correct parameters")
             {
-                When(Method(mockExtendedMetricsBleService, isExtendedMetricsSubscribed)).Return(true);
+                When(Method(mockExtendedMetricsBleService, getExtendedMetricsClientIds)).AlwaysReturn({0});
 
                 bluetoothController.notifyNewMetrics(expectedData);
 
