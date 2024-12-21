@@ -59,7 +59,7 @@ void ExtendedMetricBleService::broadcastExtendedMetrics(const Configurations::pr
     extendedMetricsParams.driveDuration = driveDuration;
     extendedMetricsParams.dragCoefficient = dragCoefficient;
 
-    const auto coreStackSize = 1'800U;
+    const auto coreStackSize = 2'048U;
 
     xTaskCreatePinnedToCore(
         ExtendedMetricBleService::ExtendedMetricsParams::task,

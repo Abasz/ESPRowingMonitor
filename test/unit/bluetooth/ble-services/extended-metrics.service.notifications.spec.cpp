@@ -47,7 +47,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
         const unsigned short expectedDriveDuration = lroundl(driveDuration / secInMicroSec * 4'096);
         const auto expectedAvgStrokePower = static_cast<short>(lround(avgStrokePower));
         const auto expectedDragFactor = static_cast<unsigned char>(lround(dragCoefficient * 1e6));
-        const auto expectedStackSize = 1'800U;
+        const auto expectedStackSize = 2'048U;
 
         Fake(OverloadedMethod(mockExtendedMetricsCharacteristic, setValue, void(const std::array<unsigned char, 7U>)));
         Fake(Method(mockExtendedMetricsCharacteristic, notify));
