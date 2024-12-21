@@ -226,11 +226,14 @@ NimBLEService *BaseMetricsBleService::setupFtmsServices(NimBLEServer *const serv
 {
     Log.infoln("Setting up Fitness Machine Profile");
 
-    auto *ftmsService = server->createService(FTMSSensorBleFlags::FtmsSvcUuid);
+    auto *ftmsService = server->createService(FTMSSensorBleFlags::ftmsSvcUuid);
+
     parameters.characteristic = ftmsService->createCharacteristic(FTMSSensorBleFlags::rowerDataUuid, NIMBLE_PROPERTY::NOTIFY);
 
+    ftmsService->createCharacteristic(FTMSSensorBleFlags::ftmsControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&callbacks);
+
     ftmsService
-        ->createCharacteristic(FTMSSensorBleFlags::FtmsFeaturesUuid, NIMBLE_PROPERTY::READ)
+        ->createCharacteristic(FTMSSensorBleFlags::ftmsFeaturesUuid, NIMBLE_PROPERTY::READ)
         ->setValue(FTMSSensorBleFlags::ftmsFeaturesFlag);
 
     return ftmsService;

@@ -302,9 +302,10 @@ public:
         FTMSMeasurementFeaturesFlags::TotalDistancePresent | FTMSMeasurementFeaturesFlags::InstantaneousPacePresent | FTMSMeasurementFeaturesFlags::InstantaneousPowerPresent | FTMSMeasurementFeaturesFlags::ResistanceLevelPresent;
     static constexpr unsigned int ftmsFeaturesFlag =
         FTMSFeaturesFlags::TotalDistanceSupported | FTMSFeaturesFlags::PaceSupported | FTMSFeaturesFlags::ResistanceLevelSupported | FTMSFeaturesFlags::PowerMeasurementSupported;
-    static constexpr unsigned short FtmsSvcUuid = 0x1826;
-    static const unsigned short FtmsFeaturesUuid = 0x2ACC;
-    static const unsigned short rowerDataUuid = 0x2AD1;
+    static constexpr unsigned short ftmsSvcUuid = 0x1826;
+    static constexpr unsigned short ftmsFeaturesUuid = 0x2ACC;
+    static constexpr unsigned short rowerDataUuid = 0x2AD1;
+    static constexpr unsigned short ftmsControlPointUuid = 0x2AD9;
 };
 
 class CommonBleFlags

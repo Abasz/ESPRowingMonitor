@@ -149,14 +149,14 @@ void BluetoothController::setupAdvertisement() const
         return;
 
     case BleServiceFlag::FtmsService:
-        pAdvertising->addServiceUUID(FTMSSensorBleFlags::FtmsSvcUuid);
+        pAdvertising->addServiceUUID(FTMSSensorBleFlags::ftmsSvcUuid);
 
         const std::string ftmsType{
             1U,
             FTMSTypeField::RowerSupported,
             FTMSTypeField::RowerSupported >> 8,
         };
-        pAdvertising->setServiceData(FTMSSensorBleFlags::FtmsSvcUuid, ftmsType);
+        pAdvertising->setServiceData(FTMSSensorBleFlags::ftmsSvcUuid, ftmsType);
 
         return;
     }

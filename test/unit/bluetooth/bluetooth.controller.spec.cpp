@@ -401,8 +401,8 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
                 bluetoothController.setup();
 
-                Verify(Method(mockNimBLEAdvertising, addServiceUUID).Using(FTMSSensorBleFlags::FtmsSvcUuid)).Once();
-                Verify(Method(mockNimBLEAdvertising, setServiceData).Using(FTMSSensorBleFlags::FtmsSvcUuid, ftmsType)).Once();
+                Verify(Method(mockNimBLEAdvertising, addServiceUUID).Using(FTMSSensorBleFlags::ftmsSvcUuid)).Once();
+                Verify(Method(mockNimBLEAdvertising, setServiceData).Using(FTMSSensorBleFlags::ftmsSvcUuid, ftmsType)).Once();
             }
         }
     }

@@ -220,6 +220,86 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                 Verify(OverloadedMethod(mockCscCharacteristic, setValue, void(const std::array<unsigned char, 11U>))).Once();
             }
         }
+
+        SECTION("when BleServiceFlag::FtmsService is passed should")
+        {
+            Mock<NimBLEService> mockFtmsService;
+            Mock<NimBLECharacteristic> mockFtmsCharacteristic;
+
+            When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(FTMSSensorBleFlags::ftmsSvcUuid)).AlwaysReturn(&mockFtmsService.get());
+            When(OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockFtmsCharacteristic.get());
+            Fake(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const unsigned short)));
+            Fake(Method(mockFtmsCharacteristic, setCallbacks));
+
+            SECTION("setup FTMS service")
+            {
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (unsigned short)).Using(FTMSSensorBleFlags::ftmsSvcUuid)).Once();
+            }
+
+            SECTION("setup FTMS rower data characteristic with correct parameters")
+            {
+                const unsigned int expectedMeasurementProperty = NIMBLE_PROPERTY::NOTIFY;
+
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                Verify(
+                    OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
+                        .Using(FTMSSensorBleFlags::rowerDataUuid, expectedMeasurementProperty))
+                    .Once();
+            }
+
+            SECTION("setup FTMS features characteristic with correct parameters")
+            {
+                const unsigned int expectedFlagsProperty = NIMBLE_PROPERTY::READ;
+
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                Verify(
+                    OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
+                        .Using(FTMSSensorBleFlags::ftmsFeaturesUuid, expectedFlagsProperty))
+                    .Once();
+                Verify(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const unsigned short)).Using(FTMSSensorBleFlags::ftmsFeaturesFlag)).Once();
+            }
+
+            SECTION("setup FTMS control point characteristic with correct parameters")
+            {
+                const unsigned int expectedControlPointProperty = NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE;
+
+                When(Method(mockFtmsCharacteristic, setCallbacks)).Do([&mockFtmsCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                                      { mockFtmsCharacteristic.get().callbacks = callbacks; });
+
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                Verify(
+                    OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
+                        .Using(FTMSSensorBleFlags::ftmsControlPointUuid, expectedControlPointProperty))
+                    .Once();
+
+                REQUIRE(mockFtmsCharacteristic.get().callbacks != nullptr);
+            }
+
+            SECTION("should return the created service NimBLEService")
+            {
+                auto *const service = baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                REQUIRE(service == &mockFtmsService.get());
+            }
+
+            SECTION("set ftmsTask to the broadcastTask")
+            {
+                Fake(Method(mockArduino, xTaskCreatePinnedToCore));
+                Fake(Method(mockArduino, vTaskDelete));
+                Fake(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const std::array<unsigned char, 14U>)));
+                Fake(Method(mockFtmsCharacteristic, notify));
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                baseMetricsBleService.broadcastBaseMetrics({1, 1, 1, 1, 1});
+
+                Verify(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const std::array<unsigned char, 14U>))).Once();
+            }
+        }
     }
 
     SECTION("isSubscribed method should")
