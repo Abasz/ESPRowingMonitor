@@ -9,7 +9,7 @@
 
 using std::vector;
 
-ExtendedMetricBleService::ExtendedMetricBleService() : callbacks(*this)
+ExtendedMetricBleService::ExtendedMetricBleService()
 {
 }
 
@@ -19,9 +19,9 @@ NimBLEService *ExtendedMetricBleService::setup(NimBLEServer *const server)
     auto *extendedMetricsService = server->createService(CommonBleFlags::extendedMetricsServiceUuid);
 
     handleForcesParams.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
-    handleForcesParams.characteristic->setCallbacks(&callbacks);
+    handleForcesParams.characteristic->setCallbacks(&handleForcesParams.callbacks);
     deltaTimesParams.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::deltaTimesUuid, NIMBLE_PROPERTY::NOTIFY);
-    deltaTimesParams.characteristic->setCallbacks(&callbacks);
+    deltaTimesParams.characteristic->setCallbacks(&deltaTimesParams.callbacks);
 
     extendedMetricsParams.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
 
@@ -30,22 +30,12 @@ NimBLEService *ExtendedMetricBleService::setup(NimBLEServer *const server)
 
 const vector<unsigned char> &ExtendedMetricBleService::getHandleForcesClientIds() const
 {
-    return handleForcesParams.clientIds;
-}
-
-void ExtendedMetricBleService::addHandleForcesClientId(unsigned char clientId)
-{
-    handleForcesParams.clientIds.push_back(clientId);
+    return handleForcesParams.callbacks.getClientIds();
 }
 
 const vector<unsigned char> &ExtendedMetricBleService::getDeltaTimesClientIds() const
 {
-    return deltaTimesParams.clientIds;
-}
-
-void ExtendedMetricBleService::addDeltaTimesClientId(const unsigned char clientId)
-{
-    deltaTimesParams.clientIds.push_back(clientId);
+    return deltaTimesParams.callbacks.getClientIds();
 }
 
 unsigned short ExtendedMetricBleService::calculateMtu(const std::vector<unsigned char> &clientIds) const
@@ -61,39 +51,6 @@ unsigned short ExtendedMetricBleService::calculateMtu(const std::vector<unsigned
                     }
 
                     return std::min(previousMtu, currentMTU); });
-}
-
-unsigned char ExtendedMetricBleService::removeDeltaTimesClient(const unsigned char clientId)
-{
-    const auto initialSize = deltaTimesParams.clientIds.size();
-
-    deltaTimesParams.clientIds.erase(
-        std::remove_if(
-            begin(deltaTimesParams.clientIds),
-            end(deltaTimesParams.clientIds),
-            [&](unsigned char connectionId)
-            {
-                return connectionId == clientId;
-            }),
-        cend(deltaTimesParams.clientIds));
-
-    return initialSize - deltaTimesParams.clientIds.size();
-}
-
-unsigned char ExtendedMetricBleService::removeHandleForcesClient(const unsigned char clientId)
-{
-    const auto initialSize = handleForcesParams.clientIds.size();
-    handleForcesParams.clientIds.erase(
-        std::remove_if(
-            begin(handleForcesParams.clientIds),
-            end(handleForcesParams.clientIds),
-            [&](unsigned char connectionId)
-            {
-                return connectionId == clientId;
-            }),
-        cend(handleForcesParams.clientIds));
-
-    return initialSize - handleForcesParams.clientIds.size();
 }
 
 bool ExtendedMetricBleService::isExtendedMetricsSubscribed() const

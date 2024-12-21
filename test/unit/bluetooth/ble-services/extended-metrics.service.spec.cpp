@@ -132,111 +132,20 @@ TEST_CASE("ExtendedMetricBleService", "[ble-service]")
         }
     }
 
-    SECTION("removeDeltaTimesClient method")
-    {
-        ExtendedMetricBleService extendedMetricBleService;
-
-        SECTION("should remove clientId if exist in the deltaTimes ID list")
-        {
-            const auto expectedClientId = 0;
-            extendedMetricBleService.addDeltaTimesClientId(expectedClientId);
-
-            extendedMetricBleService.removeDeltaTimesClient(expectedClientId);
-
-            REQUIRE_THAT(extendedMetricBleService.getDeltaTimesClientIds(), Catch::Matchers::IsEmpty());
-        }
-
-        SECTION("should not remove clientId if does not exist in the deltaTimes ID list")
-        {
-            const auto expectedClientId = 0;
-            extendedMetricBleService.addDeltaTimesClientId(expectedClientId);
-
-            extendedMetricBleService.removeDeltaTimesClient(1);
-
-            REQUIRE_THAT(extendedMetricBleService.getDeltaTimesClientIds(), Catch::Matchers::SizeIs(1));
-        }
-
-        SECTION("should return the number of elements removed")
-        {
-            const auto expectedClientId = 0;
-            extendedMetricBleService.addDeltaTimesClientId(expectedClientId);
-            extendedMetricBleService.addDeltaTimesClientId(expectedClientId);
-
-            const auto removeFirst = extendedMetricBleService.removeDeltaTimesClient(0);
-            const auto removeSecond = extendedMetricBleService.removeDeltaTimesClient(0);
-
-            REQUIRE(removeFirst == 2);
-            REQUIRE(removeSecond == 0);
-        }
-    }
-
-    SECTION("removeHandleForcesClient method")
-    {
-        ExtendedMetricBleService extendedMetricBleService;
-
-        SECTION("should remove clientId if exist in the handleForces ID list")
-        {
-            const auto expectedClientId = 0;
-            extendedMetricBleService.addHandleForcesClientId(expectedClientId);
-
-            extendedMetricBleService.removeHandleForcesClient(expectedClientId);
-
-            REQUIRE_THAT(extendedMetricBleService.getHandleForcesClientIds(), Catch::Matchers::IsEmpty());
-        }
-
-        SECTION("should not remove clientId if does not exist in handleForces ID list")
-        {
-            const auto expectedClientId = 0;
-            extendedMetricBleService.addHandleForcesClientId(expectedClientId);
-
-            extendedMetricBleService.removeHandleForcesClient(1);
-
-            REQUIRE_THAT(extendedMetricBleService.getHandleForcesClientIds(), Catch::Matchers::SizeIs(1));
-        }
-
-        SECTION("should return the number of elements removed")
-        {
-            const auto expectedClientId = 0;
-            extendedMetricBleService.addHandleForcesClientId(expectedClientId);
-            extendedMetricBleService.addHandleForcesClientId(expectedClientId);
-
-            const auto removeFirst = extendedMetricBleService.removeHandleForcesClient(0);
-            const auto removeSecond = extendedMetricBleService.removeHandleForcesClient(0);
-
-            REQUIRE(removeFirst == 2);
-            REQUIRE(removeSecond == 0);
-        }
-    }
-
-    SECTION("addHandleForcesClientId method should add to handleForces client ID list")
-    {
-        ExtendedMetricBleService extendedMetricBleService;
-
-        const auto expectedClientId = 0;
-
-        extendedMetricBleService.addHandleForcesClientId(expectedClientId);
-
-        REQUIRE_THAT(extendedMetricBleService.getHandleForcesClientIds(), Catch::Matchers::Equals(std::vector<unsigned char>{expectedClientId}));
-    }
-
-    SECTION("addDeltaTimesClientId method should add to deltaTimes client ID list")
-    {
-        ExtendedMetricBleService extendedMetricBleService;
-
-        const auto expectedClientId = 0;
-
-        extendedMetricBleService.addDeltaTimesClientId(expectedClientId);
-
-        REQUIRE_THAT(extendedMetricBleService.getDeltaTimesClientIds(), Catch::Matchers::Equals(std::vector<unsigned char>{expectedClientId}));
-    }
-
     SECTION("getHandleForcesClientId method should get handleForces client ID list")
     {
+        Mock<NimBLECharacteristic> mockCharacteristic;
+
+        When(OverloadedMethod(mockExtendedMetricService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::handleForcesUuid, Any())).AlwaysReturn(&mockCharacteristic.get());
+        When(Method(mockCharacteristic, setCallbacks)).Do([&mockCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                          { mockCharacteristic.get().callbacks = callbacks; });
+
         ExtendedMetricBleService extendedMetricBleService;
+        extendedMetricBleService.setup(&mockNimBLEServer.get());
 
         const std::vector<unsigned char> expectedClientIds{0, 1};
-        std::for_each(cbegin(expectedClientIds), cend(expectedClientIds), [&extendedMetricBleService](unsigned char clientId)
-                      { extendedMetricBleService.addHandleForcesClientId(clientId); });
+        std::for_each(cbegin(expectedClientIds), cend(expectedClientIds), [&mockCharacteristic](unsigned char clientId)
+                      { mockCharacteristic.get().subscribe(clientId, 1); });
 
         const auto clientIds = extendedMetricBleService.getHandleForcesClientIds();
 
@@ -245,11 +154,18 @@ TEST_CASE("ExtendedMetricBleService", "[ble-service]")
 
     SECTION("getDeltaTimesClientId method should get deltaTimes client ID list")
     {
+        Mock<NimBLECharacteristic> mockCharacteristic;
+
+        When(OverloadedMethod(mockExtendedMetricService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::deltaTimesUuid, Any())).AlwaysReturn(&mockCharacteristic.get());
+        When(Method(mockCharacteristic, setCallbacks)).Do([&mockCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                          { mockCharacteristic.get().callbacks = callbacks; });
+
         ExtendedMetricBleService extendedMetricBleService;
+        extendedMetricBleService.setup(&mockNimBLEServer.get());
 
         const std::vector<unsigned char> expectedClientIds{0, 1};
-        std::for_each(cbegin(expectedClientIds), cend(expectedClientIds), [&extendedMetricBleService](unsigned char clientId)
-                      { extendedMetricBleService.addDeltaTimesClientId(clientId); });
+        std::for_each(cbegin(expectedClientIds), cend(expectedClientIds), [&mockCharacteristic](unsigned char clientId)
+                      { mockCharacteristic.get().subscribe(clientId, 1); });
 
         const auto clientIds = extendedMetricBleService.getDeltaTimesClientIds();
 

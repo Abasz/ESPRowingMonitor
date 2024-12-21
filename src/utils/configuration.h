@@ -15,6 +15,8 @@ class Configurations
 public:
     typedef PRECISION precision;
 
+    static constexpr unsigned char maxConnectionCount = 2;
+
     static constexpr bool logCalibration = LOG_CALIBRATION;
     static constexpr ArduinoLogLevel defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
     static constexpr bool supportSdCardLogging = SUPPORT_SD_CARD_LOGGING;

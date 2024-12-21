@@ -12,5 +12,4 @@ public:
     explicit ServerCallbacks(IExtendedMetricBleService &_extendedMetricsBleService);
 
     void onConnect(NimBLEServer *pServer) override;
-    void onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc) override;
 };

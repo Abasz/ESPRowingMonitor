@@ -4,18 +4,32 @@
 #include "../../../utils/enums.h"
 #include "./chunked-notify.callbacks.h"
 
-ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks(IExtendedMetricBleService &_extendedMetricsBleService) : extendedMetricsBleService(_extendedMetricsBleService)
+ChunkedNotifyMetricCallbacks::ChunkedNotifyMetricCallbacks()
 {
+    clientIds.reserve(Configurations::maxConnectionCount);
 }
 
 void ChunkedNotifyMetricCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue)
 {
-    if (pCharacteristic->getUUID().toString() == CommonBleFlags::handleForcesUuid)
+    if (subValue > 0)
     {
-        extendedMetricsBleService.addHandleForcesClientId(desc->conn_handle);
+        clientIds.push_back(desc->conn_handle);
+
+        return;
     }
-    if (pCharacteristic->getUUID().toString() == CommonBleFlags::deltaTimesUuid)
-    {
-        extendedMetricsBleService.addDeltaTimesClientId(desc->conn_handle);
-    }
+
+    clientIds.erase(
+        std::remove_if(
+            begin(clientIds),
+            end(clientIds),
+            [&](unsigned char connectionId)
+            {
+                return connectionId == desc->conn_handle;
+            }),
+        cend(clientIds));
+}
+
+const vector<unsigned char> &ChunkedNotifyMetricCallbacks::getClientIds() const
+{
+    return clientIds;
 }

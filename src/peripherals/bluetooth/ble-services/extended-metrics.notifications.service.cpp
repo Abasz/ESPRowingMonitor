@@ -14,7 +14,7 @@ void ExtendedMetricBleService::broadcastHandleForces(const vector<float> &handle
 {
     ASSERT_SETUP_CALLED(handleForcesParams.characteristic);
 
-    const unsigned short mtu = calculateMtu(handleForcesParams.clientIds);
+    const unsigned short mtu = calculateMtu(handleForcesParams.callbacks.getClientIds());
 
     handleForcesParams.chunkSize = (mtu - 3U - 2U) / sizeof(float);
     handleForcesParams.handleForces = handleForces;

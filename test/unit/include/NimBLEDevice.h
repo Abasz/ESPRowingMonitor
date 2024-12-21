@@ -190,6 +190,11 @@ public:
     virtual size_t getSubscribedCount() = 0;
     virtual NimBLEService *getService() = 0;
     virtual NimBLEUUID getUUID() = 0;
+    void subscribe(unsigned char clientId, unsigned short subValue)
+    {
+        ble_gap_conn_desc desc = {clientId};
+        callbacks->onSubscribe(this, &desc, subValue);
+    };
 };
 extern fakeit::Mock<NimBLECharacteristic> mockNimBLECharacteristic;
 

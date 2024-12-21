@@ -137,8 +137,9 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
         When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(100);
 
         When(OverloadedMethod(mockExtendedMetricService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::handleForcesUuid, Any())).AlwaysReturn(&mockHandleForcesCharacteristic.get());
+        When(Method(mockHandleForcesCharacteristic, setCallbacks)).Do([&mockHandleForcesCharacteristic](NimBLECharacteristicCallbacks *callbacks)
+                                                                      { mockHandleForcesCharacteristic.get().callbacks = callbacks; });
 
-        Fake(Method(mockHandleForcesCharacteristic, setCallbacks));
         Fake(OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const unsigned char *data, size_t length)));
         Fake(Method(mockHandleForcesCharacteristic, notify));
 
@@ -147,6 +148,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
         ExtendedMetricBleService extendedMetricBleService;
         extendedMetricBleService.setup(&mockNimBLEServer.get());
+        mockHandleForcesCharacteristic.get().subscribe(0, 1);
 
         SECTION("calculate stack size for the task")
         {
@@ -156,7 +158,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
                 const auto expectedStackSize = coreStackSize + expectedMTU / 3;
 
                 When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(expectedMTU);
-                extendedMetricBleService.addHandleForcesClientId(0);
 
                 extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
 
@@ -172,7 +173,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
                 const auto expectedStackSize = coreStackSize + (expectedHandleForces.size() * sizeof(float)) / 3;
 
                 When(Method(mockNimBLEServer, getPeerMTU)).AlwaysReturn(expectedMTU);
-                extendedMetricBleService.addHandleForcesClientId(0);
 
                 extendedMetricBleService.broadcastHandleForces(expectedHandleForces);
 
@@ -185,8 +185,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
         SECTION("should start a task")
         {
-            extendedMetricBleService.addHandleForcesClientId(0);
-
             extendedMetricBleService.broadcastHandleForces(expectedHandleForces);
 
             Verify(
@@ -202,7 +200,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
             SECTION("one notify when all handleForces plus header can fit within the MTU")
             {
                 When(Method(mockNimBLEServer, getPeerMTU)).Return(expectedMTU);
-                extendedMetricBleService.addHandleForcesClientId(0);
 
                 extendedMetricBleService.broadcastHandleForces(expectedHandleForces);
 
@@ -214,7 +211,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
             SECTION("multiple consecutive notifies when handleForces plus header do not fit within the MTU")
             {
-                extendedMetricBleService.addHandleForcesClientId(0);
                 const auto expectedMTU = 512U;
 
                 for (size_t i = 0; expectedMTU - i > 23; ++i)
@@ -256,7 +252,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
                     results.push_back(std::vector<unsigned char>(data, data + length));
 
                     return true; }));
-            extendedMetricBleService.addHandleForcesClientId(0);
 
             extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
 
@@ -284,7 +279,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
                     results.push_back(std::vector<unsigned char>(data, data + length));
 
                     return true; }));
-            extendedMetricBleService.addHandleForcesClientId(0);
 
             extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
 
@@ -314,7 +308,6 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
         SECTION("delete task")
         {
             mockArduino.ClearInvocationHistory();
-            extendedMetricBleService.addHandleForcesClientId(0);
 
             extendedMetricBleService.broadcastHandleForces(expectedHandleForces);
 

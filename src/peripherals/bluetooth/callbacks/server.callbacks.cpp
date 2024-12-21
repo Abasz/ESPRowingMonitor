@@ -4,6 +4,7 @@
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
+#include "../../../utils/configuration.h"
 #include "./server.callbacks.h"
 
 ServerCallbacks::ServerCallbacks(IExtendedMetricBleService &_extendedMetricsBleService) : extendedMetricsBleService(_extendedMetricsBleService)
@@ -12,17 +13,9 @@ ServerCallbacks::ServerCallbacks(IExtendedMetricBleService &_extendedMetricsBleS
 
 void ServerCallbacks::onConnect(NimBLEServer *pServer)
 {
-    if (pServer->getConnectedCount() < 2)
+    if (pServer->getConnectedCount() < Configurations::maxConnectionCount)
     {
         Log.verboseln("Device connected");
         NimBLEDevice::getAdvertising()->start();
     }
-}
-
-void ServerCallbacks::onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc)
-{
-    Log.verboseln("disconnected ID: %n", desc->conn_handle);
-
-    extendedMetricsBleService.removeHandleForcesClient(desc->conn_handle);
-    extendedMetricsBleService.removeDeltaTimesClient(desc->conn_handle);
 }

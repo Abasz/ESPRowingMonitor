@@ -42,27 +42,5 @@ TEST_CASE("ServerCallbacks", "[callbacks]")
             Verify(Method(mockNimBLEAdvertising, start)).Never();
         }
     }
-
-    SECTION("onDisconnect method should")
-    {
-        ble_gap_conn_desc first = {0};
-        Fake(Method(mockExtendedMetricBleService, removeDeltaTimesClient));
-        Fake(Method(mockExtendedMetricBleService, removeHandleForcesClient));
-
-        SECTION("should remove clientID in the deltaTimes ID list")
-        {
-
-            serverCallbacks.onDisconnect(&mockNimBLEServer.get(), &first);
-
-            Verify(Method(mockExtendedMetricBleService, removeHandleForcesClient).Using(first.conn_handle)).Once();
-        }
-
-        SECTION("should remove clientID in thehandleForces ID list")
-        {
-            serverCallbacks.onDisconnect(&mockNimBLEServer.get(), &first);
-
-            Verify(Method(mockExtendedMetricBleService, removeHandleForcesClient).Using(first.conn_handle)).Once();
-        }
-    }
 }
 // NOLINTEND(readability-magic-numbers)
