@@ -16,13 +16,6 @@ NimBLEService *BatteryBleService::setup(NimBLEServer *const server)
     return batteryService;
 }
 
-bool BatteryBleService::isSubscribed() const
-{
-    ASSERT_SETUP_CALLED(characteristic);
-
-    return characteristic->getSubscribedCount() > 0;
-}
-
 void BatteryBleService::broadcastBatteryLevel() const
 {
     ASSERT_SETUP_CALLED(characteristic);

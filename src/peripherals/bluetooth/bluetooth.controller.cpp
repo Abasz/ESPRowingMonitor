@@ -165,10 +165,7 @@ void BluetoothController::setupAdvertisement() const
 void BluetoothController::notifyBattery(const unsigned char batteryLevel) const
 {
     batteryBleService.setBatteryLevel(batteryLevel);
-    if (batteryBleService.isSubscribed())
-    {
-        batteryBleService.broadcastBatteryLevel();
-    }
+    batteryBleService.broadcastBatteryLevel();
 }
 
 void BluetoothController::notifyNewDeltaTime(unsigned long deltaTime)

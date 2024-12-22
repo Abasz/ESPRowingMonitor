@@ -73,29 +73,5 @@ TEST_CASE("BatteryBleService", "[ble-service]")
 
         Verify(Method(mockBatteryCharacteristic, notify));
     }
-
-    SECTION("isSubscribed method should return")
-    {
-        batteryBleService.setup(&mockNimBLEServer.get());
-        mockBatteryCharacteristic.ClearInvocationHistory();
-
-        SECTION("true when there are subscribers")
-        {
-            When(Method(mockBatteryCharacteristic, getSubscribedCount)).Return(1);
-
-            const auto isSubscribed = batteryBleService.isSubscribed();
-
-            REQUIRE(isSubscribed == true);
-        }
-
-        SECTION("false when there are no subscribers")
-        {
-            When(Method(mockBatteryCharacteristic, getSubscribedCount)).Return(0);
-
-            const auto isSubscribed = batteryBleService.isSubscribed();
-
-            REQUIRE(isSubscribed == false);
-        }
-    }
 }
 // NOLINTEND(readability-magic-numbers)

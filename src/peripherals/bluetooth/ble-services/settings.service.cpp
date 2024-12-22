@@ -30,10 +30,7 @@ void SettingsBleService::broadcastSettings() const
     ASSERT_SETUP_CALLED(characteristic);
 
     characteristic->setValue(getSettings());
-    if (characteristic->getSubscribedCount() > 0)
-    {
-        characteristic->notify();
-    }
+    characteristic->notify();
 }
 
 std::array<unsigned char, SettingsBleService::settingsArrayLength> SettingsBleService::getSettings() const

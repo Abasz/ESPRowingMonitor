@@ -97,26 +97,13 @@ TEST_CASE("BluetoothController", "[callbacks]")
 
         SECTION("set new battery level")
         {
-            When(Method(mockBatteryBleService, isSubscribed)).Return(true);
-
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
             Verify(Method(mockBatteryBleService, setBatteryLevel).Using(expectedBatteryLevel));
         }
 
-        SECTION("not notify if there are no subscribers")
+        SECTION("notify")
         {
-            When(Method(mockBatteryBleService, isSubscribed)).Return(false);
-
-            bluetoothController.notifyBattery(expectedBatteryLevel);
-
-            VerifyNoOtherInvocations(Method(mockBatteryBleService, broadcastBatteryLevel));
-        }
-
-        SECTION("notify if there are subscribers")
-        {
-            When(Method(mockBatteryBleService, isSubscribed)).Return(true);
-
             bluetoothController.notifyBattery(expectedBatteryLevel);
 
             Verify(Method(mockBatteryBleService, broadcastBatteryLevel));

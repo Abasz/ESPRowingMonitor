@@ -11,7 +11,6 @@ class BatteryBleService final : public IBatteryBleService
 public:
     NimBLEService *setup(NimBLEServer *server) override;
 
-    bool isSubscribed() const override;
     void broadcastBatteryLevel() const override;
     void setBatteryLevel(unsigned char batteryLevel) const override;
 };

@@ -107,7 +107,6 @@ TEST_CASE("SettingsBleService", "[ble-service]")
 
     SECTION("broadcastSettings method should")
     {
-        When(Method(mockSettingsCharacteristic, getSubscribedCount)).AlwaysReturn(0);
         Fake(Method(mockSettingsCharacteristic, notify));
 
         settingsBleService.setup(&mockNimBLEServer.get());
@@ -211,19 +210,8 @@ TEST_CASE("SettingsBleService", "[ble-service]")
                 .Once();
         }
 
-        SECTION("not notify if there are no subscribers")
+        SECTION("notify")
         {
-            When(Method(mockSettingsCharacteristic, getSubscribedCount)).Return(0);
-
-            settingsBleService.broadcastSettings();
-
-            Verify(Method(mockSettingsCharacteristic, notify)).Never();
-        }
-
-        SECTION("notify if there are subscribers")
-        {
-            When(Method(mockSettingsCharacteristic, getSubscribedCount)).Return(1);
-
             settingsBleService.broadcastSettings();
 
             Verify(Method(mockSettingsCharacteristic, notify));
