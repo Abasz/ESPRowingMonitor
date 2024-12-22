@@ -47,7 +47,7 @@ class BluetoothController final : public IBluetoothController
 
     void setupBleDevice();
     void setupServices();
-    void setupAdvertisement() const;
+    void setupAdvertisement(const std::string &deviceName) const;
     void flushBleDeltaTimes(unsigned short mtu);
 
 public:

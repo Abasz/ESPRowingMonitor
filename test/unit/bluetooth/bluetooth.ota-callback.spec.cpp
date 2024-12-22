@@ -22,9 +22,9 @@ TEST_CASE("OtaRxCallbacks onWrite method should", "[ota]")
 
     Mock<IOtaUpdaterService> mockOtaService;
     Mock<NimBLECharacteristic> mockOtaRxCharacteristic;
+    Mock<NimBLEConnInfo> mockConnectionInfo;
 
-    ble_gap_conn_desc gapDescriptor{
-        .conn_handle = 0};
+    When(Method(mockConnectionInfo, getConnHandle)).AlwaysReturn(0);
 
     When(Method(mockOtaRxCharacteristic, getService)).AlwaysReturn(&mockNimBLEService.get());
     When(Method(mockNimBLEService, getServer)).AlwaysReturn(&mockNimBLEServer.get());
@@ -37,7 +37,7 @@ TEST_CASE("OtaRxCallbacks onWrite method should", "[ota]")
 
     SECTION("get MTU")
     {
-        otaCallback.onWrite(&mockOtaRxCharacteristic.get(), &gapDescriptor);
+        otaCallback.onWrite(&mockOtaRxCharacteristic.get(), mockConnectionInfo.get());
 
         Verify(Method(mockNimBLEServer, getPeerMTU)).Once();
     }
@@ -58,7 +58,7 @@ TEST_CASE("OtaRxCallbacks onWrite method should", "[ota]")
                                                     const auto temp = std::span<const unsigned char>(data.data(), data.size());
                                                     resultValue.insert(cend(resultValue), cbegin(temp), cend(temp)); });
 
-        otaCallback.onWrite(&mockOtaRxCharacteristic.get(), &gapDescriptor);
+        otaCallback.onWrite(&mockOtaRxCharacteristic.get(), mockConnectionInfo.get());
 
         Verify(Method(mockOtaService, onData)).Once();
 

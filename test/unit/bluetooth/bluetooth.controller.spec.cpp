@@ -53,6 +53,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     const std::vector<unsigned char> emptyClientIds{};
 
     Fake(Method(mockNimBLEServer, createServer));
+    Fake(Method(mockNimBLEServer, advertiseOnDisconnect));
     Fake(Method(mockNimBLEServer, init));
     Fake(Method(mockNimBLEServer, setPower));
     Fake(Method(mockNimBLEServer, start));
@@ -80,6 +81,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     Fake(Method(mockNimBLEAdvertising, setAppearance));
     Fake(Method(mockNimBLEAdvertising, addServiceUUID));
     Fake(Method(mockNimBLEAdvertising, setServiceData));
+    Fake(Method(mockNimBLEAdvertising, setName));
 
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(serviceFlag);
 
@@ -223,15 +225,15 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
     SECTION("setup method")
     {
+        auto cpsDeviceName = Configurations::deviceName;
+        cpsDeviceName.append(" (CPS)");
+        auto cscDeviceName = Configurations::deviceName;
+        cscDeviceName.append(" (CSC)");
+        auto ftmsDeviceName = Configurations::deviceName;
+        ftmsDeviceName.append(" (FTMS)");
+
         SECTION("should initialize BLE with correct device name")
         {
-            auto cpsDeviceName = Configurations::deviceName;
-            cpsDeviceName.append(" (CPS)");
-            auto cscDeviceName = Configurations::deviceName;
-            cscDeviceName.append(" (CSC)");
-            auto ftmsDeviceName = Configurations::deviceName;
-            ftmsDeviceName.append(" (FTMS)");
-
             When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
 
             bluetoothController.setup();
@@ -255,8 +257,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
         {
             bluetoothController.setup();
 
-            Verify(Method(mockNimBLEServer, setPower).Using(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_ADV)).Once();
-            Verify(Method(mockNimBLEServer, setPower).Using(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_DEFAULT)).Once();
+            Verify(Method(mockNimBLEServer, setPower).Using(static_cast<signed char>(Configurations::bleSignalStrength))).Once();
         }
 
         SECTION("should create server")
@@ -264,6 +265,13 @@ TEST_CASE("BluetoothController", "[peripheral]")
             bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, createServer)).Once();
+        }
+
+        SECTION("should turn advertise on disconnect on BLE power")
+        {
+            bluetoothController.setup();
+
+            Verify(Method(mockNimBLEServer, advertiseOnDisconnect).Using(true)).Once();
         }
 
         SECTION("should set server callback function")
@@ -377,6 +385,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
                 bluetoothController.setup();
 
+                Verify(Method(mockNimBLEAdvertising, setName).Using(cpsDeviceName)).Once();
                 Verify(Method(mockNimBLEAdvertising, setAppearance).Using(PSCSensorBleFlags::bleAppearanceCyclingPower)).Once();
                 Verify(Method(mockNimBLEAdvertising, addServiceUUID).Using(PSCSensorBleFlags::cyclingPowerSvcUuid)).Once();
             }
@@ -387,6 +396,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
                 bluetoothController.setup();
 
+                Verify(Method(mockNimBLEAdvertising, setName).Using(cscDeviceName)).Once();
                 Verify(Method(mockNimBLEAdvertising, setAppearance).Using(CSCSensorBleFlags::bleAppearanceCyclingSpeedCadence)).Once();
                 Verify(Method(mockNimBLEAdvertising, addServiceUUID).Using(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid)).Once();
             }
@@ -401,6 +411,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
                 bluetoothController.setup();
 
+                Verify(Method(mockNimBLEAdvertising, setName).Using(ftmsDeviceName)).Once();
                 Verify(Method(mockNimBLEAdvertising, addServiceUUID).Using(FTMSSensorBleFlags::ftmsSvcUuid)).Once();
                 Verify(Method(mockNimBLEAdvertising, setServiceData).Using(FTMSSensorBleFlags::ftmsSvcUuid, ftmsType)).Once();
             }

@@ -20,5 +20,5 @@ class ControlPointCallbacks final : public NimBLECharacteristicCallbacks
 public:
     explicit ControlPointCallbacks(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService);
 
-    void onWrite(NimBLECharacteristic *pCharacteristic) override;
+    void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo) override;
 };

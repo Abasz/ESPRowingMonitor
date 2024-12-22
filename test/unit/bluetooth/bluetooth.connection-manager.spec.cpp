@@ -14,20 +14,21 @@ TEST_CASE("ConnectionManagerCallbacks onSubscribed method", "[callbacks]")
 {
     mockNimBLECharacteristic.Reset();
 
-    ble_gap_conn_desc first = {0};
+    Mock<NimBLEConnInfo> mockConnectionInfo;
+    When(Method(mockConnectionInfo, getConnHandle)).AlwaysReturn(0);
 
     ConnectionManagerCallbacks chunkedNotifyMetricCallback;
 
     SECTION("should add new connection's client ID to client ID list when subscribing")
     {
-        chunkedNotifyMetricCallback.onSubscribe(&mockNimBLECharacteristic.get(), &first, 1);
+        chunkedNotifyMetricCallback.onSubscribe(&mockNimBLECharacteristic.get(), mockConnectionInfo.get(), 1);
 
         REQUIRE(chunkedNotifyMetricCallback.getClientIds().size() == 1);
     }
 
     SECTION("should remove clientID in thehandleForces ID list")
     {
-        chunkedNotifyMetricCallback.onSubscribe(&mockNimBLECharacteristic.get(), &first, 0);
+        chunkedNotifyMetricCallback.onSubscribe(&mockNimBLECharacteristic.get(), mockConnectionInfo.get(), 0);
 
         REQUIRE(chunkedNotifyMetricCallback.getClientIds().size() == 0);
     }

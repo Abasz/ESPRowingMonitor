@@ -11,11 +11,15 @@ ServerCallbacks::ServerCallbacks(IExtendedMetricBleService &_extendedMetricsBleS
 {
 }
 
-void ServerCallbacks::onConnect(NimBLEServer *pServer)
+void ServerCallbacks::onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
 {
-    if (pServer->getConnectedCount() < Configurations::maxConnectionCount)
+    const auto connectedCount = pServer->getConnectedCount();
+    Log.verboseln("Device connected: %d", connectedCount);
+
+    if (connectedCount < Configurations::maxConnectionCount)
     {
-        Log.verboseln("Device connected");
-        NimBLEDevice::getAdvertising()->start();
+        auto *const advertising = NimBLEDevice::getAdvertising();
+
+        Log.verboseln("Advertising restarted %T, %T", advertising->stop(), advertising->start());
     }
 }

@@ -9,11 +9,11 @@ ConnectionManagerCallbacks::ConnectionManagerCallbacks()
     clientIds.reserve(Configurations::maxConnectionCount);
 }
 
-void ConnectionManagerCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue)
+void ConnectionManagerCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, NimBLEConnInfo &connInfo, unsigned short subValue)
 {
     if (subValue > 0)
     {
-        clientIds.push_back(desc->conn_handle);
+        clientIds.push_back(connInfo.getConnHandle());
 
         return;
     }
@@ -24,7 +24,7 @@ void ConnectionManagerCallbacks::onSubscribe(NimBLECharacteristic *const pCharac
             end(clientIds),
             [&](unsigned char connectionId)
             {
-                return connectionId == desc->conn_handle;
+                return connectionId == connInfo.getConnHandle();
             }),
         cend(clientIds));
 }

@@ -125,6 +125,12 @@ public:
     };
 };
 
+class NimBLEConnInfo
+{
+public:
+    virtual uint16_t getConnHandle() = 0;
+};
+
 class NimBLEService;
 class NimBLEServer;
 class NimBLECharacteristic;
@@ -132,16 +138,14 @@ class NimBLECharacteristic;
 class NimBLEServerCallbacks
 {
 public:
-    virtual void onConnect(NimBLEServer *pServer) {};
-    virtual void onDisconnect(NimBLEServer *pServer, ble_gap_conn_desc *desc) {};
+    virtual void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo) {};
 };
 
 class NimBLECharacteristicCallbacks
 {
 public:
-    virtual void onWrite(NimBLECharacteristic *pCharacteristic) {};
-    virtual void onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc) {};
-    virtual void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue) {};
+    virtual void onWrite(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo) {};
+    virtual void onSubscribe(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo, unsigned short subValue) {};
 };
 
 class NimBLEServer
@@ -156,7 +160,8 @@ public:
     virtual NimBLEService *createService(const unsigned short uuid) = 0;
     virtual size_t getConnectedCount() = 0;
     virtual void init(const std::string deviceName) = 0;
-    virtual void setPower(esp_power_level_t powerLevel, esp_ble_power_type_t powerType) = 0;
+    virtual void setPower(int powerLevel) = 0;
+    virtual void advertiseOnDisconnect(bool restart) = 0;
     void setCallbacks(NimBLEServerCallbacks *pCallbacks)
     {
         callbacks = pCallbacks;
@@ -192,8 +197,9 @@ public:
     virtual NimBLEUUID getUUID() = 0;
     void subscribe(unsigned char clientId, unsigned short subValue)
     {
-        ble_gap_conn_desc desc = {clientId};
-        callbacks->onSubscribe(this, &desc, subValue);
+        fakeit::Mock<NimBLEConnInfo> mockConnInfo;
+        fakeit::When(Method(mockConnInfo, getConnHandle)).Return(clientId);
+        callbacks->onSubscribe(this, mockConnInfo.get(), subValue);
     };
 };
 extern fakeit::Mock<NimBLECharacteristic> mockNimBLECharacteristic;
@@ -216,6 +222,7 @@ public:
     virtual void setAppearance(unsigned short appearance) = 0;
     virtual void addServiceUUID(unsigned short uuid) = 0;
     virtual void setServiceData(const unsigned short uuid, const std::string data) = 0;
+    virtual void setName(const std::string deviceName) = 0;
 };
 extern fakeit::Mock<NimBLEAdvertising> mockNimBLEAdvertising;
 
@@ -243,9 +250,9 @@ public:
         mockNimBLEServer.get().init(deviceName);
     }
 
-    static void setPower(esp_power_level_t powerLevel, esp_ble_power_type_t powerType)
+    static void setPower(int powerLevel)
     {
-        mockNimBLEServer.get().setPower(powerLevel, powerType);
+        mockNimBLEServer.get().setPower(powerLevel);
     }
 };
 // NOLINTEND

@@ -11,5 +11,5 @@ class ServerCallbacks final : public NimBLEServerCallbacks
 public:
     explicit ServerCallbacks(IExtendedMetricBleService &_extendedMetricsBleService);
 
-    void onConnect(NimBLEServer *pServer) override;
+    void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo) override;
 };

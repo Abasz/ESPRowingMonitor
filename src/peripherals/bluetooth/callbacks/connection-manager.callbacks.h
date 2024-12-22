@@ -14,7 +14,7 @@ class ConnectionManagerCallbacks final : public NimBLECharacteristicCallbacks
 public:
     explicit ConnectionManagerCallbacks();
 
-    void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, unsigned short subValue) override;
+    void onSubscribe(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo, unsigned short subValue) override;
 
     const vector<unsigned char> &getClientIds() const;
 };

@@ -16,8 +16,12 @@ TEST_CASE("ServerCallbacks", "[callbacks]")
     mockNimBLEService.Reset();
 
     Mock<IExtendedMetricBleService> mockExtendedMetricBleService;
+    Mock<NimBLEConnInfo> mockConnectionInfo;
+
+    When(Method(mockConnectionInfo, getConnHandle)).AlwaysReturn(0);
 
     Fake(Method(mockNimBLEAdvertising, start));
+    Fake(Method(mockNimBLEAdvertising, stop));
 
     ServerCallbacks serverCallbacks(mockExtendedMetricBleService.get());
 
@@ -27,9 +31,10 @@ TEST_CASE("ServerCallbacks", "[callbacks]")
         {
             When(Method(mockNimBLEServer, getConnectedCount)).Return(0, 1);
 
-            serverCallbacks.onConnect(&mockNimBLEServer.get());
-            serverCallbacks.onConnect(&mockNimBLEServer.get());
+            serverCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
+            serverCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
 
+            Verify(Method(mockNimBLEAdvertising, stop)).Exactly(2);
             Verify(Method(mockNimBLEAdvertising, start)).Exactly(2);
         }
 
@@ -37,8 +42,9 @@ TEST_CASE("ServerCallbacks", "[callbacks]")
         {
             When(Method(mockNimBLEServer, getConnectedCount)).AlwaysReturn(2);
 
-            serverCallbacks.onConnect(&mockNimBLEServer.get());
+            serverCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
 
+            Verify(Method(mockNimBLEAdvertising, stop)).Never();
             Verify(Method(mockNimBLEAdvertising, start)).Never();
         }
     }

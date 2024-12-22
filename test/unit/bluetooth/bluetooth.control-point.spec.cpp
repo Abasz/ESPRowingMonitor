@@ -22,6 +22,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISettingsBleService> mockSettingsBleService;
     Mock<NimBLECharacteristic> mockControlPointCharacteristic;
+    Mock<NimBLEConnInfo> mockConnectionInfo;
 
     Fake(Method(mockControlPointCharacteristic, indicate));
     Fake(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>)));
@@ -44,7 +45,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
         When(Method(mockControlPointCharacteristic, getValue)).Return({});
 
-        controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+        controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
         Verify(Method(mockControlPointCharacteristic, getValue)).Once();
         Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -68,7 +69,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
             When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -90,7 +91,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
             When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -111,7 +112,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetLogLevel), 10});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -129,7 +130,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetLogLevel)});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -148,7 +149,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetLogLevel), static_cast<unsigned char>(expectedLogLevel)});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             SECTION("indicate Success response")
             {
@@ -182,7 +183,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService), 3});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -200,7 +201,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService)});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -222,7 +223,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             Fake(Method(mockArduino, esp_restart));
             Fake(Method(mockArduino, delay));
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             SECTION("indicate Success response")
             {
@@ -261,7 +262,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging), 10});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -279,7 +280,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging)});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -299,7 +300,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging), static_cast<unsigned char>(expectedSdCardLogging)});
             Fake(Method(mockEEPROMService, setLogLevel));
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             SECTION("indicate Success response")
             {
@@ -333,7 +334,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging), 10});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -351,7 +352,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging), 10});
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
@@ -371,7 +372,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging), static_cast<unsigned char>(expectedDeltaTimeLogging)});
             Fake(Method(mockEEPROMService, setLogLevel));
 
-            controlPointCallback.onWrite(&mockControlPointCharacteristic.get());
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             SECTION("indicate Success response")
             {

@@ -134,7 +134,7 @@ consteval std::string_view extractClassName(const std::string_view className)
     #define HAS_BLE_EXTENDED_METRICS true
 #endif
 #if !defined(BLE_SIGNAL_STRENGTH)
-    #define BLE_SIGNAL_STRENGTH BleSignalStrength::Default
+    #define BLE_SIGNAL_STRENGTH BleSignalStrength::MaxPower
 #endif
 
 #if !defined(ENABLE_BLUETOOTH_DELTA_TIME_LOGGING)

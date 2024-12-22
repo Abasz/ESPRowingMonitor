@@ -1,4 +1,3 @@
-
 #include "NimBLEDevice.h"
 
 #include "../bluetooth.controller.h"
@@ -10,9 +9,9 @@ OtaRxCallbacks::OtaRxCallbacks(IOtaUpdaterService &_otaService) : otaService(_ot
 {
 }
 
-void OtaRxCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic, ble_gap_conn_desc *desc)
+void OtaRxCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic, NimBLEConnInfo &connInfo)
 {
-    const auto mtu = pCharacteristic->getService()->getServer()->getPeerMTU(desc->conn_handle);
+    const auto mtu = pCharacteristic->getService()->getServer()->getPeerMTU(connInfo.getConnHandle());
 
     otaService.onData(pCharacteristic->getValue(), mtu);
 }

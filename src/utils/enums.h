@@ -23,11 +23,11 @@ enum class BleServiceFlag : unsigned char
     FtmsService
 };
 
-enum class BleSignalStrength : unsigned char
+enum class BleSignalStrength : signed char
 {
-    PowerSaver = ESP_PWR_LVL_N12,
-    Default = ESP_PWR_LVL_N0,
-    MaxPower = ESP_PWR_LVL_P9,
+    PowerSaver = -12,
+    Default = 0,
+    MaxPower = 9,
 };
 
 enum class ArduinoLogLevel : unsigned char

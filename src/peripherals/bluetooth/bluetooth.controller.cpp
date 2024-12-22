@@ -88,17 +88,18 @@ void BluetoothController::setupBleDevice()
     }
 
     NimBLEDevice::init(deviceName);
-    NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_ADV);
-    NimBLEDevice::setPower(static_cast<esp_power_level_t>(Configurations::bleSignalStrength), ESP_BLE_PWR_TYPE_DEFAULT);
+    NimBLEDevice::setPower(static_cast<signed char>(Configurations::bleSignalStrength));
 
     Log.verboseln("Setting up Server");
 
     auto *const pServer = NimBLEDevice::createServer();
 
+    pServer->advertiseOnDisconnect(true);
+
     pServer->setCallbacks(&serverCallbacks);
 
     setupServices();
-    setupAdvertisement();
+    setupAdvertisement(deviceName);
 }
 
 void BluetoothController::setupServices()
@@ -130,9 +131,10 @@ void BluetoothController::setupServices()
     server->start();
 }
 
-void BluetoothController::setupAdvertisement() const
+void BluetoothController::setupAdvertisement(const std::string &deviceName) const
 {
     auto *pAdvertising = NimBLEDevice::getAdvertising();
+    pAdvertising->setName(deviceName);
 
     switch (eepromService.getBleServiceFlag())
     {

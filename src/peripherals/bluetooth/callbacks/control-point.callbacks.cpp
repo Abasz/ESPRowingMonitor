@@ -1,4 +1,3 @@
-
 #include <array>
 
 #include "ArduinoLog.h"
@@ -13,7 +12,7 @@ ControlPointCallbacks::ControlPointCallbacks(ISettingsBleService &_settingsBleSe
 {
 }
 
-void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic)
+void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic, NimBLEConnInfo &connInfo)
 {
     NimBLEAttValue message = pCharacteristic->getValue();
 
