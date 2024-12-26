@@ -24,10 +24,10 @@ class PeripheralsController final : public IPeripheralsController
 
     unsigned char ledState = HIGH;
     CRGB::HTMLColorCode ledColor = CRGB::Black;
-    inline static std::array<CRGB, 1> leds;
+    std::array<CRGB, 1> leds;
 
     void updateLed(CRGB::HTMLColorCode newLedColor);
-    static void setupConnectionIndicatorLed();
+    void setupConnectionIndicatorLed();
 
 public:
     PeripheralsController(IBluetoothController &_bluetoothController, ISdCardService &sdCardService, IEEPROMService &_eepromService);

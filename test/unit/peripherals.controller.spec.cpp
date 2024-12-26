@@ -52,10 +52,10 @@ TEST_CASE("PeripheralController", "[peripheral]")
     Fake(Method(mockFastLED, show));
     Fake(Method(mockFastLED, mockHelperSetColor));
 
-    PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
-
     SECTION("begin method should")
     {
+        PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+
         Fake(Method(mockSdCardService, setup));
 
         Fake(Method(mockBluetoothController, setup));
@@ -87,6 +87,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
     SECTION("notifyBattery method should send notification of battery level")
     {
         const auto expectedBatteryLevel = 55U;
+        PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
         Fake(Method(mockBluetoothController, notifyBattery));
 
         peripheralsController.notifyBattery(expectedBatteryLevel);
@@ -96,6 +97,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
     SECTION("isAnyDeviceConnected method should return bluetooth connection status")
     {
+        PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
         When(Method(mockBluetoothController, isAnyDeviceConnected)).Return(true, false);
 
         REQUIRE(peripheralsController.isAnyDeviceConnected() == true);
@@ -110,6 +112,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
         {
             SECTION("in ledBlinkFrequency")
             {
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
                 When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval, blinkInterval, blinkInterval * 2, blinkInterval * 2, blinkInterval * 2);
 
                 peripheralsController.update(batteryLevel);
@@ -122,12 +125,11 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             SECTION("to green when battery level is above 80")
             {
-                PeripheralsController peripheralsControllerLedTest(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
-
                 const auto maxBatteryLevel = 90;
-                When(Method(mockArduino, millis)).AlwaysReturn(Configurations::ledBlinkFrequency + 1U);
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                When(Method(mockArduino, millis)).Return(blinkInterval);
 
-                peripheralsControllerLedTest.update(maxBatteryLevel);
+                peripheralsController.update(maxBatteryLevel);
 
                 Verify(Method(mockFastLED, mockHelperSetColor).Using(CRGB::Green)).Once();
             }
@@ -135,10 +137,10 @@ TEST_CASE("PeripheralController", "[peripheral]")
             SECTION("to red when battery level is below 30")
             {
                 const auto minBatteryLevel = 29;
-                When(Method(mockArduino, millis)).AlwaysReturn(Configurations::ledBlinkFrequency + 1U);
-                PeripheralsController peripheralsControllerLedTest(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                When(Method(mockArduino, millis)).Return(blinkInterval);
 
-                peripheralsControllerLedTest.update(minBatteryLevel);
+                peripheralsController.update(minBatteryLevel);
 
                 Verify(Method(mockFastLED, mockHelperSetColor).Using(CRGB::Red)).Once();
             }
@@ -146,23 +148,23 @@ TEST_CASE("PeripheralController", "[peripheral]")
             SECTION("to blue when battery level above 30 but below 80")
             {
                 const auto normalBatteryLevel = 55;
-                When(Method(mockArduino, millis)).AlwaysReturn(Configurations::ledBlinkFrequency + 1U);
-                PeripheralsController peripheralsControllerLedTest(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                When(Method(mockArduino, millis)).Return(blinkInterval);
 
-                peripheralsControllerLedTest.update(normalBatteryLevel);
+                peripheralsController.update(normalBatteryLevel);
 
                 Verify(Method(mockFastLED, mockHelperSetColor).Using(CRGB::Blue)).Once();
             }
 
             SECTION("to black (i.e. off) when the last update turned the led on")
             {
-                When(Method(mockArduino, millis)).Return(Configurations::ledBlinkFrequency + 1U, Configurations::ledBlinkFrequency * 2 + 2U, Configurations::ledBlinkFrequency * 3 + 3U, Configurations::ledBlinkFrequency * 4 + 4U);
-                PeripheralsController peripheralsControllerLedTest(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval * 2, blinkInterval * 3, blinkInterval * 4);
 
-                peripheralsControllerLedTest.update(batteryLevel);
-                peripheralsControllerLedTest.update(batteryLevel);
-                peripheralsControllerLedTest.update(batteryLevel);
-                peripheralsControllerLedTest.update(batteryLevel);
+                peripheralsController.update(batteryLevel);
+                peripheralsController.update(batteryLevel);
+                peripheralsController.update(batteryLevel);
+                peripheralsController.update(batteryLevel);
 
                 Verify(Method(mockFastLED, mockHelperSetColor).Using(CRGB::Black)).Twice();
             }
@@ -170,6 +172,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
         SECTION("call update on BluetoothController")
         {
+            PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
             Fake(Method(mockBluetoothController, update));
 
             peripheralsController.update(batteryLevel);
@@ -180,6 +183,8 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
     SECTION("updateDeltaTime method should")
     {
+        PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+
         SECTION("to the sdCard data")
         {
             SECTION("add new deltaTime when logging to sd-card is enabled and log file is open")
@@ -204,6 +209,8 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
             SECTION("skip adding new deltaTime when")
             {
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+
                 SECTION("logging to sd-card is disabled")
                 {
                     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(true);
@@ -238,6 +245,8 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
         SECTION("to the bluetooth data")
         {
+            PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+
             SECTION("skip adding new deltaTime when logging to bluetooth is disabled")
             {
                 When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(false);
@@ -260,6 +269,8 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
     SECTION("updateData method should")
     {
+        PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+
         SECTION("notify new data to bluetooth controller")
         {
             peripheralsController.updateData(expectedData);
