@@ -24,6 +24,9 @@ class CLEDController
 
 struct CRGB
 {
+    CRGB() = default;
+    constexpr CRGB(unsigned int colorcode) noexcept : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF) {}
+
     typedef enum
     {
         Black = 0x000000,
@@ -32,9 +35,38 @@ struct CRGB
         Red = 0xFF0000
     } HTMLColorCode;
 
-    // NOLINTNEXTLINE
-    void operator=(const HTMLColorCode rhs);
+    union
+    {
+        struct
+        {
+            union
+            {
+                unsigned char r;   ///< Red channel value
+                unsigned char red; ///< @copydoc r
+            };
+            union
+            {
+                unsigned char g;     ///< Green channel value
+                unsigned char green; ///< @copydoc g
+            };
+            union
+            {
+                unsigned char b;    ///< Blue channel value
+                unsigned char blue; ///< @copydoc b
+            };
+        };
+        /// Access the red, green, and blue data as an array.
+        /// Where:
+        /// * `raw[0]` is the red value
+        /// * `raw[1]` is the green value
+        /// * `raw[2]` is the blue value
+        unsigned char raw[3];
+    };
+
+    CRGB& operator=(const unsigned int rhs);
 };
+
+bool operator==(const CRGB &lhs, const CRGB &rhs);
 
 class MockCFastLED
 {
@@ -43,7 +75,7 @@ public:
     virtual void clear(bool writeData = false) = 0;
     virtual void show() = 0;
 
-    virtual void mockHelperSetColor(const CRGB::HTMLColorCode rhs) = 0;
+    virtual void mockHelperSetColor(const unsigned int rhs) = 0;
 };
 extern fakeit::Mock<MockCFastLED> mockFastLED;
 

@@ -23,8 +23,7 @@ class PeripheralsController final : public IPeripheralsController
     vector<unsigned long> sdDeltaTimes;
 
     unsigned char ledState = HIGH;
-    CRGB::HTMLColorCode ledColor = CRGB::Black;
-    std::array<CRGB, 1> leds;
+    std::array<CRGB, 1> leds{CRGB::Black};
 
     void updateLed(CRGB::HTMLColorCode newLedColor);
     void setupConnectionIndicatorLed();

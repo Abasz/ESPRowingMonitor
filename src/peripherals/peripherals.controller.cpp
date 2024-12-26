@@ -65,16 +65,16 @@ void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
 {
     if constexpr (Configurations::isRgb)
     {
-        if (isAnyDeviceConnected() || ledColor == CRGB::Black)
+        const auto previousLedState = static_cast<CRGB>(leds[0]);
+        const auto isConnected = isAnyDeviceConnected();
+
+        if (isConnected && newLedColor == previousLedState)
         {
-            ledColor = newLedColor;
-        }
-        else
-        {
-            ledColor = CRGB::Black;
+            return;
         }
 
-        leds[0] = ledColor;
+        leds[0] = isConnected || previousLedState == CRGB::Black ? newLedColor : CRGB::Black;
+
         FastLED.show();
 
         return;

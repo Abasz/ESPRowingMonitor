@@ -108,6 +108,49 @@ TEST_CASE("PeripheralController", "[peripheral]")
     {
         const auto batteryLevel = 90;
 
+        SECTION("when a device connected")
+        {
+            SECTION("not update LED when its already on with same color")
+            {
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval * 2);
+                When(Method(mockBluetoothController, isAnyDeviceConnected)).Return(false).AlwaysReturn(true);
+                // Set the led state to on
+                peripheralsController.update(batteryLevel);
+                mockFastLED.ClearInvocationHistory();
+
+                peripheralsController.update(batteryLevel);
+
+                Verify(Method(mockFastLED, show)).Never();
+            }
+
+            SECTION("update LED when color should be changed")
+            {
+                const auto minBatteryLevel = 29;
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval * 2);
+                When(Method(mockBluetoothController, isAnyDeviceConnected)).Return(false).AlwaysReturn(true);
+                // Set the led state to on
+                peripheralsController.update(batteryLevel);
+                mockFastLED.ClearInvocationHistory();
+
+                peripheralsController.update(minBatteryLevel);
+
+                Verify(Method(mockFastLED, show)).Once();
+            }
+
+            SECTION("update LED when current color is black (i.e. off)")
+            {
+                PeripheralsController peripheralsController(mockBluetoothController.get(), mockSdCardService.get(), mockEEPROMService.get());
+                When(Method(mockArduino, millis)).Return(blinkInterval, blinkInterval * 2);
+                When(Method(mockBluetoothController, isAnyDeviceConnected)).AlwaysReturn(true);
+
+                peripheralsController.update(batteryLevel);
+
+                Verify(Method(mockFastLED, show)).Once();
+            }
+        }
+
         SECTION("update LED")
         {
             SECTION("in ledBlinkFrequency")
