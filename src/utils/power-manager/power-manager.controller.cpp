@@ -13,10 +13,10 @@ void PowerManagerController::begin()
     batteryLevel = powerManagerService.setup();
 }
 
-void PowerManagerController::update(const unsigned long lastRevTime, const bool isDeviceConnected)
+void PowerManagerController::update(const unsigned long lastImpulseTime, const bool isDeviceConnected)
 {
     const auto now = micros();
-    if (!isDeviceConnected && now - lastRevTime > Configurations::deepSleepTimeout * 1'000UL)
+    if (!isDeviceConnected && now - lastImpulseTime > Configurations::deepSleepTimeout * 1'000UL)
     {
         powerManagerService.goToSleep();
     }

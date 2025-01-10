@@ -49,6 +49,7 @@ public:
     unsigned long getPreviousRawImpulseCount() const override;
     void setPreviousRawImpulseCount() override;
     unsigned long getRawImpulseCount() const override;
+    unsigned long getLastImpulseTime() const override;
 
     unsigned long getDeltaTime() const override;
     unsigned long long getLastRevTime() const override;

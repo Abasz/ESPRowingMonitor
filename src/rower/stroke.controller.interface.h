@@ -19,6 +19,7 @@ public:
     virtual unsigned long getPreviousRawImpulseCount() const = 0;
     virtual void setPreviousRawImpulseCount() = 0;
     virtual unsigned long getRawImpulseCount() const = 0;
+    virtual unsigned long getLastImpulseTime() const = 0;
 
     virtual unsigned long getDeltaTime() const = 0;
     virtual unsigned long long getLastRevTime() const = 0;

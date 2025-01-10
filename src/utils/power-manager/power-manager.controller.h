@@ -16,7 +16,7 @@ public:
     explicit PowerManagerController(IPowerManagerService &_powerManagerService);
 
     void begin() override;
-    void update(unsigned long lastRevTime, bool isDeviceConnected) override;
+    void update(unsigned long lastImpulseTime, bool isDeviceConnected) override;
     unsigned char getBatteryLevel() const override;
     unsigned char getPreviousBatteryLevel() const override;
     void setPreviousBatteryLevel() override;

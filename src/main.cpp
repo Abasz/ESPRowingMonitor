@@ -58,7 +58,7 @@ void loop()
 
     strokeController.update();
     peripheralController.update(powerManagerController.getBatteryLevel());
-    powerManagerController.update(strokeController.getLastRevTime(), peripheralController.isAnyDeviceConnected());
+    powerManagerController.update(strokeController.getLastImpulseTime(), peripheralController.isAnyDeviceConnected());
 
     if (strokeController.getRawImpulseCount() != strokeController.getPreviousRawImpulseCount())
     {

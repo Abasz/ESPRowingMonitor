@@ -67,6 +67,11 @@ unsigned long StrokeController::getRawImpulseCount() const
     return flywheelData.rawImpulseCount;
 }
 
+unsigned long StrokeController::getLastImpulseTime() const
+{
+    return flywheelData.cleanImpulseTime;
+}
+
 unsigned long StrokeController::getDeltaTime() const
 {
     return flywheelData.deltaTime;

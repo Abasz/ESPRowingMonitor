@@ -45,8 +45,9 @@ TEST_CASE("PowerManagerController", "[utils]")
         {
             const auto now = lastRevTime + deepSleepTimeout + 1;
 
-            When(Method(mockArduino, micros)).AlwaysReturn(now);
+            When(Method(mockArduino, micros)).Return(lastRevTime).AlwaysReturn(now);
 
+            powerManagerController.update(lastRevTime, false);
             powerManagerController.update(lastRevTime, false);
 
             Verify(Method(mockPowerManagerService, goToSleep)).Once();
@@ -56,8 +57,9 @@ TEST_CASE("PowerManagerController", "[utils]")
         {
             const auto now = lastRevTime + deepSleepTimeout + 1;
 
-            When(Method(mockArduino, micros)).AlwaysReturn(now);
+            When(Method(mockArduino, micros)).Return(lastRevTime).AlwaysReturn(now);
 
+            powerManagerController.update(lastRevTime, true);
             powerManagerController.update(lastRevTime, true);
 
             Verify(Method(mockPowerManagerService, goToSleep)).Never();
@@ -67,8 +69,9 @@ TEST_CASE("PowerManagerController", "[utils]")
         {
             const auto now = lastRevTime + deepSleepTimeout - 1;
 
-            When(Method(mockArduino, micros)).AlwaysReturn(now);
+            When(Method(mockArduino, micros)).Return(lastRevTime).AlwaysReturn(now);
 
+            powerManagerController.update(lastRevTime, false);
             powerManagerController.update(lastRevTime, false);
 
             Verify(Method(mockPowerManagerService, goToSleep)).Never();
