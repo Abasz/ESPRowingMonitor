@@ -3,6 +3,8 @@
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
+#include "globals.h"
+
 #include "../bluetooth.controller.h"
 #include "./control-point.callbacks.h"
 
@@ -199,7 +201,6 @@ void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &messag
 
     settingsBleService.broadcastSettings();
 
-    Log.verboseln("Restarting device in 5s");
-    delay(100);
-    esp_restart();
+    Log.verboseln("Restarting device...");
+    restartWithDelay(100);
 }

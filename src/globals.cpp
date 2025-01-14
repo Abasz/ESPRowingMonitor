@@ -42,6 +42,14 @@ void detachRotationInterrupt()
     detachInterrupt(digitalPinToInterrupt(Configurations::sensorPinNumber));
 }
 
+void restartWithDelay(const unsigned long millis)
+{
+    auto *const timer = timerBegin(1e6);
+    timerAttachInterrupt(timer, []() IRAM_ATTR
+                         { esp_restart(); });
+    timerAlarm(timer, millis * 1'000, false, 0);
+}
+
 void printPrefix(Print *const _logOutput, const int logLevel)
 {
     printTimestamp(_logOutput);

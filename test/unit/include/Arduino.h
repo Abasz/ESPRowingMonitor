@@ -11,6 +11,9 @@ typedef int BaseType_t;
 typedef unsigned int UBaseType_t;
 typedef void (*TaskFunction_t)(void *);
 typedef void *TaskHandle_t;
+typedef void (*voidFuncPtr)(void);
+
+struct hw_timer_t;
 
 #define FALLING 0x02
 #define INPUT 0x01
@@ -49,7 +52,6 @@ public:
     virtual esp_sleep_wakeup_cause_t esp_sleep_get_wakeup_cause() = 0;
     virtual void esp_sleep_enable_ext0_wakeup(gpio_num_t gpio_num, int level) = 0;
     virtual void esp_deep_sleep_start() = 0;
-    virtual void esp_restart() = 0;
     virtual BaseType_t xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode,
                                                const char *const pcName,
                                                const unsigned int usStackDepth,
@@ -143,10 +145,14 @@ inline BaseType_t xTaskCreatePinnedToCore(TaskFunction_t pvTaskCode,
         xCoreID);
 }
 
-inline void esp_restart()
+inline void timerAttachInterrupt(hw_timer_t *timer, voidFuncPtr userFunc) {}
+inline void timerAlarm(hw_timer_t *timer, unsigned long long alarm_value, bool autoreload, unsigned long long reload_count) {}
+inline hw_timer_t *timerBegin(uint32_t frequency)
 {
-    mockArduino.get().esp_restart();
+    return nullptr;
 }
+
+inline void esp_restart() {}
 
 class HardwareSerial : public Print
 {

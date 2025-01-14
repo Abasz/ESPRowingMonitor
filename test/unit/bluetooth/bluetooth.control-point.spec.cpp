@@ -6,6 +6,8 @@
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"
 
+#include "../include/globals.h"
+
 #include "../../../src/peripherals/bluetooth//ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/callbacks/control-point.callbacks.h"
 #include "../../../src/peripherals/sd-card/sd-card.service.interface.h"
@@ -18,6 +20,7 @@ using namespace fakeit;
 TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 {
     mockArduino.Reset();
+    mockGlobals.Reset();
 
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISettingsBleService> mockSettingsBleService;
@@ -220,7 +223,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService), static_cast<unsigned char>(expectedBleService)});
             Fake(Method(mockEEPROMService, setLogLevel));
-            Fake(Method(mockArduino, esp_restart));
+            Fake(Method(mockGlobals, restartWithDelay));
             Fake(Method(mockArduino, delay));
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
@@ -246,7 +249,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             SECTION("restart device")
             {
-                Verify(Method(mockArduino, esp_restart)).Once();
+                Verify(Method(mockGlobals, restartWithDelay)).Once();
             }
         }
     }

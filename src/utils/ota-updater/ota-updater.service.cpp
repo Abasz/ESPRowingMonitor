@@ -225,8 +225,7 @@ void OtaUpdaterService::handleInstall()
 
     Log.infoln("OTA installed, restarting device...");
 
-    delay(500);
-    esp_restart();
+    restartWithDelay(500);
 }
 
 void OtaUpdaterService::handleError(OtaResponseOpCodes errorCode)

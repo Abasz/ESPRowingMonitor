@@ -37,9 +37,9 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
     Fake(Method(mockGlobals, attachRotationInterrupt));
     Fake(Method(mockGlobals, detachRotationInterrupt));
+    Fake(Method(mockGlobals, restartWithDelay));
 
     Fake(Method(mockArduino, delay));
-    Fake(Method(mockArduino, esp_restart));
 
     When(Method(mockUpdate, isRunning)).AlwaysReturn(false);
     When(Method(mockUpdate, begin)).AlwaysReturn(true);
@@ -579,7 +579,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                     {
                         otaService.onData(endRequest, 256);
 
-                        Verify(Method(mockArduino, esp_restart)).Once();
+                        Verify(Method(mockGlobals, restartWithDelay)).Once();
                     }
                 }
             }
