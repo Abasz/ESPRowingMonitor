@@ -119,10 +119,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
         {
             sdCardService.saveDeltaTime(sdDeltaTimes);
         }
-    }
 
-    if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
-    {
         if (!sdDeltaTimes.empty())
         {
             vector<unsigned long> clear;

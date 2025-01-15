@@ -6,8 +6,8 @@
 
 #include "./esp_err.h"
 
+#include "../../include/Arduino.h"
 #include "../../include/NimBLEDevice.h"
-#include "../../include/globals.h"
 
 #include "../../../../src/peripherals/bluetooth/ble-services/ota.service.h"
 #include "../../../../src/utils/configuration.h"
@@ -19,7 +19,7 @@ using namespace fakeit;
 TEST_CASE("OtaBleService", "[ble-service]")
 {
     mockNimBLEServer.Reset();
-    mockGlobals.Reset();
+    mockArduino.Reset();
 
     Mock<IOtaUpdaterService> mockOtaUpdaterService;
     Mock<NimBLECharacteristic> mockOtaTxCharacteristic;
@@ -75,11 +75,11 @@ TEST_CASE("OtaBleService", "[ble-service]")
     {
         SECTION("call abort when called before begin method is called")
         {
-            Fake(Method(mockGlobals, abort));
+            Fake(Method(mockArduino, abort));
 
             REQUIRE_THROWS(otaBleService.getOtaTx());
 
-            Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
+            Verify(Method(mockArduino, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }
 
         SECTION("return stored transfer characteristic when called after begin method")

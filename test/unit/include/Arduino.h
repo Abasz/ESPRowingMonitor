@@ -40,6 +40,7 @@ public:
 class MockArduino
 {
 public:
+    virtual void abort(int errorCode) = 0;
     virtual unsigned long analogReadMilliVolts(unsigned char pin) = 0;
     virtual void pinMode(unsigned char pin, unsigned char mode) = 0;
     virtual void digitalWrite(unsigned char pin, unsigned char val) = 0;

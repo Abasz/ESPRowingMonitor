@@ -12,8 +12,6 @@
 #include "../../include/Arduino.h"
 #include "../../include/NimBLEDevice.h"
 
-#include "../include/globals.h"
-
 #include "../../../../src/peripherals/bluetooth/ble-services/extended-metrics.service.h"
 #include "../../../../src/utils/configuration.h"
 #include "../../../../src/utils/enums.h"
@@ -115,14 +113,14 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
         SECTION("trigger ESP_ERR_NOT_FOUND if ExtendedMetricBleService setup() method was not called")
         {
-            mockGlobals.ClearInvocationHistory();
+            mockArduino.ClearInvocationHistory();
 
             ExtendedMetricBleService extendedMetricBleServiceNoSetup;
-            Fake(Method(mockGlobals, abort));
+            Fake(Method(mockArduino, abort));
 
             REQUIRE_THROWS(extendedMetricBleServiceNoSetup.broadcastExtendedMetrics(avgStrokePower, recoveryDuration, driveDuration, dragCoefficient));
 
-            Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
+            Verify(Method(mockArduino, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }
     }
 
@@ -316,14 +314,14 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
         SECTION("trigger ESP_ERR_NOT_FOUND if ExtendedMetricBleService setup() method was not called")
         {
-            mockGlobals.ClearInvocationHistory();
+            mockArduino.ClearInvocationHistory();
 
             ExtendedMetricBleService extendedMetricBleServiceNoSetup;
-            Fake(Method(mockGlobals, abort));
+            Fake(Method(mockArduino, abort));
 
             REQUIRE_THROWS(extendedMetricBleServiceNoSetup.broadcastHandleForces(expectedHandleForces));
 
-            Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
+            Verify(Method(mockArduino, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }
     }
 
@@ -389,14 +387,14 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
         SECTION("trigger ESP_ERR_NOT_FOUND if ExtendedMetricBleService setup() method was not called")
         {
-            mockGlobals.ClearInvocationHistory();
+            mockArduino.ClearInvocationHistory();
 
             ExtendedMetricBleService extendedMetricBleServiceNoSetup;
-            Fake(Method(mockGlobals, abort));
+            Fake(Method(mockArduino, abort));
 
             REQUIRE_THROWS(extendedMetricBleServiceNoSetup.broadcastDeltaTimes(expectedDeltaTimes));
 
-            Verify(Method(mockGlobals, abort).Using(ESP_ERR_NOT_FOUND)).Once();
+            Verify(Method(mockArduino, abort).Using(ESP_ERR_NOT_FOUND)).Once();
         }
     }
 }
