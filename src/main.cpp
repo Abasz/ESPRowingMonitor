@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "esp_ota_ops.h"
 
 #include "Arduino.h"
@@ -9,7 +11,7 @@
 
 void setup()
 {
-    Serial.begin(static_cast<int>(Configurations::baudRate));
+    Serial.begin(std::to_underlying(Configurations::baudRate));
 
 #if ARDUINO_USB_CDC_ON_BOOT != 1
     while (!Serial && !(bool)Serial.available())
@@ -17,11 +19,11 @@ void setup()
     }
 #endif
 
-    Log.begin(static_cast<int>(Configurations::defaultLogLevel), &Serial, false);
+    Log.begin(std::to_underlying(Configurations::defaultLogLevel), &Serial, false);
     Log.setPrefix(printPrefix);
 
     eepromService.setup();
-    Log.setLevel(static_cast<int>(eepromService.getLogLevel()));
+    Log.setLevel(std::to_underlying(eepromService.getLogLevel()));
 
     peripheralController.begin();
     powerManagerController.begin();

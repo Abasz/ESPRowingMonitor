@@ -1,4 +1,6 @@
 // NOLINTBEGIN(readability-magic-numbers)
+#include <utility>
+
 #include "../include/catch_amalgamated.hpp"
 #include "../include/fakeit.hpp"
 
@@ -257,7 +259,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
         {
             bluetoothController.setup();
 
-            Verify(Method(mockNimBLEServer, setPower).Using(static_cast<signed char>(Configurations::bleSignalStrength))).Once();
+            Verify(Method(mockNimBLEServer, setPower).Using(std::to_underlying(Configurations::bleSignalStrength))).Once();
         }
 
         SECTION("should create server")

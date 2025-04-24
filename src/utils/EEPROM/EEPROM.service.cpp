@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "ArduinoLog.h"
 
 #include "./EEPROM.service.h"
@@ -18,12 +20,12 @@ void EEPROMService::setup()
     if (!preferences.isKey(logLevelAddress))
     {
         Log.infoln("Setting LogLevel to default");
-        preferences.putUChar(logLevelAddress, static_cast<unsigned char>(Configurations::defaultLogLevel));
+        preferences.putUChar(logLevelAddress, std::to_underlying(Configurations::defaultLogLevel));
     }
     if (!preferences.isKey(bleServiceFlagAddress))
     {
         Log.infoln("Setting BleServiceFlag to default");
-        preferences.putUChar(bleServiceFlagAddress, static_cast<unsigned char>(Configurations::defaultBleServiceFlag));
+        preferences.putUChar(bleServiceFlagAddress, std::to_underlying(Configurations::defaultBleServiceFlag));
     }
 
     if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
@@ -48,8 +50,8 @@ void EEPROMService::setup()
         Log.verboseln("%s: %d", sdCardLoggingAddress, logToSdCard);
     }
 
-    logLevel = static_cast<ArduinoLogLevel>(preferences.getUChar(logLevelAddress, static_cast<unsigned char>(Configurations::defaultLogLevel)));
-    bleServiceFlag = static_cast<BleServiceFlag>(preferences.getUChar(bleServiceFlagAddress, static_cast<unsigned char>(Configurations::defaultBleServiceFlag)));
+    logLevel = ArduinoLogLevel{preferences.getUChar(logLevelAddress, std::to_underlying(Configurations::defaultLogLevel))};
+    bleServiceFlag = BleServiceFlag{preferences.getUChar(bleServiceFlagAddress, std::to_underlying(Configurations::defaultBleServiceFlag))};
 
     Log.verboseln("%s: %d", logLevelAddress, logLevel);
     Log.verboseln("%s: %d", bleServiceFlagAddress, bleServiceFlag);
@@ -57,7 +59,7 @@ void EEPROMService::setup()
 
 void EEPROMService::setLogLevel(const ArduinoLogLevel newLogLevel)
 {
-    int intLogLevel = static_cast<int>(newLogLevel);
+    const int intLogLevel = std::to_underlying(newLogLevel);
     if (intLogLevel < 0 || intLogLevel > 6)
     {
         Log.errorln("Invalid LogLevel setting, should be between 0-6");
@@ -103,7 +105,7 @@ void EEPROMService::setLogToSdCard(const bool shouldLogToSdCard)
 
 void EEPROMService::setBleServiceFlag(const BleServiceFlag newServiceFlag)
 {
-    const auto intBleServiceFlag = static_cast<unsigned char>(newServiceFlag);
+    const auto intBleServiceFlag = std::to_underlying(newServiceFlag);
     if (intBleServiceFlag < 0 || intBleServiceFlag > 2)
     {
         Log.errorln("Invalid BLE Service setting, should be between 0 or 2");

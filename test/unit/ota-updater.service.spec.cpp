@@ -1,5 +1,6 @@
 // NOLINTBEGIN(readability-magic-numbers)
 #include <span>
+#include <utility>
 #include <vector>
 
 #include "./include/catch_amalgamated.hpp"
@@ -24,12 +25,12 @@ TEST_CASE("OtaUpdaterService", "[ota]")
     const unsigned char blePackageHeaderSize = 3;
     const unsigned int firmwareSize = 765;
 
-    NimBLEAttValue beginRequest{static_cast<unsigned char>(OtaRequestOpCodes::Begin), static_cast<unsigned char>(firmwareSize), static_cast<unsigned char>(firmwareSize >> 8), static_cast<unsigned char>(firmwareSize >> 16), static_cast<unsigned char>(firmwareSize >> 24)};
-    NimBLEAttValue invalidBeginRequest{static_cast<unsigned char>(OtaRequestOpCodes::Begin), 0, 2, 250};
-    NimBLEAttValue abortRequest{static_cast<unsigned char>(OtaRequestOpCodes::Abort)};
-    NimBLEAttValue packageRequest{static_cast<unsigned char>(OtaRequestOpCodes::Package), 1, 1};
-    NimBLEAttValue endRequest{static_cast<unsigned char>(OtaRequestOpCodes::End), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    NimBLEAttValue invalidEndRequest{static_cast<unsigned char>(OtaRequestOpCodes::End), 0, 0};
+    NimBLEAttValue beginRequest{std::to_underlying(OtaRequestOpCodes::Begin), static_cast<unsigned char>(firmwareSize), static_cast<unsigned char>(firmwareSize >> 8), static_cast<unsigned char>(firmwareSize >> 16), static_cast<unsigned char>(firmwareSize >> 24)};
+    NimBLEAttValue invalidBeginRequest{std::to_underlying(OtaRequestOpCodes::Begin), 0, 2, 250};
+    NimBLEAttValue abortRequest{std::to_underlying(OtaRequestOpCodes::Abort)};
+    NimBLEAttValue packageRequest{std::to_underlying(OtaRequestOpCodes::Package), 1, 1};
+    NimBLEAttValue endRequest{std::to_underlying(OtaRequestOpCodes::End), 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    NimBLEAttValue invalidEndRequest{std::to_underlying(OtaRequestOpCodes::End), 0, 0};
     NimBLEAttValue invalidRequest{4};
     NimBLEAttValue emptyRequest{};
 
@@ -95,7 +96,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
         SECTION("should send OtaResponseOpCodes::IncorrectFormat response and terminate the request on empty request")
         {
-            const auto expectedResult = std::vector<unsigned char>{static_cast<unsigned char>(OtaResponseOpCodes::IncorrectFormat)};
+            const auto expectedResult = std::vector<unsigned char>{std::to_underlying(OtaResponseOpCodes::IncorrectFormat)};
             std::vector<unsigned char> resultResponse;
 
             When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
@@ -113,7 +114,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
         SECTION("should send OtaResponseOpCodes::IncorrectFormat response and terminate the request on invalid request OpCode")
         {
-            const auto expectedResult = std::vector<unsigned char>{static_cast<unsigned char>(OtaResponseOpCodes::IncorrectFormat)};
+            const auto expectedResult = std::vector<unsigned char>{std::to_underlying(OtaResponseOpCodes::IncorrectFormat)};
             std::vector<unsigned char> resultResponse;
 
             When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
@@ -143,7 +144,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
             Verify(Method(mockUpdate, abort)).Once();
             Verify(Method(mockGlobals, attachRotationInterrupt)).Once();
             REQUIRE_THAT(otaResponseOpCodes, Catch::Matchers::SizeIs(sizeof(OtaResponseOpCodes)));
-            REQUIRE(otaResponseOpCodes.at(0) == static_cast<unsigned char>(OtaResponseOpCodes::Ok));
+            REQUIRE(otaResponseOpCodes.at(0) == std::to_underlying(OtaResponseOpCodes::Ok));
             Verify(Method(mockTxCharacteristic, notify)).Once();
         }
 
@@ -178,7 +179,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
             SECTION("should send OtaResponseOpCodes::IncorrectFormat response and terminate the request on invalid payload")
             {
-                const auto expectedResult = static_cast<unsigned char>(OtaResponseOpCodes::IncorrectFormat);
+                const auto expectedResult = std::to_underlying(OtaResponseOpCodes::IncorrectFormat);
                 std::vector<unsigned char> resultResponse;
 
                 When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
@@ -232,7 +233,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         otaService.onData(beginRequest, 256);
 
                         REQUIRE_THAT(resultResponse, Catch::Matchers::SizeIs(sizeof(OtaResponseOpCodes)));
-                        REQUIRE(resultResponse[0] == static_cast<unsigned char>(OtaResponseOpCodes::IncorrectFirmwareSize));
+                        REQUIRE(resultResponse[0] == std::to_underlying(OtaResponseOpCodes::IncorrectFirmwareSize));
                     }
 
                     SECTION("with UPDATE_ERROR_NO_PARTITION should send OtaResponseOpCodes::InternalStorageError response")
@@ -250,7 +251,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         otaService.onData(beginRequest, 256);
 
                         REQUIRE_THAT(resultResponse, Catch::Matchers::SizeIs(sizeof(OtaResponseOpCodes)));
-                        REQUIRE(resultResponse[0] == static_cast<unsigned char>(OtaResponseOpCodes::InternalStorageError));
+                        REQUIRE(resultResponse[0] == std::to_underlying(OtaResponseOpCodes::InternalStorageError));
                     }
 
                     SECTION("with unmapped error should send OtaResponseOpCodes::NotOk response")
@@ -268,7 +269,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         otaService.onData(beginRequest, 256);
 
                         REQUIRE_THAT(resultResponse, Catch::Matchers::SizeIs(sizeof(OtaResponseOpCodes)));
-                        REQUIRE(resultResponse[0] == static_cast<unsigned char>(OtaResponseOpCodes::NotOk));
+                        REQUIRE(resultResponse[0] == std::to_underlying(OtaResponseOpCodes::NotOk));
                     }
                 }
 
@@ -302,7 +303,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                         const auto perPackageSize = (resultResponse[1] | resultResponse[2] << 8 | resultResponse[3] << 16 | resultResponse[4] << 24);
                         const auto bufferSize = (resultResponse[1 + sizeof(unsigned int)] | resultResponse[2 + sizeof(unsigned int)] << 8 | resultResponse[3 + sizeof(unsigned int)] << 16 | resultResponse[4 + sizeof(unsigned int)] << 24);
 
-                        REQUIRE(resultResponse[0] == static_cast<unsigned char>(OtaResponseOpCodes::Ok));
+                        REQUIRE(resultResponse[0] == std::to_underlying(OtaResponseOpCodes::Ok));
                         REQUIRE(perPackageSize == expectedPerPackageSize);
                         REQUIRE(bufferSize == expectedBufferSize);
                     }
@@ -314,7 +315,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
         {
             SECTION("should send OtaResponseOpCodes::NotOk when OTA updater is not running")
             {
-                const auto expectedResult = static_cast<unsigned char>(OtaResponseOpCodes::NotOk);
+                const auto expectedResult = std::to_underlying(OtaResponseOpCodes::NotOk);
                 std::vector<unsigned char> resultResponse;
 
                 When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
@@ -341,7 +342,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
                 std::vector<unsigned char> packageData(expectedBufferSize);
                 std::fill(begin(packageData), end(packageData), 1);
-                NimBLEAttValue flushPackageRequest{static_cast<unsigned char>(OtaRequestOpCodes::Package)};
+                NimBLEAttValue flushPackageRequest{std::to_underlying(OtaRequestOpCodes::Package)};
                 flushPackageRequest.insert(packageData);
                 std::vector<unsigned char> resultResponse;
 
@@ -352,7 +353,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                 {
                     std::vector<unsigned char> packageData(expectedBufferSize - 1);
                     std::fill(begin(packageData), end(packageData), 1);
-                    NimBLEAttValue noFlushPackageRequest{static_cast<unsigned char>(OtaRequestOpCodes::Package)};
+                    NimBLEAttValue noFlushPackageRequest{std::to_underlying(OtaRequestOpCodes::Package)};
                     noFlushPackageRequest.insert(packageData);
 
                     otaService.onData(noFlushPackageRequest, mtu);
@@ -368,7 +369,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
                     std::vector<unsigned char> packageData(expectedBufferSize);
                     std::fill(begin(packageData), end(packageData), 1);
-                    NimBLEAttValue noFlushPackageRequest{static_cast<unsigned char>(OtaRequestOpCodes::Package)};
+                    NimBLEAttValue noFlushPackageRequest{std::to_underlying(OtaRequestOpCodes::Package)};
                     noFlushPackageRequest.insert(packageData);
 
                     When(Method(mockUpdate, isRunning)).Return(false).AlwaysReturn(true);
@@ -391,7 +392,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                     Verify(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).Once();
 
                     REQUIRE_THAT(resultResponse, Catch::Matchers::SizeIs(sizeof(OtaResponseOpCodes)));
-                    REQUIRE(resultResponse[0] == static_cast<unsigned char>(OtaResponseOpCodes::Ok));
+                    REQUIRE(resultResponse[0] == std::to_underlying(OtaResponseOpCodes::Ok));
                 }
 
                 SECTION("should send OtaResponseOpCodes::ChecksumError on update partition write error with UPDATE_ERROR_MAGIC_BYTE")
@@ -408,7 +409,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                     Verify(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).Once();
 
                     REQUIRE_THAT(resultResponse, Catch::Matchers::SizeIs(sizeof(OtaResponseOpCodes)));
-                    REQUIRE(resultResponse[0] == static_cast<unsigned char>(OtaResponseOpCodes::ChecksumError));
+                    REQUIRE(resultResponse[0] == std::to_underlying(OtaResponseOpCodes::ChecksumError));
                 }
 
                 SECTION("should send OtaResponseOpCodes::InternalStorageError on update partition write error")
@@ -425,7 +426,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
                     Verify(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).Once();
 
                     REQUIRE_THAT(resultResponse, Catch::Matchers::SizeIs(sizeof(OtaResponseOpCodes)));
-                    REQUIRE(resultResponse[0] == static_cast<unsigned char>(OtaResponseOpCodes::InternalStorageError));
+                    REQUIRE(resultResponse[0] == std::to_underlying(OtaResponseOpCodes::InternalStorageError));
                 }
             }
         }
@@ -435,7 +436,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
     {
         SECTION("should send OtaResponseOpCodes::NotOk when OTA updater is not running")
         {
-            const auto expectedResult = static_cast<unsigned char>(OtaResponseOpCodes::NotOk);
+            const auto expectedResult = std::to_underlying(OtaResponseOpCodes::NotOk);
             std::vector<unsigned char> resultResponse;
 
             When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
@@ -456,11 +457,11 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
         SECTION("should send OtaResponseOpCodes::IncorrectFormat response and terminate the request on invalid payload")
         {
-            const auto expectedResult = static_cast<unsigned char>(OtaResponseOpCodes::IncorrectFormat);
+            const auto expectedResult = std::to_underlying(OtaResponseOpCodes::IncorrectFormat);
             std::vector<unsigned char> resultResponse;
             std::vector<unsigned char> md5Hash(ESP_ROM_MD5_DIGEST_LEN + 1);
             std::fill(begin(md5Hash), end(md5Hash), 1);
-            NimBLEAttValue tooLongEndRequest{static_cast<unsigned char>(OtaRequestOpCodes::End)};
+            NimBLEAttValue tooLongEndRequest{std::to_underlying(OtaRequestOpCodes::End)};
             tooLongEndRequest.insert(md5Hash);
 
             When(Method(mockUpdate, isRunning)).AlwaysReturn(true);
@@ -518,7 +519,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
                     SECTION("OtaResponseOpCodes::ChecksumError when MD5 hash is invalid")
                     {
-                        const auto expectedResult = static_cast<unsigned char>(OtaResponseOpCodes::ChecksumError);
+                        const auto expectedResult = std::to_underlying(OtaResponseOpCodes::ChecksumError);
                         std::vector<unsigned char> resultResponse;
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
@@ -537,7 +538,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
                     SECTION("OtaResponseOpCodes::NotOk when not an UPDATE_ERROR_MD5 occurs")
                     {
-                        const auto expectedResult = static_cast<unsigned char>(OtaResponseOpCodes::NotOk);
+                        const auto expectedResult = std::to_underlying(OtaResponseOpCodes::NotOk);
                         std::vector<unsigned char> resultResponse;
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)
@@ -561,7 +562,7 @@ TEST_CASE("OtaUpdaterService", "[ota]")
 
                     SECTION("should return OtaResponseOpCodes::Ok")
                     {
-                        const auto expectedResult = static_cast<unsigned char>(OtaResponseOpCodes::Ok);
+                        const auto expectedResult = std::to_underlying(OtaResponseOpCodes::Ok);
                         std::vector<unsigned char> resultResponse;
 
                         When(OverloadedMethod(mockTxCharacteristic, setValue, void(const unsigned char *data, size_t length)).Using(Any(), 1U)).AlwaysDo([&resultResponse](const unsigned char *data, size_t length)

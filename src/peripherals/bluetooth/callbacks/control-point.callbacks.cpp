@@ -1,4 +1,5 @@
 #include <array>
+#include <utility>
 
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
@@ -24,9 +25,9 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     {
         Log.infoln("Invalid request, no Op Code");
         array<unsigned char, 3U> errorResponse = {
-            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+            std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(0),
-            static_cast<unsigned char>(ResponseOpCodes::OperationFailed)};
+            std::to_underlying(ResponseOpCodes::OperationFailed)};
         pCharacteristic->setValue(errorResponse);
         pCharacteristic->indicate();
 
@@ -38,7 +39,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     switch (message[0])
     {
 
-    case static_cast<unsigned char>(SettingsOpCodes::SetLogLevel):
+    case std::to_underlying(SettingsOpCodes::SetLogLevel):
     {
         Log.infoln("Set LogLevel");
 
@@ -46,15 +47,15 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
 
         array<unsigned char, 3U>
             temp = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::ResponseCode),
                 static_cast<unsigned char>(message[0]),
-                static_cast<unsigned char>(response)};
+                std::to_underlying(response)};
 
         pCharacteristic->setValue(temp);
     }
     break;
 
-    case static_cast<unsigned char>(SettingsOpCodes::ChangeBleService):
+    case std::to_underlying(SettingsOpCodes::ChangeBleService):
     {
         Log.infoln("Change BLE Service");
 
@@ -66,39 +67,39 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         }
 
         array<unsigned char, 3U> temp = {
-            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+            std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+            std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
         pCharacteristic->setValue(temp);
     }
     break;
 
-    case static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging):
+    case std::to_underlying(SettingsOpCodes::SetSdCardLogging):
     {
         Log.infoln("Change Sd Card Logging");
 
         const auto response = processSdCardLogging(message, pCharacteristic);
 
         array<unsigned char, 3U> temp = {
-            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+            std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(response)};
+            std::to_underlying(response)};
 
         pCharacteristic->setValue(temp);
     }
     break;
 
-    case static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging):
+    case std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging):
     {
         Log.infoln("Change deltaTime logging");
 
         const auto response = processDeltaTimeLogging(message, pCharacteristic);
 
         array<unsigned char, 3U> temp = {
-            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+            std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(response)};
+            std::to_underlying(response)};
 
         pCharacteristic->setValue(temp);
     }
@@ -108,9 +109,9 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);
         array<unsigned char, 3U> response = {
-            eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? static_cast<unsigned char>(SettingsOpCodes::ResponseCodeFtms) : static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+            eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? std::to_underlying(SettingsOpCodes::ResponseCodeFtms) : std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            static_cast<unsigned char>(eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode)};
+            std::to_underlying(eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode)};
         pCharacteristic->setValue(response);
     }
     break;
@@ -128,7 +129,7 @@ ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &mes
     }
 
     Log.infoln("New LogLevel: %d", message[1]);
-    eepromService.setLogLevel(static_cast<ArduinoLogLevel>(message[1]));
+    eepromService.setLogLevel(ArduinoLogLevel{message[1]});
 
     settingsBleService.broadcastSettings();
 
@@ -175,7 +176,7 @@ ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttVa
 void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
 {
     std::string flagString;
-    switch (static_cast<BleServiceFlag>(message[1]))
+    switch (BleServiceFlag{message[1]})
     {
     case BleServiceFlag::CpsService:
         flagString = "CPS";
@@ -191,11 +192,11 @@ void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &messag
     }
 
     Log.infoln("New BLE Service: %s", flagString.c_str());
-    eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(message[1]));
+    eepromService.setBleServiceFlag(BleServiceFlag{message[1]});
     array<unsigned char, 3U> temp = {
-        static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+        std::to_underlying(SettingsOpCodes::ResponseCode),
         static_cast<unsigned char>(message[0]),
-        static_cast<unsigned char>(ResponseOpCodes::Successful)};
+        std::to_underlying(ResponseOpCodes::Successful)};
     pCharacteristic->setValue(temp);
     pCharacteristic->indicate();
 

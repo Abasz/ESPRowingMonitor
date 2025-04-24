@@ -1,5 +1,6 @@
 #include <array>
 #include <span>
+#include <utility>
 
 #include "ArduinoLog.h"
 #include "Update.h"
@@ -41,28 +42,28 @@ void OtaUpdaterService::onData(const NimBLEAttValue &data, const unsigned short 
 
     switch (data[0])
     {
-    case static_cast<unsigned char>(OtaRequestOpCodes::Begin):
+    case std::to_underlying(OtaRequestOpCodes::Begin):
     {
         setMtu(newMtu);
         span<const unsigned char>::iterator iterator(data.data());
         handleBegin(span<const unsigned char>(iterator + 1, data.size() - 1));
     }
     break;
-    case static_cast<unsigned char>(OtaRequestOpCodes::Package):
+    case std::to_underlying(OtaRequestOpCodes::Package):
     {
         span<const unsigned char>::iterator iterator(data.data());
         handlePackage(span<const unsigned char>(iterator + 1, data.size() - 1));
     }
     break;
-    case static_cast<unsigned char>(OtaRequestOpCodes::End):
+    case std::to_underlying(OtaRequestOpCodes::End):
     {
         span<const unsigned char>::iterator iterator(data.data());
         handleEnd(span<const unsigned char>(iterator + 1, data.size() - 1));
     }
     break;
-    case static_cast<unsigned char>(OtaRequestOpCodes::Abort):
+    case std::to_underlying(OtaRequestOpCodes::Abort):
         terminateUpload();
-        send(static_cast<unsigned char>(OtaResponseOpCodes::Ok));
+        send(std::to_underlying(OtaResponseOpCodes::Ok));
         break;
     default:
         handleError(OtaResponseOpCodes::IncorrectFormat);
@@ -121,7 +122,7 @@ void OtaUpdaterService::handleBegin(const span<const unsigned char> &payload)
 
     const auto length = 9U;
     std::array<unsigned char, length> response = {
-        static_cast<unsigned char>(OtaResponseOpCodes::Ok),
+        std::to_underlying(OtaResponseOpCodes::Ok),
         static_cast<unsigned char>(perPackageDataSize),
         static_cast<unsigned char>(perPackageDataSize >> 8),
         static_cast<unsigned char>(perPackageDataSize >> 16),
@@ -169,7 +170,7 @@ void OtaUpdaterService::handlePackage(const span<const unsigned char> &payload)
             return;
         }
 
-        send(static_cast<unsigned char>(OtaResponseOpCodes::Ok));
+        send(std::to_underlying(OtaResponseOpCodes::Ok));
 
         Log.verboseln("OTA progress: %d/%d, remaining: %d", Update.size(), Update.progress(), Update.remaining());
     }
@@ -221,7 +222,7 @@ void OtaUpdaterService::handleInstall()
         return;
     }
 
-    send(static_cast<unsigned char>(OtaResponseOpCodes::Ok));
+    send(std::to_underlying(OtaResponseOpCodes::Ok));
 
     Log.infoln("OTA installed, restarting device...");
 
@@ -230,7 +231,7 @@ void OtaUpdaterService::handleInstall()
 
 void OtaUpdaterService::handleError(OtaResponseOpCodes errorCode)
 {
-    send(static_cast<unsigned char>(errorCode));
+    send(std::to_underlying(errorCode));
 }
 
 void OtaUpdaterService::send(unsigned char head)

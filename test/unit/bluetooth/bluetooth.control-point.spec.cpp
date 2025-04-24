@@ -1,4 +1,5 @@
 #include <array>
+#include <utility>
 
 #include "../include/catch_amalgamated.hpp"
 #include "../include/fakeit.hpp"
@@ -42,9 +43,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
     SECTION("indicate OperationFailed response when request is empty")
     {
         std::array<unsigned char, 3U> operationFailedResponse = {
-            static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
+            std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(0),
-            static_cast<unsigned char>(ResponseOpCodes::OperationFailed)};
+            std::to_underlying(ResponseOpCodes::OperationFailed)};
 
         When(Method(mockControlPointCharacteristic, getValue)).Return({});
 
@@ -64,9 +65,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             const auto unsupportedOpCode = 60;
 
             std::array<unsigned char, 3U> unsupportedOperationFtmsResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCodeFtms),
+                std::to_underlying(SettingsOpCodes::ResponseCodeFtms),
                 static_cast<unsigned char>(unsupportedOpCode),
-                static_cast<unsigned char>(ResponseOpCodes::ControlNotPermitted),
+                std::to_underlying(ResponseOpCodes::ControlNotPermitted),
             };
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
@@ -86,9 +87,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             const auto unsupportedOpCode = 60;
 
             std::array<unsigned char, 3U> unsupportedOperationFtmsResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCodeFtms),
+                std::to_underlying(SettingsOpCodes::ResponseCodeFtms),
                 static_cast<unsigned char>(unsupportedOpCode),
-                static_cast<unsigned char>(ResponseOpCodes::ControlNotPermitted),
+                std::to_underlying(ResponseOpCodes::ControlNotPermitted),
             };
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
@@ -109,11 +110,11 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when log level settings is invalid return InvalidParameter response")
         {
             std::array<unsigned char, 3U> invalidParameterResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetLogLevel),
-                static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetLogLevel),
+                std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetLogLevel), 10});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetLogLevel), 10});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -127,11 +128,11 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when log level settings is missing return InvalidParameter response")
         {
             std::array<unsigned char, 3U> invalidParameterResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetLogLevel),
-                static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetLogLevel),
+                std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetLogLevel)});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetLogLevel)});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -145,12 +146,12 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when log level settings is is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetLogLevel),
-                static_cast<unsigned char>(ResponseOpCodes::Successful)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetLogLevel),
+                std::to_underlying(ResponseOpCodes::Successful)};
             const auto expectedLogLevel = ArduinoLogLevel::LogLevelInfo;
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetLogLevel), static_cast<unsigned char>(expectedLogLevel)});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetLogLevel), std::to_underlying(expectedLogLevel)});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -180,11 +181,11 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when BLE service settings is invalid return InvalidParameter response")
         {
             std::array<unsigned char, 3U> invalidParameterResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::ChangeBleService),
-                static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::ChangeBleService),
+                std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService), 3});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::ChangeBleService), 3});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -198,11 +199,11 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when BLE service settings is missing return InvalidParameter response")
         {
             std::array<unsigned char, 3U> invalidParameterResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::ChangeBleService),
-                static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::ChangeBleService),
+                std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService)});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::ChangeBleService)});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -216,12 +217,12 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when BLE service setting is is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::ChangeBleService),
-                static_cast<unsigned char>(ResponseOpCodes::Successful)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::ChangeBleService),
+                std::to_underlying(ResponseOpCodes::Successful)};
             const auto expectedBleService = BleServiceFlag::FtmsService;
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::ChangeBleService), static_cast<unsigned char>(expectedBleService)});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::ChangeBleService), std::to_underlying(expectedBleService)});
             Fake(Method(mockEEPROMService, setLogLevel));
             Fake(Method(mockGlobals, restartWithDelay));
             Fake(Method(mockArduino, delay));
@@ -259,11 +260,11 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when Delta Time logging setting is invalid return InvalidParameter response")
         {
             std::array<unsigned char, 3U> invalidParameterResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging),
-                static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetSdCardLogging),
+                std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging), 10});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetSdCardLogging), 10});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -277,11 +278,11 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when Delta Time logging setting is missing return InvalidParameter response")
         {
             std::array<unsigned char, 3U> invalidParameterResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging),
-                static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetSdCardLogging),
+                std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging)});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetSdCardLogging)});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -295,12 +296,12 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when SD Card logging settings is is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging),
-                static_cast<unsigned char>(ResponseOpCodes::Successful)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetSdCardLogging),
+                std::to_underlying(ResponseOpCodes::Successful)};
             const auto expectedSdCardLogging = true;
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetSdCardLogging), static_cast<unsigned char>(expectedSdCardLogging)});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetSdCardLogging), static_cast<unsigned char>(expectedSdCardLogging)});
             Fake(Method(mockEEPROMService, setLogLevel));
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
@@ -331,11 +332,11 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when Delta Time logging setting is invalid return InvalidParameter response")
         {
             std::array<unsigned char, 3U> invalidParameterResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging),
-                static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging),
+                std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging), 10});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging), 10});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -349,11 +350,11 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when Delta Time logging setting is missing return InvalidParameter response")
         {
             std::array<unsigned char, 3U> invalidParameterResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging),
-                static_cast<unsigned char>(ResponseOpCodes::InvalidParameter)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging),
+                std::to_underlying(ResponseOpCodes::InvalidParameter)};
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging), 10});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging), 10});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -367,12 +368,12 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         SECTION("and when Delta Time logging setting is is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
-                static_cast<unsigned char>(SettingsOpCodes::ResponseCode),
-                static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging),
-                static_cast<unsigned char>(ResponseOpCodes::Successful)};
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging),
+                std::to_underlying(ResponseOpCodes::Successful)};
             const auto expectedDeltaTimeLogging = true;
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return({static_cast<unsigned char>(SettingsOpCodes::SetDeltaTimeLogging), static_cast<unsigned char>(expectedDeltaTimeLogging)});
+            When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging), static_cast<unsigned char>(expectedDeltaTimeLogging)});
             Fake(Method(mockEEPROMService, setLogLevel));
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());

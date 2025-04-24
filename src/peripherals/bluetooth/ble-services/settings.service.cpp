@@ -1,4 +1,5 @@
 #include <array>
+#include <utility>
 
 #include "ArduinoLog.h"
 
@@ -38,7 +39,7 @@ std::array<unsigned char, SettingsBleService::settingsArrayLength> SettingsBleSe
     const unsigned char settings =
         ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToBluetooth()) + 1 : 0) << 0U) |
         ((Configurations::supportSdCardLogging && sdCardService.isLogFileOpen() ? static_cast<unsigned char>(eepromService.getLogToSdCard()) + 1 : 0) << 2U) |
-        (static_cast<unsigned char>(eepromService.getLogLevel()) << 4U);
+        (std::to_underlying(eepromService.getLogLevel()) << 4U);
 
     std::array<unsigned char, SettingsBleService::settingsArrayLength> temp = {
         settings,

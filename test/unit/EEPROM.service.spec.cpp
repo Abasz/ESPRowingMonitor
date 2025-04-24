@@ -1,4 +1,6 @@
 // NOLINTBEGIN(readability-magic-numbers)
+#include <utility>
+
 #include "./include/catch_amalgamated.hpp"
 #include "./include/fakeit.hpp"
 
@@ -27,8 +29,8 @@ TEST_CASE("EEPROMService", "[utils]")
 
         When(Method(mockPreferences, getBool).Using(StrEq(bluetoothDeltaTimeLoggingAddress), Configurations::enableBluetoothDeltaTimeLogging)).Return(Configurations::enableBluetoothDeltaTimeLogging);
         When(Method(mockPreferences, getBool).Using(StrEq(sdCardLoggingAddress), false)).Return(false);
-        When(Method(mockPreferences, getUChar).Using(StrEq(logLevelAddress), static_cast<unsigned char>(Configurations::defaultLogLevel))).Return(static_cast<unsigned char>(Configurations::defaultLogLevel));
-        When(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), static_cast<unsigned char>(Configurations::defaultBleServiceFlag))).Return(static_cast<unsigned char>(Configurations::defaultBleServiceFlag));
+        When(Method(mockPreferences, getUChar).Using(StrEq(logLevelAddress), std::to_underlying(Configurations::defaultLogLevel))).Return(std::to_underlying(Configurations::defaultLogLevel));
+        When(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), std::to_underlying(Configurations::defaultBleServiceFlag))).Return(std::to_underlying(Configurations::defaultBleServiceFlag));
 
         EEPROMService eepromService(mockPreferences.get());
         eepromService.setup();
@@ -41,10 +43,10 @@ TEST_CASE("EEPROMService", "[utils]")
         SECTION("should initialize keys to their defaults if do not exist")
         {
             Verify(Method(mockPreferences, isKey).Using(StrEq(logLevelAddress))).Once();
-            Verify(Method(mockPreferences, putUChar).Using(StrEq(logLevelAddress), static_cast<unsigned char>(Configurations::defaultLogLevel))).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(logLevelAddress), std::to_underlying(Configurations::defaultLogLevel))).Once();
 
             Verify(Method(mockPreferences, isKey).Using(StrEq(bleServiceAddress))).Once();
-            Verify(Method(mockPreferences, putUChar).Using(StrEq(bleServiceAddress), static_cast<unsigned char>(Configurations::defaultBleServiceFlag))).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(bleServiceAddress), std::to_underlying(Configurations::defaultBleServiceFlag))).Once();
 
             Verify(Method(mockPreferences, isKey).Using(StrEq(bluetoothDeltaTimeLoggingAddress))).Once();
             Verify(Method(mockPreferences, putBool).Using(StrEq(bluetoothDeltaTimeLoggingAddress), Configurations::enableBluetoothDeltaTimeLogging)).Once();
@@ -59,9 +61,9 @@ TEST_CASE("EEPROMService", "[utils]")
 
             Verify(Method(mockPreferences, getBool).Using(StrEq(sdCardLoggingAddress), false)).Once();
 
-            Verify(Method(mockPreferences, getUChar).Using(StrEq(logLevelAddress), static_cast<unsigned char>(Configurations::defaultLogLevel))).Once();
+            Verify(Method(mockPreferences, getUChar).Using(StrEq(logLevelAddress), std::to_underlying(Configurations::defaultLogLevel))).Once();
 
-            Verify(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), static_cast<unsigned char>(Configurations::defaultBleServiceFlag))).Once();
+            Verify(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), std::to_underlying(Configurations::defaultBleServiceFlag))).Once();
         }
 
         SECTION("should set initial values for getters")
@@ -86,14 +88,14 @@ TEST_CASE("EEPROMService", "[utils]")
             eepromService.setLogLevel(newLogLevel);
 
             REQUIRE(eepromService.getLogLevel() == newLogLevel);
-            Verify(Method(mockPreferences, putUChar).Using(StrEq(logLevelAddress), static_cast<unsigned char>(newLogLevel))).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(logLevelAddress), std::to_underlying(newLogLevel))).Once();
         }
 
         SECTION("should ignore invalid level")
         {
             mockPreferences.ClearInvocationHistory();
 
-            eepromService.setLogLevel(static_cast<ArduinoLogLevel>(7));
+            eepromService.setLogLevel(ArduinoLogLevel{7});
 
             Verify(Method(mockPreferences, putUChar)).Exactly(0);
         }
@@ -137,14 +139,14 @@ TEST_CASE("EEPROMService", "[utils]")
             eepromService.setBleServiceFlag(bleService);
 
             REQUIRE(eepromService.getBleServiceFlag() == bleService);
-            Verify(Method(mockPreferences, putUChar).Using(StrEq(bleServiceAddress), static_cast<unsigned char>(bleService))).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(bleServiceAddress), std::to_underlying(bleService))).Once();
         }
 
         SECTION("should ignore invalid flag")
         {
             mockPreferences.ClearInvocationHistory();
 
-            eepromService.setBleServiceFlag(static_cast<BleServiceFlag>(7));
+            eepromService.setBleServiceFlag(BleServiceFlag{7});
 
             Verify(Method(mockPreferences, putUChar)).Exactly(0);
         }
