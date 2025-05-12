@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 # Set project name and version
 project(
     ESP-Rowing-Monitor
-    VERSION 5.3
+    VERSION 6.0.1
     LANGUAGES CXX
 )
 
@@ -143,7 +143,7 @@ rowerProfile=$(awk -v targetEnvironment=\"\${targetEnvironment}\" '
 
 echo \"\${rowerProfile:-genericAir}\"
 "
-    FILE_PERMISSIONS OWNER_EXECUTE
+    FILE_PERMISSIONS OWNER_EXECUTE OWNER_READ
 )
 
 # Create e2e target
@@ -190,7 +190,7 @@ if [[ ! -f \"${CMAKE_CURRENT_BINARY_DIR}/\${rowerProfile\}.environment\" ]]; the
 fi
 "
     TARGET e2e-test
-    FILE_PERMISSIONS OWNER_EXECUTE
+    FILE_PERMISSIONS OWNER_EXECUTE OWNER_READ
 )
 
 file(
@@ -211,7 +211,7 @@ rowerProfile=$(\"${CMAKE_CURRENT_BINARY_DIR}/get-rower-profile\" \"\${targetEnvi
 ${CMAKE_COMMAND} --build \"${CMAKE_CURRENT_BINARY_DIR}\" --target e2e-test --parallel $(getconf _NPROCESSORS_ONLN) -- ROWER_PROFILE=\${rowerProfile}
 "
     TARGET e2e-test
-    FILE_PERMISSIONS OWNER_EXECUTE
+    FILE_PERMISSIONS OWNER_EXECUTE OWNER_READ
 )
 
 add_custom_command(
@@ -320,5 +320,5 @@ for file in \"\${calibrationDir}\"/*test.txt; do
 done
 exit \${exitCode}
 "
-  FILE_PERMISSIONS OWNER_EXECUTE
+  FILE_PERMISSIONS OWNER_EXECUTE OWNER_READ
 )
