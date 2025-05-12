@@ -141,7 +141,7 @@ rowerProfile=$(awk -v targetEnvironment=\"\${targetEnvironment}\" '
     }
 ' \"${CMAKE_CURRENT_SOURCE_DIR}/platformio.ini\")
 
-echo \"\${rowerProfile:-generic}\"
+echo \"\${rowerProfile:-genericAir}\"
 "
     FILE_PERMISSIONS OWNER_EXECUTE
 )
@@ -160,7 +160,6 @@ target_include_directories(e2e-test PRIVATE ${E2E_TEST_DIR})
 target_compile_options(e2e-test PRIVATE ${COMPILER_FLAGS})
 target_compile_definitions(e2e-test PRIVATE
     LOG_CALIBRATION
-    USE_CUSTOM_SETTINGS
     [[BOARD_PROFILE="profiles/generic.board-profile.h"]]
     [[ROWER_PROFILE="profiles/$(ROWER_PROFILE).rower-profile.h"]]
 )
