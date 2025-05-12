@@ -9,7 +9,7 @@
 
 // LED settings
 #define LED_BLINK_FREQUENCY 1'000
-#define LED_PIN LED_BUILTIN // Use GPIO_NUM_NC if no led is available
+#define LED_PIN GPIO_NUM_NC // Use GPIO_NUM_NC if no led is available
 #define IS_RGB false
 
 // Hardware settings
