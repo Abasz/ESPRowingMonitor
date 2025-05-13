@@ -1,5 +1,5 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "../include/catch_amalgamated.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include "../../../src/utils/series/ts-quadratic-series.h"
 #include "./regression.test-cases.spec.h"

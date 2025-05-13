@@ -1,5 +1,5 @@
 // NOLINTBEGIN
-#include "./fakeit.hpp"
+#include "fakeit.hpp"
 
 static constexpr unsigned char labelLength = 17;
 typedef struct

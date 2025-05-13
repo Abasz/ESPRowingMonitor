@@ -1,8 +1,9 @@
 // NOLINTBEGIN(readability-magic-numbers)
 #include <vector>
 
-#include "../include/catch_amalgamated.hpp"
-#include "../include/fakeit.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_container_properties.hpp"
+#include "fakeit.hpp"
 
 #include "../include/Arduino.h"
 #include "../include/NimBLEDevice.h"

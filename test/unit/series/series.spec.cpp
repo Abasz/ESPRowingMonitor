@@ -1,5 +1,5 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "../include/catch_amalgamated.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include "../../../src/utils/configuration.h"
 #include "../../../src/utils/series/series.h"

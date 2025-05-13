@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "./fakeit.hpp"
+#include "fakeit.hpp"
 
 #include "./Esp32-typedefs.h"
 

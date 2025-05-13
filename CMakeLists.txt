@@ -12,6 +12,23 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+Include(FetchContent)
+
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG v3.11.0
+)
+
+FetchContent_Declare(
+  FakeIt
+  GIT_REPOSITORY https://github.com/eranpeer/FakeIt.git
+  GIT_TAG 2.4.1
+)
+
+FetchContent_MakeAvailable(Catch2)
+FetchContent_MakeAvailable(FakeIt)
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -100,7 +117,6 @@ set(SOURCES_UNIT_TEST
     "${UNIT_TEST_DIR}/include/esp_ota_ops.cpp"
     "${UNIT_TEST_DIR}/include/ArduinoLog.cpp"
     "${UNIT_TEST_DIR}/include/globals.cpp"
-    "${UNIT_TEST_DIR}/include/catch_amalgamated.cpp"
 )
 
 set(SOURCES_E2E_TEST
@@ -227,6 +243,11 @@ add_executable(unit-test ${SOURCES_UNIT_TEST})
 target_include_directories(unit-test PRIVATE ${INCLUDES_UNIT_TEST})
 target_compile_options(unit-test PRIVATE ${COMPILER_FLAGS})
 target_compile_definitions(unit-test PRIVATE UNIT_TEST)
+target_link_libraries(
+    unit-test PRIVATE 
+    Catch2::Catch2WithMain
+    FakeIt::FakeIt-catch
+)
 set_target_properties(
     unit-test
     PROPERTIES
@@ -248,8 +269,10 @@ target_include_directories(test-coverage PRIVATE ${INCLUDES_UNIT_TEST})
 target_compile_options(test-coverage PRIVATE ${COMPILER_FLAGS_UNIT_TEST} --coverage)
 target_compile_definitions(test-coverage PRIVATE UNIT_TEST)
 target_link_libraries(
-    test-coverage
+    test-coverage PRIVATE
     gcov
+    Catch2::Catch2WithMain
+    FakeIt::FakeIt-catch
 )
 set_target_properties(
     test-coverage

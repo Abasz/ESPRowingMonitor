@@ -1,6 +1,8 @@
 // NOLINTBEGIN(readability-magic-numbers)
-#include "./include/catch_amalgamated.hpp"
-#include "./include/fakeit.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers_container_properties.hpp"
+#include "catch2/matchers/catch_matchers_range_equals.hpp"
+#include "fakeit.hpp"
 
 #include "./include/FastLED.h"
 

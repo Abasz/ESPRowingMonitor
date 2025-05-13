@@ -1,7 +1,7 @@
 // NOLINTBEGIN
 #pragma once
 
-#include "./fakeit.hpp"
+#include "fakeit.hpp"
 
 /// RGB color channel orderings, used when instantiating controllers to determine
 /// what order the controller should send data out in. The default ordering
@@ -63,7 +63,7 @@ struct CRGB
         unsigned char raw[3];
     };
 
-    CRGB& operator=(const unsigned int rhs);
+    CRGB &operator=(const unsigned int rhs);
 };
 
 bool operator==(const CRGB &lhs, const CRGB &rhs);

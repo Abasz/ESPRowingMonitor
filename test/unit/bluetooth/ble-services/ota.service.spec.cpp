@@ -1,8 +1,8 @@
 // NOLINTBEGIN(readability-magic-numbers)
 #include <string>
 
-#include "../../include/catch_amalgamated.hpp"
-#include "../../include/fakeit.hpp"
+#include "catch2/catch_test_macros.hpp"
+#include "fakeit.hpp"
 
 #include "./esp_err.h"
 

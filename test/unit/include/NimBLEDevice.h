@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "./fakeit.hpp"
+#include "fakeit.hpp"
 
 /**
  * @brief Bluetooth TX power level(index), it's just a index corresponding to power(dbm).

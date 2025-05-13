@@ -1,7 +1,7 @@
 // NOLINTBEGIN
 #pragma once
 
-#include "./fakeit.hpp"
+#include "fakeit.hpp"
 
 #define UPDATE_ERROR_OK (0)
 #define UPDATE_ERROR_WRITE (1)

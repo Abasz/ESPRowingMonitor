@@ -1,5 +1,5 @@
 // NOLINTBEGIN(cppcoreguidelines-pro-type-union-access, readability-magic-numbers)
-#include "./fakeit.hpp"
+#include "fakeit.hpp"
 
 #include "./FastLED.h"
 #include "FastLED.h"
