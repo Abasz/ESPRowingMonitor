@@ -1,0 +1,41 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+    contents: read
+    checks: write
+    id-token: write
+
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Configure CMake
+        run: cmake -S . -B build
+
+      - name: 🧪 Build & Run unit tests
+        run: |
+          cmake --build build --target unit-test --parallel $(nproc)
+          ./build/test.out -r junit -o results.xml
+
+      - name: 📊 Build & Run rower calibration tests
+        run: |
+          environments=$(grep -oP '^\[env:\K(?!.*(?:debug|custom)).*(?=\])' < "platformio.ini")
+          for environment in $(echo "${environments}" | cut -d'-' -f1 | sort -u); do
+            ${{github.workspace}}/build/run-calibration "${environment}-generic"
+          done
+
+      - name: 📋 Test summary
+        uses: test-summary/action@v2
+        with:
+          paths: "results.xml"
+        if: always()

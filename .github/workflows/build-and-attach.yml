@@ -1,0 +1,76 @@
+name: Build & Attach Firmware to Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    env:
+      PIO_CLI_CALLER: github-actions
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: 🔧 Set up PlatformIO Core
+        run: pip install -U platformio esptool
+
+      - name:  Build binaries for all rowers and board profiles
+        run: |
+          echo "🔨 Building binaries"
+          environments=$(platformio project config | grep -oP '^env:\K(?!(.*debug|custom)).*')
+          echo
+          echo "Environments:"
+          mapfile -t env_array <<< "$environments"
+          for env in "${env_array[@]}"; do
+            echo "- ${env}"
+          done
+          echo
+          pio run $(echo "${environments}" | sed 's/^/-e /' | paste -sd ' ' -)
+
+      - name: 📦 Prepare zipped firmware binaries
+        run: |
+          set -eo pipefail
+          mkdir -p release_assets
+          shopt -s nullglob
+
+          for dir in "${{github.workspace}}/.pio/build"/*/; do
+            environmentName=$(basename "${dir}")
+            echo "Processing environment: ${environmentName}"
+
+            # Require the canonical firmware file produced by PlatformIO
+            binfile="${dir}firmware.bin"
+            if [ ! -f "${binfile}" ]; then
+              echo "ERROR: expected firmware binary '${binfile}' not found for environment ${environmentName}"
+              exit 1
+            fi
+            echo "Using firmware: ${binfile}"
+
+            chip_id=$(esptool image_info "${binfile}" 2>&1 | sed -nE 's/.*Chip ID:.*\(([^)]+)\).*/\1/p')
+
+            # sanitize chip_id to safe filename chars
+            chip_id_safe=$(echo "${chip_id}" | sed -E 's/[^A-Za-z0-9._]//g')
+
+            zipname="${{github.workspace}}/release_assets/firmware_${environmentName}_${chip_id_safe}.zip"
+            echo "Creating zip: ${zipname} (all .bin files in ${dir})"
+            # include all .bin files from this environment folder
+            find "${dir}" -maxdepth 1 -type f -name '*.bin' -print | zip -j -q "${zipname}" -@
+          done
+
+      - name: 📎 Upload firmware binaries
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{github.workspace}}/release_assets/*
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
