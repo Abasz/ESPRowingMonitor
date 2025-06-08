@@ -44,7 +44,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     {
         Log.infoln("Set LogLevel");
 
-        const auto response = processLogLevel(message, pCharacteristic);
+        const auto response = processLogLevel(message);
 
         array<unsigned char, 3U>
             temp = {
@@ -83,7 +83,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     {
         Log.infoln("Change Sd Card Logging");
 
-        const auto response = processSdCardLogging(message, pCharacteristic);
+        const auto response = processSdCardLogging(message);
 
         array<unsigned char, 3U> temp = {
             std::to_underlying(SettingsOpCodes::ResponseCode),
@@ -99,7 +99,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     {
         Log.infoln("Change deltaTime logging");
 
-        const auto response = processDeltaTimeLogging(message, pCharacteristic);
+        const auto response = processDeltaTimeLogging(message);
 
         array<unsigned char, 3U> temp = {
             std::to_underlying(SettingsOpCodes::ResponseCode),
@@ -143,7 +143,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     pCharacteristic->indicate();
 }
 
-ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
+ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &message)
 {
     if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 6U))
     {
@@ -158,7 +158,7 @@ ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &mes
     return ResponseOpCodes::Successful;
 }
 
-ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
+ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue &message)
 {
     if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 1U))
     {
@@ -176,7 +176,7 @@ ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue
     return ResponseOpCodes::Successful;
 }
 
-ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
+ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttValue &message)
 {
     if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 1U))
     {
