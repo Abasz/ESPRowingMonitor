@@ -27,7 +27,8 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         array<unsigned char, 3U> errorResponse = {
             std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(0),
-            std::to_underlying(ResponseOpCodes::OperationFailed)};
+            std::to_underlying(ResponseOpCodes::OperationFailed),
+        };
         pCharacteristic->setValue(errorResponse);
         pCharacteristic->indicate();
 
@@ -49,7 +50,8 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
             temp = {
                 std::to_underlying(SettingsOpCodes::ResponseCode),
                 static_cast<unsigned char>(message[0]),
-                std::to_underlying(response)};
+                std::to_underlying(response),
+            };
 
         pCharacteristic->setValue(temp);
     }
@@ -59,21 +61,23 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     {
         Log.infoln("Change BLE Service");
 
-        if (message.size() == 2 && message[1] >= 0 && message[1] <= 2)
+        if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 2U))
         {
-            processBleServiceChange(message, pCharacteristic);
+            array<unsigned char, 3U> temp = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                static_cast<unsigned char>(message[0]),
+                std::to_underlying(ResponseOpCodes::InvalidParameter),
+            };
 
-            return;
+            pCharacteristic->setValue(temp);
+
+            break;
         }
 
-        array<unsigned char, 3U> temp = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            static_cast<unsigned char>(message[0]),
-            std::to_underlying(ResponseOpCodes::InvalidParameter)};
+        processBleServiceChange(message, pCharacteristic);
 
-        pCharacteristic->setValue(temp);
+        return;
     }
-    break;
 
     case std::to_underlying(SettingsOpCodes::SetSdCardLogging):
     {
@@ -84,7 +88,8 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         array<unsigned char, 3U> temp = {
             std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            std::to_underlying(response)};
+            std::to_underlying(response),
+        };
 
         pCharacteristic->setValue(temp);
     }
@@ -99,7 +104,8 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         array<unsigned char, 3U> temp = {
             std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            std::to_underlying(response)};
+            std::to_underlying(response),
+        };
 
         pCharacteristic->setValue(temp);
     }
@@ -111,7 +117,8 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         array<unsigned char, 3U> response = {
             eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? std::to_underlying(SettingsOpCodes::ResponseCodeFtms) : std::to_underlying(SettingsOpCodes::ResponseCode),
             static_cast<unsigned char>(message[0]),
-            std::to_underlying(eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode)};
+            std::to_underlying(eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode),
+        };
         pCharacteristic->setValue(response);
     }
     break;
@@ -123,7 +130,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
 
 ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
 {
-    if (message.size() != 2 || message[1] < 0 || message[1] > 6)
+    if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 6U))
     {
         return ResponseOpCodes::InvalidParameter;
     }
@@ -138,7 +145,7 @@ ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &mes
 
 ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
 {
-    if (message.size() != 2 || message[1] < 0 || message[1] > 1)
+    if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 1U))
     {
         Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", message[1]);
 
@@ -156,7 +163,7 @@ ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue
 
 ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
 {
-    if (message.size() != 2 || message[1] < 0 || message[1] > 1)
+    if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 1U))
     {
         Log.infoln("Invalid OP command for setting deltaTime logging, this should be a bool: %d", message[1]);
 
