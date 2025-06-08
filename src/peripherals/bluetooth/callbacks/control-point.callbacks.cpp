@@ -111,6 +111,21 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     }
     break;
 
+    case std::to_underlying(SettingsOpCodes::RestartDevice):
+    {
+        Log.verboseln("Restarting device...");
+
+        array<unsigned char, 3U> temp = {
+            std::to_underlying(SettingsOpCodes::ResponseCode),
+            static_cast<unsigned char>(message[0]),
+            std::to_underlying(ResponseOpCodes::Successful),
+        };
+
+        pCharacteristic->setValue(temp);
+        restartWithDelay(100);
+    }
+    break;
+
     default:
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);

@@ -64,6 +64,7 @@ enum class SettingsOpCodes : unsigned char
     ChangeBleService = 18U,
     SetDeltaTimeLogging = 19U,
     SetSdCardLogging = 20U,
+    RestartDevice = 31U,
     ResponseCode = 32U,
     ResponseCodeFtms = 128U,
 };

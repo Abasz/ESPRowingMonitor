@@ -398,4 +398,31 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             }
         }
     }
+
+    SECTION("handle RestartDevice request")
+    {
+        std::array<unsigned char, 3U> successResponse = {
+            std::to_underlying(SettingsOpCodes::ResponseCode),
+            std::to_underlying(SettingsOpCodes::RestartDevice),
+            std::to_underlying(ResponseOpCodes::Successful)};
+
+        When(Method(mockControlPointCharacteristic, getValue)).Return({std::to_underlying(SettingsOpCodes::RestartDevice)});
+        Fake(Method(mockGlobals, restartWithDelay));
+
+        controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+        SECTION("and indicate Success response")
+        {
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(successResponse)))
+                .Once();
+        }
+
+        SECTION("restart device")
+        {
+            Verify(Method(mockGlobals, restartWithDelay)).Once();
+        }
+    }
 }
