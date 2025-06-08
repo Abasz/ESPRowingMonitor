@@ -2,6 +2,8 @@
 
 #include "ArduinoLog.h"
 
+#include "globals.h"
+
 #include "./EEPROM.service.h"
 
 EEPROMService::EEPROMService(Preferences &_preferences) : preferences(_preferences)
@@ -60,9 +62,10 @@ void EEPROMService::setup()
 void EEPROMService::setLogLevel(const ArduinoLogLevel newLogLevel)
 {
     const int intLogLevel = std::to_underlying(newLogLevel);
-    if (intLogLevel < 0 || intLogLevel > 6)
+    if (!isInBounds(intLogLevel, 0, 6))
     {
         Log.errorln("Invalid LogLevel setting, should be between 0-6");
+
         return;
     }
 
@@ -105,10 +108,11 @@ void EEPROMService::setLogToSdCard(const bool shouldLogToSdCard)
 
 void EEPROMService::setBleServiceFlag(const BleServiceFlag newServiceFlag)
 {
-    const auto intBleServiceFlag = std::to_underlying(newServiceFlag);
-    if (intBleServiceFlag < 0 || intBleServiceFlag > 2)
+    const unsigned int intBleServiceFlag = std::to_underlying(newServiceFlag);
+    if (!isInBounds(intBleServiceFlag, 0U, 2U))
     {
         Log.errorln("Invalid BLE Service setting, should be between 0 or 2");
+
         return;
     }
 
