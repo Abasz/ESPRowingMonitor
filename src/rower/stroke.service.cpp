@@ -22,6 +22,13 @@ StrokeService::StrokeService()
     angularDistances.push(0, 0);
 }
 
+#if ENABLE_RUNTIME_SETTINGS
+void StrokeService::setup(const RowerProfile::MachineSettings newMachineSettings)
+{
+    machineSettings = newMachineSettings;
+}
+#endif
+
 bool StrokeService::isFlywheelUnpowered()
 {
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
@@ -67,7 +74,7 @@ void StrokeService::calculateDragCoefficient()
         return;
     }
 
-    const auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * Configurations::flywheelInertia) / Configurations::angularDisplacementPerImpulse;
+    const auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * machineSettings.flywheelInertia) / Configurations::angularDisplacementPerImpulse;
 
     if (rawNewDragCoefficient > Configurations::upperDragFactorThreshold ||
         rawNewDragCoefficient < Configurations::lowerDragFactorThreshold)
@@ -173,7 +180,7 @@ void StrokeService::recoveryEnd()
     recoveryDeltaTimes.reset();
     calculateAvgStrokePower();
 
-    distancePerAngularDisplacement = pow((dragCoefficient * 1e6) / Configurations::concept2MagicNumber, 1 / 3.0);
+    distancePerAngularDisplacement = pow((dragCoefficient * 1e6) / machineSettings.concept2MagicNumber, 1 / 3.0);
     distance = recoveryStartDistance + distancePerAngularDisplacement * (distance == 0 ? rowingTotalAngularDisplacement : recoveryTotalAngularDisplacement);
     if (distance > 0)
     {
@@ -225,7 +232,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     currentAngularVelocity = angularVelocityMatrix[0].average();
     currentAngularAcceleration = angularAccelerationMatrix[0].average();
 
-    currentTorque = Configurations::flywheelInertia * currentAngularAcceleration + dragCoefficient * pow(currentAngularVelocity, 2);
+    currentTorque = machineSettings.flywheelInertia * currentAngularAcceleration + dragCoefficient * pow(currentAngularVelocity, 2);
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
     if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > Configurations::rowingStoppedThresholdPeriod)

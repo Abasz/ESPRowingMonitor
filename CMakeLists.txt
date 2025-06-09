@@ -169,6 +169,10 @@ add_custom_target(clean-e2e
     COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --cyan \"Rower profile: $(ROWER_PROFILE)\"
     COMMAND "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/e2e-test.dir/clean_e2e" $(ROWER_PROFILE)
 )
+target_link_libraries(
+    e2e-test PRIVATE 
+    FakeIt::FakeIt-standalone
+)
 
 add_dependencies(e2e-test clean-e2e)
 

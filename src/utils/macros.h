@@ -74,6 +74,10 @@ consteval std::string_view extractClassName(const std::string_view className)
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #define __CLASS_NAME__ extractClassName(__PRETTY_FUNCTION__)
 
+#if !defined(ENABLE_RUNTIME_SETTINGS)
+    #define ENABLE_RUNTIME_SETTINGS false
+#endif
+
 #if !defined(DEFAULT_CPS_LOGGING_LEVEL)
     #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 #endif

@@ -21,6 +21,8 @@ public:
     static constexpr ArduinoLogLevel defaultLogLevel = DEFAULT_CPS_LOGGING_LEVEL;
     static constexpr bool supportSdCardLogging = SUPPORT_SD_CARD_LOGGING;
 
+    static constexpr bool isRuntimeSettingsEnabled = ENABLE_RUNTIME_SETTINGS;
+
     // Bluetooth Settings
     static constexpr BleServiceFlag defaultBleServiceFlag = DEFAULT_BLE_SERVICE;
     static constexpr bool hasExtendedBleMetrics = HAS_BLE_EXTENDED_METRICS;

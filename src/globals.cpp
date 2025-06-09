@@ -24,7 +24,7 @@ ExtendedMetricBleService extendedMetricsBleService;
 BluetoothController bleController(eepromService, otaService, settingsBleService, batteryBleService, deviceInfoBleService, otaBleService, baseMetricsBleService, extendedMetricsBleService);
 
 PeripheralsController peripheralController(bleController, sdCardService, eepromService);
-StrokeController strokeController(strokeService, flywheelService);
+StrokeController strokeController(strokeService, flywheelService, eepromService);
 PowerManagerController powerManagerController(powerManagerService);
 
 void IRAM_ATTR rotationInterrupt()

@@ -5,6 +5,7 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
+#define ENABLE_RUNTIME_SETTINGS true
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelSilent
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
 

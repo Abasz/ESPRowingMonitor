@@ -16,21 +16,27 @@ TEST_CASE("EEPROMService", "[utils]")
     const auto *const bleServiceAddress = "bleService";
     const auto *const bluetoothDeltaTimeLoggingAddress = "bleLogging";
     const auto *const sdCardLoggingAddress = "sdCardLogging";
+    const auto *const flywheelInertiaAddress = "flywheelInertia";
+    const auto *const concept2MagicNumberAddress = "magicNumber";
 
     SECTION("setup method")
     {
         Mock<Preferences> mockPreferences;
 
         When(Method(mockPreferences, begin)).Return(true);
+        When(Method(mockPreferences, freeEntries)).Return(100);
         When(Method(mockPreferences, isKey)).AlwaysReturn(false);
 
         When(Method(mockPreferences, putUChar)).AlwaysReturn(1);
         When(Method(mockPreferences, putBool)).AlwaysReturn(1);
+        When(Method(mockPreferences, putFloat)).AlwaysReturn(1);
 
         When(Method(mockPreferences, getBool).Using(StrEq(bluetoothDeltaTimeLoggingAddress), Configurations::enableBluetoothDeltaTimeLogging)).Return(Configurations::enableBluetoothDeltaTimeLogging);
         When(Method(mockPreferences, getBool).Using(StrEq(sdCardLoggingAddress), false)).Return(false);
         When(Method(mockPreferences, getUChar).Using(StrEq(logLevelAddress), std::to_underlying(Configurations::defaultLogLevel))).Return(std::to_underlying(Configurations::defaultLogLevel));
         When(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), std::to_underlying(Configurations::defaultBleServiceFlag))).Return(std::to_underlying(Configurations::defaultBleServiceFlag));
+        When(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Return(Configurations::flywheelInertia);
+        When(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Return(Configurations::concept2MagicNumber);
 
         EEPROMService eepromService(mockPreferences.get());
         eepromService.setup();
@@ -53,6 +59,18 @@ TEST_CASE("EEPROMService", "[utils]")
 
             Verify(Method(mockPreferences, isKey).Using(StrEq(sdCardLoggingAddress))).Once();
             Verify(Method(mockPreferences, putBool).Using(StrEq(sdCardLoggingAddress), false)).Once();
+
+#if ENABLE_RUNTIME_SETTINGS
+            Verify(Method(mockPreferences, isKey).Using(StrEq(flywheelInertiaAddress))).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Once();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(concept2MagicNumberAddress))).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Once();
+#else
+            Verify(Method(mockPreferences, isKey).Using(StrEq(flywheelInertiaAddress))).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(concept2MagicNumberAddress))).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
+#endif
         }
 
         SECTION("should get keys from EEPROM")
@@ -64,6 +82,14 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, getUChar).Using(StrEq(logLevelAddress), std::to_underlying(Configurations::defaultLogLevel))).Once();
 
             Verify(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), std::to_underlying(Configurations::defaultBleServiceFlag))).Once();
+
+#if ENABLE_RUNTIME_SETTINGS
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Once();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Once();
+#else
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
+#endif
         }
 
         SECTION("should set initial values for getters")
@@ -72,6 +98,9 @@ TEST_CASE("EEPROMService", "[utils]")
             REQUIRE(eepromService.getLogLevel() == Configurations::defaultLogLevel);
             REQUIRE(eepromService.getLogToBluetooth() == Configurations::enableBluetoothDeltaTimeLogging);
             REQUIRE(eepromService.getLogToSdCard() == false);
+
+            REQUIRE(eepromService.getMachineSettings().flywheelInertia == Configurations::flywheelInertia);
+            REQUIRE(eepromService.getMachineSettings().concept2MagicNumber == Configurations::concept2MagicNumber);
         }
     }
 
@@ -126,6 +155,7 @@ TEST_CASE("EEPROMService", "[utils]")
         REQUIRE(eepromService.getLogToSdCard() == newLogToSdCard);
         Verify(Method(mockPreferences, putBool).Using(StrEq(sdCardLoggingAddress), newLogToSdCard)).Once();
     }
+
     SECTION("setBleServiceFlag method")
     {
         Mock<Preferences> mockPreferences;
@@ -150,6 +180,59 @@ TEST_CASE("EEPROMService", "[utils]")
 
             Verify(Method(mockPreferences, putUChar)).Exactly(0);
         }
+    }
+
+    SECTION("setMachineSettings method should")
+    {
+        Mock<Preferences> mockPreferences;
+        When(Method(mockPreferences, putFloat)).AlwaysReturn(1);
+        EEPROMService eepromService(mockPreferences.get());
+
+#if ENABLE_RUNTIME_SETTINGS
+        SECTION("not save if any value is invalid")
+        {
+            const auto invalidFlywheel = RowerProfile::MachineSettings{
+                .flywheelInertia = -1,
+                .concept2MagicNumber = 1,
+            };
+
+            const auto invalidMagicNumber = RowerProfile::MachineSettings{
+                .flywheelInertia = 1,
+                .concept2MagicNumber = -1,
+            };
+
+            eepromService.setMachineSettings(invalidFlywheel);
+            eepromService.setMachineSettings(invalidMagicNumber);
+
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
+        }
+
+        SECTION("save new machine settings without updating backing fields")
+        {
+            const auto newMachineSettings = RowerProfile::MachineSettings{
+                .flywheelInertia = 1,
+                .concept2MagicNumber = 1,
+            };
+
+            eepromService.setMachineSettings(newMachineSettings);
+
+            const auto machineSettings = eepromService.getMachineSettings();
+
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), newMachineSettings.flywheelInertia)).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), newMachineSettings.concept2MagicNumber)).Once();
+            REQUIRE(machineSettings.flywheelInertia != newMachineSettings.flywheelInertia);
+            REQUIRE(machineSettings.concept2MagicNumber != newMachineSettings.flywheelInertia);
+        }
+#else
+        SECTION("not save any value if runtime settings are not enabled")
+        {
+            eepromService.setMachineSettings(RowerProfile::MachineSettings{});
+
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
+        }
+#endif
     }
 }
 // NOLINTEND(readability-magic-numbers)

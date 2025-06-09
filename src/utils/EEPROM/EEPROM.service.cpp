@@ -1,3 +1,4 @@
+#include <limits>
 #include <utility>
 
 #include "ArduinoLog.h"
@@ -52,11 +53,41 @@ void EEPROMService::setup()
         Log.verboseln("%s: %d", sdCardLoggingAddress, logToSdCard);
     }
 
+    if constexpr (Configurations::isRuntimeSettingsEnabled)
+    {
+        if (!preferences.isKey(flywheelInertiaAddress))
+        {
+            Log.infoln("Setting Flywheel Inertia to default");
+            preferences.putFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
+        }
+
+        if (!preferences.isKey(concept2MagicNumberAddress))
+        {
+            Log.infoln("Setting Magic Constant to default");
+            preferences.putFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
+        }
+
+        flywheelInertia = preferences.getFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
+        concept2MagicNumber = preferences.getFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
+
+        std::string inertiaFormatted{};
+        const auto stringSize = 10U;
+        inertiaFormatted.reserve(stringSize);
+        // Workaround of ArduinoLog library float precision limitation and size issue with <format> header
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        snprintf(inertiaFormatted.data(), inertiaFormatted.capacity(), "%.5f", flywheelInertia);
+
+        Log.verboseln("%s: %s", flywheelInertiaAddress, inertiaFormatted.c_str());
+        Log.verboseln("%s: %F", concept2MagicNumberAddress, concept2MagicNumber);
+    }
+
     logLevel = ArduinoLogLevel{preferences.getUChar(logLevelAddress, std::to_underlying(Configurations::defaultLogLevel))};
     bleServiceFlag = BleServiceFlag{preferences.getUChar(bleServiceFlagAddress, std::to_underlying(Configurations::defaultBleServiceFlag))};
 
     Log.verboseln("%s: %d", logLevelAddress, logLevel);
     Log.verboseln("%s: %d", bleServiceFlagAddress, bleServiceFlag);
+
+    Log.verboseln("Free NVS entries: %u", preferences.freeEntries());
 }
 
 void EEPROMService::setLogLevel(const ArduinoLogLevel newLogLevel)
@@ -120,6 +151,33 @@ void EEPROMService::setBleServiceFlag(const BleServiceFlag newServiceFlag)
     preferences.putUChar(bleServiceFlagAddress, intBleServiceFlag);
 }
 
+void EEPROMService::setMachineSettings(const RowerProfile::MachineSettings newMachineSettings)
+{
+    if constexpr (!Configurations::isRuntimeSettingsEnabled)
+    {
+        Log.warningln("Not able to set machine settings as runtime settings is not enabled");
+
+        return;
+    }
+
+    if (!isInBounds(newMachineSettings.concept2MagicNumber, 0.0F, std::numeric_limits<float>::max()))
+    {
+        Log.errorln("Invalid magic number, should be greater than 0");
+
+        return;
+    }
+
+    if (!isInBounds(newMachineSettings.flywheelInertia, 0.0F, std::numeric_limits<float>::max()))
+    {
+        Log.errorln("Invalid flywheel inertia, should be greater than 0");
+
+        return;
+    }
+
+    preferences.putFloat(flywheelInertiaAddress, newMachineSettings.flywheelInertia);
+    preferences.putFloat(concept2MagicNumberAddress, newMachineSettings.concept2MagicNumber);
+}
+
 BleServiceFlag EEPROMService::getBleServiceFlag() const
 {
     return bleServiceFlag;
@@ -138,4 +196,12 @@ bool EEPROMService::getLogToBluetooth() const
 bool EEPROMService::getLogToSdCard() const
 {
     return logToSdCard;
+}
+
+RowerProfile::MachineSettings EEPROMService::getMachineSettings() const
+{
+    return RowerProfile::MachineSettings{
+        .flywheelInertia = flywheelInertia,
+        .concept2MagicNumber = concept2MagicNumber,
+    };
 }

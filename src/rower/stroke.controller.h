@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../utils/EEPROM/EEPROM.service.interface.h"
 #include "../utils/configuration.h"
 #include "./flywheel.service.interface.h"
 #include "./stroke.controller.interface.h"
@@ -9,6 +10,7 @@ class StrokeController final : public IStrokeController
 {
     IStrokeService &strokeService;
     IFlywheelService &flywheelService;
+    IEEPROMService &eepromService;
 
     unsigned int previousRevCount = 0;
     unsigned int previousStrokeCount = 0U;
@@ -35,7 +37,7 @@ class StrokeController final : public IStrokeController
     };
 
 public:
-    StrokeController(IStrokeService &_strokeService, IFlywheelService &_flywheelService);
+    StrokeController(IStrokeService &_strokeService, IFlywheelService &_flywheelService, IEEPROMService &eepromService);
 
     void begin() override;
     void update() override;

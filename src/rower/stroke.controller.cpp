@@ -4,7 +4,7 @@
 
 #include "./stroke.controller.h"
 
-StrokeController::StrokeController(IStrokeService &_strokeService, IFlywheelService &_flywheelService) : strokeService(_strokeService), flywheelService(_flywheelService)
+StrokeController::StrokeController(IStrokeService &_strokeService, IFlywheelService &_flywheelService, IEEPROMService &_eepromService) : strokeService(_strokeService), flywheelService(_flywheelService), eepromService(_eepromService)
 {
 }
 
@@ -12,6 +12,9 @@ void StrokeController::begin()
 {
     Log.infoln("Setting up rowing monitor controller");
     flywheelService.setup();
+#if ENABLE_RUNTIME_SETTINGS
+    strokeService.setup(eepromService.getMachineSettings());
+#endif
 }
 
 void StrokeController::update()

@@ -10,6 +10,9 @@
 
 class StrokeService final : public IStrokeService
 {
+    // Machine settings
+    RowerProfile::MachineSettings machineSettings;
+
     // rower state
     CyclePhase cyclePhase = CyclePhase::Stopped;
     unsigned long long rowingTotalTime = 0ULL;
@@ -72,6 +75,10 @@ class StrokeService final : public IStrokeService
 
 public:
     StrokeService();
+
+#if ENABLE_RUNTIME_SETTINGS
+    void setup(RowerProfile::MachineSettings newMachineSettings) override;
+#endif
 
     RowingDataModels::RowingMetrics getData() override;
     void processData(RowingDataModels::FlywheelData data) override;
