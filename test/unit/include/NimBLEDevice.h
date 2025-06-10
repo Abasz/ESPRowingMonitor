@@ -85,7 +85,7 @@ public:
         return &_data.back() + 1;
     }
 
-    const unsigned char &operator[](size_t index) const
+    const unsigned char operator[](size_t index) const
     {
         return _data[index];
     }
@@ -182,6 +182,7 @@ public:
     virtual void setValue(const std::string s) = 0;
     virtual void setValue(const std::array<unsigned char, 1U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 3U> s) = 0;
+    virtual void setValue(const std::array<unsigned char, 6U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 7U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 11U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 14U> s) = 0;

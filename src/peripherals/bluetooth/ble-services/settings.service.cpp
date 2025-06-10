@@ -1,4 +1,5 @@
 #include <array>
+#include <bit>
 #include <utility>
 
 #include "ArduinoLog.h"
@@ -34,16 +35,27 @@ void SettingsBleService::broadcastSettings() const
     characteristic->notify();
 }
 
-std::array<unsigned char, SettingsBleService::settingsArrayLength> SettingsBleService::getSettings() const
+std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleService::getSettings() const
 {
-    const unsigned char settings =
+    const unsigned char baseSettings =
         ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(eepromService.getLogToBluetooth()) + 1 : 0) << 0U) |
         ((Configurations::supportSdCardLogging && sdCardService.isLogFileOpen() ? static_cast<unsigned char>(eepromService.getLogToSdCard()) + 1 : 0) << 2U) |
-        (std::to_underlying(eepromService.getLogLevel()) << 4U);
+        (std::to_underlying(eepromService.getLogLevel()) << 4U) |
+        (static_cast<unsigned char>(Configurations::isRuntimeSettingsEnabled) << 7U);
 
-    std::array<unsigned char, SettingsBleService::settingsArrayLength> temp = {
-        settings,
-    };
+    const auto machineSettings = eepromService.getMachineSettings();
+
+    const auto flywheelInertia = std::bit_cast<unsigned int>(machineSettings.flywheelInertia);
+
+    std::array<unsigned char, ISettingsBleService::settingsPayloadSize>
+        temp = {
+            baseSettings,
+            static_cast<unsigned char>(flywheelInertia),
+            static_cast<unsigned char>(flywheelInertia >> 8),
+            static_cast<unsigned char>(flywheelInertia >> 16),
+            static_cast<unsigned char>(flywheelInertia >> 24),
+            static_cast<unsigned char>(roundf(machineSettings.concept2MagicNumber * ISettingsBleService::magicNumberScale)),
+        };
 
     return temp;
 }

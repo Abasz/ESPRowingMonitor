@@ -75,7 +75,7 @@ void EEPROMService::setup()
         inertiaFormatted.reserve(stringSize);
         // Workaround of ArduinoLog library float precision limitation and size issue with <format> header
         // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        snprintf(inertiaFormatted.data(), inertiaFormatted.capacity(), "%.5f", flywheelInertia);
+        snprintf(inertiaFormatted.data(), stringSize, "%.5f", flywheelInertia);
 
         Log.verboseln("%s: %s", flywheelInertiaAddress, inertiaFormatted.c_str());
         Log.verboseln("%s: %F", concept2MagicNumberAddress, concept2MagicNumber);

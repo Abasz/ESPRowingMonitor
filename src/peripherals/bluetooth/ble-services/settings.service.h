@@ -18,7 +18,7 @@ class SettingsBleService final : public ISettingsBleService
     ControlPointCallbacks callbacks;
     NimBLECharacteristic *characteristic = nullptr;
 
-    std::array<unsigned char, ISettingsBleService::settingsArrayLength> getSettings() const;
+    std::array<unsigned char, ISettingsBleService::settingsPayloadSize> getSettings() const;
 
 public:
     explicit SettingsBleService(ISdCardService &_sdCardService, IEEPROMService &_eepromService);

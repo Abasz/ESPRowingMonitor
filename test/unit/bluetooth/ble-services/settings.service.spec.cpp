@@ -1,5 +1,6 @@
 // NOLINTBEGIN(readability-magic-numbers)
 #include <array>
+#include <bit>
 #include <string>
 
 #include "catch2/catch_test_macros.hpp"
@@ -26,28 +27,36 @@ TEST_CASE("SettingsBleService", "[ble-service]")
 
     const auto logToBluetooth = true;
     const auto logToSdCard = true;
-    const auto logLevel = ArduinoLogLevel::LogLevelSilent;
+    const auto logLevel = ArduinoLogLevel::LogLevelVerbose;
     const auto logFileOpen = true;
 
     const unsigned char settings =
         ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetooth) + 1 : 0) << 0U) |
         ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCard) + 1 : 0) << 2U) |
-        (static_cast<unsigned char>(logLevel) << 4U);
+        (static_cast<unsigned char>(logLevel) << 4U) |
+        (static_cast<unsigned char>(Configurations::isRuntimeSettingsEnabled) << 7U);
+    const auto flywheelInertia = std::bit_cast<unsigned int>(Configurations::flywheelInertia);
 
-    std::array<unsigned char, SettingsBleService::settingsArrayLength> expectedInitialSettings = {
+    const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedInitialSettings = {
         settings,
+        static_cast<unsigned char>(flywheelInertia),
+        static_cast<unsigned char>(flywheelInertia >> 8),
+        static_cast<unsigned char>(flywheelInertia >> 16),
+        static_cast<unsigned char>(flywheelInertia >> 24),
+        static_cast<unsigned char>(roundf(Configurations::concept2MagicNumber * ISettingsBleService::magicNumberScale)),
     };
 
     When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string))).AlwaysReturn(&mockSettingsService.get());
 
     When(OverloadedMethod(mockSettingsService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))).AlwaysReturn(&mockSettingsCharacteristic.get());
 
-    Fake(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
+    Fake(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>)));
     Fake(Method(mockSettingsCharacteristic, setCallbacks));
 
     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(logToBluetooth);
     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCard);
     When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(logLevel);
+    When(Method(mockEEPROMService, getMachineSettings)).AlwaysReturn(RowerProfile::MachineSettings{});
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(logFileOpen);
 
     SettingsBleService settingsBleService(mockSdCardService.get(), mockEEPROMService.get());
@@ -79,8 +88,8 @@ TEST_CASE("SettingsBleService", "[ble-service]")
             settingsBleService.setup(&mockNimBLEServer.get());
 
             Verify(
-                OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                    .Using(Eq(std::array<unsigned char, 1U>{expectedInitialSettings})))
+                OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))
+                    .Using(Eq(std::array<unsigned char, ISettingsBleService::settingsPayloadSize>{expectedInitialSettings})))
                 .Once();
         }
 
@@ -122,81 +131,117 @@ TEST_CASE("SettingsBleService", "[ble-service]")
             Verify(Method(mockEEPROMService, getLogToBluetooth)).Once();
             Verify(Method(mockEEPROMService, getLogToSdCard)).Once();
             Verify(Method(mockEEPROMService, getLogLevel)).Once();
+            Verify(Method(mockEEPROMService, getMachineSettings)).Once();
             Verify(Method(mockSdCardService, isLogFileOpen)).Once();
+
+            SECTION("and split MachineSettings correctly into bytes")
+            {
+                float flywheelInertia = 0.0F;
+                float concept2MagicNumber = 0.0F;
+
+                When(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))).Do([&flywheelInertia, &concept2MagicNumber](const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> &settings)
+                                                                                                                                                                 {
+                    std::memcpy(&flywheelInertia, &settings[1], ISettingsBleService::flywheelInertiaPayloadSize);
+                    concept2MagicNumber = static_cast<float>(settings[5]) / ISettingsBleService::magicNumberScale; });
+
+                settingsBleService.broadcastSettings();
+
+                REQUIRE(flywheelInertia == Configurations::flywheelInertia);
+                REQUIRE(concept2MagicNumber == Configurations::concept2MagicNumber);
+            }
 
             SECTION("and calculate correct setting binary value")
             {
+                mockSettingsCharacteristic.ClearInvocationHistory();
+
                 SECTION("when logToBluetooth is disabled")
                 {
                     const auto logToBluetoothTest = false;
 
-                    const unsigned char expectedSettings =
+                    std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedSettings = expectedInitialSettings;
+                    expectedSettings[0] =
                         ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetoothTest) + 1 : 0) << 0U) |
                         ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCard) + 1 : 0) << 2U) |
-                        (static_cast<unsigned char>(logLevel) << 4U);
+                        (static_cast<unsigned char>(logLevel) << 4U) |
+                        (static_cast<unsigned char>(Configurations::isRuntimeSettingsEnabled) << 7);
 
-                    When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(logToBluetoothTest);
+                    When(Method(mockEEPROMService, getLogToBluetooth))
+                        .AlwaysReturn(logToBluetoothTest);
                     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCard);
                     When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(logLevel);
                     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(logFileOpen);
 
                     settingsBleService.broadcastSettings();
 
-                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                               .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})));
+                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))
+                               .Using(Eq(expectedSettings)));
                 }
 
                 SECTION("when logToBluetooth is disabled")
                 {
                     const auto logToBluetoothTest = false;
 
-                    const unsigned char expectedSettings =
+                    std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedSettings = expectedInitialSettings;
+                    expectedSettings[0] =
                         ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetoothTest) + 1 : 0) << 0U) |
                         ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCard) + 1 : 0) << 2U) |
-                        (static_cast<unsigned char>(logLevel) << 4U);
+                        (static_cast<unsigned char>(logLevel) << 4U) |
+                        (static_cast<unsigned char>(Configurations::isRuntimeSettingsEnabled) << 7);
 
                     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(logToBluetoothTest);
 
                     settingsBleService.broadcastSettings();
 
-                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                               .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})));
+                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))
+                               .Using(Eq(expectedSettings)));
                 }
 
                 SECTION("when logToSdCard is disabled")
                 {
                     const auto logToSdCardTest = false;
 
-                    const unsigned char expectedSettings =
+                    std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedSettings = expectedInitialSettings;
+                    expectedSettings[0] =
                         ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetooth) + 1 : 0) << 0U) |
                         ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCardTest) + 1 : 0) << 2U) |
-                        (static_cast<unsigned char>(logLevel) << 4U);
+                        (static_cast<unsigned char>(logLevel) << 4U) |
+                        (static_cast<unsigned char>(Configurations::isRuntimeSettingsEnabled) << 7);
 
                     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCardTest);
 
                     settingsBleService.broadcastSettings();
 
-                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                               .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})));
+                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))
+                               .Using(Eq(expectedSettings)));
                 }
 
                 SECTION("when logToSdCard is disabled and logLevel is Verbose")
                 {
-                    const auto logLevelTest = ArduinoLogLevel::LogLevelSilent;
+                    const auto logLevelTest = ArduinoLogLevel::LogLevelVerbose;
                     const auto logToSdCardTest = false;
 
-                    const unsigned char expectedSettings =
+                    std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedSettings = expectedInitialSettings;
+                    expectedSettings[0] =
                         ((Configurations::enableBluetoothDeltaTimeLogging ? static_cast<unsigned char>(logToBluetooth) + 1 : 0) << 0U) |
                         ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCardTest) + 1 : 0) << 2U) |
-                        (static_cast<unsigned char>(logLevelTest) << 4U);
+                        (static_cast<unsigned char>(logLevelTest) << 4U) |
+                        (static_cast<unsigned char>(Configurations::isRuntimeSettingsEnabled) << 7);
 
                     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCardTest);
                     When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(logLevelTest);
 
                     settingsBleService.broadcastSettings();
 
-                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                               .Using(Eq(std::array<unsigned char, 1U>{expectedSettings})));
+                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))
+                               .Using(Eq(expectedSettings)));
+                }
+
+                SECTION("when isRuntimeSettingsEnabled is true")
+                {
+                    settingsBleService.broadcastSettings();
+
+                    Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))
+                               .Using(Eq(expectedInitialSettings)));
                 }
             }
         }
@@ -205,8 +250,8 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         {
             settingsBleService.broadcastSettings();
 
-            Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, 1U>))
-                       .Using(Eq(std::array<unsigned char, 1U>{expectedInitialSettings})))
+            Verify(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))
+                       .Using(Eq(expectedInitialSettings)))
                 .Once();
         }
 
