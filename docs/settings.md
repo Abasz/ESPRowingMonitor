@@ -6,9 +6,11 @@ Please note that ORM has a very good [wiki](https://github.com/laberning/openrow
 
 As of version 5 the project is able to handle different board and rower settings (similarly to ORM) which provides flexibility and generally enables easier distribution of settings.
 
-Basically the board and rower settings profiles can be loaded via `#include` statement in a `custom.settings.h` file and compile the project with the platformio environment of `custom` (so upon compilation the custom.settings.h file is used). This ensures that the selected board and machine settings are loaded.
+Basically the board and rower settings can be loaded by compiling the appropriate PlatformIO environment (for specifically supported boards and rowers) or by creating a `custom.settings.h` file and compile the project with the platformio environment of `custom` (so upon compilation the custom.settings.h file is used). This ensures that the selected board and machine settings are loaded. Please note that with custom settings file as a first step the platformio.ini file needs the exact board name under the [generic-board] section like this `board = dfrobot_firebeetle2_esp32s3`.
 
-Example is shown in the default.settings.h file (which I do not recommend to change as it gets overwritten on updates).
+Alternatively for Linux systems an [Auto Compiler](./installation.md#auto-compiler) script is provided that interactively helps with compilation (including installation of necessary dependencies).
+
+Example of a custom settings file is shown in the default.settings.h file (which I do not recommend to change as it gets overwritten on updates).
 
 Below is a list of all settings which can be set, there are 3 categories
 
@@ -43,6 +45,7 @@ enum class BleServiceFlag : unsigned char
     CscService
 };
 ```
+
 #### HAS_BLE_EXTENDED_METRICS
 
 Enables or disables the extended BLE API to broadcast data. Default is true.
@@ -54,6 +57,12 @@ Enables or disables to delta time logging via BLE (by setting up a specific char
 #### SUPPORT_SD_CARD_LOGGING
 
 This settings enables logging deltaTime values to a connected SD Card.
+
+#### ENABLE_RUNTIME_SETTINGS
+
+Enables changing certain settings at runtime (without recompilation) via the Settings Service BLE endpoint which is then saved to flash on the device (currently support Flywheel inertia and Magic Constant). Note allowing dynamic settings change may have some immaterial performance hit (please see [Limitations](./limitation.md)).
+
+Default: false
 
 ## Board profile settings
 

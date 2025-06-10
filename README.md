@@ -75,7 +75,7 @@ Please see more details on their specifications and protocols under [Custom BLE 
 
 ### Over-the-Air updates
 
-As of version 6 after the initial installation, an over-the-air Bluetooth update protocol is available.". The protocol is implemented in the WebGUI so installation can be done from there.
+As of version 6 after the initial installation, an over-the-air Bluetooth update protocol is available. The protocol is implemented in the WebGUI so installation can be done from there.
 
 More details on the specification can be found [here](docs/custom-ble-services.md#over-the-air-updater)
 
@@ -119,7 +119,7 @@ Please note that due to the difference between the Rpi and the ESP32 (including 
 
 ## 📋 Backlog
 
-- Implement a more flexible settings system that doesn't require recompiling and takes advantage of persistent storage.
+- Allow changing BLE device and model name dynamically
 
 ## 🙏 Attribution
 

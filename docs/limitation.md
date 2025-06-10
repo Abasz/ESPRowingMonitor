@@ -61,6 +61,10 @@ In addition based on testing the ESP32s3 chip (e.g. on a Loling S3 mini board) i
 
 Based on this, this chip is now the clearly recommended chip for the purpose of this project.
 
+## Runtime settings
+
+ESP Rowing Monitor can be compiled with the ENABLE_RUNTIME_SETTINGS flag (please refer to [settings](./settings.md#enable_ble_service)) which allows changing certain Rower specific settings on the fly without recompilation. This may have some immaterial performance hit as the compiler cannot inline constants into the code (since it cannot be 100% sure that it is not changed after class initialization), rather needs to access it from a shared memory location (which generally should only cost an additional few more instructions). In order to limit the performance hit as much as possible when enabling dynamic settings flag the settings object is copied at startup and cannot change without device restart.
+
 ## Noise filtering
 
 Unlike ORM, the ESP Rowing Monitor has limited noise filtering capabilities on the ISR level. ESP Rowing Monitor implements only one impulse noise filter. This is based on the minimum required time between impulses. This means that the hardware used for sensing should produce clean impulses, and read switches with debounce may not yield accurate results. However, if the impulses per revolution are low (e.g. 1), and the minimum time between impulses can be set to a sufficiently high value, it may still work.

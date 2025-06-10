@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.22)
 # Set project name and version
 project(
     ESP-Rowing-Monitor
-    VERSION 6.0.1
+    VERSION 6.2.0
     LANGUAGES CXX
 )
 

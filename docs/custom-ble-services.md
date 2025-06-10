@@ -71,7 +71,9 @@ Settings (UUID: 54e15528-73b5-4905-9481-89e5184a3364)
 
 Uses Notify to broadcast and allow Read the current settings (which may be extended in the future) as an array of consecutive bytes. It notifies when a setting is changed.
 
-Currently the Notify includes only one byte where every two bit represents the status of the logging related settings:
+Currently the Notify/Read includes the following data:
+
+Byte 0 includes the logging and other general settings with a bit mask detailed below:
 
 _Delta Time logging_ - whether to broadcast the measured delta times
 
@@ -101,8 +103,19 @@ LogLevelTrace = (0x05 << 4U);
 LogLevelVerbose = (0x06 << 4U);
 ```
 
+_Runtime settings_ - whether runtime setting is enabled
+
+```cpp
+RuntimeSettingsDisabled = (0x00 << 7U);
+RuntimeSettingsEnabled = (0x01 << 7U);
+```
+
+Bytes 1-4 are the [Flywheel Inertia](./settings.md#flywheel-inertia) as a positive float represented in unsigned chars (e.g. [0, 0, 128, 63] is 1.000). Response will be InvalidOperations if the value is out of bounds.
+
+Byte 5 (unsigned char) is the [Magic Constant](./settings.md#concept_2_magic_number) with a resolution (scale) of 35 (i.e. value of 98 translates to 2.8)
+
 ```text
-Settings Control Point (UUID: 51ba0a00-8853-477c-bf43-6a09c36aac9f)**
+Settings Control Point (UUID: 51ba0a00-8853-477c-bf43-6a09c36aac9f)
 ```
 
 Uses Indicate and allow Write to change the settings. The structure corresponds to the standard BLE profile Control Point with the difference that custom OpCodes are used for each setting:
@@ -112,6 +125,8 @@ Uses Indicate and allow Write to change the settings. The structure corresponds 
     ChangeBleService = 18U,
     SetDeltaTimeLogging = 19U,
     SetSdCardLogging = 20U,
+    SetMachineSettings = 21U,
+    RestartDevice = 31U,
 ```
 
 The response to the Write is sent via Indicate and the structure follows the BLE Control Point standard (i.e. starts with the ResponseCode - 32 -, followed by the request OpCode, than the ResponseOpCode - e.g. 1 for success or 2 for an unsupported request OpCode).
@@ -120,7 +135,9 @@ Also a Notify is sent by the Settings characteristic including the new settings.
 
 Please note that the new BLE service structure is currently experimental and the API may be subject to change in the future.
 
-For an example of an implementation (in Javascript) please visit the [WebGUI page]((https://github.com/Abasz/ESPRowingMonitor-WebGUI/blob/master/src/common/services/ble-data.service.ts)).
+For an example of an implementation (in Javascript) please visit the [WebGUI page]((https://github.com/Abasz/ESPRowingMonitor-WebGUI/blob/master/src/common/services/ergometer/erg-settings.service.ts)).
+
+Please note that `SetMachineSettings` OpCode only available if firmware is compiled with [`ENABLE_RUNTIME_SETTINGS`](./settings.md#enable_runtime_settings) flag. Otherwise sending this OpCode it will return `UnsupportedOpCode`. Furthermore, device restart (e.g. sending Restart Device OpCode) is necessary for the new settings to take effect.
 
 ## Over-the-Air updater
 
