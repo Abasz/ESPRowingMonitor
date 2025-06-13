@@ -49,7 +49,7 @@ void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetri
 
     parameters.data = data;
 
-    const auto coreStackSize = 2'048U;
+    const auto coreStackSize = 2'328U;
 
     xTaskCreatePinnedToCore(
         BaseMetricsBleService::broadcastTask,

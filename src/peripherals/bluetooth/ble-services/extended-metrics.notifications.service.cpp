@@ -19,7 +19,7 @@ void ExtendedMetricBleService::broadcastHandleForces(const vector<float> &handle
     handleForcesParams.chunkSize = (mtu - 3U - 2U) / sizeof(float);
     handleForcesParams.handleForces = handleForces;
 
-    const auto coreStackSize = 2'048U;
+    const auto coreStackSize = 2'240U;
     const auto variableStackSize = mtu > handleForcesParams.handleForces.size() * sizeof(float) ? handleForcesParams.handleForces.size() * sizeof(float) : mtu;
 
     xTaskCreatePinnedToCore(
@@ -38,7 +38,7 @@ void ExtendedMetricBleService::broadcastDeltaTimes(const vector<unsigned long> &
 
     deltaTimesParams.deltaTimes = deltaTimes;
 
-    const auto coreStackSize = 1'850U;
+    const auto coreStackSize = 2'368U;
 
     xTaskCreatePinnedToCore(
         ExtendedMetricBleService::DeltaTimesParams::task,
@@ -59,7 +59,7 @@ void ExtendedMetricBleService::broadcastExtendedMetrics(const Configurations::pr
     extendedMetricsParams.driveDuration = driveDuration;
     extendedMetricsParams.dragCoefficient = dragCoefficient;
 
-    const auto coreStackSize = 2'048U;
+    const auto coreStackSize = 2'368U;
 
     xTaskCreatePinnedToCore(
         ExtendedMetricBleService::ExtendedMetricsParams::task,

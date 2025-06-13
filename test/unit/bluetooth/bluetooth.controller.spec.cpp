@@ -61,6 +61,7 @@ TEST_CASE("BluetoothController", "[peripheral]")
     Fake(Method(mockNimBLEServer, advertiseOnDisconnect));
     Fake(Method(mockNimBLEServer, init));
     Fake(Method(mockNimBLEServer, setPower));
+    Fake(Method(mockNimBLEServer, setSecurityAuth));
     Fake(Method(mockNimBLEServer, start));
 
     When(Method(mockBatteryBleService, setup)).AlwaysReturn(&mockNimBLEService.get());
@@ -263,6 +264,13 @@ TEST_CASE("BluetoothController", "[peripheral]")
             bluetoothController.setup();
 
             Verify(Method(mockNimBLEServer, setPower).Using(std::to_underlying(Configurations::bleSignalStrength))).Once();
+        }
+
+        SECTION("should set setSecurityAuth")
+        {
+            bluetoothController.setup();
+
+            Verify(Method(mockNimBLEServer, setSecurityAuth).Using(true, false, false)).Once();
         }
 
         SECTION("should create server")

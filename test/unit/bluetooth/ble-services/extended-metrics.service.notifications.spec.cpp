@@ -47,7 +47,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
         const unsigned short expectedDriveDuration = lroundl(driveDuration / secInMicroSec * 4'096);
         const auto expectedAvgStrokePower = static_cast<short>(lround(avgStrokePower));
         const auto expectedDragFactor = static_cast<unsigned char>(lround(dragCoefficient * 1e6));
-        const auto expectedStackSize = 2'048U;
+        const auto expectedStackSize = 2'368U;
 
         Fake(OverloadedMethod(mockExtendedMetricsCharacteristic, setValue, void(const std::array<unsigned char, 7U>)));
         Fake(Method(mockExtendedMetricsCharacteristic, notify));
@@ -128,7 +128,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
     SECTION("HandleForces method should")
     {
-        const auto coreStackSize = 2'048U;
+        const auto coreStackSize = 2'240U;
         const std::vector<float> expectedHandleForces{1.1, 3.3, 500.4, 300.4};
         const std::vector<float> expectedBigHandleForces{1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 1.1, 3.3, 10.4, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12, 30.999, 80.323, 500.4, 300.4, 200.8474, 100.12};
 
@@ -329,7 +329,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
 
     SECTION("DeltaTimes method should")
     {
-        const auto coreStackSize = 1'850U;
+        const auto coreStackSize = 2'368U;
         std::vector<unsigned long> expectedDeltaTimes{10000, 11000, 12000, 11000};
         const auto expectedStackSize = coreStackSize + expectedDeltaTimes.size() * sizeof(unsigned long) / 3;
 

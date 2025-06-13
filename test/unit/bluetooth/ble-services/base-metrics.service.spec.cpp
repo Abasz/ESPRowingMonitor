@@ -362,7 +362,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
             .dragCoefficient = 110 / 1e6,
         };
 
-        const auto expectedStackSize = 2'048U;
+        const auto expectedStackSize = 2'328U;
 
         BaseMetricsBleService baseMetricsBleService(mockMockSettingsBleService.get(), mockEEPROMService.get());
 

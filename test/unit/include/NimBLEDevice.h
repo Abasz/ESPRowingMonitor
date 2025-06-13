@@ -162,6 +162,7 @@ public:
     virtual size_t getConnectedCount() = 0;
     virtual void init(const std::string deviceName) = 0;
     virtual void setPower(int powerLevel) = 0;
+    virtual void setSecurityAuth(bool bonding, bool middleProtection, bool secureConnection) = 0;
     virtual void advertiseOnDisconnect(bool restart) = 0;
     void setCallbacks(NimBLEServerCallbacks *pCallbacks)
     {
@@ -256,5 +257,10 @@ public:
     {
         mockNimBLEServer.get().setPower(powerLevel);
     }
+
+    static void setSecurityAuth(bool bonding, bool middleProtection, bool secureConnection)
+    {
+        mockNimBLEServer.get().setSecurityAuth(bonding, middleProtection, secureConnection);
+    };
 };
 // NOLINTEND

@@ -93,6 +93,7 @@ void BluetoothController::setupBleDevice()
 
     NimBLEDevice::init(deviceName);
     NimBLEDevice::setPower(std::to_underlying(Configurations::bleSignalStrength));
+    NimBLEDevice::setSecurityAuth(true, false, false);
 
     Log.verboseln("Setting up Server");
 
