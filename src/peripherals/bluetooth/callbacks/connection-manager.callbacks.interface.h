@@ -2,10 +2,10 @@
 
 #include "NimBLEDevice.h"
 
-class IServerCallbacks : public NimBLEServerCallbacks
+class IConnectionManagerCallbacks : public NimBLEServerCallbacks
 {
 protected:
-    ~IServerCallbacks() = default;
+    ~IConnectionManagerCallbacks() = default;
 
 public:
     virtual unsigned char getConnectionCount() const = 0;

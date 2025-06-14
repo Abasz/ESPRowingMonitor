@@ -18,7 +18,7 @@
 #include "./ble-services/ota.service.interface.h"
 #include "./ble-services/settings.service.interface.h"
 #include "./bluetooth.controller.interface.h"
-#include "./callbacks/server.callbacks.interface.h"
+#include "./callbacks/connection-manager.callbacks.interface.h"
 
 using std::vector;
 
@@ -34,7 +34,7 @@ class BluetoothController final : public IBluetoothController
     IBaseMetricsBleService &baseMetricsBleService;
     IExtendedMetricBleService &extendedMetricsBleService;
 
-    IServerCallbacks &serverCallbacks;
+    IConnectionManagerCallbacks &connectionManagerCallbacks;
 
     unsigned int lastMetricsBroadcastTime = 0UL;
     unsigned int lastDeltaTimesBroadcastTime = 0UL;
@@ -51,7 +51,7 @@ class BluetoothController final : public IBluetoothController
     void flushBleDeltaTimes(unsigned short mtu);
 
 public:
-    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService, IExtendedMetricBleService &_extendedMetricsBleService, IServerCallbacks &_serverCallbacks);
+    explicit BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService, IExtendedMetricBleService &_extendedMetricsBleService, IConnectionManagerCallbacks &_connectionManagerCallbacks);
 
     void update() override;
 

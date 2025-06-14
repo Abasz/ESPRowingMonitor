@@ -12,7 +12,7 @@
 #include "./peripherals/bluetooth/ble-services/ota.service.h"
 #include "./peripherals/bluetooth/ble-services/settings.service.h"
 #include "./peripherals/bluetooth/bluetooth.controller.h"
-#include "./peripherals/bluetooth/callbacks/server.callbacks.h"
+#include "./peripherals/bluetooth/callbacks/connection-manager.callbacks.h"
 #include "./peripherals/peripherals.controller.h"
 #include "./peripherals/sd-card/sd-card.service.h"
 #include "./rower/flywheel.service.h"
@@ -46,7 +46,7 @@ extern DeviceInfoBleService deviceInfoBleService;
 extern OtaBleService otaBleService;
 extern BaseMetricsBleService baseMetricsBleService;
 extern ExtendedMetricBleService extendedMetricsBleService;
-extern ServerCallbacks serverCallbacks;
+extern ConnectionManagerCallbacks connectionManagerCallbacks;
 extern SdCardService sdCardService;
 
 extern BluetoothController bleController;

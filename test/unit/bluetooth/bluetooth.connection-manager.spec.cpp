@@ -4,33 +4,64 @@
 
 #include "../include/NimBLEDevice.h"
 
-#include "../../../src/peripherals/bluetooth/ble-services/extended-metrics.service.interface.h"
+#include "../../../src/peripherals/bluetooth/ble-services/base-metrics.service.interface.h"
 #include "../../../src/peripherals/bluetooth/callbacks/connection-manager.callbacks.h"
-#include "../../../src/utils/enums.h"
 
 using namespace fakeit;
 
-TEST_CASE("ConnectionManagerCallbacks onSubscribed method", "[callbacks]")
+TEST_CASE("ConnectionManagerCallbacks", "[callbacks]")
 {
-    mockNimBLECharacteristic.Reset();
+    mockNimBLEServer.Reset();
+    mockNimBLEAdvertising.Reset();
+    mockNimBLEService.Reset();
 
     Mock<NimBLEConnInfo> mockConnectionInfo;
+
     When(Method(mockConnectionInfo, getConnHandle)).AlwaysReturn(0);
 
-    ConnectionManagerCallbacks chunkedNotifyMetricCallback;
+    Fake(Method(mockNimBLEAdvertising, start));
+    Fake(Method(mockNimBLEAdvertising, stop));
 
-    SECTION("should add new connection's client ID to client ID list when subscribing")
+    ConnectionManagerCallbacks connectionManagerCallbacks;
+
+    SECTION("onConnect method should")
     {
-        chunkedNotifyMetricCallback.onSubscribe(&mockNimBLECharacteristic.get(), mockConnectionInfo.get(), 1);
+        SECTION("restart advertising when connection count is less than 2")
+        {
+            When(Method(mockNimBLEServer, getConnectedCount)).Return(0, 1);
 
-        REQUIRE(chunkedNotifyMetricCallback.getClientIds().size() == 1);
+            connectionManagerCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
+            connectionManagerCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockNimBLEAdvertising, stop)).Exactly(2);
+            Verify(Method(mockNimBLEAdvertising, start)).Exactly(2);
+        }
+
+        SECTION("should not restart advertising when connection count is 2 or more")
+        {
+            When(Method(mockNimBLEServer, getConnectedCount)).AlwaysReturn(2);
+
+            connectionManagerCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockNimBLEAdvertising, stop)).Never();
+            Verify(Method(mockNimBLEAdvertising, start)).Never();
+        }
     }
 
-    SECTION("should remove clientID in thehandleForces ID list")
+    SECTION("onDisconnect method should")
     {
-        chunkedNotifyMetricCallback.onSubscribe(&mockNimBLECharacteristic.get(), mockConnectionInfo.get(), 0);
+        SECTION("decrease connected count")
+        {
+            const auto expectedConnectedCount = 1U;
+            When(Method(mockNimBLEServer, getConnectedCount)).Return(0, 1, expectedConnectedCount);
 
-        REQUIRE(chunkedNotifyMetricCallback.getClientIds().size() == 0);
+            connectionManagerCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
+            connectionManagerCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
+
+            connectionManagerCallbacks.onDisconnect(&mockNimBLEServer.get(), mockConnectionInfo.get(), 0);
+
+            REQUIRE(connectionManagerCallbacks.getConnectionCount() == expectedConnectedCount);
+        }
     }
 }
 // NOLINTEND(readability-magic-numbers)

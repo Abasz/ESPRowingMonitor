@@ -71,9 +71,9 @@ set(SOURCES_UNIT_TEST
     "${LIB_DIR}/peripherals/bluetooth/ble-services/settings.service.cpp"
     "${LIB_DIR}/peripherals/bluetooth/ble-services/device-info.service.cpp"
     "${LIB_DIR}/peripherals/bluetooth/callbacks/control-point.callbacks.cpp"
-    "${LIB_DIR}/peripherals/bluetooth/callbacks/connection-manager.callbacks.cpp"
+    "${LIB_DIR}/peripherals/bluetooth/callbacks/subscription-manager.callbacks.cpp"
     "${LIB_DIR}/peripherals/bluetooth/callbacks/ota.callbacks.cpp"
-    "${LIB_DIR}/peripherals/bluetooth/callbacks/server.callbacks.cpp"
+    "${LIB_DIR}/peripherals/bluetooth/callbacks/connection-manager.callbacks.cpp"
     "${LIB_DIR}/peripherals/bluetooth/bluetooth.controller.cpp"
 
     "${UNIT_TEST_DIR}/bluetooth/ble-services/settings.service.spec.cpp"
@@ -87,9 +87,9 @@ set(SOURCES_UNIT_TEST
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.control-point.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.controller.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.notifications.spec.cpp"
-    "${UNIT_TEST_DIR}/bluetooth/bluetooth.connection-manager.spec.cpp"
+    "${UNIT_TEST_DIR}/bluetooth/bluetooth.subscription-manager.spec.cpp"
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.ota-callback.spec.cpp"
-    "${UNIT_TEST_DIR}/bluetooth/bluetooth.server-callbacks.spec.cpp"
+    "${UNIT_TEST_DIR}/bluetooth/bluetooth.connection-manager.spec.cpp"
 
     "${UNIT_TEST_DIR}/peripherals.controller.spec.cpp"
     "${UNIT_TEST_DIR}/EEPROM.service.spec.cpp"

@@ -1,35 +1,36 @@
+#include <algorithm>
 
+#include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
-#include "../../../utils/enums.h"
+#include "../../../utils/configuration.h"
 #include "./connection-manager.callbacks.h"
 
 ConnectionManagerCallbacks::ConnectionManagerCallbacks()
 {
-    clientIds.reserve(Configurations::maxConnectionCount);
 }
 
-void ConnectionManagerCallbacks::onSubscribe(NimBLECharacteristic *const pCharacteristic, NimBLEConnInfo &connInfo, unsigned short subValue)
+void ConnectionManagerCallbacks::onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
 {
-    if (subValue > 0)
+    connectionCount = pServer->getConnectedCount();
+    Log.verboseln("Device connected, handle: %d, total connections: %d", connInfo.getConnHandle(), connectionCount);
+
+    if (connectionCount < Configurations::maxConnectionCount)
     {
-        clientIds.push_back(connInfo.getConnHandle());
+        auto *const advertising = NimBLEDevice::getAdvertising();
 
-        return;
+        Log.verboseln("Advertising restarted (stoped)%T, (started)%T", advertising->stop(), advertising->start());
     }
-
-    clientIds.erase(
-        std::remove_if(
-            begin(clientIds),
-            end(clientIds),
-            [&](unsigned char connectionId)
-            {
-                return connectionId == connInfo.getConnHandle();
-            }),
-        cend(clientIds));
 }
 
-const vector<unsigned char> &ConnectionManagerCallbacks::getClientIds() const
+void ConnectionManagerCallbacks::onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason)
 {
-    return clientIds;
+    connectionCount = pServer->getConnectedCount();
+
+    Log.verboseln("Device disconnected, handle: %d, remaining connections: %d", connInfo.getConnHandle(), connectionCount);
+}
+
+unsigned char ConnectionManagerCallbacks::getConnectionCount() const
+{
+    return connectionCount;
 }

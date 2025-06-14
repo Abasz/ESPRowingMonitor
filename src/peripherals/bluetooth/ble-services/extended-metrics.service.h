@@ -4,7 +4,7 @@
 
 #include "NimBLEDevice.h"
 
-#include "../callbacks/connection-manager.callbacks.h"
+#include "../callbacks/subscription-manager.callbacks.h"
 #include "./extended-metrics.service.interface.h"
 
 using std::vector;
@@ -14,7 +14,7 @@ class ExtendedMetricBleService final : public IExtendedMetricBleService
     struct ExtendedMetricsParams
     {
         NimBLECharacteristic *characteristic = nullptr;
-        ConnectionManagerCallbacks callbacks;
+        SubscriptionManagerCallbacks callbacks;
 
         Configurations::precision avgStrokePower = 0;
         unsigned int recoveryDuration = 0;
@@ -28,7 +28,7 @@ class ExtendedMetricBleService final : public IExtendedMetricBleService
     struct HandleForcesParams
     {
         NimBLECharacteristic *characteristic = nullptr;
-        ConnectionManagerCallbacks callbacks;
+        SubscriptionManagerCallbacks callbacks;
 
         unsigned short chunkSize = (512U - 3 - 2) / sizeof(float);
         vector<float> handleForces;
@@ -39,7 +39,7 @@ class ExtendedMetricBleService final : public IExtendedMetricBleService
 
     struct DeltaTimesParams
     {
-        ConnectionManagerCallbacks callbacks;
+        SubscriptionManagerCallbacks callbacks;
         NimBLECharacteristic *characteristic = nullptr;
         vector<unsigned long> deltaTimes;
 

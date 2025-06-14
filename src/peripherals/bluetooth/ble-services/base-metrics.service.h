@@ -6,14 +6,14 @@
 #include "../../../utils/enums.h"
 #include "../ble-metrics.model.h"
 #include "../bluetooth.controller.interface.h"
-#include "../callbacks/connection-manager.callbacks.h"
 #include "../callbacks/control-point.callbacks.h"
+#include "../callbacks/subscription-manager.callbacks.h"
 #include "./base-metrics.service.interface.h"
 
 class BaseMetricsBleService final : public IBaseMetricsBleService
 {
     ControlPointCallbacks controlPointCallbacks;
-    ConnectionManagerCallbacks connectionManager;
+    SubscriptionManagerCallbacks connectionManager;
 
     struct BaseMetricsParams
     {
