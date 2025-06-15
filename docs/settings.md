@@ -43,11 +43,6 @@ enum class BleServiceFlag : unsigned char
     CscService
 };
 ```
-
-#### ENABLE_BLE_SERVICE
-
-Enables or disables the BLE service to broadcast data. Default is true.
-
 #### HAS_BLE_EXTENDED_METRICS
 
 Enables or disables the extended BLE API to broadcast data. Default is true.
@@ -151,6 +146,10 @@ These are the settings applicable to the rowing machine. It can be included in a
 #### DEVICE_NAME
 
 This is the device name that is set as BLE Device name. This should be one word without spaces and without quotes.
+
+#### ADD_BLE_SERVICE_STRING_TO_NAME
+
+Enables or disables the BLE service flag to be included in the BLE device name (like `(CPS)`, `(FTMS)`, etc.) with a space separator. Default is true.
 
 #### MODEL_NUMBER
 

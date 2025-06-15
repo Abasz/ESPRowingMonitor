@@ -29,6 +29,7 @@ public:
     static constexpr bool enableBluetoothDeltaTimeLogging = ENABLE_BLUETOOTH_DELTA_TIME_LOGGING;
     static constexpr BleSignalStrength bleSignalStrength = BLE_SIGNAL_STRENGTH;
 
+    static constexpr bool addBleServiceStringToName = ADD_BLE_SERVICE_STRING_TO_NAME;
     inline static const string deviceName = TOSTRING(DEVICE_NAME);
     inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
     inline static const string serialNumber = SERIAL_NUMBER;

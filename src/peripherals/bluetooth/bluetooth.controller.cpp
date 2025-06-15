@@ -64,27 +64,31 @@ void BluetoothController::setupBleDevice()
 {
     Log.verboseln("Initializing BLE device");
 
-    auto deviceName = Configurations::deviceName + " (";
-    ;
+    auto deviceName = Configurations::deviceName;
 
-    switch (eepromService.getBleServiceFlag())
+    if constexpr (Configurations::addBleServiceStringToName)
     {
-    case BleServiceFlag::CscService:
-        deviceName.append("CSC)");
+        deviceName.append(" (");
 
-        break;
+        switch (eepromService.getBleServiceFlag())
+        {
+        case BleServiceFlag::CscService:
+            deviceName.append("CSC)");
 
-    case BleServiceFlag::CpsService:
-        deviceName.append("CPS)");
+            break;
 
-        break;
+        case BleServiceFlag::CpsService:
+            deviceName.append("CPS)");
 
-    case BleServiceFlag::FtmsService:
-        deviceName.append("FTMS)");
+            break;
 
-        break;
-    default:
-        std::unreachable();
+        case BleServiceFlag::FtmsService:
+            deviceName.append("FTMS)");
+
+            break;
+        default:
+            std::unreachable();
+        }
     }
 
     NimBLEDevice::init(deviceName);

@@ -118,6 +118,10 @@ consteval std::string_view extractClassName(const std::string_view className)
     #define SERIAL_NUMBER "03172022/1"
 #endif
 
+#if !defined(ADD_BLE_SERVICE_STRING_TO_NAME)
+    #define ADD_BLE_SERVICE_STRING_TO_NAME true
+#endif
+
 #if !defined(SENSOR_ON_SWITCH_PIN_NUMBER)
     #define SENSOR_ON_SWITCH_PIN_NUMBER GPIO_NUM_NC
 #endif
