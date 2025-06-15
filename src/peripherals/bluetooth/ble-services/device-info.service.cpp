@@ -2,6 +2,8 @@
 
 #include "ArduinoLog.h"
 
+#include "globals.h"
+
 #include "../../../utils/configuration.h"
 #include "../../../utils/enums.h"
 
@@ -20,7 +22,7 @@ NimBLEService *DeviceInfoBleService::setup(NimBLEServer *const server) const
         ->setValue(Configurations::modelNumber);
     deviceInfoService
         ->createCharacteristic(CommonBleFlags::serialNumberSvcUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(Configurations::serialNumber);
+        ->setValue(Configurations::serialNumber.empty() ? generateSerial() : Configurations::serialNumber);
     deviceInfoService
         ->createCharacteristic(CommonBleFlags::firmwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue(Configurations::firmwareVersion);

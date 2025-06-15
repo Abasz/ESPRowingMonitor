@@ -32,6 +32,7 @@ public:
     static constexpr bool addBleServiceStringToName = ADD_BLE_SERVICE_TO_DEVICE_NAME;
     inline static const string deviceName = TOSTRING(DEVICE_NAME);
     inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
+    // NOLINTNEXTLINE(readability-redundant-string-init)
     inline static const string serialNumber = SERIAL_NUMBER;
     inline static const string firmwareVersion = string(getCompileDate().data(), getCompileDate().size());
 

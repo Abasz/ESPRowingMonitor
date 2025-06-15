@@ -64,6 +64,8 @@ void printPrefix(Print *_logOutput, int logLevel);
 void printTimestamp(Print *_logOutput);
 void printLogLevel(Print *_logOutput, int logLevel);
 
+std::string generateSerial();
+
 consteval bool isOdd(unsigned long number)
 {
     return number % 2 != 0;

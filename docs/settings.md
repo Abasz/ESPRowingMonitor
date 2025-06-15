@@ -166,7 +166,7 @@ This is the model number for the BLE device profile service. This should be one 
 
 #### SERIAL_NUMBER
 
-Serial number for the BLE device profile. This can be anything but should be within quotes.
+Serial number for the BLE device profile. This can be anything but should be within quotes. Default is the last 3 bytes of the MAC Address formatted to HEX without the 0x (i.e. 6 characters).
 
 ### Machine settings
 

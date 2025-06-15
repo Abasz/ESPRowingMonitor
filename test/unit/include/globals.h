@@ -21,6 +21,8 @@ void attachRotationInterrupt();
 void detachRotationInterrupt();
 void restartWithDelay(unsigned long millis = 0);
 
+std::string generateSerial();
+
 consteval bool isOdd(unsigned long number)
 {
     return number % 2 != 0;

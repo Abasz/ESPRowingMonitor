@@ -119,7 +119,7 @@ consteval std::string_view extractClassName(const std::string_view className)
 #endif
 
 #if !defined(SERIAL_NUMBER)
-    #define SERIAL_NUMBER "03172022/1"
+    #define SERIAL_NUMBER ""
 #endif
 
 #if !defined(ADD_BLE_SERVICE_TO_DEVICE_NAME)

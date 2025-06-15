@@ -97,6 +97,7 @@ set(SOURCES_UNIT_TEST
     "${UNIT_TEST_DIR}/ota-updater.service.spec.cpp"
     "${UNIT_TEST_DIR}/power-manager.controller.spec.cpp"
     "${UNIT_TEST_DIR}/sd-card.service.spec.cpp"
+    "${UNIT_TEST_DIR}/globals.spec.cpp"
 
     "${UNIT_TEST_DIR}/rower/stroke.controller.spec.cpp"
     "${UNIT_TEST_DIR}/rower/stroke.service.spec.cpp"
