@@ -168,6 +168,10 @@ This is the model number for the BLE device profile service. This should be one 
 
 Serial number for the BLE device profile. This can be anything but should be within quotes. Default is the last 3 bytes of the MAC Address formatted to HEX without the 0x (i.e. 6 characters).
 
+#### ADD_SERIAL_IN_DEVICE_NAME
+
+Include the Serial Number in the BLE device name with an additional `-` separator from the device name. Please note that the total device name length cannot be longer than 18 characters. Default is false.
+
 ### Machine settings
 
 #### IMPULSES_PER_REVOLUTION

@@ -6,6 +6,8 @@
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
+#include "globals.h"
+
 #include "../../utils/configuration.h"
 #include "./bluetooth.controller.h"
 
@@ -65,6 +67,14 @@ void BluetoothController::setupBleDevice()
     Log.verboseln("Initializing BLE device");
 
     auto deviceName = Configurations::deviceName;
+
+    if constexpr (Configurations::enableSerialInDeviceName)
+    {
+        const auto serial = Configurations::serialNumber.empty() ? generateSerial() : Configurations::serialNumber;
+
+        deviceName.append("-");
+        deviceName.append(serial);
+    }
 
     if constexpr (Configurations::addBleServiceStringToName)
     {

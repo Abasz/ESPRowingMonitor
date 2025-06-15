@@ -120,15 +120,23 @@ consteval std::string_view extractClassName(const std::string_view className)
 
 #if !defined(SERIAL_NUMBER)
     #define SERIAL_NUMBER ""
+    #define SERIAL_NUMBER_ERROR_MSG "123456"
+#else
+    #define SERIAL_NUMBER_ERROR_MSG SERIAL_NUMBER
 #endif
 
 #if !defined(ADD_BLE_SERVICE_TO_DEVICE_NAME)
     #define ADD_BLE_SERVICE_TO_DEVICE_NAME true
 #endif
 
+#if !defined(ADD_SERIAL_TO_DEVICE_NAME)
+    #define ADD_SERIAL_TO_DEVICE_NAME false
+#endif
+
 // NOLINTBEGIN(cppcoreguidelines-macro-to-enum)
 #define MAX_DEVICE_NAME_LENGTH 18
 #define BLE_SERVICE_FLAG_LENGTH 7
+#define DEFAULT_SERIAL_LENGTH 7
 // NOLINTEND(cppcoreguidelines-macro-to-enum)
 
 #if !ADD_BLE_SERVICE_TO_DEVICE_NAME
@@ -137,6 +145,17 @@ static_assert((sizeof(TOSTRING(DEVICE_NAME)) - 1) <= MAX_DEVICE_NAME_LENGTH, "De
 
 #if ADD_BLE_SERVICE_TO_DEVICE_NAME
 static_assert(((sizeof(TOSTRING(DEVICE_NAME)) - 1) + BLE_SERVICE_FLAG_LENGTH) <= MAX_DEVICE_NAME_LENGTH, "Device name \"" TOSTRING(DEVICE_NAME) " (FTMS)\" is too long (max " TOSTRING(MAX_DEVICE_NAME_LENGTH) " characters)  please either disable ADD_BLE_SERVICE_TO_DEVICE_NAME or reduce DEVICE_NAME to " TOSTRING(MAX_DEVICE_NAME_LENGTH - BLE_SERVICE_FLAG_LENGTH) " characters");
+#endif
+
+#if !ADD_BLE_SERVICE_TO_DEVICE_NAME && ADD_SERIAL_TO_DEVICE_NAME
+static_assert(((sizeof(TOSTRING(DEVICE_NAME)) - 1) + (sizeof(SERIAL_NUMBER) - 1 > 0 ? DEFAULT_SERIAL_LENGTH : sizeof(SERIAL_NUMBER) - 1)) <= MAX_DEVICE_NAME_LENGTH, "Device name '" TOSTRING(DEVICE_NAME) "-" SERIAL_NUMBER_ERROR_MSG "' is too long (full name should fit in " TOSTRING(MAX_DEVICE_NAME_LENGTH) " characters), please either disable ADD_SERIAL_TO_DEVICE_NAME or reduce DEVICE_NAME length");
+#endif
+
+#if ADD_BLE_SERVICE_TO_DEVICE_NAME && ADD_SERIAL_TO_DEVICE_NAME
+    #if !defined(SERIAL_NUMBER_ERROR_MSG)
+        #define SERIAL_NUMBER_ERROR_MSG SERIAL_NUMBER
+    #endif
+static_assert(((sizeof(SERIAL_NUMBER) - 1 == 0 ? DEFAULT_SERIAL_LENGTH : sizeof(SERIAL_NUMBER)) + sizeof(TOSTRING(DEVICE_NAME)) - 1 + DEFAULT_SERIAL_LENGTH) <= MAX_DEVICE_NAME_LENGTH, "Device name '" TOSTRING(DEVICE_NAME) "-" SERIAL_NUMBER_ERROR_MSG " (FTMS)' is too long (full name should fit in " TOSTRING(MAX_DEVICE_NAME_LENGTH) " characters), please either change some settings (e.g. disable serial in device name or disable ble service flag) or reduce device name");
 #endif
 
 #if !defined(SENSOR_ON_SWITCH_PIN_NUMBER)

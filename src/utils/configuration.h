@@ -30,6 +30,7 @@ public:
     static constexpr BleSignalStrength bleSignalStrength = BLE_SIGNAL_STRENGTH;
 
     static constexpr bool addBleServiceStringToName = ADD_BLE_SERVICE_TO_DEVICE_NAME;
+    static constexpr bool enableSerialInDeviceName = ADD_SERIAL_TO_DEVICE_NAME;
     inline static const string deviceName = TOSTRING(DEVICE_NAME);
     inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
     // NOLINTNEXTLINE(readability-redundant-string-init)
