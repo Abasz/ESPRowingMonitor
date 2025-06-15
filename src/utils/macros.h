@@ -114,12 +114,29 @@ consteval std::string_view extractClassName(const std::string_view className)
     #define BAUD_RATE BaudRates::Baud115200
 #endif
 
+#if !defined(DEVICE_NAME)
+    #define DEVICE_NAME ESPRM
+#endif
+
 #if !defined(SERIAL_NUMBER)
     #define SERIAL_NUMBER "03172022/1"
 #endif
 
-#if !defined(ADD_BLE_SERVICE_STRING_TO_NAME)
-    #define ADD_BLE_SERVICE_STRING_TO_NAME true
+#if !defined(ADD_BLE_SERVICE_TO_DEVICE_NAME)
+    #define ADD_BLE_SERVICE_TO_DEVICE_NAME true
+#endif
+
+// NOLINTBEGIN(cppcoreguidelines-macro-to-enum)
+#define MAX_DEVICE_NAME_LENGTH 18
+#define BLE_SERVICE_FLAG_LENGTH 7
+// NOLINTEND(cppcoreguidelines-macro-to-enum)
+
+#if !ADD_BLE_SERVICE_TO_DEVICE_NAME
+static_assert((sizeof(TOSTRING(DEVICE_NAME)) - 1) <= MAX_DEVICE_NAME_LENGTH, "Device name \"" TOSTRING(DEVICE_NAME) "\" is too long, please set it to fit in " TOSTRING(MAX_DEVICE_NAME_LENGTH) " characters");
+#endif
+
+#if ADD_BLE_SERVICE_TO_DEVICE_NAME
+static_assert(((sizeof(TOSTRING(DEVICE_NAME)) - 1) + BLE_SERVICE_FLAG_LENGTH) <= MAX_DEVICE_NAME_LENGTH, "Device name \"" TOSTRING(DEVICE_NAME) " (FTMS)\" is too long (max " TOSTRING(MAX_DEVICE_NAME_LENGTH) " characters)  please either disable ADD_BLE_SERVICE_TO_DEVICE_NAME or reduce DEVICE_NAME to " TOSTRING(MAX_DEVICE_NAME_LENGTH - BLE_SERVICE_FLAG_LENGTH) " characters");
 #endif
 
 #if !defined(SENSOR_ON_SWITCH_PIN_NUMBER)

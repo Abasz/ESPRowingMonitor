@@ -154,9 +154,9 @@ These are the settings applicable to the rowing machine. It can be included in a
 
 #### DEVICE_NAME
 
-This is the device name that is set as BLE Device name. This should be one word without spaces and without quotes.
+This is the device name that is set as BLE Device name. This should be without quotes and should not exceed 18 characters or if `ADD_BLE_SERVICE_TO_DEVICE_NAME` is true 11 characters.
 
-#### ADD_BLE_SERVICE_STRING_TO_NAME
+#### ADD_BLE_SERVICE_TO_DEVICE_NAME
 
 Enables or disables the BLE service flag to be included in the BLE device name (like `(CPS)`, `(FTMS)`, etc.) with a space separator. Default is true.
 
