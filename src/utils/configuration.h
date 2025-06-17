@@ -57,7 +57,7 @@ public:
     static constexpr unsigned char impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
     static constexpr float flywheelInertia = FLYWHEEL_INERTIA;
     static constexpr unsigned short ledBlinkFrequency = LED_BLINK_FREQUENCY;
-    static constexpr float sprocketRadius = SPROCKET_RADIUS / 100;
+    static constexpr float sprocketRadius = SPROCKET_RADIUS / 100.0F;
     static constexpr float concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
 
     static constexpr precision angularDisplacementPerImpulse = (2 * PI) / impulsesPerRevolution;
