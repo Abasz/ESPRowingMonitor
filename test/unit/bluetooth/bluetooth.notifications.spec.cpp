@@ -37,6 +37,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Mock<IOtaBleService> mockOtaBleService;
     Mock<IBaseMetricsBleService> mockBaseMetricsBleService;
     Mock<IExtendedMetricBleService> mockExtendedMetricsBleService;
+    Mock<IServerCallbacks> mockServerCallbacks;
 
     const RowingDataModels::RowingMetrics expectedData{
         .distance = 101.121,
@@ -87,7 +88,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Fake(Method(mockExtendedMetricsBleService, broadcastHandleForces));
     When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(0);
 
-    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get(), mockBaseMetricsBleService.get(), mockExtendedMetricsBleService.get());
+    BluetoothController bluetoothController(mockEEPROMService.get(), mockOtaUpdaterService.get(), mockSettingsBleService.get(), mockBatteryBleService.get(), mockDeviceInfoBleService.get(), mockOtaBleService.get(), mockBaseMetricsBleService.get(), mockExtendedMetricsBleService.get(), mockServerCallbacks.get());
 
     SECTION("notifyBattery method should")
     {

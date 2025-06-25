@@ -1,4 +1,3 @@
-
 #include <algorithm>
 
 #include "ArduinoLog.h"
@@ -7,19 +6,31 @@
 #include "../../../utils/configuration.h"
 #include "./server.callbacks.h"
 
-ServerCallbacks::ServerCallbacks(IExtendedMetricBleService &_extendedMetricsBleService) : extendedMetricsBleService(_extendedMetricsBleService)
+ServerCallbacks::ServerCallbacks()
 {
 }
 
 void ServerCallbacks::onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
 {
-    const auto connectedCount = pServer->getConnectedCount();
-    Log.verboseln("Device connected: %d", connectedCount);
+    connectionCount = pServer->getConnectedCount();
+    Log.verboseln("Device connected, handle: %d, total connections: %d", connInfo.getConnHandle(), connectionCount);
 
-    if (connectedCount < Configurations::maxConnectionCount)
+    if (connectionCount < Configurations::maxConnectionCount)
     {
         auto *const advertising = NimBLEDevice::getAdvertising();
 
-        Log.verboseln("Advertising restarted %T, %T", advertising->stop(), advertising->start());
+        Log.verboseln("Advertising restarted (stoped)%T, (started)%T", advertising->stop(), advertising->start());
     }
+}
+
+void ServerCallbacks::onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason)
+{
+    connectionCount = pServer->getConnectedCount();
+
+    Log.verboseln("Device disconnected, handle: %d, remaining connections: %d", connInfo.getConnHandle(), connectionCount);
+}
+
+unsigned char ServerCallbacks::getConnectionCount() const
+{
+    return connectionCount;
 }

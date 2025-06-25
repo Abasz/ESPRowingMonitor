@@ -42,7 +42,7 @@ class StrokeService final : public IStrokeService
 
     Configurations::precision dragCoefficient = 0;
 
-    WeightedAverageSeries dragCoefficients = WeightedAverageSeries(Configurations::dragCoefficientsArrayLength);
+    WeightedAverageSeries dragCoefficients = WeightedAverageSeries(Configurations::dragCoefficientsArrayLength, Configurations::defaultAllocationCapacity);
 
     // advance metrics
     Configurations::precision currentAngularVelocity = 0;
@@ -53,10 +53,10 @@ class StrokeService final : public IStrokeService
     vector<WeightedAverageSeries> angularVelocityMatrix;
     vector<WeightedAverageSeries> angularAccelerationMatrix;
 
-    TSLinearSeries deltaTimes = TSLinearSeries(Configurations::impulseDataArrayLength);
-    OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength);
-    OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries(0, Configurations::maxDragFactorRecoveryPeriod / Configurations::rotationDebounceTimeMin / 2);
-    TSQuadraticSeries angularDistances = TSQuadraticSeries(Configurations::impulseDataArrayLength);
+    TSLinearSeries deltaTimes = TSLinearSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
+    OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
+    OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries(0, Configurations::defaultAllocationCapacity, Configurations::maxDragFactorRecoveryPeriod / Configurations::rotationDebounceTimeMin / 2);
+    TSQuadraticSeries angularDistances = TSQuadraticSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
 
     bool isFlywheelUnpowered();
     bool isFlywheelPowered();

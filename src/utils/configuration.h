@@ -90,4 +90,6 @@ public:
     static constexpr unsigned char initialBatteryLevelMeasurementCount = INITIAL_BATTERY_LEVEL_MEASUREMENT_COUNT;
     static constexpr unsigned int batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1'000;
     static constexpr unsigned int deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1'000;
+
+    static constexpr unsigned short defaultAllocationCapacity = Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin;
 };

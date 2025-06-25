@@ -139,6 +139,7 @@ class NimBLEServerCallbacks
 {
 public:
     virtual void onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo) {};
+    virtual void onDisconnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo, int reason) {};
 };
 
 class NimBLECharacteristicCallbacks

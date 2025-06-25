@@ -146,7 +146,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 .Once();
         }
 
-        SECTION("and when log level settings is is valid")
+        SECTION("and when log level settings is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
                 std::to_underlying(SettingsOpCodes::ResponseCode),
@@ -217,7 +217,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 .Once();
         }
 
-        SECTION("and when BLE service setting is is valid")
+        SECTION("and when BLE service setting is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
                 std::to_underlying(SettingsOpCodes::ResponseCode),
@@ -296,7 +296,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 .Once();
         }
 
-        SECTION("and when SD Card logging settings is is valid")
+        SECTION("and when SD Card logging settings is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
                 std::to_underlying(SettingsOpCodes::ResponseCode),
@@ -368,7 +368,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 .Once();
         }
 
-        SECTION("and when Delta Time logging setting is is valid")
+        SECTION("and when Delta Time logging setting is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
                 std::to_underlying(SettingsOpCodes::ResponseCode),
@@ -481,7 +481,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 .Once();
         }
 
-        SECTION("and when MachineSettings is is valid")
+        SECTION("and when MachineSettings is valid")
         {
             std::array<unsigned char, 3U> successResponse = {
                 std::to_underlying(SettingsOpCodes::ResponseCode),

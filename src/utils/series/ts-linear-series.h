@@ -11,6 +11,7 @@ class TSLinearSeries
 {
     unsigned char maxSeriesLength;
     unsigned short maxSlopeSeriesLength = ((maxSeriesLength - 2) * (maxSeriesLength - 1)) / 2;
+    unsigned short initialCapacity;
     bool shouldRecalculateB = true;
     bool shouldRecalculateA = true;
     Configurations::precision a = 0;
@@ -23,7 +24,10 @@ class TSLinearSeries
     Configurations::precision calculateSlope(unsigned char pointOne, unsigned char pointTwo) const;
 
 public:
-    constexpr explicit TSLinearSeries(const unsigned char _maxSeriesLength = 0, const unsigned short _maxAllocationCapacity = 1'000) : maxSeriesLength(_maxSeriesLength), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity)
+    constexpr explicit TSLinearSeries(
+        const unsigned char _maxSeriesLength = 0,
+        const unsigned short _initialCapacity = Configurations::defaultAllocationCapacity,
+        const unsigned short _maxAllocationCapacity = 1'000) : maxSeriesLength(_maxSeriesLength), initialCapacity(_initialCapacity), seriesX(_maxSeriesLength, _initialCapacity, _maxAllocationCapacity), seriesY(_maxSeriesLength, _initialCapacity, _maxAllocationCapacity)
     {
         if (_maxSeriesLength > 0)
         {

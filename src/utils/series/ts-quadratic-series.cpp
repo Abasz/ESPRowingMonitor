@@ -72,7 +72,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     }
     a = seriesAMedian();
 
-    TSLinearSeries linearResidue(maxSeriesLength, maxAllocationCapacity);
+    TSLinearSeries linearResidue(maxSeriesLength, initialCapacity, maxAllocationCapacity);
     i = 0;
     while (i < seriesX.size())
     {

@@ -13,6 +13,7 @@ class TSQuadraticSeries
     unsigned short maxSeriesAInnerLength = ((maxSeriesLength - 2) * (maxSeriesLength - 1)) / 2;
     unsigned short maxSeriesALength;
     unsigned short maxAllocationCapacity;
+    unsigned short initialCapacity;
 
     Configurations::precision a = 0;
     Configurations::precision b = 0;
@@ -39,7 +40,10 @@ class TSQuadraticSeries
     Configurations::precision projectX(Configurations::precision pointX) const;
 
 public:
-    constexpr explicit TSQuadraticSeries(const unsigned char _maxSeriesLength = 0, const unsigned short _maxAllocationCapacity = 1'000) : maxSeriesLength(_maxSeriesLength), maxSeriesALength(calculateMaxSeriesALength(_maxSeriesLength, maxSeriesAInnerLength)), maxAllocationCapacity(_maxAllocationCapacity), seriesX(_maxSeriesLength, _maxAllocationCapacity), seriesY(_maxSeriesLength, _maxAllocationCapacity)
+    constexpr explicit TSQuadraticSeries(
+        const unsigned char _maxSeriesLength = 0,
+        const unsigned short _initialCapacity = Configurations::defaultAllocationCapacity,
+        const unsigned short _maxAllocationCapacity = 1'000) : maxSeriesLength(_maxSeriesLength), maxSeriesALength(calculateMaxSeriesALength(_maxSeriesLength, maxSeriesAInnerLength)), maxAllocationCapacity(_maxAllocationCapacity), initialCapacity(_initialCapacity), seriesX(_maxSeriesLength, _initialCapacity, _maxAllocationCapacity), seriesY(_maxSeriesLength, _initialCapacity, _maxAllocationCapacity)
     {
         if (_maxSeriesLength > 0)
         {

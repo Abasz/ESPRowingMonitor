@@ -17,17 +17,17 @@ TEST_CASE("WeightedAverageSeries")
     SECTION("when maxSeriesLength is not provided")
     {
         const auto maxCapacity = 500U;
-        WeightedAverageSeries weightedAverageSeries(0, maxCapacity);
+        WeightedAverageSeries weightedAverageSeries(0, Configurations::defaultAllocationCapacity, maxCapacity);
 
-        SECTION("should initialize with capacity of Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin")
+        SECTION("should initialize with capacity of Configurations::defaultAllocationCapacity")
         {
-            REQUIRE(weightedAverageSeries.capacity() == Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin);
+            REQUIRE(weightedAverageSeries.capacity() == Configurations::defaultAllocationCapacity);
         }
 
         SECTION("should cap maxCapacity at 1000")
         {
             const auto extremeHighMaxCapacity = 1'200;
-            WeightedAverageSeries weightedAverageSeriesMaxCapacity(0, extremeHighMaxCapacity);
+            WeightedAverageSeries weightedAverageSeriesMaxCapacity(0, Configurations::defaultAllocationCapacity, extremeHighMaxCapacity);
 
             for (auto i = 0U; i < 999; ++i)
             {
@@ -58,7 +58,7 @@ TEST_CASE("WeightedAverageSeries")
 
         SECTION("should set new capacity to maxCapacity when default allocation would yield higher capacity than maxCapacity")
         {
-            unsigned int capacityStep = Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin;
+            unsigned int capacityStep = Configurations::defaultAllocationCapacity;
 
             while (capacityStep <= maxCapacity / 2)
             {

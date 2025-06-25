@@ -15,7 +15,6 @@ TEST_CASE("ServerCallbacks", "[callbacks]")
     mockNimBLEAdvertising.Reset();
     mockNimBLEService.Reset();
 
-    Mock<IExtendedMetricBleService> mockExtendedMetricBleService;
     Mock<NimBLEConnInfo> mockConnectionInfo;
 
     When(Method(mockConnectionInfo, getConnHandle)).AlwaysReturn(0);
@@ -23,7 +22,7 @@ TEST_CASE("ServerCallbacks", "[callbacks]")
     Fake(Method(mockNimBLEAdvertising, start));
     Fake(Method(mockNimBLEAdvertising, stop));
 
-    ServerCallbacks serverCallbacks(mockExtendedMetricBleService.get());
+    ServerCallbacks serverCallbacks;
 
     SECTION("onConnect method should")
     {
@@ -46,6 +45,22 @@ TEST_CASE("ServerCallbacks", "[callbacks]")
 
             Verify(Method(mockNimBLEAdvertising, stop)).Never();
             Verify(Method(mockNimBLEAdvertising, start)).Never();
+        }
+    }
+
+    SECTION("onDisconnect method should")
+    {
+        SECTION("decrease connected count")
+        {
+            const auto expectedConnectedCount = 1U;
+            When(Method(mockNimBLEServer, getConnectedCount)).Return(0, 1, expectedConnectedCount);
+
+            serverCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
+            serverCallbacks.onConnect(&mockNimBLEServer.get(), mockConnectionInfo.get());
+
+            serverCallbacks.onDisconnect(&mockNimBLEServer.get(), mockConnectionInfo.get(), 0);
+
+            REQUIRE(serverCallbacks.getConnectionCount() == expectedConnectedCount);
         }
     }
 }

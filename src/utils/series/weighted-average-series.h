@@ -11,7 +11,10 @@ class WeightedAverageSeries
     Series weightedSeries;
 
 public:
-    constexpr explicit WeightedAverageSeries(const unsigned char _maxSeriesLength = 0, const unsigned short _maxAllocationCapacity = 1'000) : weightSeries(_maxSeriesLength, _maxAllocationCapacity), weightedSeries(_maxSeriesLength, _maxAllocationCapacity) {}
+    constexpr explicit WeightedAverageSeries(
+        const unsigned char _maxSeriesLength = 0,
+        const unsigned short _initialCapacity = Configurations::defaultAllocationCapacity,
+        const unsigned short _maxAllocationCapacity = 1'000) : weightSeries(_maxSeriesLength, _initialCapacity, _maxAllocationCapacity), weightedSeries(_maxSeriesLength, _initialCapacity, _maxAllocationCapacity) {}
 
     size_t size() const;
     size_t capacity() const;

@@ -14,9 +14,12 @@ class Series
     std::vector<Configurations::precision> seriesArray;
 
 public:
-    constexpr explicit Series(const unsigned char _maxSeriesLength = 0, const unsigned short _maxAllocationCapacity = 1'000) : maxSeriesLength(_maxSeriesLength), maxAllocationCapacity(_maxAllocationCapacity)
+    constexpr explicit Series(
+        const unsigned char _maxSeriesLength = 0,
+        const unsigned short initialCapacity = Configurations::defaultAllocationCapacity,
+        const unsigned short _maxAllocationCapacity = 1'000) : maxSeriesLength(_maxSeriesLength), maxAllocationCapacity(_maxAllocationCapacity)
     {
-        seriesArray.reserve(_maxSeriesLength > 0 ? _maxSeriesLength : Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin);
+        seriesArray.reserve(_maxSeriesLength > 0 ? _maxSeriesLength : initialCapacity);
     }
 
     const Configurations::precision &operator[](size_t index) const;

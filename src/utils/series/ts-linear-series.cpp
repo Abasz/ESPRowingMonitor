@@ -42,9 +42,11 @@ Configurations::precision TSLinearSeries::coefficientB()
     {
         a = median();
 
+        const auto seriesXSize = seriesX.size() - 1;
+        Series intercepts(maxSeriesLength, initialCapacity, seriesXSize);
+
         auto i = 0U;
-        Series intercepts(maxSeriesLength, seriesX.size() - 1);
-        while (i < seriesX.size() - 1)
+        while (i < seriesXSize)
         {
             intercepts.push((seriesY[i] - (a * seriesX[i])));
             ++i;

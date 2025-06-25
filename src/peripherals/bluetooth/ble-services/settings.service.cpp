@@ -8,7 +8,6 @@
 #include "../../../utils/enums.h"
 #include "../ble-metrics.model.h"
 #include "./settings.service.h"
-#include "settings.service.h"
 
 SettingsBleService::SettingsBleService(ISdCardService &_sdCardService, IEEPROMService &_eepromService) : sdCardService(_sdCardService), eepromService(_eepromService), callbacks(*this, _eepromService)
 {

@@ -217,8 +217,8 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
         angularAccelerationMatrix.erase(begin(angularAccelerationMatrix));
     }
 
-    angularVelocityMatrix.push_back(WeightedAverageSeries(Configurations::impulseDataArrayLength));
-    angularAccelerationMatrix.push_back(WeightedAverageSeries(Configurations::impulseDataArrayLength));
+    angularVelocityMatrix.push_back(WeightedAverageSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity));
+    angularAccelerationMatrix.push_back(WeightedAverageSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity));
 
     unsigned char i = 0;
     const auto angularGoodnessOfFit = angularDistances.goodnessOfFit();
