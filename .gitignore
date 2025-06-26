@@ -99,9 +99,12 @@ test/calibration/**/output/*
 !src/profiles/devkit-v1.board-profile.h
 !src/profiles/lolinS3-mini.board-profile.h
 !src/profiles/firebeetle2.board-profile.h
+!src/profiles/firebeetle2-s3.board-profile.h
+!src/profiles/esp32s3-zero.board-profile.h
 
 #Rowers
 !src/profiles/dynamic.rower-profile.h
 !src/profiles/genericAir.rower-profile.h
 !src/profiles/kayakFirst.rower-profile.h
 !src/profiles/kayakFirstBlue.rower-profile.h
+!src/profiles/oldDanube.rower-profile.h
