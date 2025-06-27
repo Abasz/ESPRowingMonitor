@@ -26,6 +26,7 @@ StrokeService::StrokeService()
 void StrokeService::setup(const RowerProfile::MachineSettings newMachineSettings)
 {
     machineSettings = newMachineSettings;
+    angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
 }
 #endif
 
@@ -74,7 +75,7 @@ void StrokeService::calculateDragCoefficient()
         return;
     }
 
-    const auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * machineSettings.flywheelInertia) / Configurations::angularDisplacementPerImpulse;
+    const auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * machineSettings.flywheelInertia) / angularDisplacementPerImpulse;
 
     if (rawNewDragCoefficient > Configurations::upperDragFactorThreshold ||
         rawNewDragCoefficient < Configurations::lowerDragFactorThreshold)
@@ -108,7 +109,7 @@ void StrokeService::driveStart()
     driveStartAngularDisplacement = rowingTotalAngularDisplacement;
 
     driveHandleForces.clear();
-    driveHandleForces.push_back(static_cast<float>(currentTorque) / Configurations::sprocketRadius);
+    driveHandleForces.push_back(static_cast<float>(currentTorque) / machineSettings.sprocketRadius);
 
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
@@ -132,7 +133,7 @@ void StrokeService::driveUpdate()
         return;
     }
 
-    driveHandleForces.push_back(static_cast<float>(currentTorque) / Configurations::sprocketRadius);
+    driveHandleForces.push_back(static_cast<float>(currentTorque) / machineSettings.sprocketRadius);
     if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
     {
         deltaTimesSlopes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.coefficientA());
@@ -258,7 +259,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
         rowingImpulseCount++;
         rowingTotalTime += static_cast<long long>(deltaTimes.yAtSeriesBegin());
         revTime = rowingTotalTime;
-        rowingTotalAngularDisplacement += Configurations::angularDisplacementPerImpulse;
+        rowingTotalAngularDisplacement += angularDisplacementPerImpulse;
 
         // Since we detected power, setting to "Drive" phase and increasing rotation count and registering rotation time
         driveStart();
@@ -268,9 +269,9 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
 
     rowingImpulseCount++;
     rowingTotalTime += static_cast<long long>(deltaTimes.yAtSeriesBegin());
-    rowingTotalAngularDisplacement += Configurations::angularDisplacementPerImpulse;
+    rowingTotalAngularDisplacement += angularDisplacementPerImpulse;
 
-    distance += distancePerAngularDisplacement * (distance == 0 ? rowingTotalAngularDisplacement : Configurations::angularDisplacementPerImpulse);
+    distance += distancePerAngularDisplacement * (distance == 0 ? rowingTotalAngularDisplacement : angularDisplacementPerImpulse);
     if (distance > 0)
     {
         revTime = rowingTotalTime;

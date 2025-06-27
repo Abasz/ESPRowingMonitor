@@ -105,6 +105,8 @@ void EEPROMService::setMachineSettings(const RowerProfile::MachineSettings newMa
         return;
     }
 
+    preferences.putUChar(impulsesPerRevolutionAddress, newMachineSettings.impulsesPerRevolution);
+    preferences.putFloat(sprocketRadiusAddress, newMachineSettings.sprocketRadius);
     preferences.putFloat(flywheelInertiaAddress, newMachineSettings.flywheelInertia);
     preferences.putFloat(concept2MagicNumberAddress, newMachineSettings.concept2MagicNumber);
 }
@@ -132,8 +134,10 @@ bool EEPROMService::getLogToSdCard() const
 RowerProfile::MachineSettings EEPROMService::getMachineSettings() const
 {
     return RowerProfile::MachineSettings{
+        .impulsesPerRevolution = impulsesPerRevolution,
         .flywheelInertia = flywheelInertia,
         .concept2MagicNumber = concept2MagicNumber,
+        .sprocketRadius = sprocketRadius,
     };
 }
 
@@ -149,6 +153,21 @@ bool EEPROMService::validateMachineSettings(const RowerProfile::MachineSettings 
     if (!isInBounds(newMachineSettings.flywheelInertia, 0.0F, std::numeric_limits<float>::max()))
     {
         Log.errorln("Invalid flywheel inertia, should be greater than 0");
+
+        return false;
+    }
+
+    if (!isInBounds(newMachineSettings.sprocketRadius, 0.0F, std::numeric_limits<float>::max()))
+    {
+        Log.errorln("Invalid sprocket radius, should be greater than 0");
+
+        return false;
+    }
+
+    const unsigned char maxImpulsesPerRevolution = 12U;
+    if (!isInBounds(newMachineSettings.impulsesPerRevolution, static_cast<unsigned char>(1U), maxImpulsesPerRevolution))
+    {
+        Log.errorln("Invalid impulses per revolution, should be between 1 and %d", maxImpulsesPerRevolution);
 
         return false;
     }
@@ -213,8 +232,22 @@ void EEPROMService::initializeMachineSettings()
         preferences.putFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
     }
 
+    if (!preferences.isKey(sprocketRadiusAddress))
+    {
+        Log.infoln("Setting Sprocket Radius to default");
+        preferences.putFloat(sprocketRadiusAddress, Configurations::sprocketRadius);
+    }
+
+    if (!preferences.isKey(impulsesPerRevolutionAddress))
+    {
+        Log.infoln("Setting Impulses Per Revolution to default");
+        preferences.putUChar(impulsesPerRevolutionAddress, Configurations::impulsesPerRevolution);
+    }
+
     flywheelInertia = preferences.getFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
     concept2MagicNumber = preferences.getFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
+    sprocketRadius = preferences.getFloat(sprocketRadiusAddress, Configurations::sprocketRadius);
+    impulsesPerRevolution = preferences.getUChar(impulsesPerRevolutionAddress, Configurations::impulsesPerRevolution);
 
     std::string inertiaFormatted{};
     const auto stringSize = 10U;
@@ -225,4 +258,6 @@ void EEPROMService::initializeMachineSettings()
 
     Log.verboseln("%s: %s", flywheelInertiaAddress, inertiaFormatted.c_str());
     Log.verboseln("%s: %F", concept2MagicNumberAddress, concept2MagicNumber);
+    Log.verboseln("%s: %F", sprocketRadiusAddress, sprocketRadius);
+    Log.verboseln("%s: %d", impulsesPerRevolutionAddress, impulsesPerRevolution);
 }

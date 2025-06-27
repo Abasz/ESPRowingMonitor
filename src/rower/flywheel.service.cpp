@@ -10,8 +10,12 @@
 
 FlywheelService::FlywheelService() {}
 
-void FlywheelService::setup()
+void FlywheelService::setup(const RowerProfile::MachineSettings machineSettings)
 {
+#if ENABLE_RUNTIME_SETTINGS
+    angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
+#endif
+
     pinMode(Configurations::sensorPinNumber, INPUT_PULLUP);
     Log.verboseln("Attach interrupt");
     attachRotationInterrupt();
@@ -69,5 +73,5 @@ void FlywheelService::processRotation(const unsigned long now)
     totalTime = totalTime + cleanDeltaTime;
     impulseCount = impulseCount + 1;
     lastCleanImpulseTime = now;
-    totalAngularDisplacement = totalAngularDisplacement + Configurations::angularDisplacementPerImpulse;
+    totalAngularDisplacement = totalAngularDisplacement + angularDisplacementPerImpulse;
 }

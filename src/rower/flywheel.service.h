@@ -6,6 +6,8 @@
 
 class FlywheelService final : public IFlywheelService
 {
+    Configurations::precision angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
+
     volatile unsigned long lastDeltaTime = 0;
     volatile unsigned long cleanDeltaTime = 0;
     volatile unsigned long lastRawImpulseTime = 0;
@@ -20,7 +22,7 @@ class FlywheelService final : public IFlywheelService
 public:
     FlywheelService();
 
-    void setup() override;
+    void setup(RowerProfile::MachineSettings newMachineSettings) override;
     bool hasDataChanged() const override;
     RowingDataModels::FlywheelData getData() override;
     void processRotation(unsigned long now) override;

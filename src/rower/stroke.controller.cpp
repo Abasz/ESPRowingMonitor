@@ -11,9 +11,11 @@ StrokeController::StrokeController(IStrokeService &_strokeService, IFlywheelServ
 void StrokeController::begin()
 {
     Log.infoln("Setting up rowing monitor controller");
-    flywheelService.setup();
+
+    const auto machineSettings = eepromService.getMachineSettings();
+    flywheelService.setup(machineSettings);
 #if ENABLE_RUNTIME_SETTINGS
-    strokeService.setup(eepromService.getMachineSettings());
+    strokeService.setup(machineSettings);
 #endif
 }
 

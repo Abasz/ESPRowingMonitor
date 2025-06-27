@@ -16,8 +16,11 @@ TEST_CASE("EEPROMService", "[utils]")
     const auto *const bleServiceAddress = "bleService";
     const auto *const bluetoothDeltaTimeLoggingAddress = "bleLogging";
     const auto *const sdCardLoggingAddress = "sdCardLogging";
+
     const auto *const flywheelInertiaAddress = "flywheelInertia";
     const auto *const concept2MagicNumberAddress = "magicNumber";
+    const auto *const impulsesPerRevolutionAddress = "impulsesPerRev";
+    const auto *const sprocketRadiusAddress = "sprocketRadius";
 
     SECTION("setup method")
     {
@@ -37,6 +40,8 @@ TEST_CASE("EEPROMService", "[utils]")
         When(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), std::to_underlying(Configurations::defaultBleServiceFlag))).Return(std::to_underlying(Configurations::defaultBleServiceFlag));
         When(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Return(Configurations::flywheelInertia);
         When(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Return(Configurations::concept2MagicNumber);
+        When(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), Configurations::impulsesPerRevolution)).Return(Configurations::impulsesPerRevolution);
+        When(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), Configurations::sprocketRadius)).Return(Configurations::sprocketRadius);
 
         EEPROMService eepromService(mockPreferences.get());
         eepromService.setup();
@@ -65,11 +70,19 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Once();
             Verify(Method(mockPreferences, isKey).Using(StrEq(concept2MagicNumberAddress))).Once();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Once();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(impulsesPerRevolutionAddress))).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(impulsesPerRevolutionAddress), Configurations::impulsesPerRevolution)).Once();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(sprocketRadiusAddress))).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), Configurations::sprocketRadius)).Once();
 #else
             Verify(Method(mockPreferences, isKey).Using(StrEq(flywheelInertiaAddress))).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
             Verify(Method(mockPreferences, isKey).Using(StrEq(concept2MagicNumberAddress))).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(impulsesPerRevolutionAddress))).Never();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(impulsesPerRevolutionAddress), Any())).Never();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(sprocketRadiusAddress))).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), Any())).Never();
 #endif
         }
 
@@ -86,9 +99,13 @@ TEST_CASE("EEPROMService", "[utils]")
 #if ENABLE_RUNTIME_SETTINGS
             Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Once();
             Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Once();
+            Verify(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), Configurations::impulsesPerRevolution)).Once();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), Configurations::sprocketRadius)).Once();
 #else
             Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
             Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
+            Verify(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), Any())).Never();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), Any())).Never();
 #endif
         }
 
@@ -101,6 +118,8 @@ TEST_CASE("EEPROMService", "[utils]")
 
             REQUIRE(eepromService.getMachineSettings().flywheelInertia == Configurations::flywheelInertia);
             REQUIRE(eepromService.getMachineSettings().concept2MagicNumber == Configurations::concept2MagicNumber);
+            REQUIRE(eepromService.getMachineSettings().impulsesPerRevolution == Configurations::impulsesPerRevolution);
+            REQUIRE(eepromService.getMachineSettings().sprocketRadius == Configurations::sprocketRadius);
         }
     }
 
@@ -186,33 +205,66 @@ TEST_CASE("EEPROMService", "[utils]")
     {
         Mock<Preferences> mockPreferences;
         When(Method(mockPreferences, putFloat)).AlwaysReturn(1);
+        When(Method(mockPreferences, putUChar)).AlwaysReturn(1);
         EEPROMService eepromService(mockPreferences.get());
 
 #if ENABLE_RUNTIME_SETTINGS
         SECTION("not save if any value is invalid")
         {
             const auto invalidFlywheel = RowerProfile::MachineSettings{
+                .impulsesPerRevolution = 1,
                 .flywheelInertia = -1,
                 .concept2MagicNumber = 1,
+                .sprocketRadius = 1.0F,
             };
 
             const auto invalidMagicNumber = RowerProfile::MachineSettings{
+                .impulsesPerRevolution = 1,
                 .flywheelInertia = 1,
                 .concept2MagicNumber = -1,
+                .sprocketRadius = 1.0F,
+            };
+
+            const auto invalidSprocketRadius = RowerProfile::MachineSettings{
+                .impulsesPerRevolution = 1,
+                .flywheelInertia = 1,
+                .concept2MagicNumber = 1,
+                .sprocketRadius = -1.0F,
+            };
+
+            const auto invalidImpulsesPerRevolutionTooLow = RowerProfile::MachineSettings{
+                .impulsesPerRevolution = 0,
+                .flywheelInertia = 1,
+                .concept2MagicNumber = 1,
+                .sprocketRadius = 1.0F,
+            };
+
+            const auto invalidImpulsesPerRevolutionTooHigh = RowerProfile::MachineSettings{
+                .impulsesPerRevolution = 13,
+                .flywheelInertia = 1,
+                .concept2MagicNumber = 1,
+                .sprocketRadius = 1.0F,
             };
 
             eepromService.setMachineSettings(invalidFlywheel);
             eepromService.setMachineSettings(invalidMagicNumber);
+            eepromService.setMachineSettings(invalidSprocketRadius);
+            eepromService.setMachineSettings(invalidImpulsesPerRevolutionTooLow);
+            eepromService.setMachineSettings(invalidImpulsesPerRevolutionTooHigh);
 
             Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(impulsesPerRevolutionAddress), Any())).Never();
         }
 
         SECTION("save new machine settings without updating backing fields")
         {
             const auto newMachineSettings = RowerProfile::MachineSettings{
+                .impulsesPerRevolution = 1,
                 .flywheelInertia = 1,
                 .concept2MagicNumber = 1,
+                .sprocketRadius = 1,
             };
 
             eepromService.setMachineSettings(newMachineSettings);
@@ -221,8 +273,12 @@ TEST_CASE("EEPROMService", "[utils]")
 
             Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), newMachineSettings.flywheelInertia)).Once();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), newMachineSettings.concept2MagicNumber)).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(impulsesPerRevolutionAddress), newMachineSettings.impulsesPerRevolution)).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), newMachineSettings.sprocketRadius)).Once();
             REQUIRE(machineSettings.flywheelInertia != newMachineSettings.flywheelInertia);
             REQUIRE(machineSettings.concept2MagicNumber != newMachineSettings.flywheelInertia);
+            REQUIRE(machineSettings.impulsesPerRevolution != newMachineSettings.impulsesPerRevolution);
+            REQUIRE(machineSettings.sprocketRadius != newMachineSettings.sprocketRadius);
         }
 #else
         SECTION("not save any value if runtime settings are not enabled")
@@ -231,6 +287,8 @@ TEST_CASE("EEPROMService", "[utils]")
 
             Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(impulsesPerRevolutionAddress), Any())).Never();
         }
 #endif
     }

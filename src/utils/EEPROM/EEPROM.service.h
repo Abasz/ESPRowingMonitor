@@ -18,6 +18,8 @@ class EEPROMService final : public IEEPROMService
 
     static constexpr const char *flywheelInertiaAddress = "flywheelInertia";
     static constexpr const char *concept2MagicNumberAddress = "magicNumber";
+    static constexpr const char *sprocketRadiusAddress = "sprocketRadius";
+    static constexpr const char *impulsesPerRevolutionAddress = "impulsesPerRev";
 
     ArduinoLogLevel logLevel = Configurations::defaultLogLevel;
     bool logToBluetooth = Configurations::enableBluetoothDeltaTimeLogging;
@@ -26,6 +28,8 @@ class EEPROMService final : public IEEPROMService
 
     float flywheelInertia = Configurations::flywheelInertia;
     float concept2MagicNumber = Configurations::concept2MagicNumber;
+    float sprocketRadius = Configurations::sprocketRadius;
+    unsigned char impulsesPerRevolution = Configurations::impulsesPerRevolution;
 
     void initializeBaseSettings();
     void initializeMachineSettings();

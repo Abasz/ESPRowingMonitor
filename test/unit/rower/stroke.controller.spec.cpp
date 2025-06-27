@@ -23,18 +23,17 @@ TEST_CASE("StrokeController", "[rower]")
         Mock<IEEPROMService> mockEEPROMService;
 
         Fake(Method(mockFlywheelService, setup));
+        When(Method(mockEEPROMService, getMachineSettings)).Return(RowerProfile::MachineSettings{});
 #if ENABLE_RUNTIME_SETTINGS
         Fake(Method(mockStrokeService, setup));
-
-        When(Method(mockEEPROMService, getMachineSettings)).Return(RowerProfile::MachineSettings{});
 #endif
 
         StrokeController strokeController(mockStrokeService.get(), mockFlywheelService.get(), mockEEPROMService.get());
         strokeController.begin();
 
+        Verify(Method(mockEEPROMService, getMachineSettings)).Once();
         Verify(Method(mockFlywheelService, setup)).Once();
 #if ENABLE_RUNTIME_SETTINGS
-        Verify(Method(mockEEPROMService, getMachineSettings)).Once();
         Verify(Method(mockStrokeService, setup)).Once();
 #endif
     }

@@ -13,6 +13,8 @@ class StrokeService final : public IStrokeService
     // Machine settings
     RowerProfile::MachineSettings machineSettings;
 
+    Configurations::precision angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
+
     // rower state
     CyclePhase cyclePhase = CyclePhase::Stopped;
     unsigned long long rowingTotalTime = 0ULL;
