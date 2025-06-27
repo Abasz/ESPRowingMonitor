@@ -45,6 +45,8 @@ std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleS
     const auto machineSettings = eepromService.getMachineSettings();
 
     const auto flywheelInertia = std::bit_cast<unsigned int>(machineSettings.flywheelInertia);
+    const auto mToCm = 100.F;
+    const auto sprocketRadius = static_cast<unsigned short>(roundf(machineSettings.sprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
 
     std::array<unsigned char, ISettingsBleService::settingsPayloadSize>
         temp = {
@@ -54,6 +56,9 @@ std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleS
             static_cast<unsigned char>(flywheelInertia >> 16),
             static_cast<unsigned char>(flywheelInertia >> 24),
             static_cast<unsigned char>(roundf(machineSettings.concept2MagicNumber * ISettingsBleService::magicNumberScale)),
+            machineSettings.impulsesPerRevolution,
+            static_cast<unsigned char>(sprocketRadius),
+            static_cast<unsigned char>(sprocketRadius >> 8),
         };
 
     return temp;

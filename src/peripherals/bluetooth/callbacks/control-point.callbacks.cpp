@@ -262,21 +262,34 @@ void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &messag
 
 ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLEAttValue &message)
 {
-    if (message.size() != 1 + ISettingsBleService::machineSettingsPayloadSize)
+    const auto opCodePayloadSize = 1U;
+    if (message.size() != opCodePayloadSize + ISettingsBleService::machineSettingsPayloadSize)
     {
         Log.infoln("Malformed OP command for changing machine settings");
 
         return ResponseOpCodes::InvalidParameter;
     }
+    auto bytePosition = opCodePayloadSize;
 
     float flywheelInertia = 0.0F;
-    std::memcpy(&flywheelInertia, std::next(message.data(), ISettingsBleService::baseSettingsPayloadSize), ISettingsBleService::flywheelInertiaPayloadSize);
+    std::memcpy(&flywheelInertia, std::next(message.data(), bytePosition), ISettingsBleService::flywheelInertiaPayloadSize);
+    bytePosition += ISettingsBleService::flywheelInertiaPayloadSize;
 
-    const float magicNumber = static_cast<float>(message[ISettingsBleService::flywheelInertiaPayloadSize + ISettingsBleService::magicNumberPayloadSize]) / ISettingsBleService::magicNumberScale;
+    const float magicNumber = static_cast<float>(message[bytePosition]) / ISettingsBleService::magicNumberScale;
+    bytePosition += ISettingsBleService::magicNumberPayloadSize;
+
+    unsigned char impulsesPerRevolution = message[bytePosition];
+    bytePosition += ISettingsBleService::impulsesPerRevolutionPayloadSize;
+
+    const auto mToCm = 100.0F;
+    const float sprocketRadius = static_cast<float>(message[bytePosition] | message[bytePosition + 1] << 8) /
+                                 ISettingsBleService::sprocketRadiusScale / mToCm;
 
     const RowerProfile::MachineSettings newMachineSettings{
+        .impulsesPerRevolution = impulsesPerRevolution,
         .flywheelInertia = flywheelInertia,
         .concept2MagicNumber = magicNumber,
+        .sprocketRadius = sprocketRadius,
     };
 
     if (!EEPROMService::validateMachineSettings(newMachineSettings))

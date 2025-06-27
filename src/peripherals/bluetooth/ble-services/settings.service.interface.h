@@ -13,12 +13,15 @@ protected:
 
 public:
     static constexpr auto magicNumberScale = 35.0F;
+    static constexpr auto sprocketRadiusScale = 1000.0F;
 
     static constexpr unsigned char baseSettingsPayloadSize = 1U;
 
     static constexpr unsigned char flywheelInertiaPayloadSize = 4U;
     static constexpr unsigned char magicNumberPayloadSize = 1U;
-    static constexpr unsigned char machineSettingsPayloadSize = flywheelInertiaPayloadSize + magicNumberPayloadSize;
+    static constexpr unsigned char sprocketRadiusPayloadSize = 2U;
+    static constexpr unsigned char impulsesPerRevolutionPayloadSize = 1U;
+    static constexpr unsigned char machineSettingsPayloadSize = flywheelInertiaPayloadSize + magicNumberPayloadSize + sprocketRadiusPayloadSize + impulsesPerRevolutionPayloadSize;
 
     static constexpr unsigned char settingsPayloadSize = baseSettingsPayloadSize + machineSettingsPayloadSize;
 

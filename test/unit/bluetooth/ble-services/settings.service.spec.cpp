@@ -35,7 +35,10 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         ((Configurations::supportSdCardLogging && logFileOpen ? static_cast<unsigned char>(logToSdCard) + 1 : 0) << 2U) |
         (static_cast<unsigned char>(logLevel) << 4U) |
         (static_cast<unsigned char>(Configurations::isRuntimeSettingsEnabled) << 7U);
+
     const auto flywheelInertia = std::bit_cast<unsigned int>(Configurations::flywheelInertia);
+    constexpr auto mToCm = 100.0F;
+    const auto sprocketRadius = static_cast<unsigned short>(roundf(Configurations::sprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
 
     const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedInitialSettings = {
         settings,
@@ -44,6 +47,9 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         static_cast<unsigned char>(flywheelInertia >> 16),
         static_cast<unsigned char>(flywheelInertia >> 24),
         static_cast<unsigned char>(roundf(Configurations::concept2MagicNumber * ISettingsBleService::magicNumberScale)),
+        Configurations::impulsesPerRevolution,
+        static_cast<unsigned char>(sprocketRadius),
+        static_cast<unsigned char>(sprocketRadius >> 8),
     };
 
     When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string))).AlwaysReturn(&mockSettingsService.get());
@@ -138,16 +144,22 @@ TEST_CASE("SettingsBleService", "[ble-service]")
             {
                 float flywheelInertia = 0.0F;
                 float concept2MagicNumber = 0.0F;
+                float sprocketRadius = 0.0F;
+                unsigned char impulsesPerRevolution = 0;
 
-                When(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))).Do([&flywheelInertia, &concept2MagicNumber](const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> &settings)
+                When(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>))).Do([&flywheelInertia, &concept2MagicNumber, &sprocketRadius, &impulsesPerRevolution](const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> &settings)
                                                                                                                                                                  {
                     std::memcpy(&flywheelInertia, &settings[1], ISettingsBleService::flywheelInertiaPayloadSize);
-                    concept2MagicNumber = static_cast<float>(settings[5]) / ISettingsBleService::magicNumberScale; });
+                    concept2MagicNumber = static_cast<float>(settings[5]) / ISettingsBleService::magicNumberScale;
+                    impulsesPerRevolution = settings[6];
+                    sprocketRadius = static_cast<float>(settings[7] | settings[8] << 8) /ISettingsBleService::sprocketRadiusScale / mToCm; });
 
                 settingsBleService.broadcastSettings();
 
                 REQUIRE(flywheelInertia == Configurations::flywheelInertia);
                 REQUIRE(concept2MagicNumber == Configurations::concept2MagicNumber);
+                REQUIRE(impulsesPerRevolution == Configurations::impulsesPerRevolution);
+                REQUIRE(sprocketRadius == Configurations::sprocketRadius);
             }
 
             SECTION("and calculate correct setting binary value")

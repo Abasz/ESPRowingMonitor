@@ -470,6 +470,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 128,
                 191,
                 98,
+                12,
+                32,
+                10,
             });
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
@@ -491,9 +494,13 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             const auto expectedFlywheelInertia = 1.0F;
             const auto expectedMagicNumber = 1.0F;
+            const auto expectedImpulsesPerRevolution = 1U;
+            const auto expectedSprocketRadius = 0.01F;
 
             const auto flywheelInertia = std::bit_cast<unsigned int>(expectedFlywheelInertia);
             const auto magicNumber = roundf(expectedMagicNumber * ISettingsBleService::magicNumberScale);
+            const auto mToCm = 100.0F;
+            const auto sprocketRadius = static_cast<unsigned short>(roundf(expectedSprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
 
             const NimBLEAttValue payload = {
                 std::to_underlying(SettingsOpCodes::SetMachineSettings),
@@ -502,6 +509,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 static_cast<unsigned char>(flywheelInertia >> 16),
                 static_cast<unsigned char>(flywheelInertia >> 24),
                 static_cast<unsigned char>(magicNumber),
+                expectedImpulsesPerRevolution,
+                static_cast<unsigned char>(sprocketRadius),
+                static_cast<unsigned char>(sprocketRadius >> 8),
             };
 
             When(Method(mockControlPointCharacteristic, getValue)).Return(payload);
@@ -510,10 +520,12 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             SECTION("save new machine settings to EEPROM")
             {
-                Verify(Method(mockEEPROMService, setMachineSettings).Matching([&expectedFlywheelInertia, &expectedMagicNumber](const RowerProfile::MachineSettings newSettings)
+                Verify(Method(mockEEPROMService, setMachineSettings).Matching([&expectedFlywheelInertia, &expectedMagicNumber, &expectedImpulsesPerRevolution, &expectedSprocketRadius](const RowerProfile::MachineSettings newSettings)
                                                                               {
                         REQUIRE(newSettings.flywheelInertia == expectedFlywheelInertia);
                         REQUIRE(newSettings.concept2MagicNumber == expectedMagicNumber);
+                        REQUIRE(newSettings.impulsesPerRevolution == expectedImpulsesPerRevolution);
+                        REQUIRE(newSettings.sprocketRadius == expectedSprocketRadius);
 
                         return true; }))
                     .Once();

@@ -114,6 +114,10 @@ Bytes 1-4 are the [Flywheel Inertia](./settings.md#flywheel-inertia) as a positi
 
 Byte 5 (unsigned char) is the [Magic Constant](./settings.md#concept_2_magic_number) with a resolution (scale) of 35 (i.e. value of 98 translates to 2.8)
 
+Byte 6 (unsigned char) is the [Impulses per Revolution](./settings.md#impulses_per_revolution)
+
+Bytes 7-8 (unsigned short) is the [Sprocket Radius](./settings.md#sprocket_radius) in centimeter with a resolution (scale) of 1,000 (i.e. value of 3,200 translates to 3.2)
+
 ```text
 Settings Control Point (UUID: 51ba0a00-8853-477c-bf43-6a09c36aac9f)
 ```
@@ -137,7 +141,7 @@ Please note that the new BLE service structure is currently experimental and the
 
 For an example of an implementation (in Javascript) please visit the [WebGUI page]((https://github.com/Abasz/ESPRowingMonitor-WebGUI/blob/master/src/common/services/ergometer/erg-settings.service.ts)).
 
-Please note that `SetMachineSettings` OpCode only available if firmware is compiled with [`ENABLE_RUNTIME_SETTINGS`](./settings.md#enable_runtime_settings) flag. Otherwise sending this OpCode it will return `UnsupportedOpCode`. Furthermore, device restart (e.g. sending Restart Device OpCode) is necessary for the new settings to take effect.
+Please note that `SetMachineSettings` OpCode only available if firmware is compiled with [`ENABLE_RUNTIME_SETTINGS`](./settings.md#enable_runtime_settings) flag. Otherwise sending this OpCode it will return `UnsupportedOpCode`. Furthermore, device restart (e.g. sending Restart Device OpCode) is necessary for the new settings to take effect. The structure corresponds to byte 1-8 of the Settings Characteristic above.
 
 ## Over-the-Air updater
 

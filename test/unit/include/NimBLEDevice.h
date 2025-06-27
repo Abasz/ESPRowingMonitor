@@ -184,8 +184,8 @@ public:
     virtual void setValue(const std::string s) = 0;
     virtual void setValue(const std::array<unsigned char, 1U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 3U> s) = 0;
-    virtual void setValue(const std::array<unsigned char, 6U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 7U> s) = 0;
+    virtual void setValue(const std::array<unsigned char, 9U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 11U> s) = 0;
     virtual void setValue(const std::array<unsigned char, 14U> s) = 0;
     virtual void setCallbacks(NimBLECharacteristicCallbacks *pCallbacks)
