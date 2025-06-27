@@ -200,24 +200,29 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
     #endif
 #endif
 
+// NOLINTBEGIN(cppcoreguidelines-macro-to-enum)
+#define maxImpulseWhenDouble 15
+#define maxImpulseWhenFloat 18
+// NOLINTEND(cppcoreguidelines-macro-to-enum)
+
 #if defined(FLOATING_POINT_PRECISION) && FLOATING_POINT_PRECISION != PRECISION_DOUBLE && FLOATING_POINT_PRECISION != PRECISION_FLOAT
     #error "Invalid floating point precision setting"
 #endif
 #if IMPULSE_DATA_ARRAY_LENGTH < 3
-    #error "IMPULSE_DATA_ARRAY_LENGTH should not be less than 3"
+    #error "IMPULSE_DATA_ARRAY_LENGTH should be more than 2"
 #endif
-#if IMPULSE_DATA_ARRAY_LENGTH > 18
-    #error "Using too many data points will increase loop execution time. It should not be more than 18"
+#if IMPULSE_DATA_ARRAY_LENGTH > maxImpulseWhenFloat
+    #error "Using too many data points will increase loop execution time. It should be less than 19"
 #endif
 
-#if IMPULSE_DATA_ARRAY_LENGTH < 14
+#if IMPULSE_DATA_ARRAY_LENGTH <= (maxImpulseWhenDouble - 2)
     #if !defined(FLOATING_POINT_PRECISION)
         #define PRECISION double
     #else
         #define PRECISION IF(FLOATING_POINT_PRECISION, double, float)
     #endif
 #endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 14 && IMPULSE_DATA_ARRAY_LENGTH < 16
+#if IMPULSE_DATA_ARRAY_LENGTH >= (maxImpulseWhenDouble - 1) && IMPULSE_DATA_ARRAY_LENGTH <= maxImpulseWhenDouble
     #if !defined(FLOATING_POINT_PRECISION)
         #define PRECISION float
     #elif defined(FLOATING_POINT_PRECISION)
@@ -227,7 +232,7 @@ static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == tr
         #define PRECISION IF(FLOATING_POINT_PRECISION, double, float)
     #endif
 #endif
-#if IMPULSE_DATA_ARRAY_LENGTH >= 16 && IMPULSE_DATA_ARRAY_LENGTH < 18
+#if IMPULSE_DATA_ARRAY_LENGTH > maxImpulseWhenDouble && IMPULSE_DATA_ARRAY_LENGTH < maxImpulseWhenFloat
     #if (FLOATING_POINT_PRECISION == PRECISION_DOUBLE)
         #warning "Using too many data points (i.e. setting `IMPULSE_DATA_ARRAY_LENGTH` to a high number) will increase loop execution time. Using 16 and a precision of double would require 3.9-4.7ms to complete all calculation. Hence impulses may be missed. So setting precision to float to save on execution time (but potentially loose some precision). For further details please refer to [docs](docs/settings.md#impulse_data_array_length)"
     #endif
