@@ -7,6 +7,7 @@
 
 #include "globals.h"
 
+#include "../../../utils/EEPROM/EEPROM.service.h"
 #include "../bluetooth.controller.h"
 #include "./control-point.callbacks.h"
 
@@ -273,24 +274,17 @@ ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLE
 
     const float magicNumber = static_cast<float>(message[ISettingsBleService::flywheelInertiaPayloadSize + ISettingsBleService::magicNumberPayloadSize]) / ISettingsBleService::magicNumberScale;
 
-    if (!isInBounds(magicNumber, 0.0F, std::numeric_limits<float>::max()))
-    {
-        Log.infoln("Invalid magic number, should be greater than 0");
-
-        return ResponseOpCodes::OperationFailed;
-    }
-
-    if (!isInBounds(flywheelInertia, 0.0F, std::numeric_limits<float>::max()))
-    {
-        Log.infoln("Invalid flywheel inertia, should be greater than 0");
-
-        return ResponseOpCodes::OperationFailed;
-    }
-
-    eepromService.setMachineSettings(RowerProfile::MachineSettings{
+    const RowerProfile::MachineSettings newMachineSettings{
         .flywheelInertia = flywheelInertia,
         .concept2MagicNumber = magicNumber,
-    });
+    };
+
+    if (!EEPROMService::validateMachineSettings(newMachineSettings))
+    {
+        return ResponseOpCodes::OperationFailed;
+    }
+
+    eepromService.setMachineSettings(newMachineSettings);
 
     settingsBleService.broadcastSettings();
 

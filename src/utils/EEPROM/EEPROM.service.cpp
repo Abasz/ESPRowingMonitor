@@ -20,72 +20,12 @@ void EEPROMService::setup()
         Log.warningln("Error opening EEPROM using default ESP Rowing Monitor settings");
     }
 
-    if (!preferences.isKey(logLevelAddress))
-    {
-        Log.infoln("Setting LogLevel to default");
-        preferences.putUChar(logLevelAddress, std::to_underlying(Configurations::defaultLogLevel));
-    }
-    if (!preferences.isKey(bleServiceFlagAddress))
-    {
-        Log.infoln("Setting BleServiceFlag to default");
-        preferences.putUChar(bleServiceFlagAddress, std::to_underlying(Configurations::defaultBleServiceFlag));
-    }
-
-    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
-    {
-        if (!preferences.isKey(bluetoothDeltaTimeLoggingAddress))
-        {
-            Log.infoln("Setting Bluetooth deltaTime log location");
-            preferences.putBool(bluetoothDeltaTimeLoggingAddress, Configurations::enableBluetoothDeltaTimeLogging);
-        }
-        logToBluetooth = preferences.getBool(bluetoothDeltaTimeLoggingAddress, Configurations::enableBluetoothDeltaTimeLogging);
-        Log.verboseln("%s: %d", bluetoothDeltaTimeLoggingAddress, logToBluetooth);
-    }
-
-    if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
-    {
-        if (!preferences.isKey(sdCardLoggingAddress))
-        {
-            Log.infoln("Setting Sd Card log location");
-            preferences.putBool(sdCardLoggingAddress, false);
-        }
-        logToSdCard = preferences.getBool(sdCardLoggingAddress, false);
-        Log.verboseln("%s: %d", sdCardLoggingAddress, logToSdCard);
-    }
+    initializeBaseSettings();
 
     if constexpr (Configurations::isRuntimeSettingsEnabled)
     {
-        if (!preferences.isKey(flywheelInertiaAddress))
-        {
-            Log.infoln("Setting Flywheel Inertia to default");
-            preferences.putFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
-        }
-
-        if (!preferences.isKey(concept2MagicNumberAddress))
-        {
-            Log.infoln("Setting Magic Constant to default");
-            preferences.putFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
-        }
-
-        flywheelInertia = preferences.getFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
-        concept2MagicNumber = preferences.getFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
-
-        std::string inertiaFormatted{};
-        const auto stringSize = 10U;
-        inertiaFormatted.reserve(stringSize);
-        // Workaround of ArduinoLog library float precision limitation and size issue with <format> header
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        snprintf(inertiaFormatted.data(), stringSize, "%.5f", flywheelInertia);
-
-        Log.verboseln("%s: %s", flywheelInertiaAddress, inertiaFormatted.c_str());
-        Log.verboseln("%s: %F", concept2MagicNumberAddress, concept2MagicNumber);
+        initializeMachineSettings();
     }
-
-    logLevel = ArduinoLogLevel{preferences.getUChar(logLevelAddress, std::to_underlying(Configurations::defaultLogLevel))};
-    bleServiceFlag = BleServiceFlag{preferences.getUChar(bleServiceFlagAddress, std::to_underlying(Configurations::defaultBleServiceFlag))};
-
-    Log.verboseln("%s: %d", logLevelAddress, logLevel);
-    Log.verboseln("%s: %d", bleServiceFlagAddress, bleServiceFlag);
 
     Log.verboseln("Free NVS entries: %u", preferences.freeEntries());
 }
@@ -160,17 +100,8 @@ void EEPROMService::setMachineSettings(const RowerProfile::MachineSettings newMa
         return;
     }
 
-    if (!isInBounds(newMachineSettings.concept2MagicNumber, 0.0F, std::numeric_limits<float>::max()))
+    if (!EEPROMService::validateMachineSettings(newMachineSettings))
     {
-        Log.errorln("Invalid magic number, should be greater than 0");
-
-        return;
-    }
-
-    if (!isInBounds(newMachineSettings.flywheelInertia, 0.0F, std::numeric_limits<float>::max()))
-    {
-        Log.errorln("Invalid flywheel inertia, should be greater than 0");
-
         return;
     }
 
@@ -204,4 +135,94 @@ RowerProfile::MachineSettings EEPROMService::getMachineSettings() const
         .flywheelInertia = flywheelInertia,
         .concept2MagicNumber = concept2MagicNumber,
     };
+}
+
+bool EEPROMService::validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings)
+{
+    if (!isInBounds(newMachineSettings.concept2MagicNumber, 0.0F, std::numeric_limits<float>::max()))
+    {
+        Log.errorln("Invalid magic number, should be greater than 0");
+
+        return false;
+    }
+
+    if (!isInBounds(newMachineSettings.flywheelInertia, 0.0F, std::numeric_limits<float>::max()))
+    {
+        Log.errorln("Invalid flywheel inertia, should be greater than 0");
+
+        return false;
+    }
+
+    return true;
+}
+
+void EEPROMService::initializeBaseSettings()
+{
+    if (!preferences.isKey(logLevelAddress))
+    {
+        Log.infoln("Setting LogLevel to default");
+        preferences.putUChar(logLevelAddress, std::to_underlying(Configurations::defaultLogLevel));
+    }
+
+    if (!preferences.isKey(bleServiceFlagAddress))
+    {
+        Log.infoln("Setting BleServiceFlag to default");
+        preferences.putUChar(bleServiceFlagAddress, std::to_underlying(Configurations::defaultBleServiceFlag));
+    }
+
+    if constexpr (Configurations::enableBluetoothDeltaTimeLogging)
+    {
+        if (!preferences.isKey(bluetoothDeltaTimeLoggingAddress))
+        {
+            Log.infoln("Setting Bluetooth deltaTime log location");
+            preferences.putBool(bluetoothDeltaTimeLoggingAddress, Configurations::enableBluetoothDeltaTimeLogging);
+        }
+        logToBluetooth = preferences.getBool(bluetoothDeltaTimeLoggingAddress, Configurations::enableBluetoothDeltaTimeLogging);
+        Log.verboseln("%s: %d", bluetoothDeltaTimeLoggingAddress, logToBluetooth);
+    }
+
+    if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
+    {
+        if (!preferences.isKey(sdCardLoggingAddress))
+        {
+            Log.infoln("Setting Sd Card log location");
+            preferences.putBool(sdCardLoggingAddress, false);
+        }
+        logToSdCard = preferences.getBool(sdCardLoggingAddress, false);
+        Log.verboseln("%s: %d", sdCardLoggingAddress, logToSdCard);
+    }
+
+    logLevel = ArduinoLogLevel{preferences.getUChar(logLevelAddress, std::to_underlying(Configurations::defaultLogLevel))};
+    bleServiceFlag = BleServiceFlag{preferences.getUChar(bleServiceFlagAddress, std::to_underlying(Configurations::defaultBleServiceFlag))};
+
+    Log.verboseln("%s: %d", logLevelAddress, logLevel);
+    Log.verboseln("%s: %d", bleServiceFlagAddress, bleServiceFlag);
+}
+
+void EEPROMService::initializeMachineSettings()
+{
+    if (!preferences.isKey(flywheelInertiaAddress))
+    {
+        Log.infoln("Setting Flywheel Inertia to default");
+        preferences.putFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
+    }
+
+    if (!preferences.isKey(concept2MagicNumberAddress))
+    {
+        Log.infoln("Setting Magic Constant to default");
+        preferences.putFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
+    }
+
+    flywheelInertia = preferences.getFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
+    concept2MagicNumber = preferences.getFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
+
+    std::string inertiaFormatted{};
+    const auto stringSize = 10U;
+    inertiaFormatted.reserve(stringSize);
+    // Workaround of ArduinoLog library float precision limitation and size issue with <format> header
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    snprintf(inertiaFormatted.data(), stringSize, "%.5f", flywheelInertia);
+
+    Log.verboseln("%s: %s", flywheelInertiaAddress, inertiaFormatted.c_str());
+    Log.verboseln("%s: %F", concept2MagicNumberAddress, concept2MagicNumber);
 }

@@ -27,6 +27,9 @@ class EEPROMService final : public IEEPROMService
     float flywheelInertia = Configurations::flywheelInertia;
     float concept2MagicNumber = Configurations::concept2MagicNumber;
 
+    void initializeBaseSettings();
+    void initializeMachineSettings();
+
 public:
     explicit EEPROMService(Preferences &_preferences);
 
@@ -45,4 +48,6 @@ public:
     bool getLogToSdCard() const override;
 
     RowerProfile::MachineSettings getMachineSettings() const override;
+
+    static bool validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings);
 };
