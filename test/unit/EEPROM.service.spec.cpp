@@ -38,10 +38,10 @@ TEST_CASE("EEPROMService", "[utils]")
         When(Method(mockPreferences, getBool).Using(StrEq(sdCardLoggingAddress), false)).Return(false);
         When(Method(mockPreferences, getUChar).Using(StrEq(logLevelAddress), std::to_underlying(Configurations::defaultLogLevel))).Return(std::to_underlying(Configurations::defaultLogLevel));
         When(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), std::to_underlying(Configurations::defaultBleServiceFlag))).Return(std::to_underlying(Configurations::defaultBleServiceFlag));
-        When(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Return(Configurations::flywheelInertia);
-        When(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Return(Configurations::concept2MagicNumber);
-        When(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), Configurations::impulsesPerRevolution)).Return(Configurations::impulsesPerRevolution);
-        When(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), Configurations::sprocketRadius)).Return(Configurations::sprocketRadius);
+        When(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), RowerProfile::Defaults::flywheelInertia)).Return(RowerProfile::Defaults::flywheelInertia);
+        When(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), RowerProfile::Defaults::concept2MagicNumber)).Return(RowerProfile::Defaults::concept2MagicNumber);
+        When(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), RowerProfile::Defaults::impulsesPerRevolution)).Return(RowerProfile::Defaults::impulsesPerRevolution);
+        When(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), RowerProfile::Defaults::sprocketRadius)).Return(RowerProfile::Defaults::sprocketRadius);
 
         EEPROMService eepromService(mockPreferences.get());
         eepromService.setup();
@@ -67,13 +67,13 @@ TEST_CASE("EEPROMService", "[utils]")
 
 #if ENABLE_RUNTIME_SETTINGS
             Verify(Method(mockPreferences, isKey).Using(StrEq(flywheelInertiaAddress))).Once();
-            Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), RowerProfile::Defaults::flywheelInertia)).Once();
             Verify(Method(mockPreferences, isKey).Using(StrEq(concept2MagicNumberAddress))).Once();
-            Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), RowerProfile::Defaults::concept2MagicNumber)).Once();
             Verify(Method(mockPreferences, isKey).Using(StrEq(impulsesPerRevolutionAddress))).Once();
-            Verify(Method(mockPreferences, putUChar).Using(StrEq(impulsesPerRevolutionAddress), Configurations::impulsesPerRevolution)).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(impulsesPerRevolutionAddress), RowerProfile::Defaults::impulsesPerRevolution)).Once();
             Verify(Method(mockPreferences, isKey).Using(StrEq(sprocketRadiusAddress))).Once();
-            Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), Configurations::sprocketRadius)).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), RowerProfile::Defaults::sprocketRadius)).Once();
 #else
             Verify(Method(mockPreferences, isKey).Using(StrEq(flywheelInertiaAddress))).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
@@ -97,10 +97,10 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, getUChar).Using(StrEq(bleServiceAddress), std::to_underlying(Configurations::defaultBleServiceFlag))).Once();
 
 #if ENABLE_RUNTIME_SETTINGS
-            Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Configurations::flywheelInertia)).Once();
-            Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Configurations::concept2MagicNumber)).Once();
-            Verify(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), Configurations::impulsesPerRevolution)).Once();
-            Verify(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), Configurations::sprocketRadius)).Once();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), RowerProfile::Defaults::flywheelInertia)).Once();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), RowerProfile::Defaults::concept2MagicNumber)).Once();
+            Verify(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), RowerProfile::Defaults::impulsesPerRevolution)).Once();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), RowerProfile::Defaults::sprocketRadius)).Once();
 #else
             Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
             Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
@@ -116,10 +116,10 @@ TEST_CASE("EEPROMService", "[utils]")
             REQUIRE(eepromService.getLogToBluetooth() == Configurations::enableBluetoothDeltaTimeLogging);
             REQUIRE(eepromService.getLogToSdCard() == false);
 
-            REQUIRE(eepromService.getMachineSettings().flywheelInertia == Configurations::flywheelInertia);
-            REQUIRE(eepromService.getMachineSettings().concept2MagicNumber == Configurations::concept2MagicNumber);
-            REQUIRE(eepromService.getMachineSettings().impulsesPerRevolution == Configurations::impulsesPerRevolution);
-            REQUIRE(eepromService.getMachineSettings().sprocketRadius == Configurations::sprocketRadius);
+            REQUIRE(eepromService.getMachineSettings().flywheelInertia == RowerProfile::Defaults::flywheelInertia);
+            REQUIRE(eepromService.getMachineSettings().concept2MagicNumber == RowerProfile::Defaults::concept2MagicNumber);
+            REQUIRE(eepromService.getMachineSettings().impulsesPerRevolution == RowerProfile::Defaults::impulsesPerRevolution);
+            REQUIRE(eepromService.getMachineSettings().sprocketRadius == RowerProfile::Defaults::sprocketRadius);
         }
     }
 

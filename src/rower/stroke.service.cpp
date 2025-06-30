@@ -14,9 +14,9 @@ using RowingDataModels::RowingMetrics;
 
 StrokeService::StrokeService()
 {
-    angularVelocityMatrix.reserve(Configurations::impulseDataArrayLength);
-    angularAccelerationMatrix.reserve(Configurations::impulseDataArrayLength);
-    driveHandleForces.reserve(Configurations::driveHandleForcesMaxCapacity);
+    angularVelocityMatrix.reserve(RowerProfile::Defaults::impulseDataArrayLength);
+    angularAccelerationMatrix.reserve(RowerProfile::Defaults::impulseDataArrayLength);
+    driveHandleForces.reserve(RowerProfile::Defaults::driveHandleForcesMaxCapacity);
 
     deltaTimes.push(0, 0);
     angularDistances.push(0, 0);
@@ -32,9 +32,9 @@ void StrokeService::setup(const RowerProfile::MachineSettings newMachineSettings
 
 bool StrokeService::isFlywheelUnpowered()
 {
-    if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
+    if constexpr (RowerProfile::Defaults::strokeDetectionType != StrokeDetectionType::Slope)
     {
-        if (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && ((currentTorque < Configurations::minimumDragTorque && deltaTimes.coefficientA() > 0) || std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin))
+        if (deltaTimesSlopes.size() >= RowerProfile::Defaults::impulseDataArrayLength && ((currentTorque < RowerProfile::Defaults::minimumDragTorque && deltaTimes.coefficientA() > 0) || std::abs(deltaTimesSlopes.slope()) < RowerProfile::Defaults::minimumRecoverySlopeMargin))
         {
             if constexpr (Configurations::logCalibration)
             {
@@ -45,9 +45,9 @@ bool StrokeService::isFlywheelUnpowered()
         }
     }
 
-    if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Torque)
+    if constexpr (RowerProfile::Defaults::strokeDetectionType != StrokeDetectionType::Torque)
     {
-        if (deltaTimes.coefficientA() > Configurations::minimumRecoverySlope)
+        if (deltaTimes.coefficientA() > RowerProfile::Defaults::minimumRecoverySlope)
         {
             return true;
         }
@@ -58,32 +58,32 @@ bool StrokeService::isFlywheelUnpowered()
 
 bool StrokeService::isFlywheelPowered()
 {
-    return currentTorque > Configurations::minimumPoweredTorque && deltaTimes.coefficientA() < 0;
+    return currentTorque > RowerProfile::Defaults::minimumPoweredTorque && deltaTimes.coefficientA() < 0;
 }
 
 void StrokeService::calculateDragCoefficient()
 {
-    if (recoveryDuration > Configurations::maxDragFactorRecoveryPeriod || recoveryDeltaTimes.size() < Configurations::impulseDataArrayLength)
+    if (recoveryDuration > RowerProfile::Defaults::maxDragFactorRecoveryPeriod || recoveryDeltaTimes.size() < RowerProfile::Defaults::impulseDataArrayLength)
     {
         return;
     }
 
     const auto goodnessOfFit = recoveryDeltaTimes.goodnessOfFit();
 
-    if (goodnessOfFit < Configurations::goodnessOfFitThreshold)
+    if (goodnessOfFit < RowerProfile::Defaults::goodnessOfFitThreshold)
     {
         return;
     }
 
     const auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * machineSettings.flywheelInertia) / angularDisplacementPerImpulse;
 
-    if (rawNewDragCoefficient > Configurations::upperDragFactorThreshold ||
-        rawNewDragCoefficient < Configurations::lowerDragFactorThreshold)
+    if (rawNewDragCoefficient > RowerProfile::Defaults::upperDragFactorThreshold ||
+        rawNewDragCoefficient < RowerProfile::Defaults::lowerDragFactorThreshold)
     {
         return;
     }
 
-    if constexpr (Configurations::dragCoefficientsArrayLength < 2)
+    if constexpr (RowerProfile::Defaults::dragCoefficientsArrayLength < 2)
     {
         dragCoefficient = rawNewDragCoefficient;
         lastValidDragCoefficient = dragCoefficient;
@@ -111,7 +111,7 @@ void StrokeService::driveStart()
     driveHandleForces.clear();
     driveHandleForces.push_back(static_cast<float>(currentTorque) / machineSettings.sprocketRadius);
 
-    if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
+    if constexpr (RowerProfile::Defaults::strokeDetectionType != StrokeDetectionType::Slope)
     {
         deltaTimesSlopes.reset();
         deltaTimesSlopes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.coefficientA());
@@ -120,10 +120,10 @@ void StrokeService::driveStart()
 
 void StrokeService::driveUpdate()
 {
-    if (driveHandleForces.size() >= Configurations::driveHandleForcesMaxCapacity)
+    if (driveHandleForces.size() >= RowerProfile::Defaults::driveHandleForcesMaxCapacity)
     {
         driveEnd();
-        if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
+        if constexpr (RowerProfile::Defaults::strokeDetectionType != StrokeDetectionType::Slope)
         {
             dragCoefficient = 0;
             dragCoefficients.reset();
@@ -134,7 +134,7 @@ void StrokeService::driveUpdate()
     }
 
     driveHandleForces.push_back(static_cast<float>(currentTorque) / machineSettings.sprocketRadius);
-    if constexpr (Configurations::strokeDetectionType != StrokeDetectionType::Slope)
+    if constexpr (RowerProfile::Defaults::strokeDetectionType != StrokeDetectionType::Slope)
     {
         deltaTimesSlopes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.coefficientA());
     }
@@ -166,7 +166,7 @@ void StrokeService::recoveryStart()
 
 void StrokeService::recoveryUpdate()
 {
-    if (rowingTotalTime - recoveryStartTime < Configurations::maxDragFactorRecoveryPeriod)
+    if (rowingTotalTime - recoveryStartTime < RowerProfile::Defaults::maxDragFactorRecoveryPeriod)
     {
         recoveryDeltaTimes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.yAtSeriesBegin());
     }
@@ -209,17 +209,17 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     deltaTimes.push(static_cast<Configurations::precision>(data.totalTime), static_cast<Configurations::precision>(data.deltaTime));
     angularDistances.push(static_cast<Configurations::precision>(data.totalTime) / 1e6, data.totalAngularDisplacement);
 
-    if (angularVelocityMatrix.size() >= Configurations::impulseDataArrayLength)
+    if (angularVelocityMatrix.size() >= RowerProfile::Defaults::impulseDataArrayLength)
     {
         angularVelocityMatrix.erase(begin(angularVelocityMatrix));
     }
-    if (angularAccelerationMatrix.size() >= Configurations::impulseDataArrayLength)
+    if (angularAccelerationMatrix.size() >= RowerProfile::Defaults::impulseDataArrayLength)
     {
         angularAccelerationMatrix.erase(begin(angularAccelerationMatrix));
     }
 
-    angularVelocityMatrix.push_back(WeightedAverageSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity));
-    angularAccelerationMatrix.push_back(WeightedAverageSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity));
+    angularVelocityMatrix.push_back(WeightedAverageSeries(RowerProfile::Defaults::impulseDataArrayLength, Configurations::defaultAllocationCapacity));
+    angularAccelerationMatrix.push_back(WeightedAverageSeries(RowerProfile::Defaults::impulseDataArrayLength, Configurations::defaultAllocationCapacity));
 
     unsigned char i = 0;
     const auto angularGoodnessOfFit = angularDistances.goodnessOfFit();
@@ -236,7 +236,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     currentTorque = machineSettings.flywheelInertia * currentAngularAcceleration + dragCoefficient * pow(currentAngularVelocity, 2);
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
-    if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > Configurations::rowingStoppedThresholdPeriod)
+    if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > RowerProfile::Defaults::rowingStoppedThresholdPeriod)
     {
         driveHandleForces.clear();
         recoveryEnd();
@@ -251,7 +251,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     {
         // We are currently in the "Stopped" phase, as power was not applied for a long period of time or the device just started. Since rotation was detected we check if cleanDeltaTimes array is filled (i.e. whether we have sufficient data for determining the next phase) and whether power is being applied to the flywheel
         if (
-            deltaTimes.size() < Configurations::impulseDataArrayLength || !isFlywheelPowered())
+            deltaTimes.size() < RowerProfile::Defaults::impulseDataArrayLength || !isFlywheelPowered())
         {
             return;
         }
@@ -280,7 +280,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     if (cyclePhase == CyclePhase::Drive)
     {
         // We are currently in the "Drive" phase, lets determine what the next phase is (if we come from "Stopped" phase )
-        if (rowingTotalTime - driveStartTime > Configurations::minimumDriveTime && isFlywheelUnpowered())
+        if (rowingTotalTime - driveStartTime > RowerProfile::Defaults::minimumDriveTime && isFlywheelUnpowered())
         {
             driveEnd();
             recoveryStart();
@@ -296,7 +296,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     if (cyclePhase == CyclePhase::Recovery)
     {
         // We are currently in the "Recovery" phase, lets determine what the next phase is
-        if (rowingTotalTime - recoveryStartTime > Configurations::minimumRecoveryTime && isFlywheelPowered())
+        if (rowingTotalTime - recoveryStartTime > RowerProfile::Defaults::minimumRecoveryTime && isFlywheelPowered())
         {
             // Here we can conclude the "Recovery" phase (and the current stroke cycle) as drive to the flywheel is detected (e.g. calculating drag factor)
             recoveryEnd();
@@ -311,7 +311,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
 
 void StrokeService::logSlopeMarginDetection() const
 {
-    if (deltaTimesSlopes.size() >= Configurations::impulseDataArrayLength && currentTorque > Configurations::minimumDragTorque && std::abs(deltaTimesSlopes.slope()) < Configurations::minimumRecoverySlopeMargin)
+    if (deltaTimesSlopes.size() >= RowerProfile::Defaults::impulseDataArrayLength && currentTorque > RowerProfile::Defaults::minimumDragTorque && std::abs(deltaTimesSlopes.slope()) < RowerProfile::Defaults::minimumRecoverySlopeMargin)
     {
         Log.infoln("slope margin detect");
     }

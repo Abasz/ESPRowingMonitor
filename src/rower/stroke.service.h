@@ -45,7 +45,7 @@ class StrokeService final : public IStrokeService
     Configurations::precision dragCoefficient = 0;
     Configurations::precision lastValidDragCoefficient = 0;
 
-    WeightedAverageSeries dragCoefficients = WeightedAverageSeries(Configurations::dragCoefficientsArrayLength, Configurations::defaultAllocationCapacity);
+    WeightedAverageSeries dragCoefficients = WeightedAverageSeries(RowerProfile::Defaults::dragCoefficientsArrayLength, Configurations::defaultAllocationCapacity);
 
     // advance metrics
     Configurations::precision currentAngularVelocity = 0;
@@ -56,10 +56,10 @@ class StrokeService final : public IStrokeService
     vector<WeightedAverageSeries> angularVelocityMatrix;
     vector<WeightedAverageSeries> angularAccelerationMatrix;
 
-    TSLinearSeries deltaTimes = TSLinearSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
-    OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
-    OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries(0, Configurations::defaultAllocationCapacity, Configurations::maxDragFactorRecoveryPeriod / Configurations::rotationDebounceTimeMin / 2);
-    TSQuadraticSeries angularDistances = TSQuadraticSeries(Configurations::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
+    TSLinearSeries deltaTimes = TSLinearSeries(RowerProfile::Defaults::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
+    OLSLinearSeries deltaTimesSlopes = OLSLinearSeries(RowerProfile::Defaults::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
+    OLSLinearSeries recoveryDeltaTimes = OLSLinearSeries(0, Configurations::defaultAllocationCapacity, RowerProfile::Defaults::maxDragFactorRecoveryPeriod / RowerProfile::Defaults::rotationDebounceTimeMin / 2);
+    TSQuadraticSeries angularDistances = TSQuadraticSeries(RowerProfile::Defaults::impulseDataArrayLength, Configurations::defaultAllocationCapacity);
 
     bool isFlywheelUnpowered();
     bool isFlywheelPowered();

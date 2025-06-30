@@ -9,7 +9,7 @@ PeripheralsController::PeripheralsController(IBluetoothController &_bluetoothCon
 {
     if constexpr ((Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
     {
-        sdDeltaTimes.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
+        sdDeltaTimes.reserve((RowerProfile::Defaults::minimumRecoveryTime + RowerProfile::Defaults::minimumDriveTime) / RowerProfile::Defaults::rotationDebounceTimeMin);
     }
 }
 
@@ -125,7 +125,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
         if (!sdDeltaTimes.empty())
         {
             vector<unsigned long> clear;
-            clear.reserve((Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin);
+            clear.reserve((RowerProfile::Defaults::minimumRecoveryTime + RowerProfile::Defaults::minimumDriveTime) / RowerProfile::Defaults::rotationDebounceTimeMin);
             sdDeltaTimes.swap(clear);
         }
     }

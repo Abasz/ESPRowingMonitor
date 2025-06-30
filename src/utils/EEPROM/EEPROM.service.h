@@ -26,10 +26,10 @@ class EEPROMService final : public IEEPROMService
     bool logToSdCard = false;
     BleServiceFlag bleServiceFlag = Configurations::defaultBleServiceFlag;
 
-    float flywheelInertia = Configurations::flywheelInertia;
-    float concept2MagicNumber = Configurations::concept2MagicNumber;
-    float sprocketRadius = Configurations::sprocketRadius;
-    unsigned char impulsesPerRevolution = Configurations::impulsesPerRevolution;
+    float flywheelInertia = RowerProfile::Defaults::flywheelInertia;
+    float concept2MagicNumber = RowerProfile::Defaults::concept2MagicNumber;
+    float sprocketRadius = RowerProfile::Defaults::sprocketRadius;
+    unsigned char impulsesPerRevolution = RowerProfile::Defaults::impulsesPerRevolution;
 
     void initializeBaseSettings();
     void initializeMachineSettings();

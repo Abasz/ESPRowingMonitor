@@ -7,6 +7,7 @@
 #include "FastLED.h"
 
 #include "./macros.h"
+#include "./settings.model.h"
 
 using std::string;
 
@@ -47,42 +48,12 @@ public:
     static constexpr gpio_num_t sensorOnSwitchPinNumber = SENSOR_ON_SWITCH_PIN_NUMBER;
     static constexpr bool hasSensorOnSwitchPinNumber = sensorOnSwitchPinNumber != GPIO_NUM_NC;
 
+    static constexpr unsigned short ledBlinkFrequency = LED_BLINK_FREQUENCY;
     static constexpr gpio_num_t ledPin = static_cast<gpio_num_t>(LED_PIN);
     // NOLINTBEGIN(bugprone-branch-clone,readability-simplify-boolean-expr)
     static constexpr bool isRgb = ledPin == GPIO_NUM_NC ? false : IS_RGB;
-    static constexpr bool rgbLed = ledPin == GPIO_NUM_NC ? false : IS_RGB;
     // NOLINTEND(bugprone-branch-clone,readability-simplify-boolean-expr)
     static constexpr EOrder ledColorChannelOrder = RGB_LED_COLOR_CHANNEL_ORDER;
-
-    static constexpr unsigned char impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
-    static constexpr float flywheelInertia = FLYWHEEL_INERTIA;
-    static constexpr unsigned short ledBlinkFrequency = LED_BLINK_FREQUENCY;
-    static constexpr float sprocketRadius = SPROCKET_RADIUS / 100.0F;
-    static constexpr float concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
-
-    static constexpr precision angularDisplacementPerImpulse = (2 * PI) / impulsesPerRevolution;
-    static constexpr unsigned char driveHandleForcesMaxCapacity = DRIVE_HANDLE_FORCES_MAX_CAPACITY;
-
-    // Sensor signal filter settings
-    static constexpr unsigned short rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN * 1'000;
-    static constexpr unsigned int rowingStoppedThresholdPeriod = ROWING_STOPPED_THRESHOLD_PERIOD * 1'000;
-
-    // Drag factor filter settings
-    static constexpr float goodnessOfFitThreshold = GOODNESS_OF_FIT_THRESHOLD;
-    static constexpr unsigned int maxDragFactorRecoveryPeriod = MAX_DRAG_FACTOR_RECOVERY_PERIOD * 1'000;
-    static constexpr float lowerDragFactorThreshold = LOWER_DRAG_FACTOR_THRESHOLD / 1e6;
-    static constexpr float upperDragFactorThreshold = UPPER_DRAG_FACTOR_THRESHOLD / 1e6;
-    static constexpr unsigned char dragCoefficientsArrayLength = DRAG_COEFFICIENTS_ARRAY_LENGTH;
-
-    // Stroke phase detection filter settings
-    static constexpr StrokeDetectionType strokeDetectionType = STROKE_DETECTION;
-    static constexpr float minimumPoweredTorque = MINIMUM_POWERED_TORQUE;
-    static constexpr float minimumDragTorque = MINIMUM_DRAG_TORQUE;
-    static constexpr float minimumRecoverySlopeMargin = MINIMUM_RECOVERY_SLOPE_MARGIN / 1e6;
-    static constexpr float minimumRecoverySlope = MINIMUM_RECOVERY_SLOPE;
-    static constexpr unsigned int minimumRecoveryTime = MINIMUM_RECOVERY_TIME * 1'000;
-    static constexpr unsigned int minimumDriveTime = MINIMUM_DRIVE_TIME * 1'000;
-    static constexpr unsigned char impulseDataArrayLength = IMPULSE_DATA_ARRAY_LENGTH;
 
     // Device power management settings
     static constexpr gpio_num_t batteryPinNumber = BATTERY_PIN_NUMBER;
@@ -94,5 +65,5 @@ public:
     static constexpr unsigned int batteryMeasurementFrequency = BATTERY_MEASUREMENT_FREQUENCY * 60 * 1'000;
     static constexpr unsigned int deepSleepTimeout = DEEP_SLEEP_TIMEOUT * 60 * 1'000;
 
-    static constexpr unsigned short defaultAllocationCapacity = Configurations::minimumRecoveryTime / Configurations::rotationDebounceTimeMin;
+    static constexpr unsigned short defaultAllocationCapacity = RowerProfile::Defaults::minimumRecoveryTime / RowerProfile::Defaults::rotationDebounceTimeMin;
 };

@@ -223,31 +223,31 @@ void EEPROMService::initializeMachineSettings()
     if (!preferences.isKey(flywheelInertiaAddress))
     {
         Log.infoln("Setting Flywheel Inertia to default");
-        preferences.putFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
+        preferences.putFloat(flywheelInertiaAddress, RowerProfile::Defaults::flywheelInertia);
     }
 
     if (!preferences.isKey(concept2MagicNumberAddress))
     {
         Log.infoln("Setting Magic Constant to default");
-        preferences.putFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
+        preferences.putFloat(concept2MagicNumberAddress, RowerProfile::Defaults::concept2MagicNumber);
     }
 
     if (!preferences.isKey(sprocketRadiusAddress))
     {
         Log.infoln("Setting Sprocket Radius to default");
-        preferences.putFloat(sprocketRadiusAddress, Configurations::sprocketRadius);
+        preferences.putFloat(sprocketRadiusAddress, RowerProfile::Defaults::sprocketRadius);
     }
 
     if (!preferences.isKey(impulsesPerRevolutionAddress))
     {
         Log.infoln("Setting Impulses Per Revolution to default");
-        preferences.putUChar(impulsesPerRevolutionAddress, Configurations::impulsesPerRevolution);
+        preferences.putUChar(impulsesPerRevolutionAddress, RowerProfile::Defaults::impulsesPerRevolution);
     }
 
-    flywheelInertia = preferences.getFloat(flywheelInertiaAddress, Configurations::flywheelInertia);
-    concept2MagicNumber = preferences.getFloat(concept2MagicNumberAddress, Configurations::concept2MagicNumber);
-    sprocketRadius = preferences.getFloat(sprocketRadiusAddress, Configurations::sprocketRadius);
-    impulsesPerRevolution = preferences.getUChar(impulsesPerRevolutionAddress, Configurations::impulsesPerRevolution);
+    flywheelInertia = preferences.getFloat(flywheelInertiaAddress, RowerProfile::Defaults::flywheelInertia);
+    concept2MagicNumber = preferences.getFloat(concept2MagicNumberAddress, RowerProfile::Defaults::concept2MagicNumber);
+    sprocketRadius = preferences.getFloat(sprocketRadiusAddress, RowerProfile::Defaults::sprocketRadius);
+    impulsesPerRevolution = preferences.getUChar(impulsesPerRevolutionAddress, RowerProfile::Defaults::impulsesPerRevolution);
 
     std::string inertiaFormatted{};
     const auto stringSize = 10U;

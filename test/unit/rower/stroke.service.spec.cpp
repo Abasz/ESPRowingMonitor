@@ -77,15 +77,15 @@ TEST_CASE("StrokeService")
 
     SECTION("should have correct settings for test")
     {
-        CHECK(Configurations::impulsesPerRevolution == 3);
-        CHECK(Configurations::impulseDataArrayLength == 7);
-        CHECK(Configurations::flywheelInertia == 0.073F);
-        CHECK(Configurations::dragCoefficientsArrayLength == 1);
-        CHECK(Configurations::goodnessOfFitThreshold == 0.97F);
-        CHECK(Configurations::rotationDebounceTimeMin == 7'000);
-        CHECK(Configurations::sprocketRadius == 1.5F / 100);
-        CHECK(Configurations::minimumDriveTime == 300'000);
-        CHECK(Configurations::minimumRecoveryTime == 300'000);
+        CHECK(RowerProfile::Defaults::impulsesPerRevolution == 3);
+        CHECK(RowerProfile::Defaults::impulseDataArrayLength == 7);
+        CHECK(RowerProfile::Defaults::flywheelInertia == 0.073F);
+        CHECK(RowerProfile::Defaults::dragCoefficientsArrayLength == 1);
+        CHECK(RowerProfile::Defaults::goodnessOfFitThreshold == 0.97F);
+        CHECK(RowerProfile::Defaults::rotationDebounceTimeMin == 7'000);
+        CHECK(RowerProfile::Defaults::sprocketRadius == 1.5F / 100);
+        CHECK(RowerProfile::Defaults::minimumDriveTime == 300'000);
+        CHECK(RowerProfile::Defaults::minimumRecoveryTime == 300'000);
     }
 
     ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");

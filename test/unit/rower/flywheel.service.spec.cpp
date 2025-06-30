@@ -14,10 +14,10 @@
 using namespace fakeit;
 
 const std::vector<unsigned long> deltaTimes = {
-    Configurations::rotationDebounceTimeMin + 2000,
-    Configurations::rotationDebounceTimeMin + 1000,
-    Configurations::rotationDebounceTimeMin + 500,
-    Configurations::rotationDebounceTimeMin + 100,
+    RowerProfile::Defaults::rotationDebounceTimeMin + 2000,
+    RowerProfile::Defaults::rotationDebounceTimeMin + 1000,
+    RowerProfile::Defaults::rotationDebounceTimeMin + 500,
+    RowerProfile::Defaults::rotationDebounceTimeMin + 100,
 };
 
 TEST_CASE("FlywheelService", "[rower]")
@@ -46,7 +46,7 @@ TEST_CASE("FlywheelService", "[rower]")
         {
             FlywheelService flywheelService;
 
-            flywheelService.processRotation(Configurations::rotationDebounceTimeMin + 1000);
+            flywheelService.processRotation(RowerProfile::Defaults::rotationDebounceTimeMin + 1000);
 
             REQUIRE(flywheelService.hasDataChanged());
         }
@@ -55,7 +55,7 @@ TEST_CASE("FlywheelService", "[rower]")
         {
             FlywheelService flywheelService;
 
-            flywheelService.processRotation(Configurations::rotationDebounceTimeMin - 1000);
+            flywheelService.processRotation(RowerProfile::Defaults::rotationDebounceTimeMin - 1000);
 
             REQUIRE(flywheelService.hasDataChanged() == false);
         }
@@ -76,7 +76,7 @@ TEST_CASE("FlywheelService", "[rower]")
                 .rawImpulseCount = static_cast<unsigned long>(deltaTimes.size()),
                 .deltaTime = deltaTimes.back(),
                 .totalTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
-                .totalAngularDisplacement = Configurations::angularDisplacementPerImpulse * (double)deltaTimes.size(),
+                .totalAngularDisplacement = (2 * PI) / RowerProfile::Defaults::impulsesPerRevolution * (double)deltaTimes.size(),
                 .cleanImpulseTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
                 .rawImpulseTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
             };
@@ -105,7 +105,7 @@ TEST_CASE("FlywheelService", "[rower]")
         {
             FlywheelService flywheelService;
 
-            flywheelService.processRotation(Configurations::rotationDebounceTimeMin + 1000);
+            flywheelService.processRotation(RowerProfile::Defaults::rotationDebounceTimeMin + 1000);
 
             REQUIRE(flywheelService.hasDataChanged());
 

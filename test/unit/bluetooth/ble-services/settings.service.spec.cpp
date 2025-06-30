@@ -36,9 +36,9 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         (static_cast<unsigned char>(logLevel) << 4U) |
         (static_cast<unsigned char>(Configurations::isRuntimeSettingsEnabled) << 7U);
 
-    const auto flywheelInertia = std::bit_cast<unsigned int>(Configurations::flywheelInertia);
+    const auto flywheelInertia = std::bit_cast<unsigned int>(RowerProfile::Defaults::flywheelInertia);
     constexpr auto mToCm = 100.0F;
-    const auto sprocketRadius = static_cast<unsigned short>(roundf(Configurations::sprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
+    const auto sprocketRadius = static_cast<unsigned short>(roundf(RowerProfile::Defaults::sprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
 
     const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedInitialSettings = {
         settings,
@@ -46,8 +46,8 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         static_cast<unsigned char>(flywheelInertia >> 8),
         static_cast<unsigned char>(flywheelInertia >> 16),
         static_cast<unsigned char>(flywheelInertia >> 24),
-        static_cast<unsigned char>(roundf(Configurations::concept2MagicNumber * ISettingsBleService::magicNumberScale)),
-        Configurations::impulsesPerRevolution,
+        static_cast<unsigned char>(roundf(RowerProfile::Defaults::concept2MagicNumber * ISettingsBleService::magicNumberScale)),
+        RowerProfile::Defaults::impulsesPerRevolution,
         static_cast<unsigned char>(sprocketRadius),
         static_cast<unsigned char>(sprocketRadius >> 8),
     };
@@ -156,10 +156,10 @@ TEST_CASE("SettingsBleService", "[ble-service]")
 
                 settingsBleService.broadcastSettings();
 
-                REQUIRE(flywheelInertia == Configurations::flywheelInertia);
-                REQUIRE(concept2MagicNumber == Configurations::concept2MagicNumber);
-                REQUIRE(impulsesPerRevolution == Configurations::impulsesPerRevolution);
-                REQUIRE(sprocketRadius == Configurations::sprocketRadius);
+                REQUIRE(flywheelInertia == RowerProfile::Defaults::flywheelInertia);
+                REQUIRE(concept2MagicNumber == RowerProfile::Defaults::concept2MagicNumber);
+                REQUIRE(impulsesPerRevolution == RowerProfile::Defaults::impulsesPerRevolution);
+                REQUIRE(sprocketRadius == RowerProfile::Defaults::sprocketRadius);
             }
 
             SECTION("and calculate correct setting binary value")

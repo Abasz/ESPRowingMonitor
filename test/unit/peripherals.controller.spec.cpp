@@ -363,7 +363,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
             REQUIRE_THAT(savedDeltaTimes, Catch::Matchers::SizeIs(1));
             REQUIRE_THAT(savedDeltaTimes[0], Catch::Matchers::RangeEquals(std::vector<unsigned long>{expectedDeltaTime}));
             Verify(Method(mockSdCardService, saveDeltaTime).Matching([](const std::vector<unsigned long> &deltaTimes)
-                                                                     { return deltaTimes.capacity() == (Configurations::minimumRecoveryTime + Configurations::minimumDriveTime) / Configurations::rotationDebounceTimeMin && deltaTimes.empty(); }));
+                                                                     { return deltaTimes.capacity() == (RowerProfile::Defaults::minimumRecoveryTime + RowerProfile::Defaults::minimumDriveTime) / RowerProfile::Defaults::rotationDebounceTimeMin && deltaTimes.empty(); }));
         }
     }
 }

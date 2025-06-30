@@ -8,10 +8,10 @@
 using namespace fakeit;
 
 const std::vector<unsigned long> deltaTimes = {
-    Configurations::rotationDebounceTimeMin + 2000,
-    Configurations::rotationDebounceTimeMin + 1000,
-    Configurations::rotationDebounceTimeMin + 500,
-    Configurations::rotationDebounceTimeMin + 100,
+    RowerProfile::Defaults::rotationDebounceTimeMin + 2000,
+    RowerProfile::Defaults::rotationDebounceTimeMin + 1000,
+    RowerProfile::Defaults::rotationDebounceTimeMin + 500,
+    RowerProfile::Defaults::rotationDebounceTimeMin + 100,
 };
 
 TEST_CASE("StrokeController", "[rower]")

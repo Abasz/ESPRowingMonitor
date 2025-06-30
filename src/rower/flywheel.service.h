@@ -6,7 +6,7 @@
 
 class FlywheelService final : public IFlywheelService
 {
-    Configurations::precision angularDisplacementPerImpulse = (2 * PI) / Configurations::impulsesPerRevolution;
+    Configurations::precision angularDisplacementPerImpulse = (2 * PI) / RowerProfile::Defaults::impulsesPerRevolution;
 
     volatile unsigned long lastDeltaTime = 0;
     volatile unsigned long cleanDeltaTime = 0;

@@ -49,7 +49,7 @@ void FlywheelService::processRotation(const unsigned long now)
 {
     const auto currentRawImpulseDeltaTime = now - lastRawImpulseTime;
 
-    if (currentRawImpulseDeltaTime < Configurations::rotationDebounceTimeMin)
+    if (currentRawImpulseDeltaTime < RowerProfile::Defaults::rotationDebounceTimeMin)
     {
         return;
     }
