@@ -24,6 +24,7 @@ TEST_CASE("StrokeController", "[rower]")
 
         Fake(Method(mockFlywheelService, setup));
         When(Method(mockEEPROMService, getMachineSettings)).Return(RowerProfile::MachineSettings{});
+        When(Method(mockEEPROMService, getSensorSignalSettings)).Return(RowerProfile::SensorSignalSettings{});
 #if ENABLE_RUNTIME_SETTINGS
         Fake(Method(mockStrokeService, setup));
 #endif
@@ -32,6 +33,7 @@ TEST_CASE("StrokeController", "[rower]")
         strokeController.begin();
 
         Verify(Method(mockEEPROMService, getMachineSettings)).Once();
+        Verify(Method(mockEEPROMService, getSensorSignalSettings)).Once();
         Verify(Method(mockFlywheelService, setup)).Once();
 #if ENABLE_RUNTIME_SETTINGS
         Verify(Method(mockStrokeService, setup)).Once();

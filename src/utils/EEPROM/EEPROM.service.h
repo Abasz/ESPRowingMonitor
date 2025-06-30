@@ -21,6 +21,9 @@ class EEPROMService final : public IEEPROMService
     static constexpr const char *sprocketRadiusAddress = "sprocketRadius";
     static constexpr const char *impulsesPerRevolutionAddress = "impulsesPerRev";
 
+    static constexpr const char *rotationDebounceAddress = "signalDebounce";
+    static constexpr const char *rowingStoppedPeriodAddress = "rowingStopped";
+
     ArduinoLogLevel logLevel = Configurations::defaultLogLevel;
     bool logToBluetooth = Configurations::enableBluetoothDeltaTimeLogging;
     bool logToSdCard = false;
@@ -31,8 +34,12 @@ class EEPROMService final : public IEEPROMService
     float sprocketRadius = RowerProfile::Defaults::sprocketRadius;
     unsigned char impulsesPerRevolution = RowerProfile::Defaults::impulsesPerRevolution;
 
+    unsigned short rotationDebounceTimeMin = RowerProfile::Defaults::rotationDebounceTimeMin;
+    unsigned int rowingStoppedThresholdPeriod = RowerProfile::Defaults::rowingStoppedThresholdPeriod;
+
     void initializeBaseSettings();
     void initializeMachineSettings();
+    void initializeSensorSignalSettings();
 
 public:
     explicit EEPROMService(Preferences &_preferences);
@@ -45,6 +52,7 @@ public:
     void setBleServiceFlag(BleServiceFlag newServiceFlag) override;
 
     void setMachineSettings(RowerProfile::MachineSettings newMachineSettings) override;
+    void setSensorSignalSettings(RowerProfile::SensorSignalSettings newSensorSignalSettings) override;
 
     BleServiceFlag getBleServiceFlag() const override;
     ArduinoLogLevel getLogLevel() const override;
@@ -52,6 +60,8 @@ public:
     bool getLogToSdCard() const override;
 
     RowerProfile::MachineSettings getMachineSettings() const override;
+    RowerProfile::SensorSignalSettings getSensorSignalSettings() const override;
 
     static bool validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings);
+    static bool validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings);
 };

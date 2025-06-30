@@ -23,10 +23,14 @@ StrokeService::StrokeService()
 }
 
 #if ENABLE_RUNTIME_SETTINGS
-void StrokeService::setup(const RowerProfile::MachineSettings newMachineSettings)
+void StrokeService::setup(const RowerProfile::MachineSettings newMachineSettings, const RowerProfile::SensorSignalSettings newSensorSignalSettings)
 {
     machineSettings = newMachineSettings;
+
+    rowingStoppedThresholdPeriod = newSensorSignalSettings.rowingStoppedThresholdPeriod;
     angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
+
+    recoveryDeltaTimes = OLSLinearSeries(0, Configurations::defaultAllocationCapacity, RowerProfile::Defaults::maxDragFactorRecoveryPeriod / newSensorSignalSettings.rotationDebounceTimeMin / 2);
 }
 #endif
 
@@ -236,7 +240,7 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     currentTorque = machineSettings.flywheelInertia * currentAngularAcceleration + dragCoefficient * pow(currentAngularVelocity, 2);
 
     // If rotation delta exceeds the max debounce time and we are in Recovery Phase, the rower must have stopped. Setting cyclePhase to "Stopped"
-    if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > RowerProfile::Defaults::rowingStoppedThresholdPeriod)
+    if (cyclePhase == CyclePhase::Recovery && rowingTotalTime - recoveryStartTime > rowingStoppedThresholdPeriod)
     {
         driveHandleForces.clear();
         recoveryEnd();

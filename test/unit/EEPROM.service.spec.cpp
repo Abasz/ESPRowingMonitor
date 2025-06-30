@@ -22,6 +22,9 @@ TEST_CASE("EEPROMService", "[utils]")
     const auto *const impulsesPerRevolutionAddress = "impulsesPerRev";
     const auto *const sprocketRadiusAddress = "sprocketRadius";
 
+    static constexpr const char *rotationDebounceAddress = "signalDebounce";
+    static constexpr const char *rowingStoppedPeriodAddress = "rowingStopped";
+
     SECTION("setup method")
     {
         Mock<Preferences> mockPreferences;
@@ -31,6 +34,8 @@ TEST_CASE("EEPROMService", "[utils]")
         When(Method(mockPreferences, isKey)).AlwaysReturn(false);
 
         When(Method(mockPreferences, putUChar)).AlwaysReturn(1);
+        When(Method(mockPreferences, putUShort)).AlwaysReturn(1);
+        When(Method(mockPreferences, putUInt)).AlwaysReturn(1);
         When(Method(mockPreferences, putBool)).AlwaysReturn(1);
         When(Method(mockPreferences, putFloat)).AlwaysReturn(1);
 
@@ -42,6 +47,8 @@ TEST_CASE("EEPROMService", "[utils]")
         When(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), RowerProfile::Defaults::concept2MagicNumber)).Return(RowerProfile::Defaults::concept2MagicNumber);
         When(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), RowerProfile::Defaults::impulsesPerRevolution)).Return(RowerProfile::Defaults::impulsesPerRevolution);
         When(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), RowerProfile::Defaults::sprocketRadius)).Return(RowerProfile::Defaults::sprocketRadius);
+        When(Method(mockPreferences, getUShort).Using(StrEq(rotationDebounceAddress), RowerProfile::Defaults::rotationDebounceTimeMin)).Return(RowerProfile::Defaults::rotationDebounceTimeMin);
+        When(Method(mockPreferences, getUInt).Using(StrEq(rowingStoppedPeriodAddress), RowerProfile::Defaults::rowingStoppedThresholdPeriod)).Return(RowerProfile::Defaults::rowingStoppedThresholdPeriod);
 
         EEPROMService eepromService(mockPreferences.get());
         eepromService.setup();
@@ -74,6 +81,11 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, putUChar).Using(StrEq(impulsesPerRevolutionAddress), RowerProfile::Defaults::impulsesPerRevolution)).Once();
             Verify(Method(mockPreferences, isKey).Using(StrEq(sprocketRadiusAddress))).Once();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), RowerProfile::Defaults::sprocketRadius)).Once();
+
+            Verify(Method(mockPreferences, isKey).Using(StrEq(rotationDebounceAddress))).Once();
+            Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), RowerProfile::Defaults::rotationDebounceTimeMin)).Once();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(rowingStoppedPeriodAddress))).Once();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), RowerProfile::Defaults::rowingStoppedThresholdPeriod)).Once();
 #else
             Verify(Method(mockPreferences, isKey).Using(StrEq(flywheelInertiaAddress))).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
@@ -83,6 +95,11 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, putUChar).Using(StrEq(impulsesPerRevolutionAddress), Any())).Never();
             Verify(Method(mockPreferences, isKey).Using(StrEq(sprocketRadiusAddress))).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), Any())).Never();
+
+            Verify(Method(mockPreferences, isKey).Using(StrEq(rotationDebounceAddress))).Never();
+            Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), Any())).Never();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(rowingStoppedPeriodAddress))).Never();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Never();
 #endif
         }
 
@@ -101,11 +118,17 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), RowerProfile::Defaults::concept2MagicNumber)).Once();
             Verify(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), RowerProfile::Defaults::impulsesPerRevolution)).Once();
             Verify(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), RowerProfile::Defaults::sprocketRadius)).Once();
+
+            Verify(Method(mockPreferences, getUShort).Using(StrEq(rotationDebounceAddress), RowerProfile::Defaults::rotationDebounceTimeMin)).Once();
+            Verify(Method(mockPreferences, getUInt).Using(StrEq(rowingStoppedPeriodAddress), RowerProfile::Defaults::rowingStoppedThresholdPeriod)).Once();
 #else
             Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
             Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
             Verify(Method(mockPreferences, getUChar).Using(StrEq(impulsesPerRevolutionAddress), Any())).Never();
             Verify(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), Any())).Never();
+
+            Verify(Method(mockPreferences, getUShort).Using(StrEq(rotationDebounceAddress), Any())).Never();
+            Verify(Method(mockPreferences, getUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Never();
 #endif
         }
 
@@ -120,6 +143,9 @@ TEST_CASE("EEPROMService", "[utils]")
             REQUIRE(eepromService.getMachineSettings().concept2MagicNumber == RowerProfile::Defaults::concept2MagicNumber);
             REQUIRE(eepromService.getMachineSettings().impulsesPerRevolution == RowerProfile::Defaults::impulsesPerRevolution);
             REQUIRE(eepromService.getMachineSettings().sprocketRadius == RowerProfile::Defaults::sprocketRadius);
+
+            REQUIRE(eepromService.getSensorSignalSettings().rotationDebounceTimeMin == RowerProfile::Defaults::rotationDebounceTimeMin);
+            REQUIRE(eepromService.getSensorSignalSettings().rowingStoppedThresholdPeriod == RowerProfile::Defaults::rowingStoppedThresholdPeriod);
         }
     }
 
@@ -289,6 +315,54 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, putFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(sprocketRadiusAddress), Any())).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(impulsesPerRevolutionAddress), Any())).Never();
+        }
+#endif
+    }
+
+    SECTION("setSensorSignalSettings method should")
+    {
+        Mock<Preferences> mockPreferences;
+        When(Method(mockPreferences, putUShort)).AlwaysReturn(1);
+        When(Method(mockPreferences, putUInt)).AlwaysReturn(1);
+        EEPROMService eepromService(mockPreferences.get());
+
+#if ENABLE_RUNTIME_SETTINGS
+        SECTION("not save if any value is invalid")
+        {
+            const auto invalidRowingStoppedThresholdPeriodTooLow = RowerProfile::SensorSignalSettings{
+                .rotationDebounceTimeMin = 1'000,
+                .rowingStoppedThresholdPeriod = 3'000'000,
+            };
+
+            eepromService.setSensorSignalSettings(invalidRowingStoppedThresholdPeriodTooLow);
+
+            Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), Any())).Never();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Never();
+        }
+
+        SECTION("save new sensor signal settings without updating backing fields")
+        {
+            const auto newSensorSignalSettings = RowerProfile::SensorSignalSettings{
+                .rotationDebounceTimeMin = 1'000,
+                .rowingStoppedThresholdPeriod = 4'000'000,
+            };
+
+            eepromService.setSensorSignalSettings(newSensorSignalSettings);
+
+            const auto sensorSignalSettings = eepromService.getSensorSignalSettings();
+
+            Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), Any())).Once();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Once();
+            REQUIRE(sensorSignalSettings.rotationDebounceTimeMin != newSensorSignalSettings.rotationDebounceTimeMin);
+            REQUIRE(sensorSignalSettings.rowingStoppedThresholdPeriod != newSensorSignalSettings.rowingStoppedThresholdPeriod);
+        }
+#else
+        SECTION("not save any value if runtime settings are not enabled")
+        {
+            eepromService.setMachineSettings(RowerProfile::MachineSettings{});
+
+            Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), Any())).Never();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Never();
         }
 #endif
     }

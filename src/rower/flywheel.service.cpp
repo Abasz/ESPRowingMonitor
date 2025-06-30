@@ -10,10 +10,11 @@
 
 FlywheelService::FlywheelService() {}
 
-void FlywheelService::setup(const RowerProfile::MachineSettings machineSettings)
+void FlywheelService::setup(const RowerProfile::MachineSettings machineSettings, const RowerProfile::SensorSignalSettings sensorSignalSettings)
 {
 #if ENABLE_RUNTIME_SETTINGS
     angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
+    rotationDebounceTimeMin = sensorSignalSettings.rotationDebounceTimeMin;
 #endif
 
     pinMode(Configurations::sensorPinNumber, INPUT_PULLUP);
@@ -49,7 +50,7 @@ void FlywheelService::processRotation(const unsigned long now)
 {
     const auto currentRawImpulseDeltaTime = now - lastRawImpulseTime;
 
-    if (currentRawImpulseDeltaTime < RowerProfile::Defaults::rotationDebounceTimeMin)
+    if (currentRawImpulseDeltaTime < rotationDebounceTimeMin)
     {
         return;
     }

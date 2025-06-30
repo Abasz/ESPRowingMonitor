@@ -18,6 +18,8 @@ class PeripheralsController final : public IPeripheralsController
     ISdCardService &sdCardService;
     IEEPROMService &eepromService;
 
+    unsigned short rotationDebounceTimeMin = RowerProfile::Defaults::rotationDebounceTimeMin;
+
     unsigned int lastConnectedDeviceCheckTime = 0;
 
     vector<unsigned long> sdDeltaTimes;

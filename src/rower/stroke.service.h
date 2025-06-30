@@ -13,6 +13,8 @@ class StrokeService final : public IStrokeService
     // Machine settings
     RowerProfile::MachineSettings machineSettings;
 
+    unsigned int rowingStoppedThresholdPeriod = RowerProfile::Defaults::rowingStoppedThresholdPeriod;
+
     Configurations::precision angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
 
     // rower state
@@ -80,7 +82,7 @@ public:
     StrokeService();
 
 #if ENABLE_RUNTIME_SETTINGS
-    void setup(RowerProfile::MachineSettings newMachineSettings) override;
+    void setup(RowerProfile::MachineSettings newMachineSettings, RowerProfile::SensorSignalSettings newSensorSignalSettings) override;
 #endif
 
     RowingDataModels::RowingMetrics getData() override;

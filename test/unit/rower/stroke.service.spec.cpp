@@ -18,60 +18,116 @@ using std::vector;
 
 TEST_CASE("StrokeService")
 {
+    const auto angularDisplacementPerImpulse = (2 * PI) / 3;
+
 #if ENABLE_RUNTIME_SETTINGS
-    SECTION("setup method should change machine related settings")
+    SECTION("setup method should")
     {
-        ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");
-        REQUIRE(deltaTimesStream.good());
-
-        vector<unsigned long> deltaTimes;
-        const auto arraySize = 1'764;
-        deltaTimes.reserve(arraySize);
-
-        unsigned long deltaTime = 0;
-        while (deltaTimesStream >> deltaTime)
+        SECTION("update sensor signal related settings")
         {
-            deltaTimes.push_back(deltaTime);
+            ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");
+            REQUIRE(deltaTimesStream.good());
+
+            vector<unsigned long> deltaTimes;
+            const auto arraySize = 1'764;
+            deltaTimes.reserve(arraySize);
+
+            unsigned long deltaTime = 0;
+            while (deltaTimesStream >> deltaTime)
+            {
+                deltaTimes.push_back(deltaTime);
+            }
+
+            auto rawImpulseCount = 0UL;
+            auto totalTime = 0UL;
+            Configurations::precision totalAngularDisplacement = 0.0;
+
+            StrokeService strokeService;
+            strokeService.setup(RowerProfile::MachineSettings{},
+                                RowerProfile::SensorSignalSettings{
+                                    .rotationDebounceTimeMin = RowerProfile::Defaults::rotationDebounceTimeMin,
+                                    .rowingStoppedThresholdPeriod = 10'000'000,
+                                });
+
+            for (const auto &deltaTime : deltaTimes)
+            {
+                totalAngularDisplacement += angularDisplacementPerImpulse;
+                totalTime += deltaTime;
+                rawImpulseCount++;
+                RowingDataModels::FlywheelData data{
+                    .rawImpulseCount = rawImpulseCount,
+                    .deltaTime = deltaTime,
+                    .totalTime = totalTime,
+                    .totalAngularDisplacement = totalAngularDisplacement,
+                    .cleanImpulseTime = totalTime,
+                    .rawImpulseTime = totalTime,
+                };
+                strokeService.processData(data);
+            }
+
+            const auto rowingMetrics = strokeService.getData();
+
+            REQUIRE(rowingMetrics.strokeCount == 10);
+            REQUIRE(rowingMetrics.lastStrokeTime == 32'573'215);
+            REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(9'741.64407532888799324, 0.0000001));
+            REQUIRE(rowingMetrics.lastRevTime == 42'586'444);
         }
 
-        auto rawImpulseCount = 0UL;
-        auto totalTime = 0UL;
-        Configurations::precision totalAngularDisplacement = 0.0;
-
-        const auto impulsesPerRevolution = 4;
-
-        StrokeService strokeService;
-        strokeService.setup(RowerProfile::MachineSettings{
-            .impulsesPerRevolution = impulsesPerRevolution,
-            .flywheelInertia = 0.06F,
-            .concept2MagicNumber = 2.9F,
-            .sprocketRadius = 0.02F,
-        });
-
-        const auto angularDisplacementMachineSettings = (2 * PI) / impulsesPerRevolution;
-
-        for (const auto &deltaTime : deltaTimes)
+        SECTION("change machine related settings")
         {
-            totalAngularDisplacement += angularDisplacementMachineSettings;
-            totalTime += deltaTime;
-            rawImpulseCount++;
-            RowingDataModels::FlywheelData data{
-                .rawImpulseCount = rawImpulseCount,
-                .deltaTime = deltaTime,
-                .totalTime = totalTime,
-                .totalAngularDisplacement = totalAngularDisplacement,
-                .cleanImpulseTime = totalTime,
-                .rawImpulseTime = totalTime,
-            };
-            strokeService.processData(data);
+            ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");
+            REQUIRE(deltaTimesStream.good());
+
+            vector<unsigned long> deltaTimes;
+            const auto arraySize = 1'764;
+            deltaTimes.reserve(arraySize);
+
+            unsigned long deltaTime = 0;
+            while (deltaTimesStream >> deltaTime)
+            {
+                deltaTimes.push_back(deltaTime);
+            }
+
+            auto rawImpulseCount = 0UL;
+            auto totalTime = 0UL;
+            Configurations::precision totalAngularDisplacement = 0.0;
+
+            const auto impulsesPerRevolution = 4;
+
+            StrokeService strokeService;
+            strokeService.setup(RowerProfile::MachineSettings{
+                                    .impulsesPerRevolution = impulsesPerRevolution,
+                                    .flywheelInertia = 0.06F,
+                                    .concept2MagicNumber = 2.9F,
+                                    .sprocketRadius = 0.02F,
+                                },
+                                RowerProfile::SensorSignalSettings{});
+
+            const auto angularDisplacementMachineSettings = (2 * PI) / impulsesPerRevolution;
+
+            for (const auto &deltaTime : deltaTimes)
+            {
+                totalAngularDisplacement += angularDisplacementMachineSettings;
+                totalTime += deltaTime;
+                rawImpulseCount++;
+                RowingDataModels::FlywheelData data{
+                    .rawImpulseCount = rawImpulseCount,
+                    .deltaTime = deltaTime,
+                    .totalTime = totalTime,
+                    .totalAngularDisplacement = totalAngularDisplacement,
+                    .cleanImpulseTime = totalTime,
+                    .rawImpulseTime = totalTime,
+                };
+                strokeService.processData(data);
+            }
+
+            const auto rowingMetrics = strokeService.getData();
+
+            REQUIRE(rowingMetrics.strokeCount == 10);
+            REQUIRE(rowingMetrics.lastStrokeTime == 32'573'215);
+            REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(7'100.63887816623901017, 0.0000001));
+            REQUIRE(rowingMetrics.lastRevTime == 39'577'207);
         }
-
-        const auto rowingMetrics = strokeService.getData();
-
-        REQUIRE(rowingMetrics.strokeCount == 10);
-        REQUIRE(rowingMetrics.lastStrokeTime == 32'573'215);
-        REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(7'100.63887816623901017, 0.0000001));
-        REQUIRE(rowingMetrics.lastRevTime == 39'577'207);
     }
 #endif
 
@@ -167,7 +223,6 @@ TEST_CASE("StrokeService")
     SECTION("processData method should correctly determine")
     {
         StrokeService strokeService;
-        const auto angularDisplacementPerImpulse = (2 * PI) / 3;
         auto rawImpulseCount = 0UL;
         auto totalTime = 0UL;
         Configurations::precision totalAngularDisplacement = 0.0;

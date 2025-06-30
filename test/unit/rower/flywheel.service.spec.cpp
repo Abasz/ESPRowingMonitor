@@ -34,7 +34,7 @@ TEST_CASE("FlywheelService", "[rower]")
 
         FlywheelService flywheelService;
 
-        flywheelService.setup(RowerProfile::MachineSettings{});
+        flywheelService.setup(RowerProfile::MachineSettings{}, RowerProfile::SensorSignalSettings{});
 
         Verify(Method(mockGlobals, attachRotationInterrupt)).Once();
         Verify(Method(mockArduino, pinMode).Using(Configurations::sensorPinNumber, INPUT_PULLUP)).Once();

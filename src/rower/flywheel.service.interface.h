@@ -9,7 +9,7 @@ protected:
     ~IFlywheelService() = default;
 
 public:
-    virtual void setup(RowerProfile::MachineSettings newMachineSettings) = 0;
+    virtual void setup(RowerProfile::MachineSettings newMachineSettings, RowerProfile::SensorSignalSettings newSensorSignalSettings) = 0;
     virtual bool hasDataChanged() const = 0;
     virtual RowingDataModels::FlywheelData getData() = 0;
     virtual void processRotation(unsigned long now) = 0;

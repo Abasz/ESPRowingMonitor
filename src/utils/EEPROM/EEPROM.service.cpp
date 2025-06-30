@@ -25,6 +25,7 @@ void EEPROMService::setup()
     if constexpr (Configurations::isRuntimeSettingsEnabled)
     {
         initializeMachineSettings();
+        initializeSensorSignalSettings();
     }
 
     Log.verboseln("Free NVS entries: %u", preferences.freeEntries());
@@ -111,6 +112,24 @@ void EEPROMService::setMachineSettings(const RowerProfile::MachineSettings newMa
     preferences.putFloat(concept2MagicNumberAddress, newMachineSettings.concept2MagicNumber);
 }
 
+void EEPROMService::setSensorSignalSettings(const RowerProfile::SensorSignalSettings newSensorSignalSettings)
+{
+    if constexpr (!Configurations::isRuntimeSettingsEnabled)
+    {
+        Log.warningln("Not able to set signal settings as runtime settings is not enabled");
+
+        return;
+    }
+
+    if (!EEPROMService::validateSensorSignalSettings(newSensorSignalSettings))
+    {
+        return;
+    }
+
+    preferences.putUShort(rotationDebounceAddress, newSensorSignalSettings.rotationDebounceTimeMin);
+    preferences.putUInt(rowingStoppedPeriodAddress, newSensorSignalSettings.rowingStoppedThresholdPeriod);
+}
+
 BleServiceFlag EEPROMService::getBleServiceFlag() const
 {
     return bleServiceFlag;
@@ -141,6 +160,14 @@ RowerProfile::MachineSettings EEPROMService::getMachineSettings() const
     };
 }
 
+RowerProfile::SensorSignalSettings EEPROMService::getSensorSignalSettings() const
+{
+    return RowerProfile::SensorSignalSettings{
+        .rotationDebounceTimeMin = rotationDebounceTimeMin,
+        .rowingStoppedThresholdPeriod = rowingStoppedThresholdPeriod,
+    };
+}
+
 bool EEPROMService::validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings)
 {
     if (!isInBounds(newMachineSettings.concept2MagicNumber, 0.0F, std::numeric_limits<float>::max()))
@@ -168,6 +195,19 @@ bool EEPROMService::validateMachineSettings(const RowerProfile::MachineSettings 
     if (!isInBounds(newMachineSettings.impulsesPerRevolution, static_cast<unsigned char>(1U), maxImpulsesPerRevolution))
     {
         Log.errorln("Invalid impulses per revolution, should be between 1 and %d", maxImpulsesPerRevolution);
+
+        return false;
+    }
+
+    return true;
+}
+
+bool EEPROMService::validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings)
+{
+    const auto minRowingStoppedThresholdPeriod = 4'000'000U;
+    if (!isInBounds(newSensorSignalSettings.rowingStoppedThresholdPeriod, minRowingStoppedThresholdPeriod, std::numeric_limits<unsigned int>::max()))
+    {
+        Log.errorln("Invalid rowing stopped threshold period, should be greater than 4 seconds");
 
         return false;
     }
@@ -260,4 +300,25 @@ void EEPROMService::initializeMachineSettings()
     Log.verboseln("%s: %F", concept2MagicNumberAddress, concept2MagicNumber);
     Log.verboseln("%s: %F", sprocketRadiusAddress, sprocketRadius);
     Log.verboseln("%s: %d", impulsesPerRevolutionAddress, impulsesPerRevolution);
+}
+
+void EEPROMService::initializeSensorSignalSettings()
+{
+    if (!preferences.isKey(rotationDebounceAddress))
+    {
+        Log.infoln("Setting Rotation Debounce Time to default");
+        preferences.putUShort(rotationDebounceAddress, RowerProfile::Defaults::rotationDebounceTimeMin);
+    }
+
+    if (!preferences.isKey(rowingStoppedPeriodAddress))
+    {
+        Log.infoln("Setting Rowing Stopped Period to default");
+        preferences.putUInt(rowingStoppedPeriodAddress, RowerProfile::Defaults::rowingStoppedThresholdPeriod);
+    }
+
+    rotationDebounceTimeMin = preferences.getUShort(rotationDebounceAddress, RowerProfile::Defaults::rotationDebounceTimeMin);
+    rowingStoppedThresholdPeriod = preferences.getUInt(rowingStoppedPeriodAddress, RowerProfile::Defaults::rowingStoppedThresholdPeriod);
+
+    Log.verboseln("%s: %d", rotationDebounceAddress, rotationDebounceTimeMin);
+    Log.verboseln("%s: %d", rowingStoppedPeriodAddress, rowingStoppedThresholdPeriod);
 }

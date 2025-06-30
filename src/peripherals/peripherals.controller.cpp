@@ -41,6 +41,15 @@ void PeripheralsController::update(const unsigned char batteryLevel)
 
 void PeripheralsController::begin()
 {
+    if constexpr (Configurations::isRuntimeSettingsEnabled)
+    {
+        rotationDebounceTimeMin = eepromService.getSensorSignalSettings().rotationDebounceTimeMin;
+
+        sdDeltaTimes.clear();
+        sdDeltaTimes.shrink_to_fit();
+        sdDeltaTimes.reserve((RowerProfile::Defaults::minimumRecoveryTime + RowerProfile::Defaults::minimumDriveTime) / rotationDebounceTimeMin);
+    }
+
     Log.infoln("Setting up peripherals");
 
     if constexpr (Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC)
@@ -125,7 +134,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
         if (!sdDeltaTimes.empty())
         {
             vector<unsigned long> clear;
-            clear.reserve((RowerProfile::Defaults::minimumRecoveryTime + RowerProfile::Defaults::minimumDriveTime) / RowerProfile::Defaults::rotationDebounceTimeMin);
+            clear.reserve((RowerProfile::Defaults::minimumRecoveryTime + RowerProfile::Defaults::minimumDriveTime) / rotationDebounceTimeMin);
             sdDeltaTimes.swap(clear);
         }
     }

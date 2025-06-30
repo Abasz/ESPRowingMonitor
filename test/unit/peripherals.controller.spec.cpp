@@ -48,6 +48,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
     When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn(BleServiceFlag::CpsService);
     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(false);
     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(false);
+    When(Method(mockEEPROMService, getSensorSignalSettings)).AlwaysReturn(RowerProfile::SensorSignalSettings{});
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(false);
     Fake(Method(mockSdCardService, saveDeltaTime));
 
@@ -63,6 +64,22 @@ TEST_CASE("PeripheralController", "[peripheral]")
         Fake(Method(mockBluetoothController, setup));
 
         Fake(Method(mockFastLED, addLeds));
+
+#if ENABLE_RUNTIME_SETTINGS
+        SECTION("load runtime settings")
+        {
+            peripheralsController.begin();
+
+            Verify(Method(mockEEPROMService, getSensorSignalSettings)).Once();
+        }
+#else
+        SECTION("not load runtime settings")
+        {
+            peripheralsController.begin();
+
+            Verify(Method(mockEEPROMService, getSensorSignalSettings)).Never();
+        }
+#endif
 
         SECTION("setup SdCardService")
         {

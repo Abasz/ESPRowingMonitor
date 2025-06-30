@@ -42,4 +42,10 @@ namespace RowerProfile
         float concept2MagicNumber = Defaults::concept2MagicNumber;
         float sprocketRadius = Defaults::sprocketRadius;
     };
+
+    struct SensorSignalSettings
+    {
+        unsigned short rotationDebounceTimeMin = Defaults::rotationDebounceTimeMin;
+        unsigned int rowingStoppedThresholdPeriod = Defaults::rowingStoppedThresholdPeriod;
+    };
 }

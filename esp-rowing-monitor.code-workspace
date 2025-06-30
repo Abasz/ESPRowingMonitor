@@ -87,7 +87,8 @@
 			"numbers": "cpp",
 			"semaphore": "cpp",
 			"stop_token": "cpp",
-			"format": "cpp"
+			"format": "cpp",
+			"csignal": "cpp"
 		},
 		"C_Cpp.codeAnalysis.clangTidy.args": [
 			// "-extra-arg=test/unit/include"
