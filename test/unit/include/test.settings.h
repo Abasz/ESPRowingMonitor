@@ -3,7 +3,7 @@
 #include "../../../src/utils/enums.h"
 #include "./test.board-profile.h"
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+// NOLINTBEGIN(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)
 
 #define ENABLE_RUNTIME_SETTINGS true
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelSilent
@@ -46,4 +46,4 @@
 #define IMPULSE_DATA_ARRAY_LENGTH 7
 // #define FLOATING_POINT_PRECISION PRECISION_DOUBLE
 
-// NOLINTEND(cppcoreguidelines-macro-usage)
+// NOLINTEND(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)

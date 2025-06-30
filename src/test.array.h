@@ -2,7 +2,10 @@
 #include <array>
 
 #include "Arduino.h"
-#include "LittleFS.h"
+
+#if defined(SIMULATE_FILE)
+    #include "LittleFS.h"
+#endif
 
 #include "globals.h"
 

@@ -2,6 +2,8 @@
 
 #include <vector>
 
+// Disable SdFat warning about File type when FS.h is present
+#define DISABLE_FS_H_WARNING
 #include "SdFat.h"
 
 #include "./sd-card.service.interface.h"

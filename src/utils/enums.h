@@ -305,10 +305,7 @@ class CommonBleFlags
 {
 public:
     static constexpr unsigned char sensorLocationFlag = SensorLocations::Other;
-
     static constexpr unsigned short sensorLocationUuid = 0x2A5D;
-    inline static const std::string dragFactorUuid = "CE060031-43E5-11E4-916C-0800200C9A66";
-    inline static const std::string dragFactorSvcUuid = "CE060030-43E5-11E4-916C-0800200C9A66";
 
     inline static const std::string settingsServiceUuid = "56892de1-7068-4b5a-acaa-473d97b02206";
     inline static const std::string settingsUuid = "54e15528-73b5-4905-9481-89e5184a3364";
