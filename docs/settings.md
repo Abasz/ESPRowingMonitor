@@ -286,6 +286,10 @@ This is the minimum time that is required to stay in the recovery phase, if chan
 
 This is the minimum time that is required to stay in the drive phase, if change would be triggered within this period it is ignored. This should generally mean that this is the minimum time before recovery phase can start within the strokes. This setting corresponds to ORM's `minimumDriveTime` (please see [here](https://github.com/laberning/openrowingmonitor/blob/v1beta/docs/rower_settings.md#minimumdrivetime-and-minimumrecoverytime)).
 
+#### DRIVE_HANDLE_FORCES_MAX_CAPACITY
+
+This is the maximum number of datapoint that can occur within one drive phase (unsigned char). If the number of impulses exceed this number within the drive phase a recovery is force triggered. The purpose of this setting is two folded: 1. it avoids that due to missed strokes a memory leak occurs (as the underlying vector has to hold a huge number of data points, which then would need to be sent to via BLE); 2. helps resetting stroke detection when it looses track and does not detect recovery. Maximum is 256 which should be sufficient for every realistic scenario. Default is 256.
+
 ## Calibration
 
 ### Flywheel inertia

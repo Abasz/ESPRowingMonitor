@@ -26,13 +26,14 @@
 
 // Stroke phase detection filter settings
 #define MINIMUM_POWERED_TORQUE 0
-#define MINIMUM_DRAG_TORQUE 0.14
+#define MINIMUM_DRAG_TORQUE 0.07
 #define STROKE_DETECTION_TYPE STROKE_DETECTION_TORQUE
 #define MINIMUM_RECOVERY_SLOPE_MARGIN 0.00002 // Only relevant if STROKE_DETECTION_TYPE is either BOTH or TORQUE
 #define MINIMUM_RECOVERY_SLOPE 0.01           // Only relevant if STROKE_DETECTION_TYPE is either BOTH or SLOPE
 #define MINIMUM_RECOVERY_TIME 800
 #define MINIMUM_DRIVE_TIME 400
 #define IMPULSE_DATA_ARRAY_LENGTH 7
+#define DRIVE_HANDLE_FORCES_MAX_CAPACITY 55
 // #define FLOATING_POINT_PRECISION PRECISION_DOUBLE
 
 // NOLINTEND(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)

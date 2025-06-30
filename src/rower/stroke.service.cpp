@@ -85,6 +85,7 @@ void StrokeService::calculateDragCoefficient()
     if constexpr (Configurations::dragCoefficientsArrayLength < 2)
     {
         dragCoefficient = rawNewDragCoefficient;
+        lastValidDragCoefficient = dragCoefficient;
 
         return;
     }
@@ -92,11 +93,12 @@ void StrokeService::calculateDragCoefficient()
     dragCoefficients.push(rawNewDragCoefficient, goodnessOfFit);
 
     dragCoefficient = dragCoefficients.average();
+    lastValidDragCoefficient = dragCoefficient;
 }
 
 void StrokeService::calculateAvgStrokePower()
 {
-    avgStrokePower = dragCoefficient * pow((recoveryTotalAngularDisplacement + driveTotalAngularDisplacement) / ((driveDuration + recoveryDuration) / 1e6), 3);
+    avgStrokePower = lastValidDragCoefficient * pow((recoveryTotalAngularDisplacement + driveTotalAngularDisplacement) / ((driveDuration + recoveryDuration) / 1e6), 3);
 }
 
 void StrokeService::driveStart()
@@ -126,8 +128,6 @@ void StrokeService::driveUpdate()
             dragCoefficients.reset();
         }
         recoveryStart();
-
-        Log.warningln("driveHandleForces variable data point size exceeded max capacity indicating an extremely long drive phase. With plausible stroke detection settings this should not happen. Resetting variable to avoid crash...");
 
         return;
     }
@@ -180,7 +180,7 @@ void StrokeService::recoveryEnd()
     recoveryDeltaTimes.reset();
     calculateAvgStrokePower();
 
-    distancePerAngularDisplacement = pow((dragCoefficient * 1e6) / machineSettings.concept2MagicNumber, 1 / 3.0);
+    distancePerAngularDisplacement = pow((lastValidDragCoefficient * 1e6) / machineSettings.concept2MagicNumber, 1 / 3.0);
     distance = recoveryStartDistance + distancePerAngularDisplacement * (distance == 0 ? rowingTotalAngularDisplacement : recoveryTotalAngularDisplacement);
     if (distance > 0)
     {
@@ -198,7 +198,7 @@ RowingDataModels::RowingMetrics StrokeService::getData()
         .driveDuration = driveDuration,
         .recoveryDuration = recoveryDuration,
         .avgStrokePower = avgStrokePower,
-        .dragCoefficient = dragCoefficient,
+        .dragCoefficient = lastValidDragCoefficient,
         .driveHandleForces = driveHandleForces,
     };
 }

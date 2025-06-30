@@ -61,7 +61,7 @@ public:
     static constexpr float concept2MagicNumber = CONCEPT_2_MAGIC_NUMBER;
 
     static constexpr precision angularDisplacementPerImpulse = (2 * PI) / impulsesPerRevolution;
-    static constexpr unsigned char driveHandleForcesMaxCapacity = UCHAR_MAX;
+    static constexpr unsigned char driveHandleForcesMaxCapacity = DRIVE_HANDLE_FORCES_MAX_CAPACITY;
 
     // Sensor signal filter settings
     static constexpr unsigned short rotationDebounceTimeMin = ROTATION_DEBOUNCE_TIME_MIN * 1'000;

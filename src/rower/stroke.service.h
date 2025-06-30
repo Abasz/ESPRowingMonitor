@@ -41,6 +41,7 @@ class StrokeService final : public IStrokeService
     Configurations::precision avgStrokePower = 0;
 
     Configurations::precision dragCoefficient = 0;
+    Configurations::precision lastValidDragCoefficient = 0;
 
     WeightedAverageSeries dragCoefficients = WeightedAverageSeries(Configurations::dragCoefficientsArrayLength, Configurations::defaultAllocationCapacity);
 

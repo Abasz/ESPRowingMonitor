@@ -189,6 +189,9 @@ static_assert(((sizeof(SERIAL_NUMBER) - 1 == 0 ? DEFAULT_SERIAL_LENGTH : sizeof(
     #define SUPPORT_SD_CARD_LOGGING false
 #endif
 
+#if !defined(DRIVE_HANDLE_FORCES_MAX_CAPACITY)
+    #define DRIVE_HANDLE_FORCES_MAX_CAPACITY UCHAR_MAX
+#endif
 // Sanity checks and validations
 static_assert(SUPPORT_SD_CARD_LOGGING == false || (SUPPORT_SD_CARD_LOGGING == true && SD_CARD_CHIP_SELECT_PIN != GPIO_NUM_NC), "SD Card chip select pin is not provided. Please define 'SD_CARD_CHIP_SELECT_PIN' with the GPIO to which chip select is connected");
 
