@@ -26,6 +26,7 @@ void EEPROMService::setup()
     {
         initializeMachineSettings();
         initializeSensorSignalSettings();
+        initializeDragFactorSettings();
     }
 
     Log.verboseln("Free NVS entries: %u", preferences.freeEntries());
@@ -130,6 +131,27 @@ void EEPROMService::setSensorSignalSettings(const RowerProfile::SensorSignalSett
     preferences.putUInt(rowingStoppedPeriodAddress, newSensorSignalSettings.rowingStoppedThresholdPeriod);
 }
 
+void EEPROMService::setDragFactorSettings(const RowerProfile::DragFactorSettings newDragFactorSettings)
+{
+    if constexpr (!Configurations::isRuntimeSettingsEnabled)
+    {
+        Log.warningln("Not able to set drag factor settings as runtime settings is not enabled");
+
+        return;
+    }
+
+    if (!EEPROMService::validateDragFactorSettings(newDragFactorSettings, rotationDebounceTimeMin))
+    {
+        return;
+    }
+
+    preferences.putFloat(goodnessOfFitAddress, newDragFactorSettings.goodnessOfFitThreshold);
+    preferences.putUInt(maxDragFactorRecoveryPeriodAddress, newDragFactorSettings.maxDragFactorRecoveryPeriod);
+    preferences.putFloat(lowerDragFactorThresholdAddress, newDragFactorSettings.lowerDragFactorThreshold);
+    preferences.putFloat(upperDragFactorThresholdAddress, newDragFactorSettings.upperDragFactorThreshold);
+    preferences.putUChar(dragCoefficientsArrayLengthAddress, newDragFactorSettings.dragCoefficientsArrayLength);
+}
+
 BleServiceFlag EEPROMService::getBleServiceFlag() const
 {
     return bleServiceFlag;
@@ -165,6 +187,17 @@ RowerProfile::SensorSignalSettings EEPROMService::getSensorSignalSettings() cons
     return RowerProfile::SensorSignalSettings{
         .rotationDebounceTimeMin = rotationDebounceTimeMin,
         .rowingStoppedThresholdPeriod = rowingStoppedThresholdPeriod,
+    };
+}
+
+RowerProfile::DragFactorSettings EEPROMService::getDragFactorSettings() const
+{
+    return RowerProfile::DragFactorSettings{
+        .goodnessOfFitThreshold = goodnessOfFitThreshold,
+        .maxDragFactorRecoveryPeriod = maxDragFactorRecoveryPeriod,
+        .lowerDragFactorThreshold = lowerDragFactorThreshold,
+        .upperDragFactorThreshold = upperDragFactorThreshold,
+        .dragCoefficientsArrayLength = dragCoefficientsArrayLength,
     };
 }
 
@@ -208,6 +241,49 @@ bool EEPROMService::validateSensorSignalSettings(const RowerProfile::SensorSigna
     if (!isInBounds(newSensorSignalSettings.rowingStoppedThresholdPeriod, minRowingStoppedThresholdPeriod, std::numeric_limits<unsigned int>::max()))
     {
         Log.errorln("Invalid rowing stopped threshold period, should be greater than 4 seconds");
+
+        return false;
+    }
+
+    return true;
+}
+
+bool EEPROMService::validateDragFactorSettings(const RowerProfile::DragFactorSettings &newDragFactorSettings,
+                                               const unsigned short rotationDebounceTimeMin)
+{
+    if (!isInBounds(newDragFactorSettings.goodnessOfFitThreshold, 0.0F, 1.0F))
+    {
+        Log.errorln("Invalid goodness of fit threshold, should be between 0 and 1");
+
+        return false;
+    }
+
+    const auto maxDragFactorRecoveryDatapointCount = 1'000U;
+    const auto possibleRecoveryDatapointCount = newDragFactorSettings.maxDragFactorRecoveryPeriod / rotationDebounceTimeMin;
+    if (!isInBounds(possibleRecoveryDatapointCount, 0U, maxDragFactorRecoveryDatapointCount))
+    {
+        Log.errorln("Invalid max drag factor recovery period, theoretically the recovery may end up creating a vector with a max of %d data points (which amount in reality would depend on, among others, the drag) that would use up too much memory and crash the application. Based on the current settings it should be between 0 and %dus", possibleRecoveryDatapointCount, maxDragFactorRecoveryDatapointCount * rotationDebounceTimeMin);
+
+        return false;
+    }
+
+    if (!isInBounds(newDragFactorSettings.lowerDragFactorThreshold, 0.0F, std::numeric_limits<float>::max()))
+    {
+        Log.errorln("Invalid lower drag factor threshold, should be greater than 0");
+
+        return false;
+    }
+
+    if (!isInBounds(newDragFactorSettings.upperDragFactorThreshold, 0.0F, std::numeric_limits<float>::max()))
+    {
+        Log.errorln("Invalid upper drag factor threshold, should be greater than 0");
+
+        return false;
+    }
+
+    if (!isInBounds(newDragFactorSettings.dragCoefficientsArrayLength, static_cast<unsigned char>(1U), std::numeric_limits<unsigned char>::max()))
+    {
+        Log.errorln("Invalid drag coefficients array length, should be at least 1");
 
         return false;
     }
@@ -321,4 +397,49 @@ void EEPROMService::initializeSensorSignalSettings()
 
     Log.verboseln("%s: %d", rotationDebounceAddress, rotationDebounceTimeMin);
     Log.verboseln("%s: %d", rowingStoppedPeriodAddress, rowingStoppedThresholdPeriod);
+}
+
+void EEPROMService::initializeDragFactorSettings()
+{
+    if (!preferences.isKey(goodnessOfFitAddress))
+    {
+        Log.infoln("Setting Goodness of Fit Threshold to default");
+        preferences.putFloat(goodnessOfFitAddress, RowerProfile::Defaults::goodnessOfFitThreshold);
+    }
+
+    if (!preferences.isKey(maxDragFactorRecoveryPeriodAddress))
+    {
+        Log.infoln("Setting Max Drag Factor Recovery Period to default");
+        preferences.putUInt(maxDragFactorRecoveryPeriodAddress, RowerProfile::Defaults::maxDragFactorRecoveryPeriod);
+    }
+
+    if (!preferences.isKey(lowerDragFactorThresholdAddress))
+    {
+        Log.infoln("Setting Lower Drag Factor Threshold to default");
+        preferences.putFloat(lowerDragFactorThresholdAddress, RowerProfile::Defaults::lowerDragFactorThreshold);
+    }
+
+    if (!preferences.isKey(upperDragFactorThresholdAddress))
+    {
+        Log.infoln("Setting Upper Drag Factor Threshold to default");
+        preferences.putFloat(upperDragFactorThresholdAddress, RowerProfile::Defaults::upperDragFactorThreshold);
+    }
+
+    if (!preferences.isKey(dragCoefficientsArrayLengthAddress))
+    {
+        Log.infoln("Setting Drag Coefficients Array Length to default");
+        preferences.putUChar(dragCoefficientsArrayLengthAddress, RowerProfile::Defaults::dragCoefficientsArrayLength);
+    }
+
+    goodnessOfFitThreshold = preferences.getFloat(goodnessOfFitAddress, RowerProfile::Defaults::goodnessOfFitThreshold);
+    maxDragFactorRecoveryPeriod = preferences.getUInt(maxDragFactorRecoveryPeriodAddress, RowerProfile::Defaults::maxDragFactorRecoveryPeriod);
+    lowerDragFactorThreshold = preferences.getFloat(lowerDragFactorThresholdAddress, RowerProfile::Defaults::lowerDragFactorThreshold);
+    upperDragFactorThreshold = preferences.getFloat(upperDragFactorThresholdAddress, RowerProfile::Defaults::upperDragFactorThreshold);
+    dragCoefficientsArrayLength = preferences.getUChar(dragCoefficientsArrayLengthAddress, RowerProfile::Defaults::dragCoefficientsArrayLength);
+
+    Log.verboseln("%s: %F", goodnessOfFitAddress, goodnessOfFitThreshold);
+    Log.verboseln("%s: %d", maxDragFactorRecoveryPeriodAddress, maxDragFactorRecoveryPeriod);
+    Log.verboseln("%s: %F", lowerDragFactorThresholdAddress, lowerDragFactorThreshold);
+    Log.verboseln("%s: %F", upperDragFactorThresholdAddress, upperDragFactorThreshold);
+    Log.verboseln("%s: %d", dragCoefficientsArrayLengthAddress, dragCoefficientsArrayLength);
 }

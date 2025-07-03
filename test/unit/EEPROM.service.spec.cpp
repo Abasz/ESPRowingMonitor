@@ -25,6 +25,12 @@ TEST_CASE("EEPROMService", "[utils]")
     static constexpr const char *rotationDebounceAddress = "signalDebounce";
     static constexpr const char *rowingStoppedPeriodAddress = "rowingStopped";
 
+    static constexpr const char *goodnessOfFitAddress = "goodnessOfFit";
+    static constexpr const char *maxDragFactorRecoveryPeriodAddress = "maxDragPeriod";
+    static constexpr const char *lowerDragFactorThresholdAddress = "lowerDragFactor";
+    static constexpr const char *upperDragFactorThresholdAddress = "upperDragFactor";
+    static constexpr const char *dragCoefficientsArrayLengthAddress = "dragArraySize";
+
     SECTION("setup method")
     {
         Mock<Preferences> mockPreferences;
@@ -49,6 +55,11 @@ TEST_CASE("EEPROMService", "[utils]")
         When(Method(mockPreferences, getFloat).Using(StrEq(sprocketRadiusAddress), RowerProfile::Defaults::sprocketRadius)).Return(RowerProfile::Defaults::sprocketRadius);
         When(Method(mockPreferences, getUShort).Using(StrEq(rotationDebounceAddress), RowerProfile::Defaults::rotationDebounceTimeMin)).Return(RowerProfile::Defaults::rotationDebounceTimeMin);
         When(Method(mockPreferences, getUInt).Using(StrEq(rowingStoppedPeriodAddress), RowerProfile::Defaults::rowingStoppedThresholdPeriod)).Return(RowerProfile::Defaults::rowingStoppedThresholdPeriod);
+        When(Method(mockPreferences, getFloat).Using(StrEq(goodnessOfFitAddress), RowerProfile::Defaults::goodnessOfFitThreshold)).Return(RowerProfile::Defaults::goodnessOfFitThreshold);
+        When(Method(mockPreferences, getUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), RowerProfile::Defaults::maxDragFactorRecoveryPeriod)).Return(RowerProfile::Defaults::maxDragFactorRecoveryPeriod);
+        When(Method(mockPreferences, getFloat).Using(StrEq(lowerDragFactorThresholdAddress), RowerProfile::Defaults::lowerDragFactorThreshold)).Return(RowerProfile::Defaults::lowerDragFactorThreshold);
+        When(Method(mockPreferences, getFloat).Using(StrEq(upperDragFactorThresholdAddress), RowerProfile::Defaults::upperDragFactorThreshold)).Return(RowerProfile::Defaults::upperDragFactorThreshold);
+        When(Method(mockPreferences, getUChar).Using(StrEq(dragCoefficientsArrayLengthAddress), RowerProfile::Defaults::dragCoefficientsArrayLength)).Return(RowerProfile::Defaults::dragCoefficientsArrayLength);
 
         EEPROMService eepromService(mockPreferences.get());
         eepromService.setup();
@@ -86,6 +97,17 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), RowerProfile::Defaults::rotationDebounceTimeMin)).Once();
             Verify(Method(mockPreferences, isKey).Using(StrEq(rowingStoppedPeriodAddress))).Once();
             Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), RowerProfile::Defaults::rowingStoppedThresholdPeriod)).Once();
+
+            Verify(Method(mockPreferences, isKey).Using(StrEq(goodnessOfFitAddress))).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(goodnessOfFitAddress), RowerProfile::Defaults::goodnessOfFitThreshold)).Once();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(maxDragFactorRecoveryPeriodAddress))).Once();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), RowerProfile::Defaults::maxDragFactorRecoveryPeriod)).Once();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(lowerDragFactorThresholdAddress))).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(lowerDragFactorThresholdAddress), RowerProfile::Defaults::lowerDragFactorThreshold)).Once();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(upperDragFactorThresholdAddress))).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(upperDragFactorThresholdAddress), RowerProfile::Defaults::upperDragFactorThreshold)).Once();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(dragCoefficientsArrayLengthAddress))).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(dragCoefficientsArrayLengthAddress), RowerProfile::Defaults::dragCoefficientsArrayLength)).Once();
 #else
             Verify(Method(mockPreferences, isKey).Using(StrEq(flywheelInertiaAddress))).Never();
             Verify(Method(mockPreferences, putFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
@@ -100,6 +122,17 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), Any())).Never();
             Verify(Method(mockPreferences, isKey).Using(StrEq(rowingStoppedPeriodAddress))).Never();
             Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Never();
+
+            Verify(Method(mockPreferences, isKey).Using(StrEq(goodnessOfFitAddress))).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(goodnessOfFitAddress), Any())).Never();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(maxDragFactorRecoveryPeriodAddress))).Never();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), Any())).Never();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(lowerDragFactorThresholdAddress))).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(lowerDragFactorThresholdAddress), Any())).Never();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(upperDragFactorThresholdAddress))).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(upperDragFactorThresholdAddress), Any())).Never();
+            Verify(Method(mockPreferences, isKey).Using(StrEq(dragCoefficientsArrayLengthAddress))).Never();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(dragCoefficientsArrayLengthAddress), Any())).Never();
 #endif
         }
 
@@ -121,6 +154,12 @@ TEST_CASE("EEPROMService", "[utils]")
 
             Verify(Method(mockPreferences, getUShort).Using(StrEq(rotationDebounceAddress), RowerProfile::Defaults::rotationDebounceTimeMin)).Once();
             Verify(Method(mockPreferences, getUInt).Using(StrEq(rowingStoppedPeriodAddress), RowerProfile::Defaults::rowingStoppedThresholdPeriod)).Once();
+
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(goodnessOfFitAddress), RowerProfile::Defaults::goodnessOfFitThreshold)).Once();
+            Verify(Method(mockPreferences, getUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), RowerProfile::Defaults::maxDragFactorRecoveryPeriod)).Once();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(lowerDragFactorThresholdAddress), RowerProfile::Defaults::lowerDragFactorThreshold)).Once();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(upperDragFactorThresholdAddress), RowerProfile::Defaults::upperDragFactorThreshold)).Once();
+            Verify(Method(mockPreferences, getUChar).Using(StrEq(dragCoefficientsArrayLengthAddress), RowerProfile::Defaults::dragCoefficientsArrayLength)).Once();
 #else
             Verify(Method(mockPreferences, getFloat).Using(StrEq(flywheelInertiaAddress), Any())).Never();
             Verify(Method(mockPreferences, getFloat).Using(StrEq(concept2MagicNumberAddress), Any())).Never();
@@ -129,6 +168,12 @@ TEST_CASE("EEPROMService", "[utils]")
 
             Verify(Method(mockPreferences, getUShort).Using(StrEq(rotationDebounceAddress), Any())).Never();
             Verify(Method(mockPreferences, getUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Never();
+
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(goodnessOfFitAddress), Any())).Never();
+            Verify(Method(mockPreferences, getUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), Any())).Never();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(lowerDragFactorThresholdAddress), Any())).Never();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(upperDragFactorThresholdAddress), Any())).Never();
+            Verify(Method(mockPreferences, getUChar).Using(StrEq(dragCoefficientsArrayLengthAddress), Any())).Never();
 #endif
         }
 
@@ -146,6 +191,12 @@ TEST_CASE("EEPROMService", "[utils]")
 
             REQUIRE(eepromService.getSensorSignalSettings().rotationDebounceTimeMin == RowerProfile::Defaults::rotationDebounceTimeMin);
             REQUIRE(eepromService.getSensorSignalSettings().rowingStoppedThresholdPeriod == RowerProfile::Defaults::rowingStoppedThresholdPeriod);
+
+            REQUIRE(eepromService.getDragFactorSettings().goodnessOfFitThreshold == RowerProfile::Defaults::goodnessOfFitThreshold);
+            REQUIRE(eepromService.getDragFactorSettings().maxDragFactorRecoveryPeriod == RowerProfile::Defaults::maxDragFactorRecoveryPeriod);
+            REQUIRE(eepromService.getDragFactorSettings().lowerDragFactorThreshold == RowerProfile::Defaults::lowerDragFactorThreshold);
+            REQUIRE(eepromService.getDragFactorSettings().upperDragFactorThreshold == RowerProfile::Defaults::upperDragFactorThreshold);
+            REQUIRE(eepromService.getDragFactorSettings().dragCoefficientsArrayLength == RowerProfile::Defaults::dragCoefficientsArrayLength);
         }
     }
 
@@ -363,6 +414,120 @@ TEST_CASE("EEPROMService", "[utils]")
 
             Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), Any())).Never();
             Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Never();
+        }
+#endif
+    }
+
+    SECTION("setDragFactorSettings method should")
+    {
+        Mock<Preferences> mockPreferences;
+        When(Method(mockPreferences, putFloat)).AlwaysReturn(1);
+        When(Method(mockPreferences, putUChar)).AlwaysReturn(1);
+        When(Method(mockPreferences, putUInt)).AlwaysReturn(1);
+        EEPROMService eepromService(mockPreferences.get());
+
+#if ENABLE_RUNTIME_SETTINGS
+        SECTION("not save if any value is invalid")
+        {
+            const auto invalidGoodnessOfFitLow = RowerProfile::DragFactorSettings{
+                .goodnessOfFitThreshold = -1.0F,
+                .maxDragFactorRecoveryPeriod = 1'000'000,
+                .lowerDragFactorThreshold = 100.0F,
+                .upperDragFactorThreshold = 200.0F,
+                .dragCoefficientsArrayLength = 10,
+            };
+
+            const auto invalidGoodnessOfFitHigh = RowerProfile::DragFactorSettings{
+                .goodnessOfFitThreshold = 1.1F,
+                .maxDragFactorRecoveryPeriod = 1'000'000,
+                .lowerDragFactorThreshold = 100.0F,
+                .upperDragFactorThreshold = 200.0F,
+                .dragCoefficientsArrayLength = 10,
+            };
+
+            const auto invalidLowerDragFactor = RowerProfile::DragFactorSettings{
+                .goodnessOfFitThreshold = 0.9F,
+                .maxDragFactorRecoveryPeriod = 1'000'000,
+                .lowerDragFactorThreshold = -1.0F,
+                .upperDragFactorThreshold = 1.0F,
+                .dragCoefficientsArrayLength = 1,
+            };
+
+            const auto invalidHigherDragFactor = RowerProfile::DragFactorSettings{
+                .goodnessOfFitThreshold = 0.9F,
+                .maxDragFactorRecoveryPeriod = 1'000'000,
+                .lowerDragFactorThreshold = 0.0F,
+                .upperDragFactorThreshold = -1.0F,
+                .dragCoefficientsArrayLength = 1,
+            };
+
+            const auto invalidDragFactorRecoveryPeriod = RowerProfile::DragFactorSettings{
+                .goodnessOfFitThreshold = 0.9F,
+                .maxDragFactorRecoveryPeriod = RowerProfile::Defaults::rotationDebounceTimeMin * 1'000U + 1U,
+                .lowerDragFactorThreshold = 0.0F,
+                .upperDragFactorThreshold = -1.0F,
+                .dragCoefficientsArrayLength = 1,
+            };
+
+            const auto invalidDragCoefficientsArrayLength = RowerProfile::DragFactorSettings{
+                .goodnessOfFitThreshold = 0.9F,
+                .maxDragFactorRecoveryPeriod = 1'000'000,
+                .lowerDragFactorThreshold = 100.0F,
+                .upperDragFactorThreshold = 200.0F,
+                .dragCoefficientsArrayLength = 0,
+            };
+
+            eepromService.setDragFactorSettings(invalidGoodnessOfFitLow);
+            eepromService.setDragFactorSettings(invalidGoodnessOfFitHigh);
+            eepromService.setDragFactorSettings(invalidLowerDragFactor);
+            eepromService.setDragFactorSettings(invalidHigherDragFactor);
+            eepromService.setDragFactorSettings(invalidDragFactorRecoveryPeriod);
+            eepromService.setDragFactorSettings(invalidDragCoefficientsArrayLength);
+
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(goodnessOfFitAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(goodnessOfFitAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(lowerDragFactorThresholdAddress), Any())).Never();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(upperDragFactorThresholdAddress), Any())).Never();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), Any())).Never();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(dragCoefficientsArrayLengthAddress), Any())).Never();
+        }
+
+        SECTION("save new drag factor settings without updating backing fields")
+        {
+            const auto expectedDragFactorSettings = RowerProfile::DragFactorSettings{
+                .goodnessOfFitThreshold = 0.9F,
+                .maxDragFactorRecoveryPeriod = 1'000'000,
+                .lowerDragFactorThreshold = 100.0F,
+                .upperDragFactorThreshold = 200.0F,
+                .dragCoefficientsArrayLength = 10,
+            };
+
+            eepromService.setDragFactorSettings(expectedDragFactorSettings);
+
+            const auto dragFactorSettings = eepromService.getDragFactorSettings();
+
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(goodnessOfFitAddress), expectedDragFactorSettings.goodnessOfFitThreshold)).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(lowerDragFactorThresholdAddress), expectedDragFactorSettings.lowerDragFactorThreshold)).Once();
+            Verify(Method(mockPreferences, putFloat).Using(StrEq(upperDragFactorThresholdAddress), expectedDragFactorSettings.upperDragFactorThreshold)).Once();
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), expectedDragFactorSettings.maxDragFactorRecoveryPeriod)).Once();
+            Verify(Method(mockPreferences, putUChar).Using(StrEq(dragCoefficientsArrayLengthAddress), expectedDragFactorSettings.dragCoefficientsArrayLength)).Once();
+
+            REQUIRE(dragFactorSettings.goodnessOfFitThreshold != expectedDragFactorSettings.goodnessOfFitThreshold);
+            REQUIRE(dragFactorSettings.maxDragFactorRecoveryPeriod != expectedDragFactorSettings.maxDragFactorRecoveryPeriod);
+            REQUIRE(dragFactorSettings.lowerDragFactorThreshold != expectedDragFactorSettings.lowerDragFactorThreshold);
+            REQUIRE(dragFactorSettings.upperDragFactorThreshold != expectedDragFactorSettings.upperDragFactorThreshold);
+            REQUIRE(dragFactorSettings.dragCoefficientsArrayLength != expectedDragFactorSettings.dragCoefficientsArrayLength);
+        }
+#else
+        SECTION("not save any value if runtime settings are not enabled")
+        {
+            eepromService.setDragFactorSettings(RowerProfile::DragFactorSettings{});
+
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(goodnessOfFitAddress), Any())).Never();
+            Verify(Method(mockPreferences, getUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), Any())).Never();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(lowerDragFactorThresholdAddress), Any())).Never();
+            Verify(Method(mockPreferences, getFloat).Using(StrEq(upperDragFactorThresholdAddress), Any())).Never();
+            Verify(Method(mockPreferences, getUChar).Using(StrEq(dragCoefficientsArrayLengthAddress), Any())).Never();
         }
 #endif
     }

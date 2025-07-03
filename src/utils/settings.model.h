@@ -48,4 +48,13 @@ namespace RowerProfile
         unsigned short rotationDebounceTimeMin = Defaults::rotationDebounceTimeMin;
         unsigned int rowingStoppedThresholdPeriod = Defaults::rowingStoppedThresholdPeriod;
     };
+
+    struct DragFactorSettings
+    {
+        float goodnessOfFitThreshold = Defaults::goodnessOfFitThreshold;
+        unsigned int maxDragFactorRecoveryPeriod = Defaults::maxDragFactorRecoveryPeriod;
+        float lowerDragFactorThreshold = Defaults::lowerDragFactorThreshold;
+        float upperDragFactorThreshold = Defaults::upperDragFactorThreshold;
+        unsigned char dragCoefficientsArrayLength = Defaults::dragCoefficientsArrayLength;
+    };
 }

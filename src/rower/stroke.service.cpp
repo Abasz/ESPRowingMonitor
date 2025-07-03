@@ -23,14 +23,16 @@ StrokeService::StrokeService()
 }
 
 #if ENABLE_RUNTIME_SETTINGS
-void StrokeService::setup(const RowerProfile::MachineSettings newMachineSettings, const RowerProfile::SensorSignalSettings newSensorSignalSettings)
+void StrokeService::setup(const RowerProfile::MachineSettings newMachineSettings, const RowerProfile::SensorSignalSettings newSensorSignalSettings, const RowerProfile::DragFactorSettings newDragFactorSettings)
 {
     machineSettings = newMachineSettings;
+    dragFactorSettings = newDragFactorSettings;
 
     rowingStoppedThresholdPeriod = newSensorSignalSettings.rowingStoppedThresholdPeriod;
     angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
 
-    recoveryDeltaTimes = OLSLinearSeries(0, Configurations::defaultAllocationCapacity, RowerProfile::Defaults::maxDragFactorRecoveryPeriod / newSensorSignalSettings.rotationDebounceTimeMin / 2);
+    recoveryDeltaTimes = OLSLinearSeries(0, Configurations::defaultAllocationCapacity, newDragFactorSettings.maxDragFactorRecoveryPeriod / newSensorSignalSettings.rotationDebounceTimeMin / 2);
+    dragCoefficients = WeightedAverageSeries(dragFactorSettings.dragCoefficientsArrayLength, Configurations::defaultAllocationCapacity);
 }
 #endif
 
@@ -67,27 +69,27 @@ bool StrokeService::isFlywheelPowered()
 
 void StrokeService::calculateDragCoefficient()
 {
-    if (recoveryDuration > RowerProfile::Defaults::maxDragFactorRecoveryPeriod || recoveryDeltaTimes.size() < RowerProfile::Defaults::impulseDataArrayLength)
+    if (recoveryDuration > dragFactorSettings.maxDragFactorRecoveryPeriod || recoveryDeltaTimes.size() < RowerProfile::Defaults::impulseDataArrayLength)
     {
         return;
     }
 
     const auto goodnessOfFit = recoveryDeltaTimes.goodnessOfFit();
 
-    if (goodnessOfFit < RowerProfile::Defaults::goodnessOfFitThreshold)
+    if (goodnessOfFit < dragFactorSettings.goodnessOfFitThreshold)
     {
         return;
     }
 
     const auto rawNewDragCoefficient = (recoveryDeltaTimes.slope() * machineSettings.flywheelInertia) / angularDisplacementPerImpulse;
 
-    if (rawNewDragCoefficient > RowerProfile::Defaults::upperDragFactorThreshold ||
-        rawNewDragCoefficient < RowerProfile::Defaults::lowerDragFactorThreshold)
+    if (rawNewDragCoefficient > dragFactorSettings.upperDragFactorThreshold ||
+        rawNewDragCoefficient < dragFactorSettings.lowerDragFactorThreshold)
     {
         return;
     }
 
-    if constexpr (RowerProfile::Defaults::dragCoefficientsArrayLength < 2)
+    if (dragFactorSettings.dragCoefficientsArrayLength < 2)
     {
         dragCoefficient = rawNewDragCoefficient;
         lastValidDragCoefficient = dragCoefficient;
@@ -170,7 +172,7 @@ void StrokeService::recoveryStart()
 
 void StrokeService::recoveryUpdate()
 {
-    if (rowingTotalTime - recoveryStartTime < RowerProfile::Defaults::maxDragFactorRecoveryPeriod)
+    if (rowingTotalTime - recoveryStartTime < dragFactorSettings.maxDragFactorRecoveryPeriod)
     {
         recoveryDeltaTimes.push(static_cast<Configurations::precision>(rowingTotalTime), deltaTimes.yAtSeriesBegin());
     }

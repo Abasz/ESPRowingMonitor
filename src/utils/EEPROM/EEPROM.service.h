@@ -24,6 +24,12 @@ class EEPROMService final : public IEEPROMService
     static constexpr const char *rotationDebounceAddress = "signalDebounce";
     static constexpr const char *rowingStoppedPeriodAddress = "rowingStopped";
 
+    static constexpr const char *goodnessOfFitAddress = "goodnessOfFit";
+    static constexpr const char *maxDragFactorRecoveryPeriodAddress = "maxDragPeriod";
+    static constexpr const char *lowerDragFactorThresholdAddress = "lowerDragFactor";
+    static constexpr const char *upperDragFactorThresholdAddress = "upperDragFactor";
+    static constexpr const char *dragCoefficientsArrayLengthAddress = "dragArraySize";
+
     ArduinoLogLevel logLevel = Configurations::defaultLogLevel;
     bool logToBluetooth = Configurations::enableBluetoothDeltaTimeLogging;
     bool logToSdCard = false;
@@ -37,9 +43,16 @@ class EEPROMService final : public IEEPROMService
     unsigned short rotationDebounceTimeMin = RowerProfile::Defaults::rotationDebounceTimeMin;
     unsigned int rowingStoppedThresholdPeriod = RowerProfile::Defaults::rowingStoppedThresholdPeriod;
 
+    float goodnessOfFitThreshold = RowerProfile::Defaults::goodnessOfFitThreshold;
+    unsigned int maxDragFactorRecoveryPeriod = RowerProfile::Defaults::maxDragFactorRecoveryPeriod;
+    float lowerDragFactorThreshold = RowerProfile::Defaults::lowerDragFactorThreshold;
+    float upperDragFactorThreshold = RowerProfile::Defaults::upperDragFactorThreshold;
+    unsigned char dragCoefficientsArrayLength = RowerProfile::Defaults::dragCoefficientsArrayLength;
+
     void initializeBaseSettings();
     void initializeMachineSettings();
     void initializeSensorSignalSettings();
+    void initializeDragFactorSettings();
 
 public:
     explicit EEPROMService(Preferences &_preferences);
@@ -53,6 +66,7 @@ public:
 
     void setMachineSettings(RowerProfile::MachineSettings newMachineSettings) override;
     void setSensorSignalSettings(RowerProfile::SensorSignalSettings newSensorSignalSettings) override;
+    void setDragFactorSettings(RowerProfile::DragFactorSettings newDragFactorSettings) override;
 
     BleServiceFlag getBleServiceFlag() const override;
     ArduinoLogLevel getLogLevel() const override;
@@ -61,7 +75,9 @@ public:
 
     RowerProfile::MachineSettings getMachineSettings() const override;
     RowerProfile::SensorSignalSettings getSensorSignalSettings() const override;
+    RowerProfile::DragFactorSettings getDragFactorSettings() const override;
 
     static bool validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings);
     static bool validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings);
+    static bool validateDragFactorSettings(const RowerProfile::DragFactorSettings &newDragFactorSettings, unsigned short rotationDebounceTimeMin);
 };

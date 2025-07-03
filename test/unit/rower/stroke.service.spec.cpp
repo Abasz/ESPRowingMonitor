@@ -23,7 +23,7 @@ TEST_CASE("StrokeService")
 #if ENABLE_RUNTIME_SETTINGS
     SECTION("setup method should")
     {
-        SECTION("update sensor signal related settings")
+        SECTION("change sensor signal related settings")
         {
             ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");
             REQUIRE(deltaTimesStream.good());
@@ -47,6 +47,62 @@ TEST_CASE("StrokeService")
                                 RowerProfile::SensorSignalSettings{
                                     .rotationDebounceTimeMin = RowerProfile::Defaults::rotationDebounceTimeMin,
                                     .rowingStoppedThresholdPeriod = 10'000'000,
+                                },
+                                RowerProfile::DragFactorSettings{});
+
+            for (const auto &deltaTime : deltaTimes)
+            {
+                totalAngularDisplacement += angularDisplacementPerImpulse;
+                totalTime += deltaTime;
+                rawImpulseCount++;
+                RowingDataModels::FlywheelData data{
+                    .rawImpulseCount = rawImpulseCount,
+                    .deltaTime = deltaTime,
+                    .totalTime = totalTime,
+                    .totalAngularDisplacement = totalAngularDisplacement,
+                    .cleanImpulseTime = totalTime,
+                    .rawImpulseTime = totalTime,
+                };
+                strokeService.processData(data);
+            }
+
+            const auto rowingMetrics = strokeService.getData();
+
+            REQUIRE(rowingMetrics.strokeCount == 10);
+            REQUIRE(rowingMetrics.lastStrokeTime == 32'573'215);
+            const auto expectedDistance = 9'741.64407532888799324;
+            REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(expectedDistance, 0.0000001));
+            REQUIRE(rowingMetrics.lastRevTime == 42'586'444);
+        }
+
+        SECTION("change drag factor related settings")
+        {
+            ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");
+            REQUIRE(deltaTimesStream.good());
+
+            vector<unsigned long> deltaTimes;
+            const auto arraySize = 1'764;
+            deltaTimes.reserve(arraySize);
+
+            unsigned long deltaTime = 0;
+            while (deltaTimesStream >> deltaTime)
+            {
+                deltaTimes.push_back(deltaTime);
+            }
+
+            auto rawImpulseCount = 0UL;
+            auto totalTime = 0UL;
+            Configurations::precision totalAngularDisplacement = 0.0;
+
+            StrokeService strokeService;
+            strokeService.setup(RowerProfile::MachineSettings{},
+                                RowerProfile::SensorSignalSettings{},
+                                RowerProfile::DragFactorSettings{
+                                    .goodnessOfFitThreshold = 0.1,
+                                    .maxDragFactorRecoveryPeriod = 2'000'000,
+                                    .lowerDragFactorThreshold = 0.0,
+                                    .upperDragFactorThreshold = 1.0,
+                                    .dragCoefficientsArrayLength = 10,
                                 });
 
             for (const auto &deltaTime : deltaTimes)
@@ -69,8 +125,8 @@ TEST_CASE("StrokeService")
 
             REQUIRE(rowingMetrics.strokeCount == 10);
             REQUIRE(rowingMetrics.lastStrokeTime == 32'573'215);
-            REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(9'741.64407532888799324, 0.0000001));
-            REQUIRE(rowingMetrics.lastRevTime == 42'586'444);
+            REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(9'318.94758182254736312, 0.0000001));
+            REQUIRE(rowingMetrics.lastRevTime == 39'577'207);
         }
 
         SECTION("change machine related settings")
@@ -101,7 +157,7 @@ TEST_CASE("StrokeService")
                                     .concept2MagicNumber = 2.9F,
                                     .sprocketRadius = 0.02F,
                                 },
-                                RowerProfile::SensorSignalSettings{});
+                                RowerProfile::SensorSignalSettings{}, RowerProfile::DragFactorSettings{});
 
             const auto angularDisplacementMachineSettings = (2 * PI) / impulsesPerRevolution;
 

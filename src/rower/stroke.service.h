@@ -12,6 +12,7 @@ class StrokeService final : public IStrokeService
 {
     // Machine settings
     RowerProfile::MachineSettings machineSettings;
+    RowerProfile::DragFactorSettings dragFactorSettings;
 
     unsigned int rowingStoppedThresholdPeriod = RowerProfile::Defaults::rowingStoppedThresholdPeriod;
 
@@ -82,7 +83,7 @@ public:
     StrokeService();
 
 #if ENABLE_RUNTIME_SETTINGS
-    void setup(RowerProfile::MachineSettings newMachineSettings, RowerProfile::SensorSignalSettings newSensorSignalSettings) override;
+    void setup(RowerProfile::MachineSettings newMachineSettings, RowerProfile::SensorSignalSettings newSensorSignalSettings, RowerProfile::DragFactorSettings newDragFactorSettings) override;
 #endif
 
     RowingDataModels::RowingMetrics getData() override;
