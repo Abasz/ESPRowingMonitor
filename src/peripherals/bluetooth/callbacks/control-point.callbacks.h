@@ -17,6 +17,7 @@ class ControlPointCallbacks final : public NimBLECharacteristicCallbacks
     ResponseOpCodes processDeltaTimeLogging(const NimBLEAttValue &message);
     void processBleServiceChange(const NimBLEAttValue &message, NimBLECharacteristic *pCharacteristic);
     ResponseOpCodes processMachineSettingsChange(const NimBLEAttValue &message);
+    ResponseOpCodes processSensorSignalSettingsChange(const NimBLEAttValue &message);
 
 public:
     explicit ControlPointCallbacks(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService);

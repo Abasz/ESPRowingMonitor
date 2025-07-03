@@ -48,6 +48,8 @@ std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleS
     const auto mToCm = 100.F;
     const auto sprocketRadius = static_cast<unsigned short>(roundf(machineSettings.sprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
 
+    const auto sensorSignalSettings = eepromService.getSensorSignalSettings();
+
     std::array<unsigned char, ISettingsBleService::settingsPayloadSize>
         temp = {
             baseSettings,
@@ -59,6 +61,8 @@ std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleS
             machineSettings.impulsesPerRevolution,
             static_cast<unsigned char>(sprocketRadius),
             static_cast<unsigned char>(sprocketRadius >> 8),
+            static_cast<unsigned char>(sensorSignalSettings.rotationDebounceTimeMin / ISettingsBleService::debounceTimeScale),
+            static_cast<unsigned char>(sensorSignalSettings.rowingStoppedThresholdPeriod / ISettingsBleService::rowingStoppedThresholdScale),
         };
 
     return temp;

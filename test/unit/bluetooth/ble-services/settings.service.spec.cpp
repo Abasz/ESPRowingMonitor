@@ -40,6 +40,9 @@ TEST_CASE("SettingsBleService", "[ble-service]")
     constexpr auto mToCm = 100.0F;
     const auto sprocketRadius = static_cast<unsigned short>(roundf(RowerProfile::Defaults::sprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
 
+    const auto rotationDebounceTimeMin = static_cast<unsigned char>(RowerProfile::Defaults::rotationDebounceTimeMin / ISettingsBleService::debounceTimeScale);
+    const auto rowingStoppedThresholdPeriod = static_cast<unsigned char>(RowerProfile::Defaults::rowingStoppedThresholdPeriod / ISettingsBleService::rowingStoppedThresholdScale);
+
     const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedInitialSettings = {
         settings,
         static_cast<unsigned char>(flywheelInertia),
@@ -50,6 +53,8 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         RowerProfile::Defaults::impulsesPerRevolution,
         static_cast<unsigned char>(sprocketRadius),
         static_cast<unsigned char>(sprocketRadius >> 8),
+        rotationDebounceTimeMin,
+        rowingStoppedThresholdPeriod,
     };
 
     When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string))).AlwaysReturn(&mockSettingsService.get());
@@ -63,6 +68,7 @@ TEST_CASE("SettingsBleService", "[ble-service]")
     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(logToSdCard);
     When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(logLevel);
     When(Method(mockEEPROMService, getMachineSettings)).AlwaysReturn(RowerProfile::MachineSettings{});
+    When(Method(mockEEPROMService, getSensorSignalSettings)).AlwaysReturn(RowerProfile::SensorSignalSettings{});
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(logFileOpen);
 
     SettingsBleService settingsBleService(mockSdCardService.get(), mockEEPROMService.get());
@@ -138,6 +144,7 @@ TEST_CASE("SettingsBleService", "[ble-service]")
             Verify(Method(mockEEPROMService, getLogToSdCard)).Once();
             Verify(Method(mockEEPROMService, getLogLevel)).Once();
             Verify(Method(mockEEPROMService, getMachineSettings)).Once();
+            Verify(Method(mockEEPROMService, getSensorSignalSettings)).Once();
             Verify(Method(mockSdCardService, isLogFileOpen)).Once();
 
             SECTION("and split MachineSettings correctly into bytes")
@@ -160,6 +167,23 @@ TEST_CASE("SettingsBleService", "[ble-service]")
                 REQUIRE(concept2MagicNumber == RowerProfile::Defaults::concept2MagicNumber);
                 REQUIRE(impulsesPerRevolution == RowerProfile::Defaults::impulsesPerRevolution);
                 REQUIRE(sprocketRadius == RowerProfile::Defaults::sprocketRadius);
+            }
+
+            SECTION("and split SensorSignalSettings correctly into bytes")
+            {
+                unsigned short debounceTimeMin = 0;
+                unsigned int rowingStoppedThresholdPeriod = 0;
+
+                When(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>)))
+                    .Do([&debounceTimeMin, &rowingStoppedThresholdPeriod](const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> &settings)
+                        {
+                        debounceTimeMin = settings[9] * ISettingsBleService::debounceTimeScale;
+                        rowingStoppedThresholdPeriod = settings[10] * ISettingsBleService::rowingStoppedThresholdScale; });
+
+                settingsBleService.broadcastSettings();
+
+                REQUIRE(debounceTimeMin == RowerProfile::Defaults::rotationDebounceTimeMin);
+                REQUIRE(rowingStoppedThresholdPeriod == RowerProfile::Defaults::rowingStoppedThresholdPeriod);
             }
 
             SECTION("and calculate correct setting binary value")

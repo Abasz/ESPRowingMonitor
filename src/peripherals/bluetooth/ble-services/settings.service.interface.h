@@ -14,6 +14,8 @@ protected:
 public:
     static constexpr auto magicNumberScale = 35.0F;
     static constexpr auto sprocketRadiusScale = 1000.0F;
+    static constexpr unsigned short debounceTimeScale = 1'000U;
+    static constexpr unsigned int rowingStoppedThresholdScale = 1'000'000U;
 
     static constexpr unsigned char baseSettingsPayloadSize = 1U;
 
@@ -23,7 +25,11 @@ public:
     static constexpr unsigned char impulsesPerRevolutionPayloadSize = 1U;
     static constexpr unsigned char machineSettingsPayloadSize = flywheelInertiaPayloadSize + magicNumberPayloadSize + sprocketRadiusPayloadSize + impulsesPerRevolutionPayloadSize;
 
-    static constexpr unsigned char settingsPayloadSize = baseSettingsPayloadSize + machineSettingsPayloadSize;
+    static constexpr unsigned char rotationDebouncePayloadSize = 1U;
+    static constexpr unsigned char rowingStoppedThresholdPayloadSize = 1U;
+    static constexpr unsigned char sensorSignalSettingsPayloadSize = rotationDebouncePayloadSize + rowingStoppedThresholdPayloadSize;
+
+    static constexpr unsigned char settingsPayloadSize = baseSettingsPayloadSize + machineSettingsPayloadSize + sensorSignalSettingsPayloadSize;
 
     virtual NimBLEService *setup(NimBLEServer *server) = 0;
     virtual void broadcastSettings() const = 0;

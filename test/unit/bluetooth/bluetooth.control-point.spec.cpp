@@ -38,6 +38,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
     Fake(Method(mockEEPROMService, setLogToSdCard));
     Fake(Method(mockEEPROMService, setLogToBluetooth));
     Fake(Method(mockEEPROMService, setMachineSettings));
+    Fake(Method(mockEEPROMService, setSensorSignalSettings));
 
     Fake(Method(mockSettingsBleService, broadcastSettings));
 
@@ -526,6 +527,124 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                         REQUIRE(newSettings.concept2MagicNumber == expectedMagicNumber);
                         REQUIRE(newSettings.impulsesPerRevolution == expectedImpulsesPerRevolution);
                         REQUIRE(newSettings.sprocketRadius == expectedSprocketRadius);
+
+                        return true; }))
+                    .Once();
+            }
+
+            SECTION("notify new settings")
+            {
+                Verify(Method(mockSettingsBleService, broadcastSettings)).Once();
+            }
+
+            SECTION("indicate Success response")
+            {
+                Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+                Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+                Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                           .Using(Eq(successResponse)))
+                    .Once();
+            }
+        }
+#else
+        SECTION("and when runtime settings are disabled return UnsupportedOpCode response")
+        {
+            std::array<unsigned char, 3U> unsupportedParameterResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetMachineSettings),
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({
+                std::to_underlying(SettingsOpCodes::SetMachineSettings),
+            });
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(unsupportedParameterResponse)))
+                .Once();
+        }
+#endif
+    }
+
+    SECTION("handle SetSensorSignalSettings request")
+    {
+#if ENABLE_RUNTIME_SETTINGS
+        SECTION("and when settings payload size is invalid return InvalidParameter response")
+        {
+            std::array<unsigned char, 3U> invalidParameterResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetSensorSignalSettings),
+                std::to_underlying(ResponseOpCodes::InvalidParameter),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({
+                std::to_underlying(SettingsOpCodes::SetSensorSignalSettings),
+                10,
+            });
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(invalidParameterResponse)))
+                .Once();
+        }
+
+        SECTION("and when settings values are invalid return OperationFailed response")
+        {
+            std::array<unsigned char, 3U> operationsFailedResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetSensorSignalSettings),
+                std::to_underlying(ResponseOpCodes::OperationFailed),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({
+                std::to_underlying(SettingsOpCodes::SetSensorSignalSettings),
+                0,
+                3,
+            });
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(operationsFailedResponse)))
+                .Once();
+        }
+
+        SECTION("and when SensorSignalSettings is valid")
+        {
+            std::array<unsigned char, 3U> successResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetSensorSignalSettings),
+                std::to_underlying(ResponseOpCodes::Successful),
+            };
+
+            const unsigned char expectedRotationDebounce = 1U;
+            const unsigned char expectedRowingStoppedThresholdPeriod = 4U;
+
+            const NimBLEAttValue payload = {
+                std::to_underlying(SettingsOpCodes::SetSensorSignalSettings),
+                expectedRotationDebounce,
+                expectedRowingStoppedThresholdPeriod,
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return(payload);
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            SECTION("save new sensor signal settings to EEPROM")
+            {
+                Verify(Method(mockEEPROMService, setSensorSignalSettings).Matching([](const RowerProfile::SensorSignalSettings newSettings)
+                                                                                   {
+                        REQUIRE(newSettings.rotationDebounceTimeMin == static_cast<unsigned short>(expectedRotationDebounce * ISettingsBleService::debounceTimeScale));
+                        REQUIRE(newSettings.rowingStoppedThresholdPeriod == expectedRowingStoppedThresholdPeriod * ISettingsBleService::rowingStoppedThresholdScale);
 
                         return true; }))
                     .Once();

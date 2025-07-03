@@ -143,6 +143,36 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         break;
     }
 
+    case std::to_underlying(SettingsOpCodes::SetSensorSignalSettings):
+    {
+        Log.infoln("Change Sensor Signal Filter Settings");
+
+        if constexpr (!Configurations::isRuntimeSettingsEnabled)
+        {
+            array<unsigned char, 3U> temp = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                message[0],
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
+            };
+
+            pCharacteristic->setValue(temp);
+
+            break;
+        }
+
+        const auto response = processSensorSignalSettingsChange(message);
+
+        array<unsigned char, 3U> temp = {
+            std::to_underlying(SettingsOpCodes::ResponseCode),
+            message[0],
+            std::to_underlying(response),
+        };
+
+        pCharacteristic->setValue(temp);
+
+        break;
+    }
+
     case std::to_underlying(SettingsOpCodes::RestartDevice):
     {
         Log.verboseln("Restarting device...");
@@ -298,6 +328,39 @@ ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLE
     }
 
     eepromService.setMachineSettings(newMachineSettings);
+
+    settingsBleService.broadcastSettings();
+
+    return ResponseOpCodes::Successful;
+}
+
+ResponseOpCodes ControlPointCallbacks::processSensorSignalSettingsChange(const NimBLEAttValue &message)
+{
+    const auto opCodePayloadSize = 1U;
+    if (message.size() != opCodePayloadSize + ISettingsBleService::sensorSignalSettingsPayloadSize)
+    {
+        Log.infoln("Malformed OP command for sensor signal settings");
+
+        return ResponseOpCodes::InvalidParameter;
+    }
+    auto bytePosition = opCodePayloadSize;
+
+    const unsigned short rotationDebounce = message[bytePosition] * static_cast<unsigned short>(ISettingsBleService::debounceTimeScale);
+    bytePosition += ISettingsBleService::rotationDebouncePayloadSize;
+
+    const auto rowingStoppedThresholdPeriod = message[bytePosition] * static_cast<unsigned int>(ISettingsBleService::rowingStoppedThresholdScale);
+
+    const RowerProfile::SensorSignalSettings newSensorSignalSettings{
+        .rotationDebounceTimeMin = rotationDebounce,
+        .rowingStoppedThresholdPeriod = rowingStoppedThresholdPeriod,
+    };
+
+    if (!EEPROMService::validateSensorSignalSettings(newSensorSignalSettings))
+    {
+        return ResponseOpCodes::OperationFailed;
+    }
+
+    eepromService.setSensorSignalSettings(newSensorSignalSettings);
 
     settingsBleService.broadcastSettings();
 
