@@ -45,9 +45,13 @@ void PeripheralsController::begin()
     {
         rotationDebounceTimeMin = eepromService.getSensorSignalSettings().rotationDebounceTimeMin;
 
+        const auto strokePhaseDetectionSettings = eepromService.getStrokePhaseDetectionSettings();
+        minimumRecoveryTime = strokePhaseDetectionSettings.minimumRecoveryTime;
+        minimumDriveTime = strokePhaseDetectionSettings.minimumDriveTime;
+
         sdDeltaTimes.clear();
         sdDeltaTimes.shrink_to_fit();
-        sdDeltaTimes.reserve((RowerProfile::Defaults::minimumRecoveryTime + RowerProfile::Defaults::minimumDriveTime) / rotationDebounceTimeMin);
+        sdDeltaTimes.reserve((minimumRecoveryTime + minimumDriveTime) / rotationDebounceTimeMin);
     }
 
     Log.infoln("Setting up peripherals");
@@ -134,7 +138,7 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
         if (!sdDeltaTimes.empty())
         {
             vector<unsigned long> clear;
-            clear.reserve((RowerProfile::Defaults::minimumRecoveryTime + RowerProfile::Defaults::minimumDriveTime) / rotationDebounceTimeMin);
+            clear.reserve((minimumRecoveryTime + minimumDriveTime) / rotationDebounceTimeMin);
             sdDeltaTimes.swap(clear);
         }
     }

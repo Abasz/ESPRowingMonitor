@@ -57,4 +57,17 @@ namespace RowerProfile
         float upperDragFactorThreshold = Defaults::upperDragFactorThreshold;
         unsigned char dragCoefficientsArrayLength = Defaults::dragCoefficientsArrayLength;
     };
+
+    struct StrokePhaseDetectionSettings
+    {
+        StrokeDetectionType strokeDetectionType = Defaults::strokeDetectionType;
+        float minimumPoweredTorque = Defaults::minimumPoweredTorque;
+        float minimumDragTorque = Defaults::minimumDragTorque;
+        float minimumRecoverySlopeMargin = Defaults::minimumRecoverySlopeMargin;
+        float minimumRecoverySlope = Defaults::minimumRecoverySlope;
+        unsigned int minimumRecoveryTime = Defaults::minimumRecoveryTime;
+        unsigned int minimumDriveTime = Defaults::minimumDriveTime;
+        unsigned char impulseDataArrayLength = Defaults::impulseDataArrayLength;
+        unsigned char driveHandleForcesMaxCapacity = Defaults::driveHandleForcesMaxCapacity;
+    };
 }

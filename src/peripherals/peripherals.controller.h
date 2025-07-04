@@ -19,6 +19,8 @@ class PeripheralsController final : public IPeripheralsController
     IEEPROMService &eepromService;
 
     unsigned short rotationDebounceTimeMin = RowerProfile::Defaults::rotationDebounceTimeMin;
+    unsigned int minimumRecoveryTime = RowerProfile::Defaults::minimumRecoveryTime;
+    unsigned int minimumDriveTime = RowerProfile::Defaults::minimumDriveTime;
 
     unsigned int lastConnectedDeviceCheckTime = 0;
 

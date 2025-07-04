@@ -10,7 +10,7 @@ protected:
 
 public:
 #if ENABLE_RUNTIME_SETTINGS
-    virtual void setup(RowerProfile::MachineSettings newMachineSettings, RowerProfile::SensorSignalSettings newSensorSignalSettings, RowerProfile::DragFactorSettings newDragFactorSettings) = 0;
+    virtual void setup(RowerProfile::MachineSettings newMachineSettings, RowerProfile::SensorSignalSettings newSensorSignalSettings, RowerProfile::DragFactorSettings newDragFactorSettings, RowerProfile::StrokePhaseDetectionSettings newStrokeDetectionSettings) = 0;
 #endif
     virtual RowingDataModels::RowingMetrics getData() = 0;
     virtual void processData(RowingDataModels::FlywheelData data) = 0;

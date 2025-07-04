@@ -23,6 +23,65 @@ TEST_CASE("StrokeService")
 #if ENABLE_RUNTIME_SETTINGS
     SECTION("setup method should")
     {
+        SECTION("change stroke phase detection related settings")
+        {
+            ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");
+            REQUIRE(deltaTimesStream.good());
+
+            vector<unsigned long> deltaTimes;
+            const auto arraySize = 1'764;
+            deltaTimes.reserve(arraySize);
+
+            unsigned long deltaTime = 0;
+            while (deltaTimesStream >> deltaTime)
+            {
+                deltaTimes.push_back(deltaTime);
+            }
+
+            auto rawImpulseCount = 0UL;
+            auto totalTime = 0UL;
+            Configurations::precision totalAngularDisplacement = 0.0;
+
+            StrokeService strokeService;
+            strokeService.setup(RowerProfile::MachineSettings{},
+                                RowerProfile::SensorSignalSettings{},
+                                RowerProfile::DragFactorSettings{},
+                                RowerProfile::StrokePhaseDetectionSettings{
+                                    .strokeDetectionType = StrokeDetectionType::Torque,
+                                    .minimumPoweredTorque = 0.5F,
+                                    .minimumDragTorque = 0.2F,
+                                    .minimumRecoverySlopeMargin = 0.000001F,
+                                    .minimumRecoverySlope = -0.1F,
+                                    .minimumRecoveryTime = 500'000,
+                                    .minimumDriveTime = 200'000,
+                                    .impulseDataArrayLength = 10,
+                                    .driveHandleForcesMaxCapacity = 15,
+                                });
+
+            for (const auto &deltaTime : deltaTimes)
+            {
+                totalAngularDisplacement += angularDisplacementPerImpulse;
+                totalTime += deltaTime;
+                rawImpulseCount++;
+                RowingDataModels::FlywheelData data{
+                    .rawImpulseCount = rawImpulseCount,
+                    .deltaTime = deltaTime,
+                    .totalTime = totalTime,
+                    .totalAngularDisplacement = totalAngularDisplacement,
+                    .cleanImpulseTime = totalTime,
+                    .rawImpulseTime = totalTime,
+                };
+                strokeService.processData(data);
+            }
+
+            const auto rowingMetrics = strokeService.getData();
+
+            REQUIRE(rowingMetrics.strokeCount == 17);
+            REQUIRE(rowingMetrics.lastStrokeTime == 31'851'264);
+            REQUIRE_THAT(rowingMetrics.distance, Catch::Matchers::WithinRel(9'175.75398753580520861, 0.0000001));
+            REQUIRE(rowingMetrics.lastRevTime == 38'863'369);
+        }
+
         SECTION("change sensor signal related settings")
         {
             ifstream deltaTimesStream("test/unit/rower/test-data/stroke.service.spec.deltaTimes.txt");
@@ -48,7 +107,8 @@ TEST_CASE("StrokeService")
                                     .rotationDebounceTimeMin = RowerProfile::Defaults::rotationDebounceTimeMin,
                                     .rowingStoppedThresholdPeriod = 10'000'000,
                                 },
-                                RowerProfile::DragFactorSettings{});
+                                RowerProfile::DragFactorSettings{},
+                                RowerProfile::StrokePhaseDetectionSettings{});
 
             for (const auto &deltaTime : deltaTimes)
             {
@@ -103,7 +163,8 @@ TEST_CASE("StrokeService")
                                     .lowerDragFactorThreshold = 0.0,
                                     .upperDragFactorThreshold = 1.0,
                                     .dragCoefficientsArrayLength = 10,
-                                });
+                                },
+                                RowerProfile::StrokePhaseDetectionSettings{});
 
             for (const auto &deltaTime : deltaTimes)
             {
@@ -157,7 +218,7 @@ TEST_CASE("StrokeService")
                                     .concept2MagicNumber = 2.9F,
                                     .sprocketRadius = 0.02F,
                                 },
-                                RowerProfile::SensorSignalSettings{}, RowerProfile::DragFactorSettings{});
+                                RowerProfile::SensorSignalSettings{}, RowerProfile::DragFactorSettings{}, RowerProfile::StrokePhaseDetectionSettings{});
 
             const auto angularDisplacementMachineSettings = (2 * PI) / impulsesPerRevolution;
 

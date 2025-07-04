@@ -49,6 +49,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
     When(Method(mockEEPROMService, getLogToSdCard)).AlwaysReturn(false);
     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(false);
     When(Method(mockEEPROMService, getSensorSignalSettings)).AlwaysReturn(RowerProfile::SensorSignalSettings{});
+    When(Method(mockEEPROMService, getStrokePhaseDetectionSettings)).AlwaysReturn(RowerProfile::StrokePhaseDetectionSettings{});
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(false);
     Fake(Method(mockSdCardService, saveDeltaTime));
 

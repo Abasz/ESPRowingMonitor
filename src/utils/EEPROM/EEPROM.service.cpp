@@ -27,6 +27,7 @@ void EEPROMService::setup()
         initializeMachineSettings();
         initializeSensorSignalSettings();
         initializeDragFactorSettings();
+        initializeStrokePhaseDetectionSettings();
     }
 
     Log.verboseln("Free NVS entries: %u", preferences.freeEntries());
@@ -152,6 +153,31 @@ void EEPROMService::setDragFactorSettings(const RowerProfile::DragFactorSettings
     preferences.putUChar(dragCoefficientsArrayLengthAddress, newDragFactorSettings.dragCoefficientsArrayLength);
 }
 
+void EEPROMService::setStrokePhaseDetectionSettings(const RowerProfile::StrokePhaseDetectionSettings newStrokePhaseDetectionSettings)
+{
+    if constexpr (!Configurations::isRuntimeSettingsEnabled)
+    {
+        Log.warningln("Not able to set stroke phase detection settings as runtime settings is not enabled");
+
+        return;
+    }
+
+    if (!EEPROMService::validateStrokePhaseDetectionSettings(newStrokePhaseDetectionSettings))
+    {
+        return;
+    }
+
+    preferences.putUChar(strokeDetectionTypeAddress, std::to_underlying(newStrokePhaseDetectionSettings.strokeDetectionType));
+    preferences.putFloat(minimumPoweredTorqueAddress, newStrokePhaseDetectionSettings.minimumPoweredTorque);
+    preferences.putFloat(minimumDragTorqueAddress, newStrokePhaseDetectionSettings.minimumDragTorque);
+    preferences.putFloat(minimumRecoverySlopeMarginAddress, newStrokePhaseDetectionSettings.minimumRecoverySlopeMargin);
+    preferences.putFloat(minimumRecoverySlopeAddress, newStrokePhaseDetectionSettings.minimumRecoverySlope);
+    preferences.putUInt(minimumRecoveryTimeAddress, newStrokePhaseDetectionSettings.minimumRecoveryTime);
+    preferences.putUInt(minimumDriveTimeAddress, newStrokePhaseDetectionSettings.minimumDriveTime);
+    preferences.putUChar(impulseDataArrayLengthAddress, newStrokePhaseDetectionSettings.impulseDataArrayLength);
+    preferences.putUChar(driveHandleForcesMaxCapacityAddress, newStrokePhaseDetectionSettings.driveHandleForcesMaxCapacity);
+}
+
 BleServiceFlag EEPROMService::getBleServiceFlag() const
 {
     return bleServiceFlag;
@@ -198,6 +224,22 @@ RowerProfile::DragFactorSettings EEPROMService::getDragFactorSettings() const
         .lowerDragFactorThreshold = lowerDragFactorThreshold,
         .upperDragFactorThreshold = upperDragFactorThreshold,
         .dragCoefficientsArrayLength = dragCoefficientsArrayLength,
+    };
+}
+
+RowerProfile::StrokePhaseDetectionSettings EEPROMService::getStrokePhaseDetectionSettings() const
+{
+    return RowerProfile::StrokePhaseDetectionSettings
+    {
+        .strokeDetectionType = strokeDetectionType,
+        .minimumPoweredTorque = minimumPoweredTorque,
+        .minimumDragTorque = minimumDragTorque,
+        .minimumRecoverySlopeMargin = minimumRecoverySlopeMargin,
+        .minimumRecoverySlope = minimumRecoverySlope,
+        .minimumRecoveryTime = minimumRecoveryTime,
+        .minimumDriveTime = minimumDriveTime,
+        .impulseDataArrayLength = impulseDataArrayLength,
+        .driveHandleForcesMaxCapacity = driveHandleForcesMaxCapacity,
     };
 }
 
@@ -284,6 +326,33 @@ bool EEPROMService::validateDragFactorSettings(const RowerProfile::DragFactorSet
     if (!isInBounds(newDragFactorSettings.dragCoefficientsArrayLength, static_cast<unsigned char>(1U), std::numeric_limits<unsigned char>::max()))
     {
         Log.errorln("Invalid drag coefficients array length, should be at least 1");
+
+        return false;
+    }
+
+    return true;
+}
+
+bool EEPROMService::validateStrokePhaseDetectionSettings(const RowerProfile::StrokePhaseDetectionSettings &newStrokePhaseDetectionSettings)
+{
+    if (!isInBounds(newStrokePhaseDetectionSettings.minimumRecoverySlopeMargin, 0.0F, std::numeric_limits<float>::max()))
+    {
+        Log.errorln("Invalid minimum recovery slope margin, should be greater than 0");
+
+        return false;
+    }
+
+    constexpr unsigned char maxImpulseLength = std::is_same_v<Configurations::precision, float> ? maxImpulseWhenFloat : maxImpulseWhenDouble;
+    if (!isInBounds(newStrokePhaseDetectionSettings.impulseDataArrayLength, static_cast<unsigned char>(3U), maxImpulseLength))
+    {
+        Log.errorln("Invalid impulse data array length, should be between 3 and %d", maxImpulseLength);
+
+        return false;
+    }
+
+    if (!isInBounds(newStrokePhaseDetectionSettings.driveHandleForcesMaxCapacity, static_cast<unsigned char>(1U), std::numeric_limits<unsigned char>::max()))
+    {
+        Log.errorln("Invalid drive handle forces max capacity, should be between 1 and %d", std::numeric_limits<unsigned char>::max());
 
         return false;
     }
@@ -442,4 +511,81 @@ void EEPROMService::initializeDragFactorSettings()
     Log.verboseln("%s: %F", lowerDragFactorThresholdAddress, lowerDragFactorThreshold);
     Log.verboseln("%s: %F", upperDragFactorThresholdAddress, upperDragFactorThreshold);
     Log.verboseln("%s: %d", dragCoefficientsArrayLengthAddress, dragCoefficientsArrayLength);
+}
+
+void EEPROMService::initializeStrokePhaseDetectionSettings()
+{
+    if (!preferences.isKey(strokeDetectionTypeAddress))
+    {
+        Log.infoln("Setting Stroke Detection Type to default");
+        preferences.putUChar(strokeDetectionTypeAddress, std::to_underlying(RowerProfile::Defaults::strokeDetectionType));
+    }
+
+    if (!preferences.isKey(minimumPoweredTorqueAddress))
+    {
+        Log.infoln("Setting Minimum Powered Torque to default");
+        preferences.putFloat(minimumPoweredTorqueAddress, RowerProfile::Defaults::minimumPoweredTorque);
+    }
+
+    if (!preferences.isKey(minimumDragTorqueAddress))
+    {
+        Log.infoln("Setting Minimum Drag Torque to default");
+        preferences.putFloat(minimumDragTorqueAddress, RowerProfile::Defaults::minimumDragTorque);
+    }
+
+    if (!preferences.isKey(minimumRecoverySlopeMarginAddress))
+    {
+        Log.infoln("Setting Minimum Recovery Slope Margin to default");
+        preferences.putFloat(minimumRecoverySlopeMarginAddress, RowerProfile::Defaults::minimumRecoverySlopeMargin);
+    }
+
+    if (!preferences.isKey(minimumRecoverySlopeAddress))
+    {
+        Log.infoln("Setting Minimum Recovery Slope to default");
+        preferences.putFloat(minimumRecoverySlopeAddress, RowerProfile::Defaults::minimumRecoverySlope);
+    }
+
+    if (!preferences.isKey(minimumRecoveryTimeAddress))
+    {
+        Log.infoln("Setting Minimum Recovery Time to default");
+        preferences.putUInt(minimumRecoveryTimeAddress, RowerProfile::Defaults::minimumRecoveryTime);
+    }
+
+    if (!preferences.isKey(minimumDriveTimeAddress))
+    {
+        Log.infoln("Setting Minimum Drive Time to default");
+        preferences.putUInt(minimumDriveTimeAddress, RowerProfile::Defaults::minimumDriveTime);
+    }
+
+    if (!preferences.isKey(impulseDataArrayLengthAddress))
+    {
+        Log.infoln("Setting Impulse Data Array Length to default");
+        preferences.putUChar(impulseDataArrayLengthAddress, RowerProfile::Defaults::impulseDataArrayLength);
+    }
+
+    if (!preferences.isKey(driveHandleForcesMaxCapacityAddress))
+    {
+        Log.infoln("Setting Drive Handle Forces Max Capacity to default");
+        preferences.putUChar(driveHandleForcesMaxCapacityAddress, RowerProfile::Defaults::driveHandleForcesMaxCapacity);
+    }
+
+    strokeDetectionType = StrokeDetectionType{preferences.getUChar(strokeDetectionTypeAddress, std::to_underlying(RowerProfile::Defaults::strokeDetectionType))};
+    minimumPoweredTorque = preferences.getFloat(minimumPoweredTorqueAddress, RowerProfile::Defaults::minimumPoweredTorque);
+    minimumDragTorque = preferences.getFloat(minimumDragTorqueAddress, RowerProfile::Defaults::minimumDragTorque);
+    minimumRecoverySlopeMargin = preferences.getFloat(minimumRecoverySlopeMarginAddress, RowerProfile::Defaults::minimumRecoverySlopeMargin);
+    minimumRecoverySlope = preferences.getFloat(minimumRecoverySlopeAddress, RowerProfile::Defaults::minimumRecoverySlope);
+    minimumRecoveryTime = preferences.getUInt(minimumRecoveryTimeAddress, RowerProfile::Defaults::minimumRecoveryTime);
+    minimumDriveTime = preferences.getUInt(minimumDriveTimeAddress, RowerProfile::Defaults::minimumDriveTime);
+    impulseDataArrayLength = preferences.getUChar(impulseDataArrayLengthAddress, RowerProfile::Defaults::impulseDataArrayLength);
+    driveHandleForcesMaxCapacity = preferences.getUChar(driveHandleForcesMaxCapacityAddress, RowerProfile::Defaults::driveHandleForcesMaxCapacity);
+
+    Log.verboseln("%s: %d", strokeDetectionTypeAddress, strokeDetectionType);
+    Log.verboseln("%s: %F", minimumPoweredTorqueAddress, minimumPoweredTorque);
+    Log.verboseln("%s: %F", minimumDragTorqueAddress, minimumDragTorque);
+    Log.verboseln("%s: %F", minimumRecoverySlopeMarginAddress, minimumRecoverySlopeMargin);
+    Log.verboseln("%s: %F", minimumRecoverySlopeAddress, minimumRecoverySlope);
+    Log.verboseln("%s: %d", minimumRecoveryTimeAddress, minimumRecoveryTime);
+    Log.verboseln("%s: %d", minimumDriveTimeAddress, minimumDriveTime);
+    Log.verboseln("%s: %d", impulseDataArrayLengthAddress, impulseDataArrayLength);
+    Log.verboseln("%s: %d", driveHandleForcesMaxCapacityAddress, driveHandleForcesMaxCapacity);
 }

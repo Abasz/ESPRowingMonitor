@@ -30,6 +30,16 @@ class EEPROMService final : public IEEPROMService
     static constexpr const char *upperDragFactorThresholdAddress = "upperDragFactor";
     static constexpr const char *dragCoefficientsArrayLengthAddress = "dragArraySize";
 
+    static constexpr const char *strokeDetectionTypeAddress = "detectionType";
+    static constexpr const char *minimumPoweredTorqueAddress = "poweredTorque";
+    static constexpr const char *minimumDragTorqueAddress = "dragTorque";
+    static constexpr const char *minimumRecoverySlopeMarginAddress = "slopeMargin";
+    static constexpr const char *minimumRecoverySlopeAddress = "recoverySlope";
+    static constexpr const char *minimumRecoveryTimeAddress = "recoveryTime";
+    static constexpr const char *minimumDriveTimeAddress = "driveTime";
+    static constexpr const char *impulseDataArrayLengthAddress = "impulseArray";
+    static constexpr const char *driveHandleForcesMaxCapacityAddress = "forceCapacity";
+
     ArduinoLogLevel logLevel = Configurations::defaultLogLevel;
     bool logToBluetooth = Configurations::enableBluetoothDeltaTimeLogging;
     bool logToSdCard = false;
@@ -49,10 +59,21 @@ class EEPROMService final : public IEEPROMService
     float upperDragFactorThreshold = RowerProfile::Defaults::upperDragFactorThreshold;
     unsigned char dragCoefficientsArrayLength = RowerProfile::Defaults::dragCoefficientsArrayLength;
 
+    StrokeDetectionType strokeDetectionType = RowerProfile::Defaults::strokeDetectionType;
+    float minimumPoweredTorque = RowerProfile::Defaults::minimumPoweredTorque;
+    float minimumDragTorque = RowerProfile::Defaults::minimumDragTorque;
+    float minimumRecoverySlopeMargin = RowerProfile::Defaults::minimumRecoverySlopeMargin;
+    float minimumRecoverySlope = RowerProfile::Defaults::minimumRecoverySlope;
+    unsigned int minimumRecoveryTime = RowerProfile::Defaults::minimumRecoveryTime;
+    unsigned int minimumDriveTime = RowerProfile::Defaults::minimumDriveTime;
+    unsigned char impulseDataArrayLength = RowerProfile::Defaults::impulseDataArrayLength;
+    unsigned char driveHandleForcesMaxCapacity = RowerProfile::Defaults::driveHandleForcesMaxCapacity;
+
     void initializeBaseSettings();
     void initializeMachineSettings();
     void initializeSensorSignalSettings();
     void initializeDragFactorSettings();
+    void initializeStrokePhaseDetectionSettings();
 
 public:
     explicit EEPROMService(Preferences &_preferences);
@@ -67,6 +88,7 @@ public:
     void setMachineSettings(RowerProfile::MachineSettings newMachineSettings) override;
     void setSensorSignalSettings(RowerProfile::SensorSignalSettings newSensorSignalSettings) override;
     void setDragFactorSettings(RowerProfile::DragFactorSettings newDragFactorSettings) override;
+    void setStrokePhaseDetectionSettings(RowerProfile::StrokePhaseDetectionSettings newStrokePhaseDetectionSettings) override;
 
     BleServiceFlag getBleServiceFlag() const override;
     ArduinoLogLevel getLogLevel() const override;
@@ -76,8 +98,10 @@ public:
     RowerProfile::MachineSettings getMachineSettings() const override;
     RowerProfile::SensorSignalSettings getSensorSignalSettings() const override;
     RowerProfile::DragFactorSettings getDragFactorSettings() const override;
+    RowerProfile::StrokePhaseDetectionSettings getStrokePhaseDetectionSettings() const override;
 
     static bool validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings);
     static bool validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings);
     static bool validateDragFactorSettings(const RowerProfile::DragFactorSettings &newDragFactorSettings, unsigned short rotationDebounceTimeMin);
+    static bool validateStrokePhaseDetectionSettings(const RowerProfile::StrokePhaseDetectionSettings &newStrokePhaseDetectionSettings);
 };

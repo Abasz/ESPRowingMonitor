@@ -16,7 +16,7 @@ void StrokeController::begin()
     const auto sensorSignalSettings = eepromService.getSensorSignalSettings();
     flywheelService.setup(machineSettings, sensorSignalSettings);
 #if ENABLE_RUNTIME_SETTINGS
-    strokeService.setup(machineSettings, sensorSignalSettings, eepromService.getDragFactorSettings());
+    strokeService.setup(machineSettings, sensorSignalSettings, eepromService.getDragFactorSettings(), eepromService.getStrokePhaseDetectionSettings());
 #endif
 }
 

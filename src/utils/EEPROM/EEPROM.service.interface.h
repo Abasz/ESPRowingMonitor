@@ -20,6 +20,7 @@ public:
     virtual void setMachineSettings(RowerProfile::MachineSettings newMachineSettings) = 0;
     virtual void setSensorSignalSettings(RowerProfile::SensorSignalSettings newSensorSignalSettings) = 0;
     virtual void setDragFactorSettings(RowerProfile::DragFactorSettings newDragFactorSettings) = 0;
+    virtual void setStrokePhaseDetectionSettings(RowerProfile::StrokePhaseDetectionSettings newStrokePhaseDetectionSettings) = 0;
 
     virtual BleServiceFlag getBleServiceFlag() const = 0;
     virtual ArduinoLogLevel getLogLevel() const = 0;
@@ -29,4 +30,5 @@ public:
     virtual RowerProfile::MachineSettings getMachineSettings() const = 0;
     virtual RowerProfile::SensorSignalSettings getSensorSignalSettings() const = 0;
     virtual RowerProfile::DragFactorSettings getDragFactorSettings() const = 0;
+    virtual RowerProfile::StrokePhaseDetectionSettings getStrokePhaseDetectionSettings() const = 0;
 };
