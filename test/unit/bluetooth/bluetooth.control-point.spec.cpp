@@ -39,6 +39,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
     Fake(Method(mockEEPROMService, setLogToBluetooth));
     Fake(Method(mockEEPROMService, setMachineSettings));
     Fake(Method(mockEEPROMService, setSensorSignalSettings));
+    Fake(Method(mockEEPROMService, setDragFactorSettings));
 
     Fake(Method(mockSettingsBleService, broadcastSettings));
 
@@ -675,6 +676,143 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({
                 std::to_underlying(SettingsOpCodes::SetMachineSettings),
+            });
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(unsupportedParameterResponse)))
+                .Once();
+        }
+#endif
+    }
+
+    SECTION("handle SetDragFactorSettings request")
+    {
+#if ENABLE_RUNTIME_SETTINGS
+        When(Method(mockEEPROMService, getSensorSignalSettings)).AlwaysReturn(RowerProfile::SensorSignalSettings{});
+
+        SECTION("and when settings payload size is invalid return InvalidParameter response")
+        {
+            std::array<unsigned char, 3U> invalidParameterResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
+                std::to_underlying(ResponseOpCodes::InvalidParameter),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({
+                std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
+                10,
+                10,
+            });
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(invalidParameterResponse)))
+                .Once();
+        }
+
+        SECTION("and when settings values are invalid return OperationFailed response")
+        {
+            std::array<unsigned char, 3U> operationsFailedResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
+                std::to_underlying(ResponseOpCodes::OperationFailed),
+            };
+
+            const auto invalidDragFactorRecoveryPeriod = 1'000 / (RowerProfile::Defaults::rotationDebounceTimeMin / 1'000) + 1;
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({
+                std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
+                0,
+                invalidDragFactorRecoveryPeriod,
+                191,
+                98,
+                12,
+                32,
+                10,
+            });
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(operationsFailedResponse)))
+                .Once();
+        }
+
+        SECTION("and when DragFactorSettings is valid")
+        {
+            std::array<unsigned char, 3U> successResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
+                std::to_underlying(ResponseOpCodes::Successful),
+            };
+
+            constexpr auto expectedGoodnessOfFitThreshold = 0.968627453F;
+            const auto dragFactorLowerThreshold = static_cast<unsigned short>(roundf(RowerProfile::Defaults::lowerDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
+            const auto dragFactorUpperThreshold = static_cast<unsigned short>(roundf(RowerProfile::Defaults::upperDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
+
+            const NimBLEAttValue payload = {
+                std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
+                static_cast<unsigned char>(roundf(expectedGoodnessOfFitThreshold * ISettingsBleService::goodnessOfFitThresholdScale)),
+                static_cast<unsigned char>(RowerProfile::Defaults::maxDragFactorRecoveryPeriod / ISettingsBleService::dragFactorRecoveryPeriodScale),
+                static_cast<unsigned char>(dragFactorLowerThreshold),
+                static_cast<unsigned char>(dragFactorLowerThreshold >> 8),
+                static_cast<unsigned char>(dragFactorUpperThreshold),
+                static_cast<unsigned char>(dragFactorUpperThreshold >> 8),
+                RowerProfile::Defaults::dragCoefficientsArrayLength,
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return(payload);
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            SECTION("save new machine settings to EEPROM")
+            {
+                Verify(Method(mockEEPROMService, setDragFactorSettings).Matching([](const RowerProfile::DragFactorSettings newSettings)
+                                                                                 {
+                        REQUIRE(newSettings.goodnessOfFitThreshold == expectedGoodnessOfFitThreshold);
+                        REQUIRE(newSettings.maxDragFactorRecoveryPeriod  == RowerProfile::Defaults::maxDragFactorRecoveryPeriod);
+                        REQUIRE(newSettings.lowerDragFactorThreshold == RowerProfile::Defaults::lowerDragFactorThreshold);
+                        REQUIRE(newSettings.upperDragFactorThreshold  == RowerProfile::Defaults::upperDragFactorThreshold);
+                        REQUIRE(newSettings.dragCoefficientsArrayLength  == RowerProfile::Defaults::dragCoefficientsArrayLength);
+
+                        return true; }))
+                    .Once();
+            }
+
+            SECTION("notify new settings")
+            {
+                Verify(Method(mockSettingsBleService, broadcastSettings)).Once();
+            }
+
+            SECTION("indicate Success response")
+            {
+                Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+                Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+                Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                           .Using(Eq(successResponse)))
+                    .Once();
+            }
+        }
+#else
+        SECTION("and when runtime settings are disabled return UnsupportedOpCode response")
+        {
+            std::array<unsigned char, 3U> unsupportedParameterResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({
+                std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
             });
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());

@@ -16,6 +16,9 @@ public:
     static constexpr auto sprocketRadiusScale = 1000.0F;
     static constexpr unsigned short debounceTimeScale = 1'000U;
     static constexpr unsigned int rowingStoppedThresholdScale = 1'000'000U;
+    static constexpr auto goodnessOfFitThresholdScale = static_cast<float>(UCHAR_MAX);
+    static constexpr unsigned int dragFactorRecoveryPeriodScale = 1'000'000U;
+    static constexpr auto dragFactorThresholdScale = 1e6F;
 
     static constexpr unsigned char baseSettingsPayloadSize = 1U;
 
@@ -29,7 +32,14 @@ public:
     static constexpr unsigned char rowingStoppedThresholdPayloadSize = 1U;
     static constexpr unsigned char sensorSignalSettingsPayloadSize = rotationDebouncePayloadSize + rowingStoppedThresholdPayloadSize;
 
-    static constexpr unsigned char settingsPayloadSize = baseSettingsPayloadSize + machineSettingsPayloadSize + sensorSignalSettingsPayloadSize;
+    static constexpr unsigned char goodnessOfFitPayloadSize = 1U;
+    static constexpr unsigned char dragFactorRecoveryPeriodPayloadSize = 1U;
+    static constexpr unsigned char lowerDragFactorPayloadSize = 2U;
+    static constexpr unsigned char upperDragFactorPayloadSize = 2U;
+    static constexpr unsigned char dragArrayLengthPayloadSize = 1U;
+    static constexpr unsigned char dragFactorSettingsPayloadSize = goodnessOfFitPayloadSize + dragFactorRecoveryPeriodPayloadSize + lowerDragFactorPayloadSize + upperDragFactorPayloadSize + dragArrayLengthPayloadSize;
+
+    static constexpr unsigned char settingsPayloadSize = baseSettingsPayloadSize + machineSettingsPayloadSize + sensorSignalSettingsPayloadSize + dragFactorSettingsPayloadSize;
 
     virtual NimBLEService *setup(NimBLEServer *server) = 0;
     virtual void broadcastSettings() const = 0;

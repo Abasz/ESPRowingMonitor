@@ -173,6 +173,36 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         break;
     }
 
+    case std::to_underlying(SettingsOpCodes::SetDragFactorSettings):
+    {
+        Log.infoln("Change Drag Factor Settings");
+
+        if constexpr (!Configurations::isRuntimeSettingsEnabled)
+        {
+            array<unsigned char, 3U> temp = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                message[0],
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
+            };
+
+            pCharacteristic->setValue(temp);
+
+            break;
+        }
+
+        const auto response = processDragFactorSettingsChange(message);
+
+        array<unsigned char, 3U> temp = {
+            std::to_underlying(SettingsOpCodes::ResponseCode),
+            message[0],
+            std::to_underlying(response),
+        };
+
+        pCharacteristic->setValue(temp);
+
+        break;
+    }
+
     case std::to_underlying(SettingsOpCodes::RestartDevice):
     {
         Log.verboseln("Restarting device...");
@@ -361,6 +391,51 @@ ResponseOpCodes ControlPointCallbacks::processSensorSignalSettingsChange(const N
     }
 
     eepromService.setSensorSignalSettings(newSensorSignalSettings);
+
+    settingsBleService.broadcastSettings();
+
+    return ResponseOpCodes::Successful;
+}
+
+ResponseOpCodes ControlPointCallbacks::processDragFactorSettingsChange(const NimBLEAttValue &message)
+{
+    const auto opCodePayloadSize = 1U;
+    if (message.size() != opCodePayloadSize + ISettingsBleService::dragFactorSettingsPayloadSize)
+    {
+        Log.infoln("Malformed OP command for drag factor settings");
+
+        return ResponseOpCodes::InvalidParameter;
+    }
+    auto bytePosition = opCodePayloadSize;
+
+    const auto goodnessOfFitThreshold = static_cast<float>(message[bytePosition]) / ISettingsBleService::goodnessOfFitThresholdScale;
+    bytePosition += ISettingsBleService::goodnessOfFitPayloadSize;
+
+    const auto dragFactorRecoveryPeriod = message[bytePosition] * static_cast<unsigned int>(ISettingsBleService::dragFactorRecoveryPeriodScale);
+    bytePosition += ISettingsBleService::dragFactorRecoveryPeriodPayloadSize;
+
+    const float lowerDragFactorThreshold = static_cast<float>(message[bytePosition] | message[bytePosition + 1] << 8) / ISettingsBleService::dragFactorThresholdScale;
+    bytePosition += ISettingsBleService::lowerDragFactorPayloadSize;
+
+    const float upperDragFactorThreshold = static_cast<float>(message[bytePosition] | message[bytePosition + 1] << 8) / ISettingsBleService::dragFactorThresholdScale;
+    bytePosition += ISettingsBleService::upperDragFactorPayloadSize;
+
+    const unsigned char dragCoefficientsArrayLength = message[bytePosition];
+
+    const RowerProfile::DragFactorSettings newDragFactorSettings{
+        .goodnessOfFitThreshold = goodnessOfFitThreshold,
+        .maxDragFactorRecoveryPeriod = dragFactorRecoveryPeriod,
+        .lowerDragFactorThreshold = lowerDragFactorThreshold,
+        .upperDragFactorThreshold = upperDragFactorThreshold,
+        .dragCoefficientsArrayLength = dragCoefficientsArrayLength,
+    };
+
+    if (!EEPROMService::validateDragFactorSettings(newDragFactorSettings, eepromService.getSensorSignalSettings().rotationDebounceTimeMin))
+    {
+        return ResponseOpCodes::OperationFailed;
+    }
+
+    eepromService.setDragFactorSettings(newDragFactorSettings);
 
     settingsBleService.broadcastSettings();
 

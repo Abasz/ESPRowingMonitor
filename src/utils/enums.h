@@ -66,6 +66,7 @@ enum class SettingsOpCodes : unsigned char
     SetSdCardLogging = 20U,
     SetMachineSettings = 21U,
     SetSensorSignalSettings = 22U,
+    SetDragFactorSettings = 23U,
     RestartDevice = 31U,
     ResponseCode = 32U,
     ResponseCodeFtms = 128U,

@@ -50,6 +50,11 @@ std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleS
 
     const auto sensorSignalSettings = eepromService.getSensorSignalSettings();
 
+    const auto dragFactorSettings = eepromService.getDragFactorSettings();
+
+    const auto dragFactorLowerThreshold = static_cast<unsigned short>(roundf(dragFactorSettings.lowerDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
+    const auto dragFactorUpperThreshold = static_cast<unsigned short>(roundf(dragFactorSettings.upperDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
+
     std::array<unsigned char, ISettingsBleService::settingsPayloadSize>
         temp = {
             baseSettings,
@@ -63,6 +68,13 @@ std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleS
             static_cast<unsigned char>(sprocketRadius >> 8),
             static_cast<unsigned char>(sensorSignalSettings.rotationDebounceTimeMin / ISettingsBleService::debounceTimeScale),
             static_cast<unsigned char>(sensorSignalSettings.rowingStoppedThresholdPeriod / ISettingsBleService::rowingStoppedThresholdScale),
+            static_cast<unsigned char>(roundf(dragFactorSettings.goodnessOfFitThreshold * ISettingsBleService::goodnessOfFitThresholdScale)),
+            static_cast<unsigned char>(dragFactorSettings.maxDragFactorRecoveryPeriod / ISettingsBleService::dragFactorRecoveryPeriodScale),
+            static_cast<unsigned char>(dragFactorLowerThreshold),
+            static_cast<unsigned char>(dragFactorLowerThreshold >> 8),
+            static_cast<unsigned char>(dragFactorUpperThreshold),
+            static_cast<unsigned char>(dragFactorUpperThreshold >> 8),
+            dragFactorSettings.dragCoefficientsArrayLength,
         };
 
     return temp;

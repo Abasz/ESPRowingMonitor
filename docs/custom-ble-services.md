@@ -122,6 +122,16 @@ Byte 9 (unsigned char) is the [Sensor Debounce Time](./settings.md#rotation_debo
 
 Byte 10 (unsigned char) is the [Rowing Stopped Threshold](./settings.md#rowing_stopped_threshold_period) in seconds (minimum value is 4 seconds).
 
+Byte 11 (unsigned char) is the [Goodness of Fit Threshold](./settings.md#goodness_of_fit_threshold) for drag factor calculation with a resolution (scale) by 255 (i.e. value of 246 translates to ~0.96).
+
+Byte 12 (unsigned char) is the [Max Drag Factor Recovery Period](./settings.md#max_drag_factor_recovery_period) in seconds.
+
+Bytes 13-14 (unsigned short) is the [Lower Drag Factor Threshold](./settings.md#lower_drag_factor_threshold).
+
+Bytes 15-16 (unsigned short) is the [Upper Drag Factor Threshold](./settings.md#upper_drag_factor_threshold).
+
+Byte 17 (unsigned char) is the [Drag Coefficients Array Length](./settings.md#drag_coefficients_array_length).
+
 ```text
 Settings Control Point (UUID: 51ba0a00-8853-477c-bf43-6a09c36aac9f)
 ```
@@ -146,7 +156,11 @@ Please note that the new BLE service structure is currently experimental and the
 
 For an example of an implementation (in Javascript) please visit the [WebGUI page]((https://github.com/Abasz/ESPRowingMonitor-WebGUI/blob/master/src/common/services/ergometer/erg-settings.service.ts)).
 
-Please note that `SetMachineSettings`, `SetSensorSignalSettings` OpCodes only available if firmware is compiled with [`ENABLE_RUNTIME_SETTINGS`](./settings.md#enable_runtime_settings) flag. Otherwise sending this OpCode it will return `UnsupportedOpCode`. Furthermore, device restart (e.g. sending Restart Device OpCode) is necessary for the new settings to take effect. The structure of `SetMachineSettings` corresponds to byte 1-8 of the Settings Characteristic above. While `SetSensorSignalSettings` follows byte 9-10.
+Please note that `SetMachineSettings`, `SetSensorSignalSettings`, `SetDragFactorSettings` OpCodes only available if firmware is compiled with [`ENABLE_RUNTIME_SETTINGS`](./settings.md#enable_runtime_settings) flag. Otherwise sending this OpCode it will return `UnsupportedOpCode`. Furthermore, device restart (e.g. sending Restart Device OpCode) is necessary for the new settings to take effect. The structure corresponds to bytes of the Settings Characteristic above as follows:
+
+- `SetMachineSettings` follows bytes 1-8
+- `SetSensorSignalSettings` follows bytes 9-10
+- `SetDragFactorSEttings` follows bytes 11-17
 
 ## Over-the-Air updater
 

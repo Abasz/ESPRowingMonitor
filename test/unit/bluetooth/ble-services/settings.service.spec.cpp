@@ -43,6 +43,10 @@ TEST_CASE("SettingsBleService", "[ble-service]")
     const auto rotationDebounceTimeMin = static_cast<unsigned char>(RowerProfile::Defaults::rotationDebounceTimeMin / ISettingsBleService::debounceTimeScale);
     const auto rowingStoppedThresholdPeriod = static_cast<unsigned char>(RowerProfile::Defaults::rowingStoppedThresholdPeriod / ISettingsBleService::rowingStoppedThresholdScale);
 
+    const auto expectedGoodnessOfFitThreshold = 0.968627453F;
+    const auto dragFactorLowerThreshold = static_cast<unsigned short>(roundf(RowerProfile::Defaults::lowerDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
+    const auto dragFactorUpperThreshold = static_cast<unsigned short>(roundf(RowerProfile::Defaults::upperDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
+
     const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> expectedInitialSettings = {
         settings,
         static_cast<unsigned char>(flywheelInertia),
@@ -55,6 +59,13 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         static_cast<unsigned char>(sprocketRadius >> 8),
         rotationDebounceTimeMin,
         rowingStoppedThresholdPeriod,
+        static_cast<unsigned char>(roundf(expectedGoodnessOfFitThreshold * ISettingsBleService::goodnessOfFitThresholdScale)),
+        static_cast<unsigned char>(RowerProfile::Defaults::maxDragFactorRecoveryPeriod / ISettingsBleService::dragFactorRecoveryPeriodScale),
+        static_cast<unsigned char>(dragFactorLowerThreshold),
+        static_cast<unsigned char>(dragFactorLowerThreshold >> 8),
+        static_cast<unsigned char>(dragFactorUpperThreshold),
+        static_cast<unsigned char>(dragFactorUpperThreshold >> 8),
+        RowerProfile::Defaults::dragCoefficientsArrayLength,
     };
 
     When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string))).AlwaysReturn(&mockSettingsService.get());
@@ -69,6 +80,9 @@ TEST_CASE("SettingsBleService", "[ble-service]")
     When(Method(mockEEPROMService, getLogLevel)).AlwaysReturn(logLevel);
     When(Method(mockEEPROMService, getMachineSettings)).AlwaysReturn(RowerProfile::MachineSettings{});
     When(Method(mockEEPROMService, getSensorSignalSettings)).AlwaysReturn(RowerProfile::SensorSignalSettings{});
+    When(Method(mockEEPROMService, getDragFactorSettings)).AlwaysReturn(RowerProfile::DragFactorSettings{
+        .goodnessOfFitThreshold = expectedGoodnessOfFitThreshold,
+    });
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(logFileOpen);
 
     SettingsBleService settingsBleService(mockSdCardService.get(), mockEEPROMService.get());
@@ -145,6 +159,7 @@ TEST_CASE("SettingsBleService", "[ble-service]")
             Verify(Method(mockEEPROMService, getLogLevel)).Once();
             Verify(Method(mockEEPROMService, getMachineSettings)).Once();
             Verify(Method(mockEEPROMService, getSensorSignalSettings)).Once();
+            Verify(Method(mockEEPROMService, getDragFactorSettings)).Once();
             Verify(Method(mockSdCardService, isLogFileOpen)).Once();
 
             SECTION("and split MachineSettings correctly into bytes")
@@ -184,6 +199,36 @@ TEST_CASE("SettingsBleService", "[ble-service]")
 
                 REQUIRE(debounceTimeMin == RowerProfile::Defaults::rotationDebounceTimeMin);
                 REQUIRE(rowingStoppedThresholdPeriod == RowerProfile::Defaults::rowingStoppedThresholdPeriod);
+            }
+
+            SECTION("and split DragFactorSettings correctly into bytes")
+            {
+                float goodnessOfFitThreshold = 0.0F;
+                unsigned int maxDragFactorRecoveryPeriod = 0;
+                float lowerDragFactorThreshold = 0.0F;
+                float upperDragFactorThreshold = 0.0F;
+                unsigned char dragCoefficientsArrayLength = 0;
+
+                When(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>)))
+                    .Do([&goodnessOfFitThreshold,
+                         &maxDragFactorRecoveryPeriod,
+                         &lowerDragFactorThreshold,
+                         &upperDragFactorThreshold,
+                         &dragCoefficientsArrayLength](const std::array<unsigned char, ISettingsBleService::settingsPayloadSize> &settings)
+                        {
+                            goodnessOfFitThreshold = static_cast<float>(settings[11]) / ISettingsBleService::goodnessOfFitThresholdScale;
+                            maxDragFactorRecoveryPeriod = settings[12] * ISettingsBleService::dragFactorRecoveryPeriodScale;
+                            lowerDragFactorThreshold = static_cast<float>(settings[13] | settings[14] << 8) / ISettingsBleService::dragFactorThresholdScale;
+                            upperDragFactorThreshold = static_cast<float>(settings[15] | settings[16] << 8) / ISettingsBleService::dragFactorThresholdScale;
+                            dragCoefficientsArrayLength = settings[17]; });
+
+                settingsBleService.broadcastSettings();
+
+                REQUIRE(goodnessOfFitThreshold == expectedGoodnessOfFitThreshold);
+                REQUIRE(maxDragFactorRecoveryPeriod == RowerProfile::Defaults::maxDragFactorRecoveryPeriod);
+                REQUIRE(lowerDragFactorThreshold == RowerProfile::Defaults::lowerDragFactorThreshold);
+                REQUIRE(upperDragFactorThreshold == RowerProfile::Defaults::upperDragFactorThreshold);
+                REQUIRE(dragCoefficientsArrayLength == RowerProfile::Defaults::dragCoefficientsArrayLength);
             }
 
             SECTION("and calculate correct setting binary value")
