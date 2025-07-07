@@ -44,7 +44,7 @@ void EEPROMService::setLogLevel(const ArduinoLogLevel newLogLevel)
     }
 
     preferences.putUChar(logLevelAddress, intLogLevel);
-    Log.setLevel(intLogLevel);
+    Log.setLevel(newLogLevel);
     logLevel = newLogLevel;
 }
 

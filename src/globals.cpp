@@ -57,7 +57,6 @@ void restartWithDelay(const unsigned long millis)
 void printPrefix(Print *const _logOutput, const int logLevel)
 {
     printTimestamp(_logOutput);
-    printLogLevel(_logOutput, logLevel);
 }
 
 void printTimestamp(Print *const _logOutput)
@@ -73,35 +72,6 @@ void printTimestamp(Print *const _logOutput)
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     snprintf(timestamp.data(), timestamp.size(), "%02lu:%02lu:%02lu.%06lu ", hours, minutes, seconds, microSeconds);
     _logOutput->print(timestamp.data());
-}
-
-void printLogLevel(Print *const _logOutput, const int logLevel)
-{
-    switch (logLevel)
-    {
-    default:
-    case 0:
-        _logOutput->print(" SILENT - ");
-        break;
-    case 1:
-        _logOutput->print("  FATAL - ");
-        break;
-    case 2:
-        _logOutput->print("  ERROR - ");
-        break;
-    case 3:
-        _logOutput->print("WARNING - ");
-        break;
-    case 4:
-        _logOutput->print("   INFO - ");
-        break;
-    case 5:
-        _logOutput->print("  TRACE - ");
-        break;
-    case 6:
-        _logOutput->print("VERBOSE - ");
-        break;
-    }
 }
 
 std::string generateSerial()

@@ -3,6 +3,8 @@
 #include BOARD_PROFILE
 #include ROWER_PROFILE
 
+#include "ArduinoLog.h"
+
 #include "./utils/enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)

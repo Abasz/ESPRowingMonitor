@@ -30,18 +30,6 @@ enum class BleSignalStrength : signed char
     MaxPower = 9,
 };
 
-enum class ArduinoLogLevel : unsigned char
-{
-    LogLevelSilent = 0,
-    LogLevelFatal = 1,
-    LogLevelError = 2,
-    LogLevelWarning = 3,
-    LogLevelInfo = 4,
-    LogLevelNotice = 4,
-    LogLevelTrace = 5,
-    LogLevelVerbose = 6
-};
-
 enum class SettingsOpCodes : unsigned char
 {
     SetCumulativeValue = 1U,

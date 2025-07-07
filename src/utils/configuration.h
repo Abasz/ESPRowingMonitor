@@ -4,6 +4,7 @@
 #include <string>
 
 #include "Arduino.h"
+#include "ArduinoLog.h"
 #include "FastLED.h"
 
 #include "./macros.h"

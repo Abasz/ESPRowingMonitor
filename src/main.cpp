@@ -19,11 +19,11 @@ void setup()
     }
 #endif
 
-    Log.begin(std::to_underlying(Configurations::defaultLogLevel), &Serial, false);
+    Log.begin(Configurations::defaultLogLevel, &Serial, true);
     Log.setPrefix(printPrefix);
 
     eepromService.setup();
-    Log.setLevel(std::to_underlying(eepromService.getLogLevel()));
+    Log.setLevel(eepromService.getLogLevel());
 
     peripheralController.begin();
     powerManagerController.begin();

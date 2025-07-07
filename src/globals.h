@@ -62,7 +62,6 @@ void restartWithDelay(unsigned long millis = 0);
 
 void printPrefix(Print *_logOutput, int logLevel);
 void printTimestamp(Print *_logOutput);
-void printLogLevel(Print *_logOutput, int logLevel);
 
 std::string generateSerial();
 
