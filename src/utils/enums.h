@@ -323,6 +323,7 @@ public:
 
     inline static const std::string settingsServiceUuid = "56892de1-7068-4b5a-acaa-473d97b02206";
     inline static const std::string settingsUuid = "54e15528-73b5-4905-9481-89e5184a3364";
+    inline static const std::string strokeDetectionSettingsUuid = "5d9c04cd-dcec-4551-8169-8c81f14d9d9d";
     inline static const std::string settingsControlPointUuid = "51ba0a00-8853-477c-bf43-6a09c36aac9f";
 
     inline static const std::string extendedMetricsServiceUuid = "a72a5762-803b-421d-a759-f0314153da97";

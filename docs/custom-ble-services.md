@@ -63,7 +63,7 @@ The data in the Notify are 32bit unsigned integers in Little Endian.
 
 ## Settings Service
 
-This Service currently contains two characteristics:
+This Service currently contains three characteristics:
 
 ```text
 Settings (UUID: 54e15528-73b5-4905-9481-89e5184a3364)
@@ -131,6 +131,41 @@ Bytes 13-14 (unsigned short) is the [Lower Drag Factor Threshold](./settings.md#
 Bytes 15-16 (unsigned short) is the [Upper Drag Factor Threshold](./settings.md#upper_drag_factor_threshold).
 
 Byte 17 (unsigned char) is the [Drag Coefficients Array Length](./settings.md#drag_coefficients_array_length).
+
+```text
+Stroke Detection Settings (UUID: 5d9c04cd-dcec-4551-8169-8c81f14d9d9d)
+```
+
+Uses Notify to broadcast and allow Read the current stroke phase detection settings (which may be extended in the future) as an array of consecutive bytes. It notifies when a stroke detection setting is changed.
+
+Currently the Notify/Read includes the following data (15 bytes total):
+
+Byte 0 includes the stroke detection type and impulse data array length with a bit mask detailed below:
+
+_Stroke Detection Type_ - method used for stroke phase detection (bits 0-1)
+
+```cpp
+Torque = 0x00;
+Slope = 0x01;
+Both = 0x02;
+```
+
+_Impulse Data Array Length_ - number of impulses stored for calculations (bits 2-7, value range 1-63)
+
+Bytes 1-2 (signed short) is the [Minimum Powered Torque](./settings.md#minimum_powered_torque) with a resolution (scale) of 10,000 (i.e. value of 5,000 translates to 0.5).
+
+Bytes 3-4 (signed short) is the [Minimum Drag Torque](./settings.md#minimum_drag_torque) with a resolution (scale) of 10,000 (i.e. value of 2,500 translates to 0.25).
+
+Bytes 5-8 (float as unsigned int) is the [Minimum Recovery Slope Margin](./settings.md#minimum_recovery_slope_margin) as a 32-bit float represented in little-endian format.
+
+Bytes 9-10 (signed short) is the [Minimum Recovery Slope](./settings.md#minimum_recovery_slope) with a resolution (scale) of 1,000 (i.e. value of 1,500 translates to 1.5).
+
+Bytes 11-13 (3 bytes) encode the minimum stroke timing values with a resolution (scale) in milliseconds:
+
+- _Minimum Recovery Time_ - encoded in bits 0-11 (12 bits, max value 4,095, representing up to ~4.1 seconds)
+- _Minimum Drive Time_ - encoded in bits 12-23 (12 bits, max value 4,095, representing up to ~4.1 seconds)
+
+Byte 14 (unsigned char) is the [Drive Handle Forces Max Capacity](./settings.md#drive_handle_forces_max_capacity) (minimum value is 1).
 
 ```text
 Settings Control Point (UUID: 51ba0a00-8853-477c-bf43-6a09c36aac9f)

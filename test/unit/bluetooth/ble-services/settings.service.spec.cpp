@@ -23,6 +23,7 @@ TEST_CASE("SettingsBleService", "[ble-service]")
     Mock<IEEPROMService> mockEEPROMService;
     Mock<ISdCardService> mockSdCardService;
     Mock<NimBLECharacteristic> mockSettingsCharacteristic;
+    Mock<NimBLECharacteristic> mockStrokeSettingsCharacteristic;
     Mock<NimBLEService> mockSettingsService;
 
     const auto logToBluetooth = true;
@@ -68,11 +69,39 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         RowerProfile::Defaults::dragCoefficientsArrayLength,
     };
 
+    const auto strokeDetectionAndImpulseEncoded = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) | (RowerProfile::Defaults::impulseDataArrayLength << 2U);
+    const auto minimumPoweredTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
+    const auto minimumDragTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumDragTorque * ISettingsBleService::dragTorqueScale));
+    const auto minimumRecoverySlopeMargin = std::bit_cast<unsigned int>(RowerProfile::Defaults::minimumRecoverySlopeMargin * ISettingsBleService::recoverySlopeMarginPayloadScale);
+    const auto minimumRecoverySlope = static_cast<short>(roundf(RowerProfile::Defaults::minimumRecoverySlope * ISettingsBleService::recoverySlopeScale));
+    const auto strokeTimesEncoded = (RowerProfile::Defaults::minimumRecoveryTime / ISettingsBleService::minimumStrokeTimesScale) | ((RowerProfile::Defaults::minimumDriveTime / ISettingsBleService::minimumStrokeTimesScale) << 12);
+
+    const std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize> expectedInitialStrokeSettings = {
+        static_cast<unsigned char>(strokeDetectionAndImpulseEncoded),
+        static_cast<unsigned char>(minimumPoweredTorque),
+        static_cast<unsigned char>(minimumPoweredTorque >> 8),
+        static_cast<unsigned char>(minimumDragTorque),
+        static_cast<unsigned char>(minimumDragTorque >> 8),
+        static_cast<unsigned char>(minimumRecoverySlopeMargin),
+        static_cast<unsigned char>(minimumRecoverySlopeMargin >> 8),
+        static_cast<unsigned char>(minimumRecoverySlopeMargin >> 16),
+        static_cast<unsigned char>(minimumRecoverySlopeMargin >> 24),
+        static_cast<unsigned char>(minimumRecoverySlope),
+        static_cast<unsigned char>(minimumRecoverySlope >> 8),
+        static_cast<unsigned char>(strokeTimesEncoded),
+        static_cast<unsigned char>(strokeTimesEncoded >> 8),
+        static_cast<unsigned char>(strokeTimesEncoded >> 16),
+        RowerProfile::Defaults::driveHandleForcesMaxCapacity,
+    };
+
     When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string))).AlwaysReturn(&mockSettingsService.get());
 
-    When(OverloadedMethod(mockSettingsService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))).AlwaysReturn(&mockSettingsCharacteristic.get());
+    When(OverloadedMethod(mockSettingsService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::settingsUuid, Any())).AlwaysReturn(&mockSettingsCharacteristic.get());
+    When(OverloadedMethod(mockSettingsService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::strokeDetectionSettingsUuid, Any())).AlwaysReturn(&mockStrokeSettingsCharacteristic.get());
+    When(OverloadedMethod(mockSettingsService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int)).Using(CommonBleFlags::settingsControlPointUuid, Any())).AlwaysReturn(&mockSettingsCharacteristic.get());
 
     Fake(OverloadedMethod(mockSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::settingsPayloadSize>)));
+    Fake(OverloadedMethod(mockStrokeSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize>)));
     Fake(Method(mockSettingsCharacteristic, setCallbacks));
 
     When(Method(mockEEPROMService, getLogToBluetooth)).AlwaysReturn(logToBluetooth);
@@ -83,6 +112,7 @@ TEST_CASE("SettingsBleService", "[ble-service]")
     When(Method(mockEEPROMService, getDragFactorSettings)).AlwaysReturn(RowerProfile::DragFactorSettings{
         .goodnessOfFitThreshold = expectedGoodnessOfFitThreshold,
     });
+    When(Method(mockEEPROMService, getStrokePhaseDetectionSettings)).AlwaysReturn(RowerProfile::StrokePhaseDetectionSettings{});
     When(Method(mockSdCardService, isLogFileOpen)).AlwaysReturn(logFileOpen);
 
     SettingsBleService settingsBleService(mockSdCardService.get(), mockEEPROMService.get());
@@ -99,6 +129,16 @@ TEST_CASE("SettingsBleService", "[ble-service]")
             Verify(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const std::string)).Using(CommonBleFlags::settingsServiceUuid)).Once();
         }
 
+        SECTION("start stroke detection settings BLE characteristic with correct UUID")
+        {
+            settingsBleService.setup(&mockNimBLEServer.get());
+
+            Verify(
+                OverloadedMethod(mockSettingsService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))
+                    .Using(CommonBleFlags::strokeDetectionSettingsUuid, expectedSettingsProperty))
+                .Once();
+        }
+
         SECTION("start settings BLE characteristic with correct UUID")
         {
             settingsBleService.setup(&mockNimBLEServer.get());
@@ -106,6 +146,16 @@ TEST_CASE("SettingsBleService", "[ble-service]")
             Verify(
                 OverloadedMethod(mockSettingsService, createCharacteristic, NimBLECharacteristic * (const std::string, const unsigned int))
                     .Using(CommonBleFlags::settingsUuid, expectedSettingsProperty))
+                .Once();
+        }
+
+        SECTION("set initial stroke detection settings value")
+        {
+            settingsBleService.setup(&mockNimBLEServer.get());
+
+            Verify(
+                OverloadedMethod(mockStrokeSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize>))
+                    .Using(Eq(expectedInitialStrokeSettings)))
                 .Once();
         }
 
@@ -341,6 +391,78 @@ TEST_CASE("SettingsBleService", "[ble-service]")
             settingsBleService.broadcastSettings();
 
             Verify(Method(mockSettingsCharacteristic, notify));
+        }
+    }
+
+    SECTION("broadcastStrokeDetectionSettings method should")
+    {
+        Fake(Method(mockStrokeSettingsCharacteristic, notify));
+
+        settingsBleService.setup(&mockNimBLEServer.get());
+        mockStrokeSettingsCharacteristic.ClearInvocationHistory();
+
+        SECTION("get current stroke detection settings state")
+        {
+            mockEEPROMService.ClearInvocationHistory();
+
+            settingsBleService.broadcastStrokeDetectionSettings();
+
+            Verify(Method(mockEEPROMService, getStrokePhaseDetectionSettings)).Once();
+
+            SECTION("and split StrokePhaseDetectionSettings correctly into bytes")
+            {
+                StrokeDetectionType strokeDetectionType = StrokeDetectionType::Torque;
+                unsigned char impulseDataArrayLength = 0;
+                float minimumPoweredTorque = 0.0F;
+                float minimumDragTorque = 0.0F;
+                float minimumRecoverySlopeMargin = 0.0F;
+                float minimumRecoverySlope = 0.0F;
+                unsigned int minimumRecoveryTime = 0;
+                unsigned int minimumDriveTime = 0;
+                unsigned char driveHandleForcesMaxCapacity = 0;
+
+                When(OverloadedMethod(mockStrokeSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize>)))
+                    .Do([&](const std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize> &settings)
+                        {
+                            strokeDetectionType = static_cast<StrokeDetectionType>(settings[0] & 0x03);
+                            impulseDataArrayLength = (settings[0] >> 2) & 0x3F;
+                            minimumPoweredTorque = static_cast<float>(static_cast<short>(settings[1] | settings[2] << 8)) / ISettingsBleService::poweredTorqueScale;
+                            minimumDragTorque = static_cast<float>(static_cast<short>(settings[3] | settings[4] << 8)) / ISettingsBleService::dragTorqueScale;
+                            minimumRecoverySlopeMargin = std::bit_cast<float>(static_cast<unsigned int>(settings[5] | settings[6] << 8 | settings[7] << 16 | settings[8] << 24)) / ISettingsBleService::recoverySlopeMarginPayloadScale;
+                            minimumRecoverySlope = static_cast<float>(static_cast<short>(settings[9] | settings[10] << 8)) / ISettingsBleService::recoverySlopeScale;
+                            const auto strokeTimes = static_cast<unsigned int>(settings[11] | settings[12] << 8 | settings[13] << 16);
+                            minimumRecoveryTime = strokeTimes & 0xFFF;
+                            minimumDriveTime = strokeTimes >> 12;
+                            driveHandleForcesMaxCapacity = settings[14]; });
+
+                settingsBleService.broadcastStrokeDetectionSettings();
+
+                REQUIRE(strokeDetectionType == RowerProfile::Defaults::strokeDetectionType);
+                REQUIRE(impulseDataArrayLength == RowerProfile::Defaults::impulseDataArrayLength);
+                REQUIRE(minimumPoweredTorque == RowerProfile::Defaults::minimumPoweredTorque);
+                REQUIRE(minimumDragTorque == RowerProfile::Defaults::minimumDragTorque);
+                REQUIRE(minimumRecoverySlopeMargin == RowerProfile::Defaults::minimumRecoverySlopeMargin);
+                REQUIRE(minimumRecoverySlope == RowerProfile::Defaults::minimumRecoverySlope);
+                REQUIRE(minimumRecoveryTime == RowerProfile::Defaults::minimumRecoveryTime / ISettingsBleService::minimumStrokeTimesScale);
+                REQUIRE(minimumDriveTime == RowerProfile::Defaults::minimumDriveTime / ISettingsBleService::minimumStrokeTimesScale);
+                REQUIRE(driveHandleForcesMaxCapacity == RowerProfile::Defaults::driveHandleForcesMaxCapacity);
+            }
+        }
+
+        SECTION("set new stroke detection settings")
+        {
+            settingsBleService.broadcastStrokeDetectionSettings();
+
+            Verify(OverloadedMethod(mockStrokeSettingsCharacteristic, setValue, void(const std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize>))
+                       .Using(Eq(expectedInitialStrokeSettings)))
+                .Once();
+        }
+
+        SECTION("notify")
+        {
+            settingsBleService.broadcastStrokeDetectionSettings();
+
+            Verify(Method(mockStrokeSettingsCharacteristic, notify)).Once();
         }
     }
 }

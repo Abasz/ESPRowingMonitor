@@ -17,9 +17,11 @@ NimBLEService *SettingsBleService::setup(NimBLEServer *const server)
 {
     Log.traceln("Setting up Settings Service");
     auto *settingsService = server->createService(CommonBleFlags::settingsServiceUuid);
-    characteristic = settingsService->createCharacteristic(CommonBleFlags::settingsUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    settingsCharacteristic = settingsService->createCharacteristic(CommonBleFlags::settingsUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    strokeSettingsCharacteristic = settingsService->createCharacteristic(CommonBleFlags::strokeDetectionSettingsUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
-    characteristic->setValue(getSettings());
+    settingsCharacteristic->setValue(getSettings());
+    strokeSettingsCharacteristic->setValue(getStrokeDetectionSettings());
 
     settingsService->createCharacteristic(CommonBleFlags::settingsControlPointUuid, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&callbacks);
 
@@ -28,10 +30,18 @@ NimBLEService *SettingsBleService::setup(NimBLEServer *const server)
 
 void SettingsBleService::broadcastSettings() const
 {
-    ASSERT_SETUP_CALLED(characteristic);
+    ASSERT_SETUP_CALLED(settingsCharacteristic);
 
-    characteristic->setValue(getSettings());
-    characteristic->notify();
+    settingsCharacteristic->setValue(getSettings());
+    settingsCharacteristic->notify();
+}
+
+void SettingsBleService::broadcastStrokeDetectionSettings() const
+{
+    ASSERT_SETUP_CALLED(strokeSettingsCharacteristic);
+
+    strokeSettingsCharacteristic->setValue(getStrokeDetectionSettings());
+    strokeSettingsCharacteristic->notify();
 }
 
 std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleService::getSettings() const
@@ -75,6 +85,39 @@ std::array<unsigned char, ISettingsBleService::settingsPayloadSize> SettingsBleS
             static_cast<unsigned char>(dragFactorUpperThreshold),
             static_cast<unsigned char>(dragFactorUpperThreshold >> 8),
             dragFactorSettings.dragCoefficientsArrayLength,
+        };
+
+    return temp;
+}
+
+std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize> SettingsBleService::getStrokeDetectionSettings() const
+{
+    const auto strokeDetectionSettings = eepromService.getStrokePhaseDetectionSettings();
+
+    const unsigned char impulseAndDetection = (std::to_underlying(strokeDetectionSettings.strokeDetectionType) & 0x03) | (strokeDetectionSettings.impulseDataArrayLength << 2U);
+    const auto poweredTorque = static_cast<short>(roundf(strokeDetectionSettings.minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
+    const auto dragTorque = static_cast<short>(roundf(strokeDetectionSettings.minimumDragTorque * ISettingsBleService::dragTorqueScale));
+    const auto recoverySlopeMargin = std::bit_cast<unsigned int>(strokeDetectionSettings.minimumRecoverySlopeMargin * ISettingsBleService::recoverySlopeMarginPayloadScale);
+    const auto recoverySlope = static_cast<short>(roundf(strokeDetectionSettings.minimumRecoverySlope * ISettingsBleService::recoverySlopeScale));
+    const auto strokeTimes = (strokeDetectionSettings.minimumRecoveryTime / ISettingsBleService::minimumStrokeTimesScale) | ((strokeDetectionSettings.minimumDriveTime / ISettingsBleService::minimumStrokeTimesScale) << 12);
+
+    std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize>
+        temp = {
+            impulseAndDetection,
+            static_cast<unsigned char>(poweredTorque),
+            static_cast<unsigned char>(poweredTorque >> 8),
+            static_cast<unsigned char>(dragTorque),
+            static_cast<unsigned char>(dragTorque >> 8),
+            static_cast<unsigned char>(recoverySlopeMargin),
+            static_cast<unsigned char>(recoverySlopeMargin >> 8),
+            static_cast<unsigned char>(recoverySlopeMargin >> 16),
+            static_cast<unsigned char>(recoverySlopeMargin >> 24),
+            static_cast<unsigned char>(recoverySlope),
+            static_cast<unsigned char>(recoverySlope >> 8),
+            static_cast<unsigned char>(strokeTimes),
+            static_cast<unsigned char>(strokeTimes >> 8),
+            static_cast<unsigned char>(strokeTimes >> 16),
+            strokeDetectionSettings.driveHandleForcesMaxCapacity,
         };
 
     return temp;
