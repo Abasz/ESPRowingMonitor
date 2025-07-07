@@ -203,6 +203,36 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         break;
     }
 
+    case std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings):
+    {
+        Log.infoln("Change Stroke Detection Settings");
+
+        if constexpr (!Configurations::isRuntimeSettingsEnabled)
+        {
+            array<unsigned char, 3U> temp = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                message[0],
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
+            };
+
+            pCharacteristic->setValue(temp);
+
+            break;
+        }
+
+        const auto response = processStrokeDetectionSettingsChange(message);
+
+        array<unsigned char, 3U> temp = {
+            std::to_underlying(SettingsOpCodes::ResponseCode),
+            message[0],
+            std::to_underlying(response),
+        };
+
+        pCharacteristic->setValue(temp);
+
+        break;
+    }
+
     case std::to_underlying(SettingsOpCodes::RestartDevice):
     {
         Log.verboseln("Restarting device...");
@@ -438,6 +468,67 @@ ResponseOpCodes ControlPointCallbacks::processDragFactorSettingsChange(const Nim
     eepromService.setDragFactorSettings(newDragFactorSettings);
 
     settingsBleService.broadcastSettings();
+
+    return ResponseOpCodes::Successful;
+}
+
+ResponseOpCodes ControlPointCallbacks::processStrokeDetectionSettingsChange(const NimBLEAttValue &message)
+{
+    const auto opCodePayloadSize = 1U;
+    if (message.size() != opCodePayloadSize + ISettingsBleService::strokeSettingsPayloadSize)
+    {
+        Log.infoln("Malformed OP command for stroke detection settings");
+
+        return ResponseOpCodes::InvalidParameter;
+    }
+    auto bytePosition = opCodePayloadSize;
+
+    const unsigned char impulseAndDetection = message[bytePosition];
+    const auto strokeDetectionType = static_cast<StrokeDetectionType>(impulseAndDetection & 0x03);
+    const unsigned char impulseDataArrayLength = impulseAndDetection >> 2U;
+    bytePosition += ISettingsBleService::impulseAndDetectionTypePayloadSize;
+
+    const float minimumPoweredTorque = static_cast<float>(static_cast<short>(message[bytePosition] | message[bytePosition + 1] << 8)) / ISettingsBleService::poweredTorqueScale;
+    bytePosition += ISettingsBleService::poweredTorquePayloadSize;
+
+    const float minimumDragTorque = static_cast<float>(static_cast<short>(message[bytePosition] | message[bytePosition + 1] << 8)) / ISettingsBleService::dragTorqueScale;
+    bytePosition += ISettingsBleService::dragTorquePayloadSize;
+
+    float minimumRecoverySlopeMargin = 0.0F;
+    std::memcpy(&minimumRecoverySlopeMargin, std::next(message.data(), bytePosition), ISettingsBleService::recoverySlopeMarginPayloadSize);
+    minimumRecoverySlopeMargin /= ISettingsBleService::recoverySlopeMarginPayloadScale;
+    bytePosition += ISettingsBleService::recoverySlopeMarginPayloadSize;
+
+    const float minimumRecoverySlope = static_cast<float>(static_cast<short>(message[bytePosition] | message[bytePosition + 1] << 8)) / ISettingsBleService::recoverySlopeScale;
+    bytePosition += ISettingsBleService::recoverySlopePayloadSize;
+
+    const auto strokeTimes = static_cast<unsigned int>(message[bytePosition] | message[bytePosition + 1] << 8 | message[bytePosition + 2] << 16);
+    const auto minimumRecoveryTime = (strokeTimes & 0xFFF) * ISettingsBleService::minimumStrokeTimesScale;
+    const auto minimumDriveTime = (strokeTimes >> 12) * ISettingsBleService::minimumStrokeTimesScale;
+    bytePosition += ISettingsBleService::minimumStrokeTimesPayloadSize;
+
+    const auto driveHandleForcesMaxCapacity = message[bytePosition];
+
+    const RowerProfile::StrokePhaseDetectionSettings newStrokeDetectionSettings{
+        .strokeDetectionType = strokeDetectionType,
+        .minimumPoweredTorque = minimumPoweredTorque,
+        .minimumDragTorque = minimumDragTorque,
+        .minimumRecoverySlopeMargin = minimumRecoverySlopeMargin,
+        .minimumRecoverySlope = minimumRecoverySlope,
+        .minimumRecoveryTime = minimumRecoveryTime,
+        .minimumDriveTime = minimumDriveTime,
+        .impulseDataArrayLength = impulseDataArrayLength,
+        .driveHandleForcesMaxCapacity = driveHandleForcesMaxCapacity,
+    };
+
+    if (!EEPROMService::validateStrokePhaseDetectionSettings(newStrokeDetectionSettings))
+    {
+        return ResponseOpCodes::OperationFailed;
+    }
+
+    eepromService.setStrokePhaseDetectionSettings(newStrokeDetectionSettings);
+
+    settingsBleService.broadcastStrokeDetectionSettings();
 
     return ResponseOpCodes::Successful;
 }

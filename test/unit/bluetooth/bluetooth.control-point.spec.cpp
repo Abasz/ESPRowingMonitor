@@ -1,4 +1,4 @@
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity)
 #include <array>
 #include <bit>
 #include <utility>
@@ -40,8 +40,10 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
     Fake(Method(mockEEPROMService, setMachineSettings));
     Fake(Method(mockEEPROMService, setSensorSignalSettings));
     Fake(Method(mockEEPROMService, setDragFactorSettings));
+    Fake(Method(mockEEPROMService, setStrokePhaseDetectionSettings));
 
     Fake(Method(mockSettingsBleService, broadcastSettings));
+    Fake(Method(mockSettingsBleService, broadcastStrokeDetectionSettings));
 
     ControlPointCallbacks controlPointCallback(mockSettingsBleService.get(), mockEEPROMService.get());
 
@@ -825,5 +827,163 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
         }
 #endif
     }
+
+    SECTION("handle SetStrokeDetectionSettings request")
+    {
+#if ENABLE_RUNTIME_SETTINGS
+        SECTION("and when settings payload size is invalid return InvalidParameter response")
+        {
+            std::array<unsigned char, 3U> invalidParameterResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
+                std::to_underlying(ResponseOpCodes::InvalidParameter),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({
+                std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
+                10,
+                10,
+            });
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(invalidParameterResponse)))
+                .Once();
+        }
+
+        SECTION("and when settings values are invalid return OperationFailed response")
+        {
+            std::array<unsigned char, 3U> operationsFailedResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
+                std::to_underlying(ResponseOpCodes::OperationFailed),
+            };
+
+            const NimBLEAttValue invalidPayload = {
+                std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
+                0x03,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                100,
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return(invalidPayload);
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(operationsFailedResponse)))
+                .Once();
+        }
+
+        SECTION("and when StrokeDetectionSettings is valid")
+        {
+            std::array<unsigned char, 3U> successResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
+                std::to_underlying(ResponseOpCodes::Successful),
+            };
+
+            const auto impulseAndDetection = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) | (RowerProfile::Defaults::impulseDataArrayLength << 2U);
+            const auto poweredTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
+            const auto dragTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumDragTorque * ISettingsBleService::dragTorqueScale));
+            const auto recoverySlopeMarginBits = std::bit_cast<unsigned int>(RowerProfile::Defaults::minimumRecoverySlopeMargin * ISettingsBleService::recoverySlopeMarginPayloadScale);
+            const auto recoverySlope = static_cast<short>(roundf(RowerProfile::Defaults::minimumRecoverySlope * ISettingsBleService::recoverySlopeScale));
+            const auto strokeTimes = (RowerProfile::Defaults::minimumRecoveryTime / ISettingsBleService::minimumStrokeTimesScale) | ((RowerProfile::Defaults::minimumDriveTime / ISettingsBleService::minimumStrokeTimesScale) << 12U);
+
+            const NimBLEAttValue payload = {
+                std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
+                impulseAndDetection,
+                static_cast<unsigned char>(poweredTorque),
+                static_cast<unsigned char>(poweredTorque >> 8),
+                static_cast<unsigned char>(dragTorque),
+                static_cast<unsigned char>(dragTorque >> 8),
+                static_cast<unsigned char>(recoverySlopeMarginBits),
+                static_cast<unsigned char>(recoverySlopeMarginBits >> 8),
+                static_cast<unsigned char>(recoverySlopeMarginBits >> 16),
+                static_cast<unsigned char>(recoverySlopeMarginBits >> 24),
+                static_cast<unsigned char>(recoverySlope),
+                static_cast<unsigned char>(recoverySlope >> 8),
+                static_cast<unsigned char>(strokeTimes),
+                static_cast<unsigned char>(strokeTimes >> 8),
+                static_cast<unsigned char>(strokeTimes >> 16),
+                RowerProfile::Defaults::driveHandleForcesMaxCapacity,
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return(payload);
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            SECTION("save new stroke detection settings to EEPROM")
+            {
+                Verify(Method(mockEEPROMService, setStrokePhaseDetectionSettings).Matching([&](const RowerProfile::StrokePhaseDetectionSettings newSettings)
+                                                                                           {
+                        REQUIRE(newSettings.strokeDetectionType == RowerProfile::Defaults::strokeDetectionType);
+                        REQUIRE(newSettings.impulseDataArrayLength == RowerProfile::Defaults::impulseDataArrayLength);
+                        REQUIRE(newSettings.minimumPoweredTorque == RowerProfile::Defaults::minimumPoweredTorque);
+                        REQUIRE(newSettings.minimumDragTorque == RowerProfile::Defaults::minimumDragTorque);
+                        REQUIRE(newSettings.minimumRecoverySlopeMargin == RowerProfile::Defaults::minimumRecoverySlopeMargin);
+                        REQUIRE(newSettings.minimumRecoverySlope == RowerProfile::Defaults::minimumRecoverySlope);
+                        REQUIRE(newSettings.minimumRecoveryTime == RowerProfile::Defaults::minimumRecoveryTime);
+                        REQUIRE(newSettings.minimumDriveTime == RowerProfile::Defaults::minimumDriveTime);
+                        REQUIRE(newSettings.driveHandleForcesMaxCapacity == RowerProfile::Defaults::driveHandleForcesMaxCapacity);
+
+                        return true; }))
+                    .Once();
+            }
+
+            SECTION("notify new stroke detection settings")
+            {
+                Verify(Method(mockSettingsBleService, broadcastStrokeDetectionSettings)).Once();
+            }
+
+            SECTION("indicate Success response")
+            {
+                Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+                Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+                Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                           .Using(Eq(successResponse)))
+                    .Once();
+            }
+        }
+#else
+        SECTION("and when runtime settings are disabled return UnsupportedOpCode response")
+        {
+            std::array<unsigned char, 3U> unsupportedParameterResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({
+                std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
+            });
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(unsupportedParameterResponse)))
+                .Once();
+        }
+#endif
+    }
 }
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity)

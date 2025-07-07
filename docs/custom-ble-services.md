@@ -191,11 +191,12 @@ Please note that the new BLE service structure is currently experimental and the
 
 For an example of an implementation (in Javascript) please visit the [WebGUI page]((https://github.com/Abasz/ESPRowingMonitor-WebGUI/blob/master/src/common/services/ergometer/erg-settings.service.ts)).
 
-Please note that `SetMachineSettings`, `SetSensorSignalSettings`, `SetDragFactorSettings` OpCodes only available if firmware is compiled with [`ENABLE_RUNTIME_SETTINGS`](./settings.md#enable_runtime_settings) flag. Otherwise sending this OpCode it will return `UnsupportedOpCode`. Furthermore, device restart (e.g. sending Restart Device OpCode) is necessary for the new settings to take effect. The structure corresponds to bytes of the Settings Characteristic above as follows:
+Please note that `SetMachineSettings`, `SetSensorSignalSettings`, `SetDragFactorSettings`, `SetStrokeDetectionSettings` OpCodes only available if firmware is compiled with [`ENABLE_RUNTIME_SETTINGS`](./settings.md#enable_runtime_settings) flag. Otherwise sending this OpCode it will return `UnsupportedOpCode`. Furthermore, device restart (e.g. sending Restart Device OpCode) is necessary for the new settings to take effect. The structure corresponds to bytes of the Settings Characteristic and Stroke Detection Settings Characteristic above as follows:
 
-- `SetMachineSettings` follows bytes 1-8
-- `SetSensorSignalSettings` follows bytes 9-10
-- `SetDragFactorSEttings` follows bytes 11-17
+- `SetMachineSettings` follows bytes 1-8 of Settings Characteristic
+- `SetSensorSignalSettings` follows bytes 9-10 of Settings Characteristic
+- `SetDragFactorSEttings` follows bytes 11-17 of Settings Characteristic
+- `SetStrokeDetectionSettings` follows the bytes 1-15 of Stroke Detection Settings Characteristic
 
 ## Over-the-Air updater
 
