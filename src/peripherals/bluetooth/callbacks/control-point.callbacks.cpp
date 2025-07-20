@@ -485,7 +485,7 @@ ResponseOpCodes ControlPointCallbacks::processStrokeDetectionSettingsChange(cons
 
     const unsigned char impulseAndDetection = message[bytePosition];
     const auto strokeDetectionType = static_cast<StrokeDetectionType>(impulseAndDetection & 0x03);
-    const unsigned char impulseDataArrayLength = impulseAndDetection >> 2U;
+    const unsigned char impulseDataArrayLength = (impulseAndDetection >> 2U) & 0x1F;
     bytePosition += ISettingsBleService::impulseAndDetectionTypePayloadSize;
 
     const float minimumPoweredTorque = static_cast<float>(static_cast<short>(message[bytePosition] | message[bytePosition + 1] << 8)) / ISettingsBleService::poweredTorqueScale;

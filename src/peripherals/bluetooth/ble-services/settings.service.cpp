@@ -94,7 +94,9 @@ std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize> Settin
 {
     const auto strokeDetectionSettings = eepromService.getStrokePhaseDetectionSettings();
 
-    const unsigned char impulseAndDetection = (std::to_underlying(strokeDetectionSettings.strokeDetectionType) & 0x03) | (strokeDetectionSettings.impulseDataArrayLength << 2U);
+    const unsigned char impulseAndDetection = (std::to_underlying(strokeDetectionSettings.strokeDetectionType) & 0x03) |
+                                              ((strokeDetectionSettings.impulseDataArrayLength & 0x1F) << 2U) |
+                                              (static_cast<unsigned char>(std::is_same_v<Configurations::precision, double>) << 7U);
     const auto poweredTorque = static_cast<short>(roundf(strokeDetectionSettings.minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
     const auto dragTorque = static_cast<short>(roundf(strokeDetectionSettings.minimumDragTorque * ISettingsBleService::dragTorqueScale));
     const auto recoverySlopeMargin = std::bit_cast<unsigned int>(strokeDetectionSettings.minimumRecoverySlopeMargin * ISettingsBleService::recoverySlopeMarginPayloadScale);

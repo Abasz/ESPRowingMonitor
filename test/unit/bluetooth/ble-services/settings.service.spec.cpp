@@ -69,7 +69,9 @@ TEST_CASE("SettingsBleService", "[ble-service]")
         RowerProfile::Defaults::dragCoefficientsArrayLength,
     };
 
-    const auto strokeDetectionAndImpulseEncoded = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) | (RowerProfile::Defaults::impulseDataArrayLength << 2U);
+    const auto strokeDetectionAndImpulseEncoded = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) |
+                                                  ((RowerProfile::Defaults::impulseDataArrayLength & 0x1F) << 2U) |
+                                                  (static_cast<unsigned char>(std::is_same_v<Configurations::precision, double>) << 7U);
     const auto minimumPoweredTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
     const auto minimumDragTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumDragTorque * ISettingsBleService::dragTorqueScale));
     const auto minimumRecoverySlopeMargin = std::bit_cast<unsigned int>(RowerProfile::Defaults::minimumRecoverySlopeMargin * ISettingsBleService::recoverySlopeMarginPayloadScale);
@@ -425,7 +427,7 @@ TEST_CASE("SettingsBleService", "[ble-service]")
                     .Do([&](const std::array<unsigned char, ISettingsBleService::strokeSettingsPayloadSize> &settings)
                         {
                             strokeDetectionType = static_cast<StrokeDetectionType>(settings[0] & 0x03);
-                            impulseDataArrayLength = (settings[0] >> 2) & 0x3F;
+                            impulseDataArrayLength = (settings[0] >> 2) & 0x1F;
                             minimumPoweredTorque = static_cast<float>(static_cast<short>(settings[1] | settings[2] << 8)) / ISettingsBleService::poweredTorqueScale;
                             minimumDragTorque = static_cast<float>(static_cast<short>(settings[3] | settings[4] << 8)) / ISettingsBleService::dragTorqueScale;
                             minimumRecoverySlopeMargin = std::bit_cast<float>(static_cast<unsigned int>(settings[5] | settings[6] << 8 | settings[7] << 16 | settings[8] << 24)) / ISettingsBleService::recoverySlopeMarginPayloadScale;

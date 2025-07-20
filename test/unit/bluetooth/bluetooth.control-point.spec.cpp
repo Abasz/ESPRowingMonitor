@@ -900,7 +900,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 std::to_underlying(ResponseOpCodes::Successful),
             };
 
-            const auto impulseAndDetection = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) | (RowerProfile::Defaults::impulseDataArrayLength << 2U);
+            const auto impulseAndDetection = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) | 
+                                            ((RowerProfile::Defaults::impulseDataArrayLength & 0x1F) << 2U) |
+                                            (static_cast<unsigned char>(std::is_same_v<Configurations::precision, double>) << 7U);
             const auto poweredTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
             const auto dragTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumDragTorque * ISettingsBleService::dragTorqueScale));
             const auto recoverySlopeMarginBits = std::bit_cast<unsigned int>(RowerProfile::Defaults::minimumRecoverySlopeMargin * ISettingsBleService::recoverySlopeMarginPayloadScale);

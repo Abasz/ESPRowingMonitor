@@ -150,7 +150,9 @@ Slope = 0x01;
 Both = 0x02;
 ```
 
-_Impulse Data Array Length_ - number of impulses stored for calculations (bits 2-7, value range 1-63)
+_Impulse Data Array Length_ - number of impulses stored for calculations (bits 2-6, value range 1-31)
+
+_Is Compiled With Double_ - indicates whether the firmware was compiled with double precision (bit 7, read-only)
 
 Bytes 1-2 (signed short) is the [Minimum Powered Torque](./settings.md#minimum_powered_torque) with a resolution (scale) of 10,000 (i.e. value of 5,000 translates to 0.5).
 
@@ -197,6 +199,8 @@ Please note that `SetMachineSettings`, `SetSensorSignalSettings`, `SetDragFactor
 - `SetSensorSignalSettings` follows bytes 9-10 of Settings Characteristic
 - `SetDragFactorSEttings` follows bytes 11-17 of Settings Characteristic
 - `SetStrokeDetectionSettings` follows the bytes 1-15 of Stroke Detection Settings Characteristic
+
+**Note:** The "Is Compiled With Double" bit (bit 7) in the Stroke Detection Settings is read-only and will be ignored when sent via the control point. Only bits 0-6 of byte 0 are used for `SetStrokeDetectionSettings`.
 
 ## Over-the-Air updater
 
