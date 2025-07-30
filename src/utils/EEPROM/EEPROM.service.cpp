@@ -286,6 +286,17 @@ bool EEPROMService::validateSensorSignalSettings(const RowerProfile::SensorSigna
         return false;
     }
 
+    const unsigned int currentMaxDragFactorRecovery = preferences.getUInt(maxDragFactorRecoveryPeriodAddress, maxDragFactorRecoveryPeriod);
+
+    const auto maxDragFactorRecoveryDatapointCount = 1'000U;
+    const auto possibleRecoveryDatapointCount = currentMaxDragFactorRecovery / newSensorSignalSettings.rotationDebounceTimeMin;
+    if (!isInBounds(possibleRecoveryDatapointCount, 0U, maxDragFactorRecoveryDatapointCount))
+    {
+        Log.errorln("Invalid rotation debounce time, theoretically the recovery may end up creating a vector with a max of %d data points (which amount in reality would depend on, among others, the drag) that would use up too much memory and crash the application. Based on the current settings it should be between %dus and %dus", possibleRecoveryDatapointCount, currentMaxDragFactorRecovery / maxDragFactorRecoveryDatapointCount, std::numeric_limits<unsigned short>::max());
+
+        return false;
+    }
+
     return true;
 }
 

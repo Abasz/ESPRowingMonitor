@@ -462,6 +462,7 @@ TEST_CASE("EEPROMService", "[utils]")
         Mock<Preferences> mockPreferences;
         When(Method(mockPreferences, putUShort)).AlwaysReturn(1);
         When(Method(mockPreferences, putUInt)).AlwaysReturn(1);
+        When(Method(mockPreferences, getUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), Any())).Return(RowerProfile::Defaults::maxDragFactorRecoveryPeriod);
         EEPROMService eepromService(mockPreferences.get());
 
 #if ENABLE_RUNTIME_SETTINGS
@@ -472,7 +473,13 @@ TEST_CASE("EEPROMService", "[utils]")
                 .rowingStoppedThresholdPeriod = 3'000'000,
             };
 
+            const auto invalidRotationDebounceTim = RowerProfile::SensorSignalSettings{
+                .rotationDebounceTimeMin = RowerProfile::Defaults::maxDragFactorRecoveryPeriod / 1'000 - 1'000U,
+                .rowingStoppedThresholdPeriod = 5'000'000,
+            };
+
             eepromService.setSensorSignalSettings(invalidRowingStoppedThresholdPeriodTooLow);
+            eepromService.setSensorSignalSettings(invalidRotationDebounceTim);
 
             Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), Any())).Never();
             Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Never();
@@ -481,7 +488,7 @@ TEST_CASE("EEPROMService", "[utils]")
         SECTION("save new sensor signal settings without updating backing fields")
         {
             const auto newSensorSignalSettings = RowerProfile::SensorSignalSettings{
-                .rotationDebounceTimeMin = 1'000,
+                .rotationDebounceTimeMin = RowerProfile::Defaults::maxDragFactorRecoveryPeriod / 1'000,
                 .rowingStoppedThresholdPeriod = 4'000'000,
             };
 
@@ -493,6 +500,22 @@ TEST_CASE("EEPROMService", "[utils]")
             Verify(Method(mockPreferences, putUInt).Using(StrEq(rowingStoppedPeriodAddress), Any())).Once();
             REQUIRE(sensorSignalSettings.rotationDebounceTimeMin != newSensorSignalSettings.rotationDebounceTimeMin);
             REQUIRE(sensorSignalSettings.rowingStoppedThresholdPeriod != newSensorSignalSettings.rowingStoppedThresholdPeriod);
+        }
+
+        SECTION("consider pending drag factor settings when validating rotation debounce time")
+        {
+            const unsigned short invalidRotationDebounceForOldRecoveryPeriod = (RowerProfile::Defaults::maxDragFactorRecoveryPeriod - 1'000'000U) / 1000U;
+            const auto newMaxRecoveryPeriod = RowerProfile::Defaults::maxDragFactorRecoveryPeriod - 1'000'000U;
+            const auto sensorSignalSettings = RowerProfile::SensorSignalSettings{
+                .rotationDebounceTimeMin = invalidRotationDebounceForOldRecoveryPeriod,
+                .rowingStoppedThresholdPeriod = RowerProfile::Defaults::rowingStoppedThresholdPeriod,
+            };
+            When(Method(mockPreferences, getUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), Any())).Return(newMaxRecoveryPeriod);
+
+            eepromService.setSensorSignalSettings(sensorSignalSettings);
+
+            REQUIRE(eepromService.getDragFactorSettings().maxDragFactorRecoveryPeriod != newMaxRecoveryPeriod);
+            Verify(Method(mockPreferences, putUShort).Using(StrEq(rotationDebounceAddress), invalidRotationDebounceForOldRecoveryPeriod)).Once();
         }
 #else
         SECTION("not save any value if runtime settings are not enabled")
