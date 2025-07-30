@@ -100,8 +100,8 @@ public:
     RowerProfile::DragFactorSettings getDragFactorSettings() const override;
     RowerProfile::StrokePhaseDetectionSettings getStrokePhaseDetectionSettings() const override;
 
-    static bool validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings);
-    static bool validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings);
-    static bool validateDragFactorSettings(const RowerProfile::DragFactorSettings &newDragFactorSettings, unsigned short rotationDebounceTimeMin);
-    static bool validateStrokePhaseDetectionSettings(const RowerProfile::StrokePhaseDetectionSettings &newStrokePhaseDetectionSettings);
+    bool validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings) const override;
+    bool validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings) const override;
+    bool validateDragFactorSettings(const RowerProfile::DragFactorSettings &newDragFactorSettings) const override;
+    bool validateStrokePhaseDetectionSettings(const RowerProfile::StrokePhaseDetectionSettings &newStrokePhaseDetectionSettings) const override;
 };

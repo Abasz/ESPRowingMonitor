@@ -511,6 +511,7 @@ TEST_CASE("EEPROMService", "[utils]")
         When(Method(mockPreferences, putFloat)).AlwaysReturn(1);
         When(Method(mockPreferences, putUChar)).AlwaysReturn(1);
         When(Method(mockPreferences, putUInt)).AlwaysReturn(1);
+        When(Method(mockPreferences, getUShort).Using(StrEq(rotationDebounceAddress), RowerProfile::Defaults::rotationDebounceTimeMin)).AlwaysReturn(RowerProfile::Defaults::rotationDebounceTimeMin);
         EEPROMService eepromService(mockPreferences.get());
 
 #if ENABLE_RUNTIME_SETTINGS
@@ -604,6 +605,25 @@ TEST_CASE("EEPROMService", "[utils]")
             REQUIRE(dragFactorSettings.lowerDragFactorThreshold != expectedDragFactorSettings.lowerDragFactorThreshold);
             REQUIRE(dragFactorSettings.upperDragFactorThreshold != expectedDragFactorSettings.upperDragFactorThreshold);
             REQUIRE(dragFactorSettings.dragCoefficientsArrayLength != expectedDragFactorSettings.dragCoefficientsArrayLength);
+        }
+
+        SECTION("consider pending sensor signal settings when validating drag factor recovery period")
+        {
+            const auto invalidRecoveryPeriodForOldDebounceFigure = (RowerProfile::Defaults::rotationDebounceTimeMin + 10) * 1000U;
+            const auto newDebounceTime = RowerProfile::Defaults::rotationDebounceTimeMin * 2;
+            const auto dragFactorSettings = RowerProfile::DragFactorSettings{
+                .goodnessOfFitThreshold = 0.9F,
+                .maxDragFactorRecoveryPeriod = invalidRecoveryPeriodForOldDebounceFigure,
+                .lowerDragFactorThreshold = 100.0F,
+                .upperDragFactorThreshold = 200.0F,
+                .dragCoefficientsArrayLength = 10,
+            };
+            When(Method(mockPreferences, getUShort).Using(StrEq(rotationDebounceAddress), Any())).Return(newDebounceTime);
+
+            eepromService.setDragFactorSettings(dragFactorSettings);
+
+            REQUIRE(eepromService.getSensorSignalSettings().rotationDebounceTimeMin != newDebounceTime);
+            Verify(Method(mockPreferences, putUInt).Using(StrEq(maxDragFactorRecoveryPeriodAddress), invalidRecoveryPeriodForOldDebounceFigure)).Once();
         }
 #else
         SECTION("not save any value if runtime settings are not enabled")

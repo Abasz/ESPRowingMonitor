@@ -31,4 +31,9 @@ public:
     virtual RowerProfile::SensorSignalSettings getSensorSignalSettings() const = 0;
     virtual RowerProfile::DragFactorSettings getDragFactorSettings() const = 0;
     virtual RowerProfile::StrokePhaseDetectionSettings getStrokePhaseDetectionSettings() const = 0;
+
+    virtual bool validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings) const = 0;
+    virtual bool validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings) const = 0;
+    virtual bool validateDragFactorSettings(const RowerProfile::DragFactorSettings &newDragFactorSettings) const = 0;
+    virtual bool validateStrokePhaseDetectionSettings(const RowerProfile::StrokePhaseDetectionSettings &newStrokePhaseDetectionSettings) const = 0;
 };

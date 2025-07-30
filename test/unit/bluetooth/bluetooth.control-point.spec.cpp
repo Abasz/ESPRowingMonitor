@@ -41,6 +41,10 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
     Fake(Method(mockEEPROMService, setSensorSignalSettings));
     Fake(Method(mockEEPROMService, setDragFactorSettings));
     Fake(Method(mockEEPROMService, setStrokePhaseDetectionSettings));
+    When(Method(mockEEPROMService, validateMachineSettings)).AlwaysReturn(true);
+    When(Method(mockEEPROMService, validateSensorSignalSettings)).AlwaysReturn(true);
+    When(Method(mockEEPROMService, validateDragFactorSettings)).AlwaysReturn(true);
+    When(Method(mockEEPROMService, validateStrokePhaseDetectionSettings)).AlwaysReturn(true);
 
     Fake(Method(mockSettingsBleService, broadcastSettings));
     Fake(Method(mockSettingsBleService, broadcastStrokeDetectionSettings));
@@ -478,6 +482,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 32,
                 10,
             });
+            When(Method(mockEEPROMService, validateMachineSettings)).Return(false);
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -486,6 +491,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
                        .Using(Eq(operationsFailedResponse)))
                 .Once();
+
+            Verify(Method(mockEEPROMService, validateMachineSettings)).Once();
+            Verify(Method(mockEEPROMService, setMachineSettings)).Never();
         }
 
         SECTION("and when MachineSettings is valid")
@@ -611,6 +619,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 0,
                 3,
             });
+            When(Method(mockEEPROMService, validateSensorSignalSettings)).Return(false);
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -619,6 +628,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
                        .Using(Eq(operationsFailedResponse)))
                 .Once();
+
+            Verify(Method(mockEEPROMService, validateSensorSignalSettings)).Once();
+            Verify(Method(mockEEPROMService, setSensorSignalSettings)).Never();
         }
 
         SECTION("and when SensorSignalSettings is valid")
@@ -739,6 +751,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 32,
                 10,
             });
+            When(Method(mockEEPROMService, validateDragFactorSettings)).Return(false);
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -862,7 +875,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 std::to_underlying(ResponseOpCodes::OperationFailed),
             };
 
-            const NimBLEAttValue invalidPayload = {
+            const NimBLEAttValue validPayload = {
                 std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings),
                 0x03,
                 0,
@@ -881,7 +894,8 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 100,
             };
 
-            When(Method(mockControlPointCharacteristic, getValue)).Return(invalidPayload);
+            When(Method(mockControlPointCharacteristic, getValue)).Return(validPayload);
+            When(Method(mockEEPROMService, validateStrokePhaseDetectionSettings)).Return(false);
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
@@ -890,6 +904,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
                        .Using(Eq(operationsFailedResponse)))
                 .Once();
+
+            Verify(Method(mockEEPROMService, validateStrokePhaseDetectionSettings)).Once();
+            Verify(Method(mockEEPROMService, setStrokePhaseDetectionSettings)).Never();
         }
 
         SECTION("and when StrokeDetectionSettings is valid")
@@ -900,9 +917,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 std::to_underlying(ResponseOpCodes::Successful),
             };
 
-            const auto impulseAndDetection = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) | 
-                                            ((RowerProfile::Defaults::impulseDataArrayLength & 0x1F) << 2U) |
-                                            (static_cast<unsigned char>(std::is_same_v<Configurations::precision, double>) << 7U);
+            const auto impulseAndDetection = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) |
+                                             ((RowerProfile::Defaults::impulseDataArrayLength & 0x1F) << 2U) |
+                                             (static_cast<unsigned char>(std::is_same_v<Configurations::precision, double>) << 7U);
             const auto poweredTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
             const auto dragTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumDragTorque * ISettingsBleService::dragTorqueScale));
             const auto recoverySlopeMarginBits = std::bit_cast<unsigned int>(RowerProfile::Defaults::minimumRecoverySlopeMargin * ISettingsBleService::recoverySlopeMarginPayloadScale);

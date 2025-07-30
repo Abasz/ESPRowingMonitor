@@ -103,7 +103,7 @@ void EEPROMService::setMachineSettings(const RowerProfile::MachineSettings newMa
         return;
     }
 
-    if (!EEPROMService::validateMachineSettings(newMachineSettings))
+    if (!validateMachineSettings(newMachineSettings))
     {
         return;
     }
@@ -123,7 +123,7 @@ void EEPROMService::setSensorSignalSettings(const RowerProfile::SensorSignalSett
         return;
     }
 
-    if (!EEPROMService::validateSensorSignalSettings(newSensorSignalSettings))
+    if (!validateSensorSignalSettings(newSensorSignalSettings))
     {
         return;
     }
@@ -141,7 +141,7 @@ void EEPROMService::setDragFactorSettings(const RowerProfile::DragFactorSettings
         return;
     }
 
-    if (!EEPROMService::validateDragFactorSettings(newDragFactorSettings, rotationDebounceTimeMin))
+    if (!validateDragFactorSettings(newDragFactorSettings))
     {
         return;
     }
@@ -162,7 +162,7 @@ void EEPROMService::setStrokePhaseDetectionSettings(const RowerProfile::StrokePh
         return;
     }
 
-    if (!EEPROMService::validateStrokePhaseDetectionSettings(newStrokePhaseDetectionSettings))
+    if (!validateStrokePhaseDetectionSettings(newStrokePhaseDetectionSettings))
     {
         return;
     }
@@ -229,8 +229,7 @@ RowerProfile::DragFactorSettings EEPROMService::getDragFactorSettings() const
 
 RowerProfile::StrokePhaseDetectionSettings EEPROMService::getStrokePhaseDetectionSettings() const
 {
-    return RowerProfile::StrokePhaseDetectionSettings
-    {
+    return RowerProfile::StrokePhaseDetectionSettings{
         .strokeDetectionType = strokeDetectionType,
         .minimumPoweredTorque = minimumPoweredTorque,
         .minimumDragTorque = minimumDragTorque,
@@ -243,7 +242,7 @@ RowerProfile::StrokePhaseDetectionSettings EEPROMService::getStrokePhaseDetectio
     };
 }
 
-bool EEPROMService::validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings)
+bool EEPROMService::validateMachineSettings(const RowerProfile::MachineSettings &newMachineSettings) const
 {
     if (!isInBounds(newMachineSettings.concept2MagicNumber, 0.0F, std::numeric_limits<float>::max()))
     {
@@ -277,7 +276,7 @@ bool EEPROMService::validateMachineSettings(const RowerProfile::MachineSettings 
     return true;
 }
 
-bool EEPROMService::validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings)
+bool EEPROMService::validateSensorSignalSettings(const RowerProfile::SensorSignalSettings &newSensorSignalSettings) const
 {
     const auto minRowingStoppedThresholdPeriod = 4'000'000U;
     if (!isInBounds(newSensorSignalSettings.rowingStoppedThresholdPeriod, minRowingStoppedThresholdPeriod, std::numeric_limits<unsigned int>::max()))
@@ -290,8 +289,7 @@ bool EEPROMService::validateSensorSignalSettings(const RowerProfile::SensorSigna
     return true;
 }
 
-bool EEPROMService::validateDragFactorSettings(const RowerProfile::DragFactorSettings &newDragFactorSettings,
-                                               const unsigned short rotationDebounceTimeMin)
+bool EEPROMService::validateDragFactorSettings(const RowerProfile::DragFactorSettings &newDragFactorSettings) const
 {
     if (!isInBounds(newDragFactorSettings.goodnessOfFitThreshold, 0.0F, 1.0F))
     {
@@ -300,11 +298,13 @@ bool EEPROMService::validateDragFactorSettings(const RowerProfile::DragFactorSet
         return false;
     }
 
+    const unsigned short currentRotationDebounceTimeMin = preferences.getUShort(rotationDebounceAddress, rotationDebounceTimeMin);
+
     const auto maxDragFactorRecoveryDatapointCount = 1'000U;
-    const auto possibleRecoveryDatapointCount = newDragFactorSettings.maxDragFactorRecoveryPeriod / rotationDebounceTimeMin;
+    const auto possibleRecoveryDatapointCount = newDragFactorSettings.maxDragFactorRecoveryPeriod / currentRotationDebounceTimeMin;
     if (!isInBounds(possibleRecoveryDatapointCount, 0U, maxDragFactorRecoveryDatapointCount))
     {
-        Log.errorln("Invalid max drag factor recovery period, theoretically the recovery may end up creating a vector with a max of %d data points (which amount in reality would depend on, among others, the drag) that would use up too much memory and crash the application. Based on the current settings it should be between 0 and %dus", possibleRecoveryDatapointCount, maxDragFactorRecoveryDatapointCount * rotationDebounceTimeMin);
+        Log.errorln("Invalid max drag factor recovery period, theoretically the recovery may end up creating a vector with a max of %d data points (which amount in reality would depend on, among others, the drag) that would use up too much memory and crash the application. Based on the current settings it should be between 0 and %dus", possibleRecoveryDatapointCount, maxDragFactorRecoveryDatapointCount * currentRotationDebounceTimeMin);
 
         return false;
     }
@@ -333,7 +333,7 @@ bool EEPROMService::validateDragFactorSettings(const RowerProfile::DragFactorSet
     return true;
 }
 
-bool EEPROMService::validateStrokePhaseDetectionSettings(const RowerProfile::StrokePhaseDetectionSettings &newStrokePhaseDetectionSettings)
+bool EEPROMService::validateStrokePhaseDetectionSettings(const RowerProfile::StrokePhaseDetectionSettings &newStrokePhaseDetectionSettings) const
 {
     if (!isInBounds(newStrokePhaseDetectionSettings.minimumRecoverySlopeMargin, 0.0F, std::numeric_limits<float>::max()))
     {

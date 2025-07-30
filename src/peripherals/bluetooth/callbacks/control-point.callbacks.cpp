@@ -382,7 +382,7 @@ ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLE
         .sprocketRadius = sprocketRadius,
     };
 
-    if (!EEPROMService::validateMachineSettings(newMachineSettings))
+    if (!eepromService.validateMachineSettings(newMachineSettings))
     {
         return ResponseOpCodes::OperationFailed;
     }
@@ -415,7 +415,7 @@ ResponseOpCodes ControlPointCallbacks::processSensorSignalSettingsChange(const N
         .rowingStoppedThresholdPeriod = rowingStoppedThresholdPeriod,
     };
 
-    if (!EEPROMService::validateSensorSignalSettings(newSensorSignalSettings))
+    if (!eepromService.validateSensorSignalSettings(newSensorSignalSettings))
     {
         return ResponseOpCodes::OperationFailed;
     }
@@ -460,7 +460,7 @@ ResponseOpCodes ControlPointCallbacks::processDragFactorSettingsChange(const Nim
         .dragCoefficientsArrayLength = dragCoefficientsArrayLength,
     };
 
-    if (!EEPROMService::validateDragFactorSettings(newDragFactorSettings, eepromService.getSensorSignalSettings().rotationDebounceTimeMin))
+    if (!eepromService.validateDragFactorSettings(newDragFactorSettings))
     {
         return ResponseOpCodes::OperationFailed;
     }
@@ -521,7 +521,7 @@ ResponseOpCodes ControlPointCallbacks::processStrokeDetectionSettingsChange(cons
         .driveHandleForcesMaxCapacity = driveHandleForcesMaxCapacity,
     };
 
-    if (!EEPROMService::validateStrokePhaseDetectionSettings(newStrokeDetectionSettings))
+    if (!eepromService.validateStrokePhaseDetectionSettings(newStrokeDetectionSettings))
     {
         return ResponseOpCodes::OperationFailed;
     }
