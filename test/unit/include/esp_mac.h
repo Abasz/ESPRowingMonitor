@@ -24,4 +24,31 @@ esp_err_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
 
     return ESP_OK;
 }
+
+inline const char *esp_err_to_name(esp_err_t code)
+{
+    switch (code)
+    {
+    case 0:
+        return "ESP_OK";
+    case -1:
+        return "ESP_FAIL";
+    case 0x101:
+        return "ESP_ERR_NO_MEM";
+    case 0x102:
+        return "ESP_ERR_INVALID_ARG";
+    case 0x103:
+        return "ESP_ERR_INVALID_STATE";
+    case 0x104:
+        return "ESP_ERR_INVALID_SIZE";
+    case 0x105:
+        return "ESP_ERR_NOT_FOUND";
+    case 0x106:
+        return "ESP_ERR_NOT_SUPPORTED";
+    case 0x107:
+        return "ESP_ERR_TIMEOUT";
+    default:
+        return "ESP_ERR_UNKNOWN";
+    }
+}
 // NOLINTEND
