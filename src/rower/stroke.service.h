@@ -18,6 +18,7 @@ class StrokeService final : public IStrokeService
     unsigned int rowingStoppedThresholdPeriod = RowerProfile::Defaults::rowingStoppedThresholdPeriod;
 
     Configurations::precision angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
+    unsigned char absoluteMinimumRecoveryDeltaTimesSize = std::max(RowerProfile::Defaults::impulseDataArrayLength / 2 + 1, 3);
 
     // rower state
     CyclePhase cyclePhase = CyclePhase::Stopped;

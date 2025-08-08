@@ -31,6 +31,7 @@ void StrokeService::setup(const RowerProfile::MachineSettings newMachineSettings
 
     rowingStoppedThresholdPeriod = newSensorSignalSettings.rowingStoppedThresholdPeriod;
     angularDisplacementPerImpulse = (2 * PI) / machineSettings.impulsesPerRevolution;
+    absoluteMinimumRecoveryDeltaTimesSize = std::max(newStrokeDetectionSettings.impulseDataArrayLength / 2 + 1, 3);
 
     dragCoefficients = WeightedAverageSeries(dragFactorSettings.dragCoefficientsArrayLength, Configurations::defaultAllocationCapacity);
 
@@ -87,7 +88,15 @@ bool StrokeService::isFlywheelPowered()
 
 void StrokeService::calculateDragCoefficient()
 {
-    if (recoveryDuration > dragFactorSettings.maxDragFactorRecoveryPeriod || recoveryDeltaTimes.size() < strokePhaseDetectionSettings.impulseDataArrayLength)
+    if (recoveryDuration > dragFactorSettings.maxDragFactorRecoveryPeriod)
+    {
+        return;
+    }
+
+    auto minRequiredRecoveryDeltaTimes = (dragCoefficient == 0)
+                                             ? absoluteMinimumRecoveryDeltaTimesSize
+                                             : strokePhaseDetectionSettings.impulseDataArrayLength;
+    if (recoveryDeltaTimes.size() < minRequiredRecoveryDeltaTimes)
     {
         return;
     }
