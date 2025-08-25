@@ -3,6 +3,8 @@
 #include <cmath>
 #include <numeric>
 
+#include "driver/rtc_io.h"
+
 #include "Arduino.h"
 #include "ArduinoLog.h"
 #include "FastLED.h"
@@ -57,6 +59,7 @@ void PowerManagerService::goToSleep() const
     Log.verboseln("Wake up pin status: %s", pinState == HIGH ? "HIGH" : "LOW");
 
     esp_sleep_enable_ext0_wakeup(wakeupPin, pinState == HIGH ? LOW : HIGH);
+    rtc_gpio_pullup_en(wakeupPin);
 
     Log.infoln("Going to sleep mode");
     if constexpr (Configurations::isRgb)

@@ -62,17 +62,23 @@ TEST_CASE("PowerManagerService", "[utils]")
         Fake(Method(mockArduino, pinMode));
         Fake(Method(mockArduino, digitalWrite));
         Fake(Method(mockArduino, esp_sleep_enable_ext0_wakeup));
+        Fake(Method(mockArduino, rtc_gpio_pullup_en));
         Fake(Method(mockArduino, esp_deep_sleep_start));
         Fake(Method(mockSerial, flush));
         Fake(Method(mockFastLED, clear));
 
         powerManager.goToSleep();
 
-        SECTION("configure deep sleep mode and set wakeup pin")
+        SECTION("set wakeup pin")
         {
             Verify(Method(mockArduino, pinMode).Using(Configurations::wakeupPinNumber, INPUT_PULLUP)).Once();
             Verify(Method(mockArduino, digitalWrite).Using(Configurations::sensorOnSwitchPinNumber, LOW)).Once();
             Verify(Method(mockArduino, digitalRead).Using(Configurations::wakeupPinNumber)).Once();
+        }
+
+        SECTION("configure deep sleep mode")
+        {
+            Verify(Method(mockArduino, rtc_gpio_pullup_en).Using(Configurations::wakeupPinNumber)).Once();
             Verify(Method(mockArduino, esp_sleep_enable_ext0_wakeup).Using(Configurations::wakeupPinNumber, !wakeupPinState)).Once();
         }
 
