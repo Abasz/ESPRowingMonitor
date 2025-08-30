@@ -3,9 +3,9 @@
 
 There are multiple ways to install the code on the board.
 
-For specifically supported bards and rowers one can use the precompiled firmware files (which is the simplest) provided under the Release page and flash them onto the board (e.g. via [ESPTools browser flasher](https://espressif.github.io/esptool-js/)).
+For specifically supported bards one can use the precompiled firmware files (which is the simplest way) provided under the [Release page](https://github.com/Abasz/ESPRowingMonitor/releases) and flash them onto the board (e.g. via [ESPTools browser flasher](https://espressif.github.io/esptool-js/)). The easiest is to use the `dynamic rower profile` which supports runtime-configurable settings over BLE via the [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/) but for pre calibrated rowers their specific firmware can be also used.
 
-For custom boards, settings or rowers one needs to compile the code into the firmware binary. This project uses Platformio it can be compiled with that either via CLI or VSCode extension.
+For custom boards one needs to compile the code into the firmware binary. This project uses PlatformIO. Firmware can be compiled with that either via CLI or VSCode extension.
 
 For Linux systems an install script (`/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Abasz/ESPRowingMonitor/refs/heads/main/tools/install.sh)`") that downloads the code and dependencies and an interactive auto compiler script is provided. These guides the user through the installation and compilation process (please see more details [below](#auto-compiler)). For windows, Platformio (and or VSCode) needs to be installed manually. There are several tutorials on YouTube as well as on the [Platformio main page](https://platformio.org/).
 
