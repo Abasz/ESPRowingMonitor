@@ -24,6 +24,7 @@ public:
     static constexpr bool supportSdCardLogging = SUPPORT_SD_CARD_LOGGING;
 
     static constexpr bool isRuntimeSettingsEnabled = ENABLE_RUNTIME_SETTINGS;
+    static constexpr bool isDebounceFilterEnabled = ENABLE_DEBOUNCE_FILTER;
 
     // Bluetooth Settings
     static constexpr BleServiceFlag defaultBleServiceFlag = DEFAULT_BLE_SERVICE;

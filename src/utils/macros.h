@@ -78,6 +78,10 @@ consteval std::string_view extractClassName(const std::string_view className)
     #define ENABLE_RUNTIME_SETTINGS false
 #endif
 
+#if !defined(ENABLE_DEBOUNCE_FILTER)
+    #define ENABLE_DEBOUNCE_FILTER false
+#endif
+
 #if !defined(DEFAULT_CPS_LOGGING_LEVEL)
     #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelTrace
 #endif

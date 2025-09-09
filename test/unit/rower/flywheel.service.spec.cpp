@@ -113,6 +113,102 @@ TEST_CASE("FlywheelService", "[rower]")
 
             REQUIRE(flywheelService.hasDataChanged() == false);
         }
+
+        SECTION("debounce filter")
+        {
+            const auto dtLarge1 = RowerProfile::Defaults::rotationDebounceTimeMin + 100000;
+            const auto dtLarge2 = RowerProfile::Defaults::rotationDebounceTimeMin + 95000;
+            const auto dtMed1 = RowerProfile::Defaults::rotationDebounceTimeMin + 50000;
+            const auto dtMed2 = RowerProfile::Defaults::rotationDebounceTimeMin + 52000;
+            const auto dtMed3 = RowerProfile::Defaults::rotationDebounceTimeMin + 54000;
+            const auto dtSmall = RowerProfile::Defaults::rotationDebounceTimeMin + 1000;
+
+            SECTION("should accept first impulse")
+            {
+                FlywheelService flywheelService;
+
+                flywheelService.processRotation(dtLarge1);
+
+                REQUIRE(flywheelService.hasDataChanged());
+                const auto result = flywheelService.getData();
+                REQUIRE(result.rawImpulseCount == 1);
+                REQUIRE(result.deltaTime == dtLarge1);
+            }
+
+            SECTION("should accept second impulse when delta difference is small enough")
+            {
+                FlywheelService flywheelService;
+
+                auto currentTime = dtLarge1;
+                flywheelService.processRotation(currentTime);
+                // diff = |102000 - 107000| = 5000 <= 102000 ✓
+                currentTime += dtLarge2;
+                flywheelService.processRotation(currentTime);
+
+                const auto result = flywheelService.getData();
+                REQUIRE(result.rawImpulseCount == 2);
+                REQUIRE(result.deltaTime == dtLarge2);
+            }
+
+            SECTION("should reject impulse when delta drops significantly")
+            {
+                FlywheelService flywheelService;
+
+                auto currentTime = dtLarge1;
+                flywheelService.processRotation(currentTime);
+
+                // diff = |8000 - 107000| = 99000 > 8000 ✗
+                currentTime += dtSmall;
+                flywheelService.processRotation(currentTime);
+
+                const auto result = flywheelService.getData();
+                REQUIRE(result.rawImpulseCount == 1);
+                REQUIRE(result.deltaTime == dtLarge1);
+            }
+
+            SECTION("should handle gradually changing deltas")
+            {
+                FlywheelService flywheelService;
+
+                auto currentTime = dtMed1;
+                flywheelService.processRotation(currentTime);
+
+                // diff = |52000 - 50000| = 2000 <= 52000 ✓
+                currentTime += dtMed2;
+                flywheelService.processRotation(currentTime);
+                // diff = |54000 - 52000| = 2000 <= 54000 ✓
+                currentTime += dtMed3;
+                flywheelService.processRotation(currentTime);
+
+                const auto result = flywheelService.getData();
+                REQUIRE(result.rawImpulseCount == 3);
+                REQUIRE(result.deltaTime == dtMed3);
+            }
+
+            SECTION("should demonstrate filter rejection with big delta jump")
+            {
+                FlywheelService flywheelService;
+
+                auto currentTime = dtLarge1;
+                flywheelService.processRotation(currentTime);
+
+                // diff = |102000 - 107000| = 5000 <= 102000 ✓
+                currentTime += dtLarge2;
+                flywheelService.processRotation(currentTime);
+
+                const auto validResult = flywheelService.getData();
+                REQUIRE(validResult.rawImpulseCount == 2);
+                REQUIRE(validResult.deltaTime == dtLarge2);
+
+                // diff = |8000 - 102000| = 94000 > 8000 ✗
+                currentTime += dtSmall;
+                flywheelService.processRotation(currentTime);
+
+                const auto finalResult = flywheelService.getData();
+                REQUIRE(finalResult.rawImpulseCount == 2);
+                REQUIRE(finalResult.deltaTime == dtLarge2);
+            }
+        }
     }
 }
 // NOLINTEND(readability-magic-numbers)

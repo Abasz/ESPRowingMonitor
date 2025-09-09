@@ -8,6 +8,7 @@
 #define ENABLE_RUNTIME_SETTINGS true
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelSilent
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService
+#define ENABLE_DEBOUNCE_FILTER true
 
 #define DEVICE_NAME TestDevice
 #define MODEL_NUMBER TestModelNum

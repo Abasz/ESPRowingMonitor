@@ -64,6 +64,17 @@ Enables changing certain settings at runtime (without recompilation) via the Set
 
 Default: false
 
+#### ENABLE_DEBOUNCE_FILTER
+
+Enables debounce filter for incoming rotation/sensor impulses. This setting aims at reducing false impulses caused by noisy sensors (for example mechanical reed switches) by rejecting impulses that are highly inconsistent with the previous measured interval (if the absolute difference of current and previous delta times is greater than the current delta time).
+
+Typical bounce on reed looks something like this:
+![Reed bounce](imgs/very-noisy-delta-times.jpg)
+
+Enabling this filter is recommended only if you're using a mechanical/reed sensor that occasionally produces spurious pulses or when you observe large, single-sample delta drops in recorded impulse data. For Hall-effect sensors (which due to built in hysteresis are les prone to such issue) the filter is generally not required. For more information on reed bounce please see [this video](https://www.youtube.com/watch?v=7LimjYS04FQ&t=278s)
+
+Default: false
+
 ## Board profile settings
 
 These settings relate to the hardware used by ESP32 and the rowing machine. This can be added to a `your-board.board-profile.h` file.
