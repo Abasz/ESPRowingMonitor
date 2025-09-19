@@ -175,6 +175,10 @@ Enables or disables the BLE service flag to be included in the BLE device name (
 
 This is the model number for the BLE device profile service. This should be one word without spaces and without quotes.
 
+#### HARDWARE_REVISION
+
+Optional hardware revision string that will be exposed through the BLE Device Information Service (Hardware Revision String characteristic). If defined at compile time using the `HARDWARE_REVISION` macro that value is used. If not provided the project will try to infer a name from `ROWER_PROFILE` (for example `profiles/lolinS3-mini.rower-profile.h` → `lolinS3-mini`) and finally falls back to `Custom` when neither is set.
+
 #### SERIAL_NUMBER
 
 Serial number for the BLE device profile. This can be anything but should be within quotes. Default is the last 3 bytes of the MAC Address formatted to HEX without the 0x (i.e. 6 characters).

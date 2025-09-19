@@ -94,6 +94,21 @@ TEST_CASE("DeviceInfoBleService", "[ble-service]")
                     .Using(Configurations::firmwareVersion))
                 .Once();
         }
+
+        SECTION("create hardware revision characteristic and set its value")
+        {
+            deviceInfoBleService.setup(&mockNimBLEServer.get());
+
+            Verify(
+                OverloadedMethod(mockDeviceInfoService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
+                    .Using(CommonBleFlags::hardwareRevisionSvcUuid, expectedProperty))
+                .Once();
+
+            Verify(
+                OverloadedMethod(mockDeviceInfoCharacteristic, setValue, void(const std::string))
+                    .Using("test-test"))
+                .Once();
+        }
     }
 }
 // NOLINTEND(readability-magic-numbers)

@@ -5,6 +5,8 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)
 
+#define BOARD_PROFILE "profiles/test-test.board-profile.h"
+
 #define ENABLE_RUNTIME_SETTINGS true
 #define DEFAULT_CPS_LOGGING_LEVEL ArduinoLogLevel::LogLevelSilent
 #define DEFAULT_BLE_SERVICE BleServiceFlag::CpsService

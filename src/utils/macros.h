@@ -49,12 +49,43 @@ consteval std::string_view extractClassName(const std::string_view className)
     auto end = className.find("::");
     if (end == std::string_view::npos)
     {
-        return "UnknownClass";
+        return std::string_view("UnknownClass");
     }
 
     const auto start = className.rfind(" ", end) + 1;
 
     return className.substr(start, end - start);
+}
+
+consteval std::string_view getHardwareRevision()
+{
+#if defined(HARDWARE_REVISION)
+    return std::string_view(HARDWARE_REVISION);
+#elif defined(BOARD_PROFILE)
+    constexpr auto profile = std::string_view(BOARD_PROFILE);
+
+    std::string_view profileSearchTerm = "profiles/";
+    auto filenameStart = profile.find(profileSearchTerm);
+    if (filenameStart == std::string_view::npos)
+    {
+        return std::string_view("Custom");
+    }
+
+    filenameStart += profileSearchTerm.size();
+
+    auto filename = profile.substr(filenameStart);
+
+    std::string_view boardSearchTerm = ".board-profile.h";
+    auto end = filename.find(boardSearchTerm);
+    if (end == std::string_view::npos)
+    {
+        return std::string_view("Custom");
+    }
+
+    return filename.substr(0, end);
+#else
+    return std::string_view("Custom");
+#endif
 }
 
 #define PRECISION_FLOAT 0

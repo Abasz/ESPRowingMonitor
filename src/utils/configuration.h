@@ -39,6 +39,7 @@ public:
     // NOLINTNEXTLINE(readability-redundant-string-init)
     inline static const string serialNumber = SERIAL_NUMBER;
     inline static const string firmwareVersion = string(getCompileDate().data(), getCompileDate().size());
+    inline static const string hardwareRevision = string(getHardwareRevision());
 
     // Hardware settings
     static constexpr BaudRates baudRate = BAUD_RATE;

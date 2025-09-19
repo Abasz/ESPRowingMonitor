@@ -26,6 +26,9 @@ NimBLEService *DeviceInfoBleService::setup(NimBLEServer *const server) const
     deviceInfoService
         ->createCharacteristic(CommonBleFlags::firmwareNumberSvcUuid, NIMBLE_PROPERTY::READ)
         ->setValue(Configurations::firmwareVersion);
+    deviceInfoService
+        ->createCharacteristic(CommonBleFlags::hardwareRevisionSvcUuid, NIMBLE_PROPERTY::READ)
+        ->setValue(Configurations::hardwareRevision);
 
     return deviceInfoService;
 }
