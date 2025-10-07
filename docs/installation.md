@@ -3,7 +3,7 @@
 
 There are multiple ways to install the code on the board.
 
-For specifically supported bards one can use the precompiled firmware files (which is the simplest way) provided under the [Release page](https://github.com/Abasz/ESPRowingMonitor/releases) and flash them onto the board (e.g. via [ESPTools browser flasher](https://espressif.github.io/esptool-js/)). The easiest is to use the `dynamic rower profile` which supports runtime-configurable settings over BLE via the [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/) but for pre calibrated rowers their specific firmware can be also used.
+For specifically supported bards one can use the precompiled firmware files (which is the simplest way) provided under the [Release page](https://github.com/Abasz/ESPRowingMonitor/releases) and flash them onto the board (e.g. via [ESPTools browser flasher](https://espressif.github.io/esptool-js/)). The easiest is to use the `dynamic rower profile` which supports runtime-configurable settings over BLE via the [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/) but for pre calibrated rowers their specific firmware can be also used. Frimware can be flashed via the desktop GUI flasher that is provided (see below) for Windows, Linux and macOS.
 
 For custom boards one needs to compile the code into the firmware binary. This project uses PlatformIO. Firmware can be compiled with that either via CLI or VSCode extension.
 
@@ -16,6 +16,25 @@ Once platformio.ini is set up, upload can be performed with the VSCode platformi
 ## Auto compiler
 
 For Linux users an [Auto Compiler](../tools/auto-compiler.sh) script is provided that can either compile for any combination of the supported boards and rowers or compile for any supported board and a custom rower settings file. For usage please see `./tools/auto-compiler.sh --help`
+
+## ESPTool Desktop GUI (firmware flasher)
+
+A cross‑platform desktop GUI is available to flash firmware and manage precompiled firmware releases for the ESP Rowing Monitor without installing Python or CLI tools. The GUI allows selecting and flashing the supported Rowers and Boards based on the latest release.
+
+- Download & flash precompiled firmware: the GUI can fetch the latest release and flash it based on the board attached via the USB while listing only boards automatically.
+- Custom firmware support: the GUI also supports flashing local files from a local directory containing compiled .bin files and prepare the correct esptool write-flash command.
+- Common tools: Read MAC, Chip ID, Erase Flash and other utilities are available.
+- Auto-detect ports: the GUI auto-detects serial ports and can probe ports to determine the connected chip variant (ESP32, ESP32-S3, ESP8266, etc.).
+
+- Windows: download the `esptool‑gui‑windows‑x64.exe` from the release assets and run it.
+- Linux: download the `esptool‑gui‑linux‑x64` executable, mark it executable if needed (`chmod +x`), and run it.
+- macOS: download the `esptool‑gui‑macos‑x64.tar.gz`, extract it, then open the `esptool‑gui.app`.
+
+Notes:
+
+- The GUI bundles `esptool` and `pyserial` and auto‑detects serial ports where supported.
+- If you prefer a browser‑based option, you can still use the [ESPTools browser flasher](https://espressif.github.io/esptool-js/).
+- If the executable does not work it is also possible to run the python script directly, but dependencies will need to be installed with `pip`.
 
 ## Over-the-Air update
 

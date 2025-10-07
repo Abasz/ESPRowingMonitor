@@ -75,9 +75,141 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  build-gui-executables:
+    runs-on: ${{ matrix.os }}
+    needs: build-and-upload
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            artifact_name: esptool-gui
+            asset_name: esptool-gui-linux-x64
+          - os: windows-latest
+            platform: windows
+            artifact_name: esptool-gui.exe
+            asset_name: esptool-gui-windows-x64.exe
+          - os: macos-latest
+            platform: macos
+            artifact_name: esptool-gui
+            asset_name: esptool-gui-macos-x64
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔧 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: 📦 Install dependencies
+        run: |
+          pip install pyinstaller pyserial esptool certifi
+
+      - name: 🏗️ Build executable with PyInstaller (Linux)
+        if: runner.os == 'Linux'
+        working-directory: tools
+        run: |
+          ESPTOOL_LOCATION=$(pip show esptool | grep '^Location: ' | cut -c11- | tr -d '\n')
+          ESPTOOL_TARGETS_1="${ESPTOOL_LOCATION}/esptool/targets/stub_flasher/1/*.json:./esptool/targets/stub_flasher/1/"
+          ESPTOOL_TARGETS_2="${ESPTOOL_LOCATION}/esptool/targets/stub_flasher/2/*.json:./esptool/targets/stub_flasher/2/"
+
+          pyinstaller --onefile --windowed --name "${{ matrix.artifact_name }}" \
+            --icon ESPTools-GUI.ico \
+            --hidden-import serial.tools.list_ports \
+            --hidden-import esptool \
+            --hidden-import tkinter \
+            --hidden-import tkinter.ttk \
+            --hidden-import tkinter.scrolledtext \
+            --hidden-import tkinter.filedialog \
+            --hidden-import tkinter.messagebox \
+            --add-data "./ESPTools-GUI.ico:." \
+            --add-data "${ESPTOOL_TARGETS_1}" \
+            --add-data "${ESPTOOL_TARGETS_2}" \
+            esptool_gui.py
+        shell: bash
+
+      - name: 🏗️ Build executable with PyInstaller (Windows)
+        if: runner.os == 'Windows'
+        working-directory: tools
+        shell: pwsh
+        run: |
+         $ESPTOOL_LOCATION = $(pip show esptool | findstr '^Location: ').Substring(10).Trim()
+          $ESPTOOL_TARGETS_1 = "${ESPTOOL_LOCATION}\esptool\targets\stub_flasher\1\*.json;./esptool/targets/stub_flasher/1/"
+          $ESPTOOL_TARGETS_2 = "${ESPTOOL_LOCATION}\esptool\targets\stub_flasher\2\*.json;./esptool/targets/stub_flasher/2/"
+
+          pyinstaller --onefile --windowed --name "${{ matrix.artifact_name }}" `
+            --icon ESPTools-GUI.ico `
+            --hidden-import serial.tools.list_ports `
+            --hidden-import esptool `
+            --hidden-import tkinter `
+            --hidden-import tkinter.ttk `
+            --hidden-import tkinter.scrolledtext `
+            --hidden-import tkinter.filedialog `
+            --hidden-import tkinter.messagebox `
+            --add-data ".\\ESPTools-GUI.ico;." `
+            --add-data "$ESPTOOL_TARGETS_1" `
+            --add-data "$ESPTOOL_TARGETS_2" `
+            esptool_gui.py
+
+      - name: 🏗️ Build executable with PyInstaller (macOS .app bundle)
+        if: runner.os == 'macOS'
+        working-directory: tools
+        run: |
+          # On macOS create an onedir .app bundle instead of --onefile
+          pip install pillow
+          ESPTOOL_LOCATION=$(pip show esptool | grep '^Location: ' | cut -c11- | tr -d '\n') || true
+          ESPTOOL_TARGETS_1="${ESPTOOL_LOCATION}/esptool/targets/stub_flasher/1/*.json:./esptool/targets/stub_flasher/1/"
+          ESPTOOL_TARGETS_2="${ESPTOOL_LOCATION}/esptool/targets/stub_flasher/2/*.json:./esptool/targets/stub_flasher/2/"
+
+          pyinstaller --windowed --onedir --name "${{ matrix.artifact_name }}" \
+            --icon ESPTools-GUI.ico \
+            --hidden-import serial.tools.list_ports \
+            --hidden-import esptool \
+            --hidden-import tkinter \
+            --hidden-import tkinter.ttk \
+            --hidden-import tkinter.scrolledtext \
+            --hidden-import tkinter.filedialog \
+            --hidden-import tkinter.messagebox \
+            --add-data "./ESPTools-GUI.ico:." \
+            --add-data "${ESPTOOL_TARGETS_1}" \
+            --add-data "${ESPTOOL_TARGETS_2}" \
+            esptool_gui.py
+        shell: bash
+
+      - name: 📦 Prepare release asset (Linux)
+        if: runner.os == 'Linux'
+        working-directory: tools
+        run: |
+          chmod +x dist/${{ matrix.artifact_name }}
+          mv dist/${{ matrix.artifact_name }} ${{ matrix.asset_name }}
+
+      - name: 📦 Prepare release asset (Windows)
+        if: runner.os == 'Windows'
+        working-directory: tools
+        shell: bash
+        run: |
+          mv dist/${{ matrix.artifact_name }} ${{ matrix.asset_name }}
+
+      - name: 📦 Prepare release asset (macOS .app -> tar.gz)
+        if: runner.os == 'macOS'
+        working-directory: tools
+        run: |
+          # macOS produces a <name>.app directory — package it as a tar.gz for upload
+          tar -C dist -czf ${{ matrix.asset_name }}.tar.gz "${{ matrix.artifact_name }}.app"
+
+      - name: 📎 Upload GUI executable to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: "tools/${{ matrix.asset_name }}*"
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   notify-downstream:
     runs-on: ubuntu-latest
-    needs: build-and-upload
+    needs: [build-and-upload, build-gui-executables]
     if: success()
     
     steps:
