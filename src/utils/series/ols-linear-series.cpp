@@ -25,26 +25,36 @@ Configurations::precision OLSLinearSeries::yAtSeriesBegin() const
 
 Configurations::precision OLSLinearSeries::slope() const
 {
-    if (seriesX.size() < 2 || seriesX.sum() == 0)
+    const auto seriesXSize = seriesX.size();
+    const auto seriesXSum = seriesX.sum();
+
+    if (seriesXSize < 2 || seriesXSum == 0)
     {
         return 0.0;
     }
 
-    return ((Configurations::precision)seriesX.size() * seriesXY.sum() - seriesX.sum() * seriesY.sum()) / ((Configurations::precision)seriesX.size() * seriesXSquare.sum() - seriesX.sum() * seriesX.sum());
+    return ((Configurations::precision)seriesXSize * seriesXY.sum() - seriesXSum * seriesY.sum()) / ((Configurations::precision)seriesXSize * seriesXSquare.sum() - seriesXSum * seriesXSum);
 }
 
 Configurations::precision OLSLinearSeries::goodnessOfFit() const
 {
+    const auto seriesXSize = seriesX.size();
+    const auto seriesXSum = seriesX.sum();
+
     // This function returns the R^2 as a goodness of fit indicator
-    if (seriesX.size() < 2 || seriesX.sum() == 0)
+    if (seriesXSize < 2 || seriesXSum == 0)
     {
         return 0;
     }
 
-    const auto slope = ((Configurations::precision)seriesX.size() * seriesXY.sum() - seriesX.sum() * seriesY.sum()) / ((Configurations::precision)seriesX.size() * seriesXSquare.sum() - seriesX.sum() * seriesX.sum());
-    const auto intercept = (seriesY.sum() - (slope * seriesX.sum())) / (Configurations::precision)seriesX.size();
-    const auto sse = seriesYSquare.sum() - (intercept * seriesY.sum()) - (slope * seriesXY.sum());
-    const auto sst = seriesYSquare.sum() - (seriesY.sum() * seriesY.sum()) / (Configurations::precision)seriesX.size();
+    const auto seriesYSum = seriesY.sum();
+    const auto seriesXYSum = seriesXY.sum();
+    const auto seriesYSquareSum = seriesYSquare.sum();
+
+    const auto slope = ((Configurations::precision)seriesXSize * seriesXYSum - seriesXSum * seriesYSum) / ((Configurations::precision)seriesXSize * seriesXSquare.sum() - seriesXSum * seriesXSum);
+    const auto intercept = (seriesYSum - (slope * seriesXSum)) / (Configurations::precision)seriesXSize;
+    const auto sse = seriesYSquareSum - (intercept * seriesYSum) - (slope * seriesXYSum);
+    const auto sst = seriesYSquareSum - (seriesYSum * seriesYSum) / (Configurations::precision)seriesXSize;
     return 1 - (sse / sst);
 }
 

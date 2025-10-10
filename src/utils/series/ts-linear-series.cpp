@@ -76,11 +76,12 @@ Configurations::precision TSLinearSeries::median() const
         flattened.insert(cend(flattened), cbegin(slope), cend(slope));
     }
 
-    const unsigned int mid = flattened.size() / 2;
+    const auto flattenedSize = flattened.size();
+    const unsigned int mid = flattenedSize / 2;
 
     std::nth_element(begin(flattened), begin(flattened) + mid, end(flattened));
 
-    if (flattened.size() % 2 != 0)
+    if (flattenedSize % 2 != 0)
     {
         return flattened[mid];
     }
@@ -107,10 +108,12 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
     if (seriesX.size() > 1)
     {
         // There are at least two points in the X and Y arrays, so let's add the new datapoint
+        const auto seriesXPoints = seriesX.size() - 1;
+        const auto slopesSize = slopes.size();
         auto i = 0U;
-        while (i < seriesX.size() - 1)
+        while (i < seriesXPoints)
         {
-            const auto result = calculateSlope(i, slopes.size());
+            const auto result = calculateSlope(i, slopesSize);
             slopes[i].push_back(result);
             ++i;
         }

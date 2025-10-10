@@ -36,14 +36,17 @@ Configurations::precision Series::median() const
         return 0.0;
     }
 
-    const unsigned int mid = seriesArray.size() / 2;
-    vector<Configurations::precision> sortedArray(mid + 1);
-    // Note: it has been tested that partial_sort_copy implementation performs better than nth_element in any constellation for this situation. I assume it is the copying to the new array that cost more than O(n) time complexity of nth_element brings to the table
-    partial_sort_copy(cbegin(seriesArray), cend(seriesArray), begin(sortedArray), end(sortedArray));
+    const auto seriesArraySize = seriesArray.size();
+    const unsigned int mid = seriesArraySize / 2;
+    vector<Configurations::precision> sortedArray(seriesArray);
+    std::nth_element(begin(sortedArray), begin(sortedArray) + mid, end(sortedArray));
 
-    return seriesArray.size() % 2 != 0
-               ? sortedArray[mid]
-               : (sortedArray[mid - 1] + sortedArray[mid]) / 2;
+    if (seriesArraySize % 2 != 0)
+    {
+        return sortedArray[mid];
+    }
+
+    return (sortedArray[mid] + *std::max_element(begin(sortedArray), begin(sortedArray) + mid)) / 2;
 }
 
 void Series::push(const Configurations::precision value)

@@ -8,7 +8,8 @@ using std::vector;
 
 Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(const unsigned char position) const
 {
-    if (seriesX.size() < 3 || position >= seriesX.size())
+    const auto seriesXSize = seriesX.size();
+    if (seriesXSize < 3 || position >= seriesXSize)
     {
         return 0;
     }
@@ -18,7 +19,8 @@ Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(const uns
 
 Configurations::precision TSQuadraticSeries::secondDerivativeAtPosition(const unsigned char position) const
 {
-    if (seriesX.size() < 3 || position >= seriesX.size())
+    const auto seriesXSize = seriesX.size();
+    if (seriesXSize < 3 || position >= seriesXSize)
     {
         return 0;
     }
@@ -39,7 +41,8 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
 
     // Invariant: the indices of the X and Y array now match up with the row numbers of the A array. So, the A of (X[0],Y[0]) and (X[1],Y[1] will be stored in A[0][.].
 
-    if (seriesX.size() < 3)
+    const auto seriesXSize = seriesX.size();
+    if (seriesXSize < 3)
     {
         a = 0;
         b = 0;
@@ -57,15 +60,16 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     }
 
     // There are at least two points in the X and Y arrays, so let's add the new datapoint
+    const auto seriesXInnerLength = seriesXSize - 2;
     auto i = 0U;
     auto j = 0U;
-
-    while (i < seriesX.size() - 2)
+    while (i < seriesXInnerLength)
     {
         j = i + 1;
-        while (j < seriesX.size() - 1)
+        const auto seriesXIndexLength = seriesXSize - 1;
+        while (j < seriesXIndexLength)
         {
-            seriesA[i].push_back(calculateA(i, j, seriesX.size() - 1));
+            seriesA[i].push_back(calculateA(i, j, seriesXIndexLength));
             j++;
         }
         ++i;
@@ -74,9 +78,10 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
 
     TSLinearSeries linearResidue(maxSeriesLength, initialCapacity, maxAllocationCapacity);
     i = 0;
-    while (i < seriesX.size())
+    while (i < seriesXSize)
     {
         const auto seriesXPointI = seriesX[i];
+
         linearResidue.push(
             seriesXPointI,
             seriesY[i] - a * (seriesXPointI * seriesXPointI));
@@ -119,11 +124,12 @@ Configurations::precision TSQuadraticSeries::seriesAMedian() const
         flattened.insert(cend(flattened), cbegin(input), end(input));
     }
 
-    const unsigned int mid = flattened.size() / 2;
+    const auto flattenedSize = flattened.size();
+    const unsigned int mid = flattenedSize / 2;
 
     std::nth_element(begin(flattened), begin(flattened) + mid, end(flattened));
 
-    if (flattened.size() % 2 != 0)
+    if (flattenedSize % 2 != 0)
     {
         return flattened[mid];
     }
@@ -131,24 +137,30 @@ Configurations::precision TSQuadraticSeries::seriesAMedian() const
     return (flattened[mid] + *std::max_element(cbegin(flattened), cbegin(flattened) + mid)) / 2;
 }
 
+// This function returns the R^2 as a goodness of fit indicator
 Configurations::precision TSQuadraticSeries::goodnessOfFit() const
 {
-    // This function returns the R^2 as a goodness of fit indicator
-    if (seriesX.size() < 3)
+    const auto seriesXSize = seriesX.size();
+    if (seriesXSize < 3)
     {
         return 0.0;
     }
 
-    auto i = 0U;
     Configurations::precision sse = 0.0;
     Configurations::precision sst = 0.0;
 
-    while (i < seriesX.size())
+    auto i = 0U;
+    while (i < seriesXSize)
     {
+        const auto seriesYI = seriesY[i];
         const auto projectedX = projectX(seriesX[i]);
-        sse += (seriesY[i] - projectedX) * (seriesY[i] - projectedX);
         const auto averageY = seriesY.average();
-        sst += (seriesY[i] - averageY) * (seriesY[i] - averageY);
+
+        const auto seriesYProjectedXDiff = seriesYI - projectedX;
+        const auto seriesYIAverageYDiff = seriesYI - averageY;
+
+        sse += seriesYProjectedXDiff * seriesYProjectedXDiff;
+        sst += seriesYIAverageYDiff * seriesYIAverageYDiff;
         ++i;
     }
 

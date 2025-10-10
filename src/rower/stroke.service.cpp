@@ -254,9 +254,10 @@ void StrokeService::processData(const RowingDataModels::FlywheelData data)
     angularVelocityMatrix.push_back(WeightedAverageSeries(strokePhaseDetectionSettings.impulseDataArrayLength, Configurations::defaultAllocationCapacity));
     angularAccelerationMatrix.push_back(WeightedAverageSeries(strokePhaseDetectionSettings.impulseDataArrayLength, Configurations::defaultAllocationCapacity));
 
-    unsigned char i = 0;
     const auto angularGoodnessOfFit = angularDistances.goodnessOfFit();
-    while (i < angularVelocityMatrix.size())
+    const auto angularVelocitySize = angularVelocityMatrix.size();
+    unsigned char i = 0;
+    while (i < angularVelocitySize)
     {
         angularVelocityMatrix[i].push(angularDistances.firstDerivativeAtPosition(i), angularGoodnessOfFit);
         angularAccelerationMatrix[i].push(angularDistances.secondDerivativeAtPosition(i), angularGoodnessOfFit);
