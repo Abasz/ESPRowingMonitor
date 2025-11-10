@@ -148,6 +148,11 @@ set -o pipefail
 
 targetEnvironment=\"\${1:-}\"
 
+if [ \"\${targetEnvironment}\" = \"custom\" ]; then
+    echo \"custom\"
+    exit 0
+fi
+
 rowerProfile=$(awk -v targetEnvironment=\"\${targetEnvironment}\" '
     /^\\[env:/ { in_section = 0 }                                       # Reset flag when entering a new section
     \$0 ~ \"\\\\[env:\" targetEnvironment \"\\\\]\" { in_section = 1 }  # Set flag when the target section is found
@@ -181,8 +186,9 @@ target_include_directories(e2e-test PRIVATE ${E2E_TEST_DIR})
 target_compile_options(e2e-test PRIVATE ${COMPILER_FLAGS})
 target_compile_definitions(e2e-test PRIVATE
     LOG_CALIBRATION
-    [[BOARD_PROFILE="profiles/generic.board-profile.h"]]
-    [[ROWER_PROFILE="profiles/$(ROWER_PROFILE).rower-profile.h"]]
+    BOARD_PROFILE="profiles/generic.board-profile.h"
+    ROWER_PROFILE="profiles/$(ROWER_PROFILE).rower-profile.h"
+    USE_CUSTOM_SETTINGS=$(USE_CUSTOM_SETTINGS)
 )
 
 set_target_properties(
@@ -229,8 +235,12 @@ ${CMAKE_COMMAND} -E cmake_echo_color --cyan \"Target environment: \${targetEnvir
 
 rowerProfile=$(\"${CMAKE_CURRENT_BINARY_DIR}/get-rower-profile\" \"\${targetEnvironment}\")
 
-${CMAKE_COMMAND} --build \"${CMAKE_CURRENT_BINARY_DIR}\" --target e2e-test --parallel $(getconf _NPROCESSORS_ONLN) -- ROWER_PROFILE=\${rowerProfile}
-"
+# Set USE_CUSTOM for custom target
+if [ \"\${targetEnvironment}\" = \"custom\" ]; then
+    useCustom=\"true\"
+fi
+
+${CMAKE_COMMAND} --build \"${CMAKE_CURRENT_BINARY_DIR}\" --target e2e-test --parallel $(getconf _NPROCESSORS_ONLN) -- ROWER_PROFILE=\${rowerProfile} USE_CUSTOM_SETTINGS=\${useCustom:-false}"
     TARGET e2e-test
     FILE_PERMISSIONS OWNER_EXECUTE OWNER_READ
 )

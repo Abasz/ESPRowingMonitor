@@ -6,7 +6,7 @@
 
 #if defined(UNIT_TEST)
     #include "../../test/unit/include/test.settings.h"
-#elif defined(USE_CUSTOM_SETTINGS)
+#elif USE_CUSTOM_SETTINGS == true
     #include "../custom.settings.h"
 #else
     #include "../default.settings.h"
