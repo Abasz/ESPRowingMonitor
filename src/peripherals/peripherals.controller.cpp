@@ -5,10 +5,11 @@
 #include "../utils/configuration.h"
 #include "./peripherals.controller.h"
 
-PeripheralsController::PeripheralsController(IBluetoothController &_bluetoothController, ISdCardService &_sdCardService, IEEPROMService &_eepromService)
+PeripheralsController::PeripheralsController(IBluetoothController &_bluetoothController, ISdCardService &_sdCardService, IEEPROMService &_eepromService, ILedService &_ledService)
     : bluetoothController(_bluetoothController),
       sdCardService(_sdCardService),
-      eepromService(_eepromService)
+      eepromService(_eepromService),
+      ledService(_ledService)
 {
     if constexpr ((Configurations::supportSdCardLogging && Configurations::sdCardChipSelectPin != GPIO_NUM_NC))
     {
@@ -25,16 +26,16 @@ void PeripheralsController::update(const unsigned char batteryLevel)
     {
         if (now - lastConnectedDeviceCheckTime > Configurations::ledBlinkFrequency)
         {
-            auto ledColor = CRGB::Blue;
+            auto ledColor = LedColor::Blue;
             const auto minBattLevel = 30;
             if (batteryLevel < minBattLevel)
             {
-                ledColor = CRGB::Red;
+                ledColor = LedColor::Red;
             }
             const auto maxBattLevel = 80;
             if (batteryLevel > maxBattLevel)
             {
-                ledColor = CRGB::Green;
+                ledColor = LedColor::Green;
             }
             updateLed(ledColor);
             lastConnectedDeviceCheckTime = now;
@@ -67,11 +68,6 @@ void PeripheralsController::begin()
 
     Log.infoln("Setting up BLE service");
     bluetoothController.setup();
-
-    if constexpr (Configurations::ledPin != GPIO_NUM_NC)
-    {
-        setupConnectionIndicatorLed();
-    }
 }
 
 bool PeripheralsController::isAnyDeviceConnected()
@@ -79,28 +75,19 @@ bool PeripheralsController::isAnyDeviceConnected()
     return bluetoothController.isAnyDeviceConnected();
 }
 
-void PeripheralsController::updateLed(const CRGB::HTMLColorCode newLedColor)
+void PeripheralsController::updateLed(const LedColor newLedColor)
 {
-    if constexpr (Configurations::isRgb)
+    const auto previousLedState = ledService.getColor();
+    const auto isConnected = isAnyDeviceConnected();
+
+    if (isConnected && newLedColor == previousLedState)
     {
-        const auto previousLedState = static_cast<CRGB>(leds[0]);
-        const auto isConnected = isAnyDeviceConnected();
-
-        if (isConnected && newLedColor == previousLedState)
-        {
-            return;
-        }
-
-        leds[0] = isConnected || previousLedState == CRGB::Black ? newLedColor : CRGB::Black;
-
-        FastLED.show();
-
         return;
     }
 
-    ledState = isAnyDeviceConnected() ? HIGH : (ledState ^ HIGH);
+    ledService.setColor(isConnected || previousLedState == LedColor::Black ? newLedColor : LedColor::Black);
 
-    digitalWrite(Configurations::ledPin, ledState);
+    ledService.refresh();
 }
 
 void PeripheralsController::notifyBattery(const unsigned char batteryLevel)
@@ -144,22 +131,5 @@ void PeripheralsController::updateData(const RowingDataModels::RowingMetrics &da
             clear.reserve((minimumRecoveryTime + minimumDriveTime) / rotationDebounceTimeMin);
             sdDeltaTimes.swap(clear);
         }
-    }
-}
-
-void PeripheralsController::setupConnectionIndicatorLed()
-{
-    if constexpr (Configurations::ledPin == GPIO_NUM_NC)
-    {
-        return;
-    }
-
-    if constexpr (Configurations::isRgb)
-    {
-        FastLED.addLeds<WS2812, static_cast<unsigned char>(Configurations::ledPin), Configurations::ledColorChannelOrder>(leds.data(), 1);
-    }
-    else
-    {
-        pinMode(Configurations::ledPin, OUTPUT);
     }
 }

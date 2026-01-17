@@ -71,6 +71,7 @@ set(SOURCES_UNIT_TEST
 
     "${LIB_DIR}/peripherals/peripherals.controller.cpp"
     "${LIB_DIR}/peripherals/sd-card/sd-card.service.cpp"
+    "${LIB_DIR}/peripherals/led/led.service.cpp"
 
     "${LIB_DIR}/peripherals/bluetooth/ble-services/base-metrics.service.cpp"
     "${LIB_DIR}/peripherals/bluetooth/ble-services/extended-metrics.service.cpp"
@@ -101,6 +102,7 @@ set(SOURCES_UNIT_TEST
     "${UNIT_TEST_DIR}/bluetooth/bluetooth.connection-manager.spec.cpp"
 
     "${UNIT_TEST_DIR}/peripherals.controller.spec.cpp"
+    "${UNIT_TEST_DIR}/led.service.spec.cpp"
     "${UNIT_TEST_DIR}/EEPROM.service.spec.cpp"
     "${UNIT_TEST_DIR}/power-manager.service.spec.cpp"
     "${UNIT_TEST_DIR}/ota-updater.service.spec.cpp"
@@ -122,8 +124,8 @@ set(SOURCES_UNIT_TEST
 
     "${UNIT_TEST_DIR}/include/main.cpp"
     "${UNIT_TEST_DIR}/include/Update.cpp"
-    "${UNIT_TEST_DIR}/include/FastLED.cpp"
     "${UNIT_TEST_DIR}/include/SdFat.cpp"
+    "${UNIT_TEST_DIR}/include/led_strip.cpp"
     "${UNIT_TEST_DIR}/include/NimBLEDevice.cpp"
     "${UNIT_TEST_DIR}/include/Arduino.cpp"
     "${UNIT_TEST_DIR}/include/esp_ota_ops.cpp"

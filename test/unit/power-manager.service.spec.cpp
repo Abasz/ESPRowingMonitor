@@ -6,6 +6,7 @@
 
 #include "./include/Arduino.h"
 
+#include "../../src/peripherals/led/led.service.interface.h"
 #include "../../src/utils/configuration.h"
 #include "../../src/utils/power-manager/power-manager.service.h"
 
@@ -15,7 +16,13 @@ TEST_CASE("PowerManagerService", "[utils]")
 {
     mockArduino.Reset();
 
-    PowerManagerService powerManager;
+    Mock<ILedService> mockLedService;
+    Fake(Method(mockLedService, setColor));
+    When(Method(mockLedService, getColor)).AlwaysReturn(LedColor::Black);
+    Fake(Method(mockLedService, refresh));
+    Fake(Method(mockLedService, clear));
+
+    PowerManagerService powerManager(mockLedService.get());
     const auto analogVoltage = static_cast<unsigned int>(std::round((Configurations::batteryVoltageMax - 0.1) * 1000));
 
     When(Method(mockArduino, analogReadMilliVolts)).AlwaysReturn(analogVoltage);
@@ -60,7 +67,7 @@ TEST_CASE("PowerManagerService", "[utils]")
 
         mockArduino.Reset();
         mockSerial.Reset();
-        mockFastLED.Reset();
+        Fake(Method(mockLedService, clear));
         When(Method(mockArduino, digitalRead)).Return(wakeupPinState);
         Fake(Method(mockArduino, pinMode));
         Fake(Method(mockArduino, digitalWrite));
@@ -70,7 +77,6 @@ TEST_CASE("PowerManagerService", "[utils]")
         Fake(Method(mockArduino, rtc_gpio_pullup_en));
         Fake(Method(mockArduino, esp_deep_sleep_start));
         Fake(Method(mockSerial, flush));
-        Fake(Method(mockFastLED, clear));
 
         powerManager.goToSleep();
 
@@ -89,7 +95,7 @@ TEST_CASE("PowerManagerService", "[utils]")
 
         SECTION("start deep sleep mode")
         {
-            Verify(Method(mockFastLED, clear).Using(true)).Once();
+            Verify(Method(mockLedService, clear)).Once();
             Verify(Method(mockSerial, flush)).Once();
             Verify(Method(mockArduino, esp_deep_sleep_start)).Once();
         }

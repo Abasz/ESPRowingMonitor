@@ -5,8 +5,8 @@
 
 #include "Arduino.h"
 #include "ArduinoLog.h"
-#include "FastLED.h"
 
+#include "./enums.h"
 #include "./macros.h"
 #include "./settings.model.h"
 
@@ -54,10 +54,10 @@ public:
 
     static constexpr unsigned short ledBlinkFrequency = LED_BLINK_FREQUENCY;
     static constexpr gpio_num_t ledPin = static_cast<gpio_num_t>(LED_PIN);
-    // NOLINTBEGIN(bugprone-branch-clone,readability-simplify-boolean-expr)
+    // NOLINTNEXTLINE(bugprone-branch-clone,readability-simplify-boolean-expr)
     static constexpr bool isRgb = ledPin == GPIO_NUM_NC ? false : IS_RGB;
-    // NOLINTEND(bugprone-branch-clone,readability-simplify-boolean-expr)
     static constexpr EOrder ledColorChannelOrder = RGB_LED_COLOR_CHANNEL_ORDER;
+    static constexpr bool rmtDMAsupported = RMT_DMA_SUPPORTED;
 
     // Device power management settings
     static constexpr gpio_num_t batteryPinNumber = BATTERY_PIN_NUMBER;

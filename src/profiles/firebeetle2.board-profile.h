@@ -11,7 +11,7 @@
 #define LED_BLINK_FREQUENCY 1'000
 #define LED_PIN GPIO_NUM_5 // Use GPIO_NUM_NC if no led is available
 #define IS_RGB true
-#define RGB_LED_COLOR_CHANNEL_ORDER GRB
+#define RGB_LED_COLOR_CHANNEL_ORDER EOrder::GRB
 
 // Hardware settings
 #define SENSOR_PIN_NUMBER GPIO_NUM_15

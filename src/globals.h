@@ -13,6 +13,7 @@
 #include "./peripherals/bluetooth/ble-services/settings.service.h"
 #include "./peripherals/bluetooth/bluetooth.controller.h"
 #include "./peripherals/bluetooth/callbacks/connection-manager.callbacks.h"
+#include "./peripherals/led/led.service.h"
 #include "./peripherals/peripherals.controller.h"
 #include "./peripherals/sd-card/sd-card.service.h"
 #include "./rower/flywheel.service.h"
@@ -33,6 +34,7 @@ static const unsigned long secsPerDay = 86'400;
 extern Preferences preferences;
 extern EEPROMService eepromService;
 extern OtaUpdaterService otaService;
+extern LedService ledService;
 extern PowerManagerService powerManagerService;
 extern PowerManagerController powerManagerController;
 

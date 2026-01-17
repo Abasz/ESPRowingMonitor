@@ -8,12 +8,16 @@
 
 #include "Arduino.h"
 #include "ArduinoLog.h"
-#include "FastLED.h"
 
 #include "globals.h"
 
 #include "../configuration.h"
 #include "./power-manager.service.h"
+
+PowerManagerService::PowerManagerService(ILedService &_ledService)
+    : ledService(_ledService)
+{
+}
 
 unsigned char PowerManagerService::setup() const
 {
@@ -68,10 +72,7 @@ void PowerManagerService::goToSleep() const
     rtc_gpio_pullup_en(wakeupPin);
 
     Log.infoln("Going to sleep mode");
-    if constexpr (Configurations::isRgb)
-    {
-        FastLED.clear(true);
-    }
+    ledService.clear();
     Serial.flush();
     esp_deep_sleep_start();
 }

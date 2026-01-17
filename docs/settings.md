@@ -109,7 +109,7 @@ It is possible to indicate battery charge via a connected RGB LED (actually some
 
 #### RGB_LED_COLOR_CHANNEL_ORDER
 
-This is the FastLED `EOrder` enum that allows setting the color channel order as some RGB LEDs use GBR instead of RGB order (e.g. Firebeetle2 devboard). Default is `RGB`.
+This is the `EOrder` enum that allows setting the color channel order as some RGB LEDs use GBR instead of RGB order (e.g. Firebeetle2 devboard). Default is `EOrder::RGB`.
 
 #### SD_CARD_CHIP_SELECT_PIN
 

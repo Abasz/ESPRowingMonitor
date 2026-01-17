@@ -4,6 +4,8 @@
 #include <string_view>
 #include <utility>
 
+#include "soc/soc_caps.h"
+
 #if defined(UNIT_TEST)
     #include "../../test/unit/include/test.settings.h"
 #elif USE_CUSTOM_SETTINGS == true
@@ -105,6 +107,12 @@ consteval std::string_view getHardwareRevision()
 // NOLINTNEXTLINE(bugprone-reserved-identifier)
 #define __CLASS_NAME__ extractClassName(__PRETTY_FUNCTION__)
 
+#if defined(SOC_RMT_SUPPORT_DMA)
+    #define RMT_DMA_SUPPORTED true
+#else
+    #define RMT_DMA_SUPPORTED false
+#endif
+
 #if !defined(ENABLE_RUNTIME_SETTINGS)
     #define ENABLE_RUNTIME_SETTINGS false
 #endif
@@ -146,7 +154,7 @@ consteval std::string_view getHardwareRevision()
 #endif
 
 #if !defined(RGB_LED_COLOR_CHANNEL_ORDER)
-    #define RGB_LED_COLOR_CHANNEL_ORDER RGB
+    #define RGB_LED_COLOR_CHANNEL_ORDER EOrder::RGB
 #endif
 
 #if !defined(BATTERY_PIN_NUMBER)

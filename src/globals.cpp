@@ -12,7 +12,8 @@ Preferences preferences;
 
 EEPROMService eepromService(preferences);
 OtaUpdaterService otaService;
-PowerManagerService powerManagerService;
+LedService ledService;
+PowerManagerService powerManagerService(ledService);
 
 FlywheelService flywheelService;
 StrokeService strokeService;
@@ -28,7 +29,7 @@ ConnectionManagerCallbacks connectionManagerCallbacks;
 
 BluetoothController bleController(eepromService, otaService, settingsBleService, batteryBleService, deviceInfoBleService, otaBleService, baseMetricsBleService, extendedMetricsBleService, connectionManagerCallbacks);
 
-PeripheralsController peripheralController(bleController, sdCardService, eepromService);
+PeripheralsController peripheralController(bleController, sdCardService, eepromService, ledService);
 StrokeController strokeController(strokeService, flywheelService, eepromService);
 PowerManagerController powerManagerController(powerManagerService);
 

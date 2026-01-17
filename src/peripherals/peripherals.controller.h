@@ -1,12 +1,10 @@
 #pragma once
-#include <array>
 #include <vector>
-
-#include "FastLED.h"
 
 #include "../rower/stroke.model.h"
 #include "../utils/EEPROM/EEPROM.service.interface.h"
 #include "./bluetooth/bluetooth.controller.interface.h"
+#include "./led/led.service.interface.h"
 #include "./peripherals.controller.interface.h"
 #include "./sd-card/sd-card.service.interface.h"
 
@@ -17,6 +15,7 @@ class PeripheralsController final : public IPeripheralsController
     IBluetoothController &bluetoothController;
     ISdCardService &sdCardService;
     IEEPROMService &eepromService;
+    ILedService &ledService;
 
     unsigned short rotationDebounceTimeMin = RowerProfile::Defaults::rotationDebounceTimeMin;
     unsigned int minimumRecoveryTime = RowerProfile::Defaults::minimumRecoveryTime;
@@ -26,14 +25,10 @@ class PeripheralsController final : public IPeripheralsController
 
     vector<unsigned long> sdDeltaTimes;
 
-    unsigned char ledState = HIGH;
-    std::array<CRGB, 1> leds{CRGB::Black};
-
-    void updateLed(CRGB::HTMLColorCode newLedColor);
-    void setupConnectionIndicatorLed();
+    void updateLed(LedColor newLedColor);
 
 public:
-    PeripheralsController(IBluetoothController &_bluetoothController, ISdCardService &sdCardService, IEEPROMService &_eepromService);
+    PeripheralsController(IBluetoothController &_bluetoothController, ISdCardService &sdCardService, IEEPROMService &_eepromService, ILedService &_ledService);
 
     void begin() override;
     void update(unsigned char batteryLevel) override;
