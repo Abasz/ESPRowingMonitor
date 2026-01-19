@@ -36,7 +36,8 @@ jobs:
             echo "- ${env}"
           done
           echo
-          pio run $(echo "${environments}" | sed 's/^/-e /' | paste -sd ' ' -)
+          read -r -a commandArgs < <(echo "${environments}" | sed 's/^/-e /' | paste -sd ' ' -)
+          pio run "${commandArgs[@]}"
 
       - name: 📦 Prepare zipped firmware binaries
         run: |
