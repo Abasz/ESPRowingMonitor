@@ -33,13 +33,13 @@ jobs:
       - name: 🧪 Build & Run unit tests
         run: |
           cmake --build build --target unit-test --parallel $(nproc)
-          ./build/test.out -r junit -o results.xml
+          ./build/test/unit/test.out -r junit -o results.xml
 
       - name: 📊 Build & Run rower calibration tests
         run: |
           environments=$(grep -oP '^\[env:\K(?!.*(?:debug|custom|dynamic)).*(?=\])' < "platformio.ini")
           for environment in $(echo "${environments}" | cut -d'-' -f1 | sort -u); do
-            ${{github.workspace}}/build/run-calibration "${environment}-generic"
+            ${{github.workspace}}/build/test/calibration/run-calibration "${environment}-generic"
           done
 
       - name: 📋 Test summary

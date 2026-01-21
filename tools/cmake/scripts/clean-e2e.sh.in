@@ -3,7 +3,12 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-rowerProfile="$1"
+rowerProfile="${1:-}"
+
+if [[ -z "${rowerProfile}" ]]; then
+    @CMAKE_COMMAND@ -E cmake_echo_color --red "ERROR: Rower profile is missing"
+    exit 1
+fi
 
 if [[ ! -f "@CMAKE_CURRENT_BINARY_DIR@/${rowerProfile}.environment" ]]; then
     @CMAKE_COMMAND@ -E cmake_echo_color "[  0%] New rower profile, cleaning files..."

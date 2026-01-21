@@ -12,9 +12,9 @@ RESET='\033[0m'
 
 targetEnvironment="${1:-unknown}"
 
-"@CMAKE_CURRENT_BINARY_DIR@/build-e2e" "${targetEnvironment}"
+"$<TARGET_PROPERTY:e2e-test,E2E_SCRIPTS_DIR>/build-e2e" "${targetEnvironment}"
 
-rowerProfile=$("@CMAKE_CURRENT_BINARY_DIR@/get-rower-profile" "${targetEnvironment}")
+rowerProfile=$("@TEST_UTILITY_SCRIPTS_DIR@/get-rower-profile" "${targetEnvironment}")
 
 calibrationDir="@PROJECT_SOURCE_DIR@/test/calibration/${rowerProfile}"
 if [[ ! -d ${calibrationDir} ]]; then
@@ -29,22 +29,23 @@ mkdir -p "${calibrationOutputDir}"
 
 exitCode=0
 for file in "${calibrationDir}"/*test.txt; do
-  echo -e "file: $(basename "${file}")"
-
-  "$<TARGET_FILE:e2e-test>" "${file}" > "${calibrationOutputDir}/$(basename "${file}")-output.txt"
-
-  actualStrokeCount=$(grep -ic "power" "${calibrationOutputDir}/$(basename "${file}")-output.txt")
-
-  expectedStrokeCount=$(echo "$(basename "${file}")" | cut -d'-' -f3)
-  if [[ "${expectedStrokeCount}" == "${actualStrokeCount}" ]]; then
-    passed="PASSED"
-    color="${GREEN}"
-  else
-    passed="FAILED"
-    color="${RED}"
-    exitCode=1
-  fi
-
-  echo -e "number of strokes: ${actualStrokeCount} ${color}${passed}${RESET}"
+    echo -e "file: $(basename "${file}")"
+    
+    #shellcheck disable=SC2288
+    "$<TARGET_FILE:e2e-test>" "${file}" > "${calibrationOutputDir}/$(basename "${file}")-output.txt"
+    
+    actualStrokeCount=$(grep -ic "power" "${calibrationOutputDir}/$(basename "${file}")-output.txt")
+    
+    expectedStrokeCount=$(echo "$(basename "${file}")" | cut -d'-' -f3)
+    if [[ "${expectedStrokeCount}" == "${actualStrokeCount}" ]]; then
+        passed="PASSED"
+        color="${GREEN}"
+    else
+        passed="FAILED"
+        color="${RED}"
+        exitCode=1
+    fi
+    
+    echo -e "number of strokes: ${actualStrokeCount} ${color}${passed}${RESET}"
 done
 exit ${exitCode}

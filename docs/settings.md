@@ -347,17 +347,17 @@ Once the input data is sufficiently cleaned up it is possible to replay a previo
 
 ### Running a simulation
 
-In order to run the simulation, the e2e test needs to be compiled. There is a cmake target to ease the compilation that needs to be run via the `build/build-e2e rowerProfileName-board-id` (or with `custom` as argument in case of using `custom.settings.h` file for settings). The compiled executable will be under `build/run_e2e_test.out`. This file should receive the file path that contains the delta times as parameter (in a CSV format i.e. one number per line).
+In order to run the simulation, the e2e test needs to be compiled. There is a cmake target to ease the compilation that needs to be run via the `build/build-e2e rowerProfileName-board-id` (or with `custom` as argument in case of using `custom.settings.h` file for settings). The compiled executable will be under `/build/test/e2e/e2e_test.out`. This file should receive the file path that contains the delta times as parameter (in a CSV format i.e. one number per line).
 
 To run a simulation use the below command:
 
 ```bash
-./build/e2e-test.out path/to/delta-times.csv
+./build/test/e2e/e2e_test.out path/to/delta-times.csv
 ```
 
 So basically, change one setting at a time, note whether the stroke detection improves and then tweak the settings until stroke detection is consistent i.e. the reported number of strokes matches the number of strokes done.
 
-Please note that after changing a setting the executable needs recompiling (i.e. running `build/build-e2e` with correct argument).
+Please note that after changing a setting the executable needs recompiling (i.e. running `build/test/e2e/build-e2e` with correct argument).
 
 ### Calibration Helper Desktop GUI
 
@@ -382,7 +382,7 @@ A cross-platform desktop GUI is available for analyzing and visualizing the simu
 2. Run the e2e simulation with the recorded delta times and pipe the output to a file:
 
    ```bash
-   ./build/e2e-test.out path/to/delta-times.csv > simulation-output.txt
+   ./build/test/e2e/e2e_test.out path/to/delta-times.csv > simulation-output.txt
    ```
 
 3. Open the calibration helper GUI and load the simulation output file

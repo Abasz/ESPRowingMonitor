@@ -6,7 +6,7 @@
 		{
 			"type": "cppbuild",
 			"label": "e2e test",
-			"command": "build/build-e2e",
+			"command": "build/test/e2e/build-e2e",
 			"args": [
 				"${command:platformio-ide.activeEnvironment}"
 			],
@@ -25,7 +25,7 @@
 		{
 			"type": "cppbuild",
 			"label": "calibrate",
-			"command": "build/run-calibration",
+			"command": "build/test/calibration/run-calibration",
 			"args": [
 				"${command:platformio-ide.activeEnvironment}"
 			],
@@ -160,6 +160,41 @@
 				"isDefault": false
 			},
 			"detail": "Setup CMake build environment"
+		},
+		{
+			"type": "shell",
+			"label": "cmake test",
+			"command": "bash",
+			"args": [
+				"tools/cmake/test/cmake.spec.sh"
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "test",
+				"isDefault": false
+			},
+			"detail": "Run comprehensive CMake build verification"
+		},
+		{
+			"type": "shell",
+			"label": "cmake-lint",
+			"command": "bash",
+			"args": [
+				"-c",
+				"(find ./src -name CMakeLists.txt; find ./test -name CMakeLists.txt; echo ./CMakeLists.txt) | xargs ./.venv/bin/cmake-lint"
+			],
+			"options": {
+				"cwd": "${cwd}"
+			},
+			"problemMatcher": [],
+			"group": {
+				"kind": "build",
+				"isDefault": false
+			},
+			"detail": "Run cmake-lint on all CMakeLists.txt files (excluding build directory)"
 		}
 	]
 }

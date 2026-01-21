@@ -7,11 +7,11 @@ targetEnvironment="${1:-unknown}"
 
 @CMAKE_COMMAND@ -E cmake_echo_color --cyan "Target environment: ${targetEnvironment}"
 
-rowerProfile=$("@CMAKE_CURRENT_BINARY_DIR@/get-rower-profile" "${targetEnvironment}")
+rowerProfile=$("@TEST_UTILITY_SCRIPTS_DIR@/get-rower-profile" "${targetEnvironment}")
 
 # Set USE_CUSTOM for custom target
 if [ "${targetEnvironment}" = "custom" ]; then
     useCustom="true"
 fi
 
-@CMAKE_COMMAND@ --build "@CMAKE_CURRENT_BINARY_DIR@" --target e2e-test --parallel $(getconf _NPROCESSORS_ONLN) -- ROWER_PROFILE=${rowerProfile} USE_CUSTOM_SETTINGS=${useCustom:-false}
+@CMAKE_COMMAND@ --build "@CMAKE_CURRENT_BINARY_DIR@" --target e2e-test --parallel "$(getconf _NPROCESSORS_ONLN)" -- "ROWER_PROFILE=${rowerProfile}" "USE_CUSTOM_SETTINGS=${useCustom:-false}"

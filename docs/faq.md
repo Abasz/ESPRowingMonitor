@@ -415,10 +415,10 @@ Using the e2e simulation tool:
 cmake -S . -B build
 
 # Build e2e target
-./build/build-e2e [ENVIRONMENT NAME]
+./build/test/e2e/build-e2e [ENVIRONMENT NAME]
 
 # Run simulation
-./build/e2e-test.out [deltaTimes.txt] > OUTPUT
+./build/test/e2e/e2e_test.out [deltaTimes.txt] > OUTPUT
 ```
 
 Paraphrases
