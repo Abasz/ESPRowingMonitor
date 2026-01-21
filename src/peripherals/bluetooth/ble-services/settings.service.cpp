@@ -19,7 +19,7 @@ SettingsBleService::SettingsBleService(ISdCardService &_sdCardService, IEEPROMSe
 NimBLEService *SettingsBleService::setup(NimBLEServer *const server)
 {
     Log.traceln("Setting up Settings Service");
-    auto *settingsService = server->createService(CommonBleFlags::settingsServiceUuid);
+    auto *const settingsService = server->createService(CommonBleFlags::settingsServiceUuid);
     settingsCharacteristic = settingsService->createCharacteristic(CommonBleFlags::settingsUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
     strokeSettingsCharacteristic = settingsService->createCharacteristic(CommonBleFlags::strokeDetectionSettingsUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 

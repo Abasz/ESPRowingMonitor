@@ -12,7 +12,7 @@
 NimBLEService *DeviceInfoBleService::setup(NimBLEServer *const server) const
 {
     Log.traceln("Setting up Device Info Service");
-    auto *deviceInfoService = server->createService(CommonBleFlags::deviceInfoSvcUuid);
+    auto *const deviceInfoService = server->createService(CommonBleFlags::deviceInfoSvcUuid);
 
     deviceInfoService
         ->createCharacteristic(CommonBleFlags::manufacturerNameSvcUuid, NIMBLE_PROPERTY::READ)

@@ -12,7 +12,7 @@ using std::vector;
 NimBLEService *ExtendedMetricBleService::setup(NimBLEServer *const server)
 {
     Log.infoln("Setting up Extended Metrics Services");
-    auto *extendedMetricsService = server->createService(CommonBleFlags::extendedMetricsServiceUuid);
+    auto *const extendedMetricsService = server->createService(CommonBleFlags::extendedMetricsServiceUuid);
 
     handleForcesParams.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
     handleForcesParams.characteristic->setCallbacks(&handleForcesParams.callbacks);
@@ -42,7 +42,7 @@ const vector<unsigned char> &ExtendedMetricBleService::getExtendedMetricsClientI
 
 unsigned short ExtendedMetricBleService::calculateMtu(const std::vector<unsigned char> &clientIds) const
 {
-    auto *server = NimBLEDevice::getServer();
+    auto *const server = NimBLEDevice::getServer();
 
     return std::accumulate(cbegin(clientIds), cend(clientIds), 512, [&](unsigned short previousMtu, unsigned short clientId)
                            {

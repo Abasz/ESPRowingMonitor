@@ -47,7 +47,7 @@ TEST_CASE("BatteryBleService", "[ble-service]")
                 .Once();
         }
 
-        SECTION("should return the created settings NimBLEService")
+        SECTION("should return the created battery NimBLEService")
         {
             auto *const service = batteryBleService.setup(&mockNimBLEServer.get());
 

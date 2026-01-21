@@ -13,7 +13,7 @@ OtaBleService::OtaBleService(IOtaUpdaterService &_otaService) : callbacks(_otaSe
 NimBLEService *OtaBleService::setup(NimBLEServer *const server)
 {
     Log.traceln("Setting up OTA Service");
-    auto *otaBleService = server->createService(CommonBleFlags::otaServiceUuid);
+    auto *const otaBleService = server->createService(CommonBleFlags::otaServiceUuid);
     txCharacteristic = otaBleService->createCharacteristic(CommonBleFlags::otaTxUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     otaBleService->createCharacteristic(CommonBleFlags::otaRxUuid, NIMBLE_PROPERTY::WRITE_NR | NIMBLE_PROPERTY::WRITE)->setCallbacks(&callbacks);

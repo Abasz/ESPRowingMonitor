@@ -26,7 +26,7 @@ void SubscriptionManagerCallbacks::onSubscribe([[maybe_unused]] NimBLECharacteri
         last);
 }
 
-const vector<unsigned char> &SubscriptionManagerCallbacks::getClientIds() const
+const std::vector<unsigned char> &SubscriptionManagerCallbacks::getClientIds() const
 {
     return clientIds;
 }

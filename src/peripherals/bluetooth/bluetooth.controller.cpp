@@ -129,7 +129,7 @@ void BluetoothController::setupBleDevice()
 void BluetoothController::setupServices()
 {
     Log.verboseln("Setting up BLE Services");
-    auto *server = NimBLEDevice::getServer();
+    auto *const server = NimBLEDevice::getServer();
 
     baseMetricsBleService.setup(server, eepromService.getBleServiceFlag())->start();
 
@@ -157,7 +157,7 @@ void BluetoothController::setupServices()
 
 void BluetoothController::setupAdvertisement(const std::string &deviceName) const
 {
-    auto *pAdvertising = NimBLEDevice::getAdvertising();
+    auto *const pAdvertising = NimBLEDevice::getAdvertising();
     pAdvertising->setName(deviceName);
 
     switch (eepromService.getBleServiceFlag())

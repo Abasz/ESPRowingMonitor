@@ -19,7 +19,7 @@ BaseMetricsBleService::BaseMetricsBleService(ISettingsBleService &_settingsBleSe
     };
 }
 
-NimBLEService *BaseMetricsBleService::setup(NimBLEServer *server, const BleServiceFlag bleServiceFlag)
+NimBLEService *BaseMetricsBleService::setup(NimBLEServer *const server, const BleServiceFlag bleServiceFlag)
 {
 
     switch (bleServiceFlag)
@@ -190,7 +190,7 @@ NimBLEService *BaseMetricsBleService::setupCscServices(NimBLEServer *const serve
 {
     Log.infoln("Setting up Cycling Speed and Cadence Profile");
 
-    auto *cscService = server->createService(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
+    auto *const cscService = server->createService(CSCSensorBleFlags::cyclingSpeedCadenceSvcUuid);
     parameters.characteristic = cscService->createCharacteristic(CSCSensorBleFlags::cscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
     parameters.characteristic->setCallbacks(&connectionManager);
 
@@ -210,7 +210,7 @@ NimBLEService *BaseMetricsBleService::setupCscServices(NimBLEServer *const serve
 NimBLEService *BaseMetricsBleService::setupPscServices(NimBLEServer *const server)
 {
     Log.infoln("Setting up Cycling Power Profile");
-    auto *pscService = server->createService(PSCSensorBleFlags::cyclingPowerSvcUuid);
+    auto *const pscService = server->createService(PSCSensorBleFlags::cyclingPowerSvcUuid);
     parameters.characteristic = pscService->createCharacteristic(PSCSensorBleFlags::pscMeasurementUuid, NIMBLE_PROPERTY::NOTIFY);
     parameters.characteristic->setCallbacks(&connectionManager);
 
@@ -231,7 +231,7 @@ NimBLEService *BaseMetricsBleService::setupFtmsServices(NimBLEServer *const serv
 {
     Log.infoln("Setting up Fitness Machine Profile");
 
-    auto *ftmsService = server->createService(FTMSSensorBleFlags::ftmsSvcUuid);
+    auto *const ftmsService = server->createService(FTMSSensorBleFlags::ftmsSvcUuid);
     parameters.characteristic = ftmsService->createCharacteristic(FTMSSensorBleFlags::rowerDataUuid, NIMBLE_PROPERTY::NOTIFY);
     parameters.characteristic->setCallbacks(&connectionManager);
 

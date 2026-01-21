@@ -1,5 +1,3 @@
-#include <array>
-
 #include "ArduinoLog.h"
 
 #include "../../../utils/enums.h"
@@ -9,7 +7,7 @@
 
 NimBLEService *BatteryBleService::setup(NimBLEServer *const server)
 {
-    auto *batteryService = server->createService(CommonBleFlags::batterySvcUuid);
+    auto *const batteryService = server->createService(CommonBleFlags::batterySvcUuid);
 
     characteristic = batteryService->createCharacteristic(CommonBleFlags::batteryLevelUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
 
@@ -23,7 +21,7 @@ void BatteryBleService::broadcastBatteryLevel() const
     characteristic->notify();
 }
 
-void BatteryBleService::setBatteryLevel(unsigned char batteryLevel) const
+void BatteryBleService::setBatteryLevel(const unsigned char batteryLevel) const
 {
     ASSERT_SETUP_CALLED(characteristic);
 
