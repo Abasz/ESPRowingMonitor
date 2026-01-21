@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "ArduinoLog.h"
 
 #include "../utils/configuration.h"

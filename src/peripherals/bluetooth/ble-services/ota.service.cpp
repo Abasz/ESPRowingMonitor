@@ -2,8 +2,8 @@
 
 #include "ArduinoLog.h"
 
-#include "../../../utils/enums.h"
 #include "../ble-metrics.model.h"
+#include "../ble.enums.h"
 #include "./ota.service.h"
 
 OtaBleService::OtaBleService(IOtaUpdaterService &_otaService) : callbacks(_otaService)

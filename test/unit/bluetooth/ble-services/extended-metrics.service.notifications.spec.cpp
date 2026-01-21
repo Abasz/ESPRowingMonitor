@@ -19,8 +19,8 @@
 #include "../../include/NimBLEDevice.h"
 
 #include "../../../../src/peripherals/bluetooth/ble-services/extended-metrics.service.h"
+#include "../../../../src/peripherals/bluetooth/ble.enums.h"
 #include "../../../../src/utils/configuration.h"
-#include "../../../../src/utils/enums.h"
 
 using namespace fakeit;
 

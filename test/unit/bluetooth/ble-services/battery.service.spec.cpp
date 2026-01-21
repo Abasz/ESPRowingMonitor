@@ -5,8 +5,7 @@
 #include "../../include/NimBLEDevice.h"
 
 #include "../../../../src/peripherals/bluetooth/ble-services/battery.service.h"
-#include "../../../../src/utils/configuration.h"
-#include "../../../../src/utils/enums.h"
+#include "../../../../src/peripherals/bluetooth/ble.enums.h"
 
 using namespace fakeit;
 

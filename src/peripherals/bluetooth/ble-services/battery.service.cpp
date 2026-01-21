@@ -1,9 +1,8 @@
 #include "ArduinoLog.h"
 
-#include "../../../utils/enums.h"
 #include "../ble-metrics.model.h"
+#include "../ble.enums.h"
 #include "./battery.service.h"
-#include "battery.service.h"
 
 NimBLEService *BatteryBleService::setup(NimBLEServer *const server)
 {

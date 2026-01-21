@@ -5,7 +5,7 @@
 
 #include "NimBLEDevice.h"
 
-#include "../enums.h"
+#include "../../peripherals/bluetooth/ble.enums.h"
 #include "./ota-updater.service.interface.h"
 
 using std::span;

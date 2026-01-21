@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../utils/enums.h"
+#include "../utils/macros.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage,cppcoreguidelines-macro-to-enum)
 

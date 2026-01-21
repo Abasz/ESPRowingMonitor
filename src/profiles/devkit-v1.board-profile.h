@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../peripherals/bluetooth/ble.enums.h"
 #include "../utils/enums.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage, cppcoreguidelines-macro-to-enum)

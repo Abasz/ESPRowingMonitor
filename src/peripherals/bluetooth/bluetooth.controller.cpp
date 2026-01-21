@@ -9,6 +9,8 @@
 #include "globals.h"
 
 #include "../../utils/configuration.h"
+#include "../../utils/enums.h"
+#include "./ble.enums.h"
 #include "./bluetooth.controller.h"
 
 BluetoothController::BluetoothController(IEEPROMService &_eepromService, IOtaUpdaterService &_otaService, ISettingsBleService &_settingsBleService, IBatteryBleService &_batteryBleService, IDeviceInfoBleService &_deviceInfoBleService, IOtaBleService &_otaBleService, IBaseMetricsBleService &_baseMetricsBleService, IExtendedMetricBleService &_extendedMetricsBleService, IConnectionManagerCallbacks &_connectionManagerCallbacks)

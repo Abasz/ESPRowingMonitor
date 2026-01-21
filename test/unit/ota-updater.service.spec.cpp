@@ -16,6 +16,7 @@
 
 #include "./include/globals.h"
 
+#include "../../src/peripherals/bluetooth/ble.enums.h"
 #include "../../src/utils/ota-updater/ota-updater.service.h"
 
 using namespace fakeit;

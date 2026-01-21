@@ -4,7 +4,7 @@
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
-#include "../../../utils/enums.h"
+#include "../ble.enums.h"
 #include "./extended-metrics.service.h"
 
 using std::vector;

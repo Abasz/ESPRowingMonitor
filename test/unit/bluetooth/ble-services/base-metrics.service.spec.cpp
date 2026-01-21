@@ -14,8 +14,8 @@
 #include "../../../../src/peripherals/bluetooth/ble-metrics.model.h"
 #include "../../../../src/peripherals/bluetooth/ble-services/base-metrics.service.h"
 #include "../../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
+#include "../../../../src/peripherals/bluetooth/ble.enums.h"
 #include "../../../../src/utils/EEPROM/EEPROM.service.interface.h"
-#include "../../../../src/utils/configuration.h"
 #include "../../../../src/utils/enums.h"
 
 using namespace fakeit;

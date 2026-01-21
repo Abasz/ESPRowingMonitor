@@ -5,8 +5,8 @@
 #include "ArduinoLog.h"
 
 #include "../../../utils/configuration.h"
-#include "../../../utils/enums.h"
 #include "../ble-metrics.model.h"
+#include "../ble.enums.h"
 #include "./settings.service.h"
 
 SettingsBleService::SettingsBleService(ISdCardService &_sdCardService, IEEPROMService &_eepromService)

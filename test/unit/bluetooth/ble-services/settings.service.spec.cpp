@@ -9,10 +9,9 @@
 #include "../../include/NimBLEDevice.h"
 
 #include "../../../../src/peripherals/bluetooth/ble-services/settings.service.h"
+#include "../../../../src/peripherals/bluetooth/ble.enums.h"
 #include "../../../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../../../src/utils/EEPROM/EEPROM.service.interface.h"
-#include "../../../../src/utils/configuration.h"
-#include "../../../../src/utils/enums.h"
 
 using namespace fakeit;
 

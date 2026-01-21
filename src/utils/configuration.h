@@ -6,6 +6,7 @@
 #include "Arduino.h"
 #include "ArduinoLog.h"
 
+#include "../peripherals/bluetooth/ble.enums.h"
 #include "./enums.h"
 #include "./macros.h"
 #include "./settings.model.h"
