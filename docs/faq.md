@@ -449,7 +449,26 @@ What / Why / How
 
 ### Measurement methods
 
-#### Method 1: Swing period method
+#### Method 1: CAD modeling (Most accurate)
+
+If you have CAD software and can model the flywheel geometry:
+
+1. Model the flywheel as accurately as possible
+2. Weigh each component separately and take a note
+3. Assign material density so the component match the the measured weight
+4. Use CAD software to calculate moment of inertia about the rotation axis
+
+#### Method 2: Component-by-component calculation
+
+Calculate inertia by breaking down the flywheel into individual components (disc, spokes, dampers, etc.) and summing their contributions. This approach is detailed in [Dave Vernooy's ErgWare project](https://dvernooy.github.io/projects/ergware/):
+
+1. Identify each component (main disc, fan blades/dampers, hub, etc.)
+2. Calculate each component's contribution using standard moment of inertia formulas
+3. Sum all contributions: $J_{total} = J_{disc} + J_{dampers} + J_{hub} + ...$
+
+This method is practical when you can measure or estimate the mass and geometry of each component. Accuracy is typically within 10-15%.
+
+#### Method 3: Swing period method
 
 1. Remove flywheel from rower (or access it)
 2. Suspend flywheel from its center axis so it can swing freely
@@ -462,24 +481,6 @@ What / Why / How
    - $T$ = swing period (s)
 
 See [ORM discussion on swing period method](https://github.com/laberning/openrowingmonitor/discussions/113) for detailed instructions.
-
-#### Method 2: CAD modeling
-
-If you have CAD software and can model the flywheel geometry:
-
-1. Model the flywheel as accurately as possible
-2. Assign material density
-3. Use CAD software to calculate moment of inertia about the rotation axis
-
-#### Method 3: Component-by-component calculation
-
-Calculate inertia by breaking down the flywheel into individual components (disc, spokes, dampers, etc.) and summing their contributions. This approach is detailed in [Dave Vernooy's ErgWare project](https://dvernooy.github.io/projects/ergware/):
-
-1. Identify each component (main disc, fan blades/dampers, hub, etc.)
-2. Calculate each component's contribution using standard moment of inertia formulas
-3. Sum all contributions: $J_{total} = J_{disc} + J_{dampers} + J_{hub} + ...$
-
-This method is practical when you can measure or estimate the mass and geometry of each component. Accuracy is typically within 10-15%.
 
 #### Method 4: Estimate from similar machines
 
