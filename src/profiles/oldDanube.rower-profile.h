@@ -19,7 +19,7 @@
 #define IMPULSES_PER_REVOLUTION 6
 #define FLYWHEEL_INERTIA 0.0899
 #define SPROCKET_RADIUS 3.2
-#define CONCEPT_2_MAGIC_NUMBER 2.57 // 0.1302 * (boat + body weight)^(2/3) weight to magic number scaler
+#define CONCEPT_2_MAGIC_NUMBER 2.57 // 0.1325 * (boat + body weight)^(2/3) weight to magic number scaler
 
 // Sensor signal filter settings
 #define ROTATION_DEBOUNCE_TIME_MIN 4
@@ -37,8 +37,8 @@
 #define MINIMUM_DRAG_TORQUE 0.08
 #define STROKE_DETECTION_TYPE STROKE_DETECTION_TORQUE
 #define MINIMUM_RECOVERY_SLOPE 0 // Only relevant if STROKE_DETECTION_TYPE is either BOTH or SLOPE
-#define MINIMUM_RECOVERY_TIME 145
-#define MINIMUM_DRIVE_TIME 160
+#define MINIMUM_RECOVERY_TIME 100
+#define MINIMUM_DRIVE_TIME 150
 #define IMPULSE_DATA_ARRAY_LENGTH 9
 #define DRIVE_HANDLE_FORCES_MAX_CAPACITY 59
 // #define FLOATING_POINT_PRECISION PRECISION_DOUBLE
