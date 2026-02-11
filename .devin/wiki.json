@@ -1,133 +1,133 @@
-{
-  "repo_notes": [
-    {
-      "author": "Repo maintainers",
-      "content": "ESP Rowing Monitor is an ESP32-based ergometer performance monitor that provides professional-grade rowing analytics to indoor ergometers. The primary goal of documentation should be helping NEW USERS set up their device and calibrate it correctly.\n\nKey docs to treat as primary references:\n- `README.md`: Project overview, key features, breaking changes, and links to detailed docs.\n- `docs/installation.md`: Authoritative install flow (precompiled firmware flashing, PlatformIO compilation, auto-compiler script for Linux).\n- `docs/settings.md`: All configuration parameters organized by category (general, board profile, rower profile) with detailed explanations.\n- `docs/faq.md`: **LLM-enriched Community FAQ** derived from GitHub discussions. This is THE key resource for troubleshooting and setup questions. When answering 'how do I...' or 'why is X happening' questions, prioritize this document.\n- `docs/features.md`: BLE profiles, connectivity options, and feature details."
-    },
-    {
-      "author": "Repo maintainers",
-      "content": "SETUP AND CALIBRATION WORKFLOW — This is the most important user journey to document:\n\n1. **Hardware Assessment** — User determines rower compatibility, sensor needs, and ESP32 board choice. Key FAQ entries: #1 (getting started), #2 (compatibility), #11 (supported boards).\n\n2. **Sensor Selection & Wiring** — Hall sensors (recommended) vs reed switches. Key FAQ entries: #3 (Hall vs Reed), #5 (reed bounce reduction), #6 (known working Hall sensors), #12 (wakeup sensor wiring for battery setups).\n\n3. **Magnet Placement** — Number and positioning affects accuracy. Key FAQ entry: #7 (magnet count and placement).\n\n4. **Firmware Installation** — Flash precompiled binary (preferred for supported boards) or compile with PlatformIO. See `docs/installation.md`.\n\n5. **Parameter Calibration** — Critical settings: `IMPULSES_PER_REVOLUTION`, `FLYWHEEL_INERTIA`, `IMPULSE_DATA_ARRAY_LENGTH`, stroke detection parameters. Key FAQ entries: #9 (calibration workflow), #10 (flywheel inertia measurement methods).\n\n6. **Validation** — Use WebGUI to record deltaTime data, run e2e simulation tool, use Calibration Helper GUI for visual analysis."
-    },
-    {
-      "author": "Repo maintainers",
-      "content": "CODEBASE STRUCTURE for understanding the firmware:\n\n- `src/main.cpp`: Main entrypoint, setup and loop functions.\n- `src/rower/`: Core rowing algorithms — stroke detection, metrics calculation, flywheel physics. This is where `MINIMUM_DRAG_TORQUE`, `MINIMUM_POWERED_TORQUE`, and other stroke detection logic lives.\n- `src/peripherals/`: BLE services implementation (CPS, CSC, FTMS, extended metrics, handle forces, settings service).\n- `src/profiles/`: Board-specific and rower-specific configuration files. Users create custom profiles here.\n- `src/utils/`: Utility functions, enums, and helper code.\n- `src/default.settings.h`: Default settings template — users should NOT modify this directly; create `custom.settings.h` instead.\n\nBuild system uses PlatformIO with multiple environments in `platformio.ini` for different board+rower combinations."
-    },
-    {
-      "author": "Repo maintainers",
-      "content": "COMMON USER QUESTIONS — Ensure wiki addresses these frequently asked topics from GitHub discussions:\n\n1. 'Which sensor should I use?' → FAQ #3, #6 — Hall sensors preferred over reed switches\n2. 'How many magnets do I need?' → FAQ #7 — Start with 1-4, more = higher resolution but harder placement\n3. 'My stroke detection is wrong' → FAQ #9, #15 — Check `IMPULSE_DATA_ARRAY_LENGTH`, `MINIMUM_DRAG_TORQUE`, review deltaTime charts\n4. 'How do I measure flywheel inertia?' → FAQ #10 — 5 methods: swing period, CAD, component calculation, estimation, iterative tuning\n5. 'Distance/power seems wrong' → FAQ #9, #10 — Usually `FLYWHEEL_INERTIA` or `CONCEPT_2_MAGIC_NUMBER` needs adjustment\n6. 'Reed switch gives noisy readings' → FAQ #5 — Enable `ENABLE_DEBOUNCE_FILTER`, improve mounting, consider Hall sensor\n7. 'Battery drains too fast' → FAQ #12 — Use `SENSOR_ON_SWITCH_PIN_NUMBER` to power-gate Hall sensor, separate wakeup reed\n8. 'Which ESP32 board should I use?' → FAQ #11 — FireBeetle 2, Lolin S3 Mini, Waveshare S3 Zero have specific profiles"
-    },
-    {
-      "author": "Repo maintainers",
-      "content": "TOOLS AND UTILITIES — Document these helper tools prominently:\n\n- **WebGUI** (https://abasz.github.io/ESPRowingMonitor-WebGUI/): Browser-based monitoring, configuration, and OTA updates via WebBluetooth. Installable PWA.\n- **ESPTool Desktop GUI** (`tools/ESPTools-GUI/`): Cross-platform firmware flasher without Python/CLI. Downloads from releases.\n- **Auto Compiler** (`tools/auto-compiler.sh`): Linux script for interactive compilation with dependency installation.\n- **Calibration Helper GUI** (`tools/calibration-helper/`): Desktop app for visualizing simulation output — delta times analysis, handle force curves, stroke detection validation.\n- **e2e Simulation Tool**: Built via `build/build-e2e`, runs recorded deltaTime data through the algorithm for offline calibration.\n\nCalibration workflow: Record deltaTime → Run e2e simulation → Analyze in Calibration Helper GUI → Adjust settings → Repeat."
-    },
-    {
-      "author": "Repo maintainers",
-      "content": "RELATIONSHIP TO OPEN ROWING MONITOR (ORM):\n\nESP Rowing Monitor shares core physics and algorithms with OpenRowingMonitor (github.com/JaapvanEkris/openrowingmonitor) but runs on ESP32 instead of Raspberry Pi. Key differences:\n\n- **Hardware**: ESP32 microcontroller vs Raspberry Pi. ESP32 is smaller, cheaper, battery-operable.\n- **Algorithm**: Based on @JaapvanEkris's improved stroke detection from ORM branch.\n- **Settings**: Many settings names and concepts match ORM (`flankLength` = `IMPULSE_DATA_ARRAY_LENGTH`, `minimumDriveTime`/`minimumRecoveryTime` are same).\n- **Calibration resources**: ORM's docs/rower_settings.md is excellent supplementary reading.\n\nWhen users ask about physics or algorithm details, ORM documentation (especially Architecture.md and rower_settings.md) provides deeper explanations that apply to ESP Rowing Monitor."
-    },
-    {
-      "author": "Repo maintainers",
-      "content": "BLE CONNECTIVITY — Important for users connecting to smartwatches and apps:\n\n- **Standard profiles**: CPS (Cycling Power), CSC (Cycling Speed/Cadence), FTMS Rowing (experimental). Set via `DEFAULT_BLE_SERVICE` or runtime via opCode.\n- **Custom profiles**: Extended Metrics, Handle Forces, Delta Time Logging. Documented in `docs/custom-ble-services.md`.\n- **Dual connection**: Supports two simultaneous BLE clients (e.g., smartwatch + WebGUI).\n- **Compatible apps**: Kinomap, EXR, Garmin watches (via CPS/CSC), any BLE-compatible rowing app.\n\nBreaking changes in v7.0.0 affect BLE payload sizes — users must use latest WebGUI version."
-    }
-  ],
-  "pages": [
-    {
-      "title": "ESP Rowing Monitor Overview",
-      "purpose": "High-level overview of ESP Rowing Monitor: what it does, key features, hardware requirements, and links to setup guides. Emphasize that this is for indoor rowing machines using ESP32 microcontrollers."
-    },
-    {
-      "title": "Getting Started Guide",
-      "purpose": "Step-by-step guide for new users: hardware assessment, sensor selection, board choice, firmware installation, and initial configuration. Reference FAQ entries #1, #2, #11.",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "Hardware Setup",
-      "purpose": "Comprehensive hardware documentation: supported ESP32 boards, sensor options (Hall vs Reed), wiring diagrams, magnet placement, and battery-powered configurations.",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "Sensor Selection",
-      "purpose": "Detailed comparison of Hall sensors vs reed switches, known working sensor modules (DRV5023, KY-003, A3144, SS443A), wiring considerations, and troubleshooting noisy signals. Reference FAQ entries #3, #5, #6.",
-      "parent": "Hardware Setup"
-    },
-    {
-      "title": "Supported ESP32 Boards",
-      "purpose": "Documentation of supported boards (FireBeetle 2, Lolin S3 Mini, Waveshare S3 Zero, DevKit v1), their features (battery ADC, RGB LED, sensor power switching), and how to create custom board profiles. Reference FAQ entry #11.",
-      "parent": "Hardware Setup"
-    },
-    {
-      "title": "Magnet Placement",
-      "purpose": "Guide to flywheel magnet installation: how many magnets to use (1-6), spacing requirements, polarity considerations, and configuration of IMPULSES_PER_REVOLUTION. Reference FAQ entry #7.",
-      "parent": "Hardware Setup"
-    },
-    {
-      "title": "Battery-Powered Setup",
-      "purpose": "Wiring guide for battery-powered installations: wakeup sensor configuration, Hall sensor power gating with transistors, deep sleep behavior, and power optimization. Reference FAQ entry #12.",
-      "parent": "Hardware Setup"
-    },
-    {
-      "title": "Installation Guide",
-      "purpose": "Complete installation instructions: precompiled firmware flashing (ESPTool GUI, browser flasher), PlatformIO compilation, auto-compiler script for Linux, and OTA updates.",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "Calibration Guide",
-      "purpose": "The most important guide for accurate metrics: calibration workflow, key parameters (FLYWHEEL_INERTIA, IMPULSE_DATA_ARRAY_LENGTH, stroke detection settings), using the e2e simulation tool, and the Calibration Helper GUI. Reference FAQ entries #9, #10.",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "Flywheel Inertia Measurement",
-      "purpose": "Detailed methods for measuring flywheel inertia: swing period method, CAD modeling, component-by-component calculation, estimation from similar machines, and iterative tuning. Include typical values for different rower types. Reference FAQ entry #10.",
-      "parent": "Calibration Guide"
-    },
-    {
-      "title": "Stroke Detection Tuning",
-      "purpose": "Guide to tuning stroke detection parameters: MINIMUM_DRAG_TORQUE, MINIMUM_POWERED_TORQUE, IMPULSE_DATA_ARRAY_LENGTH, MINIMUM_RECOVERY_TIME/DRIVE_TIME, and diagnosing missed/ghost strokes. Reference FAQ entries #9, #15.",
-      "parent": "Calibration Guide"
-    },
-    {
-      "title": "Using the Calibration Tools",
-      "purpose": "How to use the calibration toolchain: recording deltaTime data via WebGUI/SD card/serial, running e2e simulation, analyzing output in Calibration Helper GUI, interpreting delta time charts and force curves.",
-      "parent": "Calibration Guide"
-    },
-    {
-      "title": "Configuration Reference",
-      "purpose": "Complete reference of all settings from docs/settings.md organized by category: general settings, board profile settings, rower profile settings. Include default values and tuning guidance.",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "BLE Connectivity",
-      "purpose": "Documentation of BLE features: standard profiles (CPS, CSC, FTMS), custom profiles (Extended Metrics, Handle Forces), dual connection support, compatible apps and watches, and troubleshooting connection issues.",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "Custom BLE Services",
-      "purpose": "Technical specification of custom BLE services: Extended Metrics characteristic, Handle Forces characteristic, Delta Time Logging, Settings Service, and OTA update protocol. Reference docs/custom-ble-services.md.",
-      "parent": "BLE Connectivity"
-    },
-    {
-      "title": "WebGUI Usage",
-      "purpose": "Guide to using the WebGUI PWA: connecting via WebBluetooth, monitoring metrics, configuring settings, recording deltaTime data, and performing OTA firmware updates.",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "Troubleshooting FAQ",
-      "purpose": "Consolidated troubleshooting guide derived from docs/faq.md: common problems (wrong stroke count, inaccurate distance/power, noisy sensors, battery drain) with solutions. This should be the go-to page for problem-solving.",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "Firmware Architecture",
-      "purpose": "Technical overview of the codebase structure: main.cpp entrypoint, rower/ algorithms, peripherals/ BLE implementation, profiles/ configuration system, and build system (PlatformIO environments).",
-      "parent": "ESP Rowing Monitor Overview"
-    },
-    {
-      "title": "Rower Algorithm Details",
-      "purpose": "Deep dive into the rowing algorithm: stroke detection (torque-based vs slope-based), drag factor calculation, power/distance computation, and relationship to Open Rowing Monitor's approach.",
-      "parent": "Firmware Architecture"
-    },
-    {
-      "title": "Code Documentation and Structure",
-      "purpose": "Comprehensive documentation of the codebase organization: directory structure (src/, test/, tools/, docs/, profiles/), key classes and their responsibilities, data flow through the system, build targets and test infrastructure. This page serves as the technical reference for developers who want to understand or contribute to the codebase.",
-      "parent": "Firmware Architecture"
-    }
-  ]
-}
+  {
+    "repo_notes": [
+      {
+        "author": "Repo maintainers",
+        "content": "ESP Rowing Monitor is an ESP32-based ergometer performance monitor that provides professional-grade rowing analytics to indoor ergometers. The primary goal of documentation should be helping NEW USERS set up their device and calibrate it correctly.\n\nKey docs to treat as primary references:\n- `README.md`: Project overview, key features, breaking changes, and links to detailed docs.\n- `docs/installation.md`: Authoritative install flow (precompiled firmware flashing, PlatformIO compilation, auto-compiler script for Linux).\n- `docs/settings.md`: All configuration parameters organized by category (general, board profile, rower profile) with detailed explanations.\n- `docs/faq.md`: **LLM-enriched Community FAQ** derived from GitHub discussions. This is THE key resource for troubleshooting and setup questions. When answering 'how do I...' or 'why is X happening' questions, prioritize this document.\n- `docs/features.md`: BLE profiles, connectivity options, and feature details."
+      },
+      {
+        "author": "Repo maintainers",
+        "content": "SETUP AND CALIBRATION WORKFLOW — This is the most important user journey to document:\n\n1. **Hardware Assessment** — User determines rower compatibility, sensor needs, and ESP32 board choice. Key FAQ entries: #1 (getting started), #2 (compatibility), #11 (supported boards).\n\n2. **Sensor Selection & Wiring** — Hall sensors (recommended) vs reed switches. Key FAQ entries: #3 (Hall vs Reed), #5 (reed bounce reduction), #6 (known working Hall sensors), #12 (wakeup sensor wiring for battery setups).\n\n3. **Magnet Placement** — Number and positioning affects accuracy. Key FAQ entry: #7 (magnet count and placement).\n\n4. **Firmware Installation** — Flash precompiled binary (preferred for supported boards) or compile with PlatformIO. See `docs/installation.md`.\n\n5. **Parameter Calibration** — Critical settings: `IMPULSES_PER_REVOLUTION`, `FLYWHEEL_INERTIA`, `IMPULSE_DATA_ARRAY_LENGTH`, stroke detection parameters. Key FAQ entries: #9 (calibration workflow), #10 (flywheel inertia measurement methods).\n\n6. **Validation** — Use WebGUI to record deltaTime data, run e2e simulation tool, use Calibration Helper GUI for visual analysis."
+      },
+      {
+        "author": "Repo maintainers",
+        "content": "CODEBASE STRUCTURE for understanding the firmware:\n\n- `src/main.cpp`: Main entrypoint, setup and loop functions.\n- `src/rower/`: Core rowing algorithms — stroke detection, metrics calculation, flywheel physics. This is where `MINIMUM_DRAG_TORQUE`, `MINIMUM_POWERED_TORQUE`, and other stroke detection logic lives.\n- `src/peripherals/`: BLE services implementation (CPS, CSC, FTMS, extended metrics, handle forces, settings service).\n- `src/profiles/`: Board-specific and rower-specific configuration files. Users create custom profiles here.\n- `src/utils/`: Utility functions, enums, and helper code.\n- `src/default.settings.h`: Default settings template — users should NOT modify this directly; create `custom.settings.h` instead.\n\nBuild system uses PlatformIO with multiple environments in `platformio.ini` for different board+rower combinations."
+      },
+      {
+        "author": "Repo maintainers",
+        "content": "COMMON USER QUESTIONS — Ensure wiki addresses these frequently asked topics from GitHub discussions:\n\n1. 'Which sensor should I use?' → FAQ #3, #6 — Hall sensors preferred over reed switches\n2. 'How many magnets do I need?' → FAQ #7 — Start with 1-4, more = higher resolution but harder placement\n3. 'My stroke detection is wrong' → FAQ #9, #15 — Check `IMPULSE_DATA_ARRAY_LENGTH`, `MINIMUM_DRAG_TORQUE`, review deltaTime charts\n4. 'How do I measure flywheel inertia?' → FAQ #10 — 5 methods: swing period, CAD, component calculation, estimation, iterative tuning\n5. 'Distance/power seems wrong' → FAQ #9, #10 — Usually `FLYWHEEL_INERTIA` or `CONCEPT_2_MAGIC_NUMBER` needs adjustment\n6. 'Reed switch gives noisy readings' → FAQ #5 — Enable `ENABLE_DEBOUNCE_FILTER`, improve mounting, consider Hall sensor\n7. 'Battery drains too fast' → FAQ #12 — Use `SENSOR_ON_SWITCH_PIN_NUMBER` to power-gate Hall sensor, separate wakeup reed\n8. 'Which ESP32 board should I use?' → FAQ #11 — FireBeetle 2, Lolin S3 Mini, Waveshare S3 Zero have specific profiles"
+      },
+      {
+        "author": "Repo maintainers",
+        "content": "TOOLS AND UTILITIES — Document these helper tools prominently:\n\n- **WebGUI** (https://abasz.github.io/ESPRowingMonitor-WebGUI/): Browser-based monitoring, configuration, and OTA updates via WebBluetooth. Installable PWA.\n- **ESPTool Desktop GUI** (`tools/ESPTools-GUI/`): Cross-platform firmware flasher without Python/CLI. Downloads from releases.\n- **Auto Compiler** (`tools/auto-compiler.sh`): Linux script for interactive compilation with dependency installation.\n- **Calibration Helper GUI** (`tools/calibration-helper/`): Desktop app for visualizing simulation output — delta times analysis, handle force curves, stroke detection validation.\n- **e2e Simulation Tool**: Built via `build/build-e2e`, runs recorded deltaTime data through the algorithm for offline calibration.\n\nCalibration workflow: Record deltaTime → Run e2e simulation → Analyze in Calibration Helper GUI → Adjust settings → Repeat."
+      },
+      {
+        "author": "Repo maintainers",
+        "content": "RELATIONSHIP TO OPEN ROWING MONITOR (ORM):\n\nESP Rowing Monitor shares core physics and algorithms with OpenRowingMonitor (github.com/JaapvanEkris/openrowingmonitor) but runs on ESP32 instead of Raspberry Pi. Key differences:\n\n- **Hardware**: ESP32 microcontroller vs Raspberry Pi. ESP32 is smaller, cheaper, battery-operable.\n- **Algorithm**: Based on @JaapvanEkris's improved stroke detection from ORM branch.\n- **Settings**: Many settings names and concepts match ORM (`flankLength` = `IMPULSE_DATA_ARRAY_LENGTH`, `minimumDriveTime`/`minimumRecoveryTime` are same).\n- **Calibration resources**: ORM's docs/rower_settings.md is excellent supplementary reading.\n\nWhen users ask about physics or algorithm details, ORM documentation (especially Architecture.md and rower_settings.md) provides deeper explanations that apply to ESP Rowing Monitor."
+      },
+      {
+        "author": "Repo maintainers",
+        "content": "BLE CONNECTIVITY — Important for users connecting to smartwatches and apps:\n\n- **Standard profiles**: CPS (Cycling Power), CSC (Cycling Speed/Cadence), FTMS Rowing (experimental). Set via `DEFAULT_BLE_SERVICE` or runtime via opCode.\n- **Custom profiles**: Extended Metrics, Handle Forces, Delta Time Logging. Documented in `docs/custom-ble-services.md`.\n- **Dual connection**: Supports two simultaneous BLE clients (e.g., smartwatch + WebGUI).\n- **Compatible apps**: Kinomap, EXR, Garmin watches (via CPS/CSC), any BLE-compatible rowing app.\n\nBreaking changes in v7.0.0 affect BLE payload sizes — users must use latest WebGUI version."
+      }
+    ],
+    "pages": [
+      {
+        "title": "ESP Rowing Monitor Overview",
+        "purpose": "High-level overview of ESP Rowing Monitor: what it does, key features, hardware requirements, and links to setup guides. Emphasize that this is for indoor rowing machines using ESP32 microcontrollers."
+      },
+      {
+        "title": "Getting Started Guide",
+        "purpose": "Step-by-step guide for new users: hardware assessment, sensor selection, board choice, firmware installation, and initial configuration. Reference FAQ entries #1, #2, #11.",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "Hardware Setup",
+        "purpose": "Comprehensive hardware documentation: supported ESP32 boards, sensor options (Hall vs Reed), wiring diagrams, magnet placement, and battery-powered configurations.",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "Sensor Selection",
+        "purpose": "Detailed comparison of Hall sensors vs reed switches, known working sensor modules (DRV5023, KY-003, A3144, SS443A), wiring considerations, and troubleshooting noisy signals. Reference FAQ entries #3, #5, #6.",
+        "parent": "Hardware Setup"
+      },
+      {
+        "title": "Supported ESP32 Boards",
+        "purpose": "Documentation of supported boards (FireBeetle 2, Lolin S3 Mini, Waveshare S3 Zero, DevKit v1), their features (battery ADC, RGB LED, sensor power switching), and how to create custom board profiles. Reference FAQ entry #11.",
+        "parent": "Hardware Setup"
+      },
+      {
+        "title": "Magnet Placement",
+        "purpose": "Guide to flywheel magnet installation: how many magnets to use (1-6), spacing requirements, polarity considerations, and configuration of IMPULSES_PER_REVOLUTION. Reference FAQ entry #7.",
+        "parent": "Hardware Setup"
+      },
+      {
+        "title": "Battery-Powered Setup",
+        "purpose": "Wiring guide for battery-powered installations: wakeup sensor configuration, Hall sensor power gating with transistors, deep sleep behavior, and power optimization. Reference FAQ entry #12.",
+        "parent": "Hardware Setup"
+      },
+      {
+        "title": "Installation Guide",
+        "purpose": "Complete installation instructions: precompiled firmware flashing (ESPTool GUI, browser flasher), PlatformIO compilation, auto-compiler script for Linux, and OTA updates.",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "Calibration Guide",
+        "purpose": "The most important guide for accurate metrics: calibration workflow, key parameters (FLYWHEEL_INERTIA, IMPULSE_DATA_ARRAY_LENGTH, stroke detection settings), using the e2e simulation tool, and the Calibration Helper GUI. Reference FAQ entries #9, #10.",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "Flywheel Inertia Measurement",
+        "purpose": "Detailed methods for measuring flywheel inertia: swing period method, CAD modeling, component-by-component calculation, estimation from similar machines, and iterative tuning. Include typical values for different rower types. Reference FAQ entry #10.",
+        "parent": "Calibration Guide"
+      },
+      {
+        "title": "Stroke Detection Tuning",
+        "purpose": "Guide to tuning stroke detection parameters: MINIMUM_DRAG_TORQUE, MINIMUM_POWERED_TORQUE, IMPULSE_DATA_ARRAY_LENGTH, MINIMUM_RECOVERY_TIME/DRIVE_TIME, and diagnosing missed/ghost strokes. Reference FAQ entries #9, #15.",
+        "parent": "Calibration Guide"
+      },
+      {
+        "title": "Using the Calibration Tools",
+        "purpose": "How to use the calibration toolchain: recording deltaTime data via WebGUI/SD card/serial, running e2e simulation, analyzing output in Calibration Helper GUI, interpreting delta time charts and force curves.",
+        "parent": "Calibration Guide"
+      },
+      {
+        "title": "Configuration Reference",
+        "purpose": "Complete reference of all settings from docs/settings.md organized by category: general settings, board profile settings, rower profile settings. Include default values and tuning guidance.",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "BLE Connectivity",
+        "purpose": "Documentation of BLE features: standard profiles (CPS, CSC, FTMS), custom profiles (Extended Metrics, Handle Forces), dual connection support, compatible apps and watches, and troubleshooting connection issues.",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "Custom BLE Services",
+        "purpose": "Technical specification of custom BLE services: Extended Metrics characteristic, Handle Forces characteristic, Delta Time Logging, Settings Service, and OTA update protocol. Reference docs/custom-ble-services.md.",
+        "parent": "BLE Connectivity"
+      },
+      {
+        "title": "WebGUI Usage",
+        "purpose": "Guide to using the WebGUI PWA: connecting via WebBluetooth, monitoring metrics, configuring settings, recording deltaTime data, and performing OTA firmware updates.",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "Troubleshooting FAQ",
+        "purpose": "Consolidated troubleshooting guide derived from docs/faq.md: common problems (wrong stroke count, inaccurate distance/power, noisy sensors, battery drain) with solutions. This should be the go-to page for problem-solving.",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "Firmware Architecture",
+        "purpose": "Technical overview of the codebase structure: main.cpp entrypoint, rower/ algorithms, peripherals/ BLE implementation, profiles/ configuration system, and build system (PlatformIO environments).",
+        "parent": "ESP Rowing Monitor Overview"
+      },
+      {
+        "title": "Rower Algorithm Details",
+        "purpose": "Deep dive into the rowing algorithm: stroke detection (torque-based vs slope-based), drag factor calculation, power/distance computation, and relationship to Open Rowing Monitor's approach.",
+        "parent": "Firmware Architecture"
+      },
+      {
+        "title": "Code Documentation and Structure",
+        "purpose": "Comprehensive documentation of the codebase organization: directory structure (src/, test/, tools/, docs/, profiles/), key classes and their responsibilities, data flow through the system, build targets and test infrastructure. This page serves as the technical reference for developers who want to understand or contribute to the codebase.",
+        "parent": "Firmware Architecture"
+      }
+    ]
+  }
