@@ -37,6 +37,7 @@ Controls (Stroke Detection):
 import gc
 import os
 import re
+import sys
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from dataclasses import dataclass, field
@@ -520,7 +521,23 @@ class DataVisualizer:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("ESP Rowing Monitor Data Visualizer")
-        self.root.iconbitmap(os.path.join(sys._MEIPASS, "calibration-helper-GUI.ico")) # type: ignore[arg-type]
+        try:
+            icon_path = os.path.join(
+                getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__))),
+                "calibration-helper-GUI.ico"
+            )
+            if sys.platform == 'win32':
+                self.root.iconbitmap(icon_path)
+            else:
+                # tkinter on Linux/macOS does not support .ico via iconbitmap;
+                # use iconphoto with PIL instead
+                from PIL import Image, ImageTk  # noqa: PLC0415
+                _img = Image.open(icon_path)
+                self._icon_photo = ImageTk.PhotoImage(_img)  # keep reference alive
+                self.root.iconphoto(True, self._icon_photo)
+        except Exception as e:
+            print(f"[Warning] failed to load app icon: {e}")
+            pass  # icon is cosmetic – never crash on failure
         self.root.geometry("1400x900")
         
         # Multi-file storage
