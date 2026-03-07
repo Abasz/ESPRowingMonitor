@@ -1,5 +1,6 @@
 find_program(CLANG_TIDY_EXE NAMES clang-tidy clang-tidy-21 clang-tidy-20
                                   clang-tidy-19 clang-tidy-18 REQUIRED)
+find_program(IWYU_PATH NAMES include-what-you-use iwyu)
 
 # =============================================================================
 # Unit Test Sources (local to this directory)
@@ -55,8 +56,13 @@ add_custom_target(
   COMMENT "Running unit tests")
 
 # =============================================================================
-# Unit Test with Lint (clang-tidy)
+# Unit Test with Lint (clang-tidy, include-what-you-use - optional -, link what
+# you use)
 # =============================================================================
+
+if(NOT IWYU_PATH)
+  message(WARNING "Could not find the program include-what-you-use")
+endif()
 
 add_executable(unit-test-lint EXCLUDE_FROM_ALL ${UNIT_TEST_SOURCES})
 
@@ -67,7 +73,9 @@ set_target_properties(
   PROPERTIES OUTPUT_NAME "test-lint"
              SUFFIX ".out"
              CXX_CLANG_TIDY "${CLANG_TIDY_EXE}"
-             LINT_SCRIPTS_DIR "${CMAKE_CURRENT_BINARY_DIR}")
+             LINT_SCRIPTS_DIR "${CMAKE_CURRENT_BINARY_DIR}"
+             CXX_INCLUDE_WHAT_YOU_USE "${IWYU_PATH}"
+             CXX_LINK_WHAT_YOU_USE TRUE)
 
 add_custom_target(
   run-unit-test-lint
