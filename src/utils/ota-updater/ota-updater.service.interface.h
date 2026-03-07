@@ -1,6 +1,7 @@
 #pragma once
 
-#include "NimBLEDevice.h"
+class NimBLEAttValue;
+class NimBLECharacteristic;
 
 class IOtaUpdaterService
 {

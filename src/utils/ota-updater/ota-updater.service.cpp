@@ -1,14 +1,18 @@
 #include <array>
+#include <iterator>
 #include <span>
 #include <string>
 #include <utility>
 
 #include "ArduinoLog.h"
+#include "NimBLEDevice.h"
 #include "Update.h"
 
 #include "globals.h"
 
 #include "./ota-updater.service.h"
+
+#include "../../peripherals/bluetooth/ble.enums.h"
 
 using std::span;
 

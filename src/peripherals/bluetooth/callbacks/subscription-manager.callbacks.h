@@ -4,9 +4,6 @@
 
 #include "NimBLEDevice.h"
 
-#include "../../../utils/configuration.h"
-#include "../ble-services/extended-metrics.service.interface.h"
-
 class SubscriptionManagerCallbacks final : public NimBLECharacteristicCallbacks
 {
     std::vector<unsigned char> clientIds;
@@ -16,5 +13,5 @@ public:
 
     void onSubscribe(NimBLECharacteristic *pCharacteristic, NimBLEConnInfo &connInfo, unsigned short subValue) override;
 
-    [[nodiscard]] const vector<unsigned char> &getClientIds() const;
+    [[nodiscard]] const std::vector<unsigned char> &getClientIds() const;
 };

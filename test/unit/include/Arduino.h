@@ -3,11 +3,14 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
+#include <functional>
 #include <string>
 
 #include "fakeit.hpp"
 
-#include "./Esp32-typedefs.h"
+#include "./soc/gpio_num.h"
 
 using BaseType_t = int;
 using UBaseType_t = unsigned int;

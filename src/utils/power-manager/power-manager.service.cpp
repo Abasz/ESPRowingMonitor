@@ -1,18 +1,21 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <numeric>
+#include <iterator>
 
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
+#include "soc/gpio_num.h"
 
 #include "Arduino.h"
 #include "ArduinoLog.h"
 
 #include "globals.h"
 
-#include "../configuration.h"
 #include "./power-manager.service.h"
+
+#include "../../peripherals/led/led.service.interface.h"
+#include "../configuration.h"
 
 PowerManagerService::PowerManagerService(ILedService &_ledService)
     : ledService(_ledService)

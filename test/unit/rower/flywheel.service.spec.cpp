@@ -1,4 +1,5 @@
 // NOLINTBEGIN(readability-magic-numbers,readability-function-cognitive-complexity,cppcoreguidelines-avoid-do-while, clang-analyzer-cplusplus.NewDelete, clang-analyzer-cplusplus.NewDeleteLeaks)
+#include <iterator>
 #include <numeric>
 #include <vector>
 
@@ -10,6 +11,9 @@
 #include "../include/globals.h"
 
 #include "../../../src/rower/flywheel.service.h"
+#include "../../../src/rower/stroke.model.h"
+#include "../../../src/utils/configuration.h"
+#include "../../../src/utils/settings.model.h"
 
 using namespace fakeit;
 

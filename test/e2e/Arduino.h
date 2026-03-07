@@ -2,7 +2,7 @@
 #pragma once
 #include <climits>
 
-#include "./Esp32-typedefs.h"
+#include "./soc/gpio_num.h"
 
 #define INPUT 0x01
 #define OUTPUT 0x03

@@ -3,6 +3,9 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma once
 
+#include <array>
+#include <cstdint>
+
 #include "esp_err.h"
 
 enum esp_mac_type_t : unsigned char

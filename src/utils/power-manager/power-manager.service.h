@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../peripherals/led/led.service.interface.h"
 #include "./power-manager.service.interface.h"
+
+class ILedService;
 
 class PowerManagerService final : public IPowerManagerService
 {

@@ -1,6 +1,9 @@
 #include <algorithm>
+#include <iterator>
 
 #include "./series.h"
+
+#include "../configuration.h"
 
 using std::vector;
 

@@ -1,17 +1,26 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)
 #include <array>
 #include <bit>
+#include <cmath>
+#include <cstring>
 #include <string>
+#include <type_traits>
+#include <utility>
 
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
 
+#include "../../include/ArduinoLog.h"
 #include "../../include/NimBLEDevice.h"
 
 #include "../../../../src/peripherals/bluetooth/ble-services/settings.service.h"
+#include "../../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../../src/peripherals/bluetooth/ble.enums.h"
 #include "../../../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../../../src/utils/EEPROM/EEPROM.service.interface.h"
+#include "../../../../src/utils/configuration.h"
+#include "../../../../src/utils/enums.h"
+#include "../../../../src/utils/settings.model.h"
 
 using namespace fakeit;
 
@@ -38,7 +47,7 @@ TEST_CASE("SettingsBleService", "[ble-service]")
 
     const auto flywheelInertia = std::bit_cast<unsigned int>(RowerProfile::Defaults::flywheelInertia);
     constexpr auto mToCm = 100.0F;
-    const auto sprocketRadius = static_cast<unsigned short>(roundf(RowerProfile::Defaults::sprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
+    const auto sprocketRadius = static_cast<unsigned short>(std::roundf(RowerProfile::Defaults::sprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
 
     const auto rotationDebounceTimeMin = static_cast<unsigned char>(RowerProfile::Defaults::rotationDebounceTimeMin / ISettingsBleService::debounceTimeScale);
     const auto rowingStoppedThresholdPeriod = static_cast<unsigned char>(RowerProfile::Defaults::rowingStoppedThresholdPeriod / ISettingsBleService::rowingStoppedThresholdScale);

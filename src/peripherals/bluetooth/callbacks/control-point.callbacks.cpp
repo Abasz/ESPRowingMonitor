@@ -1,5 +1,7 @@
 #include <array>
-#include <limits>
+#include <cstring>
+#include <iterator>
+#include <string>
 #include <utility>
 
 #include "ArduinoLog.h"
@@ -7,9 +9,14 @@
 
 #include "globals.h"
 
-#include "../../../utils/EEPROM/EEPROM.service.h"
-#include "../bluetooth.controller.h"
 #include "./control-point.callbacks.h"
+
+#include "../../../utils/EEPROM/EEPROM.service.interface.h"
+#include "../../../utils/configuration.h"
+#include "../../../utils/enums.h"
+#include "../../../utils/settings.model.h"
+#include "../ble-services/settings.service.interface.h"
+#include "../ble.enums.h"
 
 using std::array;
 

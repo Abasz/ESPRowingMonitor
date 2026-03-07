@@ -1,12 +1,13 @@
 // NOLINTBEGIN(readability-magic-numbers, cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity, modernize-type-traits)
+#include <algorithm>
+#include <iterator>
 #include <string>
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_vector.hpp"
 #include "fakeit.hpp"
-
-#include "./esp_err.h"
 
 #include "../../include/NimBLEDevice.h"
 
@@ -14,7 +15,6 @@
 
 #include "../../../../src/peripherals/bluetooth/ble-services/extended-metrics.service.h"
 #include "../../../../src/peripherals/bluetooth/ble.enums.h"
-#include "../../../../src/utils/configuration.h"
 
 using namespace fakeit;
 

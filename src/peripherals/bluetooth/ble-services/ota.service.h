@@ -1,10 +1,10 @@
 #pragma once
 
-#include "NimBLEDevice.h"
-
-#include "../../../utils/ota-updater/ota-updater.service.interface.h"
 #include "../callbacks/ota.callbacks.h"
 #include "./ota.service.interface.h"
+
+class IOtaUpdaterService;
+class NimBLECharacteristic;
 
 class OtaBleService final : public IOtaBleService
 {

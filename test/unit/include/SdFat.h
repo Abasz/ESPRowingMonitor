@@ -1,6 +1,7 @@
 // NOLINTBEGIN
 #pragma once
 
+#include <cstddef>
 #include <string>
 
 #include "fakeit.hpp"

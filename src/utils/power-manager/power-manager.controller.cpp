@@ -1,7 +1,12 @@
+#include "soc/gpio_num.h"
+
+#include "Arduino.h"
 #include "ArduinoLog.h"
 
-#include "../configuration.h"
 #include "./power-manager.controller.h"
+
+#include "../configuration.h"
+#include "./power-manager.service.interface.h"
 
 PowerManagerController::PowerManagerController(IPowerManagerService &_powerManagerService) : powerManagerService(_powerManagerService)
 {

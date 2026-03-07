@@ -1,9 +1,12 @@
 #include <algorithm>
-#include <numeric>
+#include <iterator>
 #include <ranges>
 
-#include "./ts-linear-series.h"
 #include "./ts-quadratic-series.h"
+
+#include "../configuration.h"
+#include "./series.h"
+#include "./ts-linear-series.h"
 
 using std::vector;
 

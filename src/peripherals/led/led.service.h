@@ -2,7 +2,7 @@
 
 #include "led_strip.h"
 
-#include "../../utils/configuration.h"
+#include "../../utils/enums.h"
 #include "./led.service.interface.h"
 
 class LedService final : public ILedService

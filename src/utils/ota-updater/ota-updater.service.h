@@ -1,14 +1,16 @@
 #pragma once
 
+#include <cstddef>
 #include <deque>
 #include <span>
 
-#include "NimBLEDevice.h"
-
-#include "../../peripherals/bluetooth/ble.enums.h"
 #include "./ota-updater.service.interface.h"
 
 using std::span;
+
+class NimBLECharacteristic;
+
+enum class OtaResponseOpCodes : unsigned char;
 
 class OtaUpdaterService final : public IOtaUpdaterService
 {

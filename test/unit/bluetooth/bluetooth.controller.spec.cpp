@@ -1,7 +1,10 @@
 // NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity)
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_container_properties.hpp"
 #include "catch2/matchers/catch_matchers_range_equals.hpp"
 #include "fakeit.hpp"
@@ -16,7 +19,9 @@
 #include "../../../src/peripherals/bluetooth/ble-services/extended-metrics.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/ota.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
+#include "../../../src/peripherals/bluetooth/ble.enums.h"
 #include "../../../src/peripherals/bluetooth/bluetooth.controller.h"
+#include "../../../src/peripherals/bluetooth/callbacks/connection-manager.callbacks.interface.h"
 #include "../../../src/rower/stroke.model.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
 #include "../../../src/utils/configuration.h"

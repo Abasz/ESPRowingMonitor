@@ -1,14 +1,18 @@
 #pragma once
 
-#include "NimBLEDevice.h"
+#include <vector>
 
-#include "../../../utils/EEPROM/EEPROM.service.interface.h"
-#include "../../../utils/enums.h"
 #include "../ble-metrics.model.h"
-#include "../bluetooth.controller.interface.h"
 #include "../callbacks/control-point.callbacks.h"
 #include "../callbacks/subscription-manager.callbacks.h"
 #include "./base-metrics.service.interface.h"
+
+class IEEPROMService;
+class ISettingsBleService;
+class NimBLECharacteristic;
+class NimBLEServer;
+class NimBLEService;
+enum class BleServiceFlag : unsigned char;
 
 class BaseMetricsBleService final : public IBaseMetricsBleService
 {
@@ -39,5 +43,5 @@ public:
 
     void broadcastBaseMetrics(const BleMetricsModel::BleMetricsData &data) override;
 
-    [[nodiscard]] const vector<unsigned char> &getClientIds() const override;
+    [[nodiscard]] const std::vector<unsigned char> &getClientIds() const override;
 };

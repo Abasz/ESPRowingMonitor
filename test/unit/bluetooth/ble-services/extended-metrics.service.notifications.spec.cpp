@@ -2,13 +2,20 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 
+#include <algorithm>
 #include <array>
+#include <cmath>
+#include <cstddef>
+#include <cstring>
+#include <iterator>
 #include <ranges>
 #include <span>
 #include <string>
 #include <vector>
 
+#include "catch2/catch_message.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_range_equals.hpp"
 #include "catch2/matchers/catch_matchers_vector.hpp"
 #include "fakeit.hpp"

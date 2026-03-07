@@ -1,15 +1,24 @@
 // NOLINTBEGIN(readability-magic-numbers,readability-function-cognitive-complexity,cppcoreguidelines-avoid-do-while)
+#include <cmath>
+#include <cstddef>
 #include <fstream>
+#include <string>
 #include <vector>
 
+#include "catch2/catch_message.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_floating_point.hpp"
 #include "catch2/matchers/catch_matchers_range_equals.hpp"
 
 #include "../include/Arduino.h"
 
+#include "../../../src/rower/stroke.model.h"
 #include "../../../src/rower/stroke.service.h"
 #include "../../../src/utils/configuration.h"
+#include "../../../src/utils/enums.h"
+#include "../../../src/utils/macros.h"
+#include "../../../src/utils/settings.model.h"
 
 using std::ifstream;
 using std::stof;

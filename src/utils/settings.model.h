@@ -1,6 +1,5 @@
 #pragma once
 
-#include "./configuration.h"
 #include "./macros.h"
 
 namespace RowerProfile

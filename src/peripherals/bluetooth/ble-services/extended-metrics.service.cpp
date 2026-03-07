@@ -1,11 +1,15 @@
+#include <algorithm>
+#include <iterator>
 #include <numeric>
 #include <vector>
 
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
-#include "../ble.enums.h"
 #include "./extended-metrics.service.h"
+
+#include "../ble.enums.h"
+#include "../callbacks/subscription-manager.callbacks.h"
 
 using std::vector;
 

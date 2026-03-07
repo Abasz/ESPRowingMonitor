@@ -1,7 +1,17 @@
+#include "soc/gpio_num.h"
+
+#include "Arduino.h"
 #include "ArduinoLog.h"
 
-#include "../utils/configuration.h"
 #include "./peripherals.controller.h"
+
+#include "../utils/EEPROM/EEPROM.service.interface.h"
+#include "../utils/configuration.h"
+#include "../utils/enums.h"
+#include "../utils/settings.model.h"
+#include "./bluetooth/bluetooth.controller.interface.h"
+#include "./led/led.service.interface.h"
+#include "./sd-card/sd-card.service.interface.h"
 
 PeripheralsController::PeripheralsController(IBluetoothController &_bluetoothController, ISdCardService &_sdCardService, IEEPROMService &_eepromService, ILedService &_ledService)
     : bluetoothController(_bluetoothController),

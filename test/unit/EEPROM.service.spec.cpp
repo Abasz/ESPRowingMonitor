@@ -1,12 +1,18 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)
+#include <type_traits>
 #include <utility>
 
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
 
+#include "./include/ArduinoLog.h"
 #include "./include/Preferences.h"
 
 #include "../../src/utils/EEPROM/EEPROM.service.h"
+#include "../../src/utils/configuration.h"
+#include "../../src/utils/enums.h"
+#include "../../src/utils/macros.h"
+#include "../../src/utils/settings.model.h"
 
 using namespace fakeit;
 

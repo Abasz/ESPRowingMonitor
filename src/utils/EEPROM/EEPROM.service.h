@@ -1,11 +1,14 @@
 #pragma once
 
-#include "ArduinoLog.h"
-#include "Preferences.h"
-
 #include "../configuration.h"
-#include "../enums.h"
+#include "../settings.model.h"
 #include "./EEPROM.service.interface.h"
+
+class Preferences;
+
+enum class ArduinoLogLevel : unsigned char;
+enum class BleServiceFlag : unsigned char;
+enum class StrokeDetectionType : unsigned char;
 
 class EEPROMService final : public IEEPROMService
 {

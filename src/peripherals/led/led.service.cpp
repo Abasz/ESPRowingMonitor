@@ -1,7 +1,14 @@
+#include <utility>
+
+#include "soc/gpio_num.h"
+
 #include "Arduino.h"
 #include "led_strip.h"
 
 #include "./led.service.h"
+
+#include "../../utils/configuration.h"
+#include "../../utils/enums.h"
 
 LedService::LedService()
 {

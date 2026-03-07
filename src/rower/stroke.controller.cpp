@@ -4,6 +4,14 @@
 
 #include "./stroke.controller.h"
 
+#include "../utils/EEPROM/EEPROM.service.interface.h"
+#include "../utils/configuration.h"
+#include "../utils/macros.h"
+#include "../utils/settings.model.h"
+#include "./flywheel.service.interface.h"
+#include "./stroke.model.h"
+#include "./stroke.service.interface.h"
+
 StrokeController::StrokeController(IStrokeService &_strokeService, IFlywheelService &_flywheelService, IEEPROMService &_eepromService)
     : strokeService(_strokeService),
       flywheelService(_flywheelService),

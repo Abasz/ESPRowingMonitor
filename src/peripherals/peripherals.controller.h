@@ -1,14 +1,16 @@
 #pragma once
 #include <vector>
 
-#include "../rower/stroke.model.h"
-#include "../utils/EEPROM/EEPROM.service.interface.h"
-#include "./bluetooth/bluetooth.controller.interface.h"
-#include "./led/led.service.interface.h"
+#include "../utils/settings.model.h"
 #include "./peripherals.controller.interface.h"
-#include "./sd-card/sd-card.service.interface.h"
 
 using std::vector;
+
+class IBluetoothController;
+class ISdCardService;
+class IEEPROMService;
+class ILedService;
+enum class LedColor : unsigned int;
 
 class PeripheralsController final : public IPeripheralsController
 {

@@ -1,10 +1,11 @@
-#include <array>
-
 #include "ArduinoLog.h"
+#include "NimBLEDevice.h"
+
+#include "./ota.service.h"
 
 #include "../ble-metrics.model.h"
 #include "../ble.enums.h"
-#include "./ota.service.h"
+#include "../callbacks/ota.callbacks.h"
 
 OtaBleService::OtaBleService(IOtaUpdaterService &_otaService) : callbacks(_otaService)
 {

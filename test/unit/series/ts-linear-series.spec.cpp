@@ -1,4 +1,7 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)
+#include <array>
+#include <initializer_list>
+
 #include "catch2/catch_test_macros.hpp"
 
 #include "../../../src/utils/series/ts-linear-series.h"

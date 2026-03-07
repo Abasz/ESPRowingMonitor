@@ -2,13 +2,14 @@
 
 #include <array>
 
-#include "NimBLEDevice.h"
-
-#include "../../../utils/EEPROM/EEPROM.service.interface.h"
-#include "../../sd-card/sd-card.service.interface.h"
-#include "../bluetooth.controller.interface.h"
 #include "../callbacks/control-point.callbacks.h"
 #include "./settings.service.interface.h"
+
+class IEEPROMService;
+class ISdCardService;
+class NimBLECharacteristic;
+class NimBLEServer;
+class NimBLEService;
 
 class SettingsBleService final : public ISettingsBleService
 {

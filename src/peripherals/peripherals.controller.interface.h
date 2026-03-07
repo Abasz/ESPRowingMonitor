@@ -1,6 +1,9 @@
 #pragma once
 
-#include "../rower/stroke.model.h"
+namespace RowingDataModels
+{
+    struct RowingMetrics;
+}
 
 class IPeripheralsController
 {

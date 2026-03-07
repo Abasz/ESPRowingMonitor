@@ -3,6 +3,11 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma once
 
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <initializer_list>
+#include <iterator>
 #include <span>
 #include <string>
 #include <vector>

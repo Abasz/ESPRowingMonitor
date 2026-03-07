@@ -1,5 +1,7 @@
 #include "./exponential-weighted-average.h"
 
+#include "../configuration.h"
+
 void ExponentialWeightedAverage::push(const Configurations::precision value, const Configurations::precision weight)
 {
     const auto weightedValue = value * weight;

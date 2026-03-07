@@ -1,10 +1,14 @@
 #pragma once
 
-#include "../utils/EEPROM/EEPROM.service.interface.h"
+#include <vector>
+
 #include "../utils/configuration.h"
-#include "./flywheel.service.interface.h"
 #include "./stroke.controller.interface.h"
-#include "./stroke.service.interface.h"
+#include "./stroke.model.h"
+
+class IStrokeService;
+class IFlywheelService;
+class IEEPROMService;
 
 class StrokeController final : public IStrokeController
 {

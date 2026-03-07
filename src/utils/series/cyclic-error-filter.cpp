@@ -1,6 +1,13 @@
-#include <ranges>
+#include <algorithm>
+#include <cmath>
+#include <iterator>
 
 #include "./cyclic-error-filter.h"
+
+#include "../configuration.h"
+#include "./exponential-weighted-average.h"
+#include "./ols-linear-series.h"
+#include "./series.h"
 
 void CyclicErrorFilter::SlotErrorTracker::push(const Configurations::precision deviation)
 {

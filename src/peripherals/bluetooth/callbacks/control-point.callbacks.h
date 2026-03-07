@@ -2,10 +2,10 @@
 
 #include "NimBLEDevice.h"
 
-#include "../../../utils/EEPROM/EEPROM.service.interface.h"
-#include "../ble-services/settings.service.interface.h"
 #include "../ble.enums.h"
-#include "../bluetooth.controller.interface.h"
+
+class IEEPROMService;
+class ISettingsBleService;
 
 class ControlPointCallbacks final : public NimBLECharacteristicCallbacks
 {

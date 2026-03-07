@@ -1,13 +1,20 @@
 #include <array>
+#include <climits>
+#include <cmath>
 #include <utility>
 
-#include "esp_err.h"
-
+#include "Arduino.h"
 #include "ArduinoLog.h"
+#include "NimBLEDevice.h"
 
-#include "../ble-metrics.model.h"
 #include "./base-metrics.service.h"
-#include "./settings.service.interface.h"
+
+#include "../../../utils/enums.h"
+#include "../../../utils/macros.h"
+#include "../ble-metrics.model.h"
+#include "../ble.enums.h"
+#include "../callbacks/control-point.callbacks.h"
+#include "../callbacks/subscription-manager.callbacks.h"
 
 using std::array;
 
@@ -61,7 +68,7 @@ void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetri
         0);
 }
 
-const vector<unsigned char> &BaseMetricsBleService::getClientIds() const
+const std::vector<unsigned char> &BaseMetricsBleService::getClientIds() const
 {
     return connectionManager.getClientIds();
 }

@@ -1,8 +1,10 @@
 #pragma once
 
+#include "Arduino.h"
+
 #include "../utils/configuration.h"
+#include "../utils/settings.model.h"
 #include "./flywheel.service.interface.h"
-#include "./stroke.model.h"
 
 class FlywheelService final : public IFlywheelService
 {

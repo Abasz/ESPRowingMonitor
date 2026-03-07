@@ -4,7 +4,6 @@
 
 #include "../include/NimBLEDevice.h"
 
-#include "../../../src/peripherals/bluetooth/ble-services/extended-metrics.service.interface.h"
 #include "../../../src/peripherals/bluetooth/callbacks/subscription-manager.callbacks.h"
 
 using namespace fakeit;

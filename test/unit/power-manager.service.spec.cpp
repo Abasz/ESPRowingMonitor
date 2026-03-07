@@ -4,10 +4,13 @@
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
 
+#include "soc/gpio_num.h"
+
 #include "./include/Arduino.h"
 
 #include "../../src/peripherals/led/led.service.interface.h"
 #include "../../src/utils/configuration.h"
+#include "../../src/utils/enums.h"
 #include "../../src/utils/power-manager/power-manager.service.h"
 
 using namespace fakeit;

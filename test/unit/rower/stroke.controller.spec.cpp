@@ -3,7 +3,13 @@
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
 
+#include "../../../src/rower/flywheel.service.interface.h"
 #include "../../../src/rower/stroke.controller.h"
+#include "../../../src/rower/stroke.model.h"
+#include "../../../src/rower/stroke.service.interface.h"
+#include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
+#include "../../../src/utils/macros.h"
+#include "../../../src/utils/settings.model.h"
 
 using namespace fakeit;
 

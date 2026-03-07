@@ -1,8 +1,13 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)
+#include <vector>
+
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_container_properties.hpp"
 #include "catch2/matchers/catch_matchers_range_equals.hpp"
 #include "fakeit.hpp"
+
+#include "../include/Arduino.h"
 
 #include "../../src/peripherals/bluetooth/bluetooth.controller.interface.h"
 #include "../../src/peripherals/led/led.service.interface.h"
@@ -10,6 +15,10 @@
 #include "../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../src/rower/stroke.model.h"
 #include "../../src/utils/EEPROM/EEPROM.service.interface.h"
+#include "../../src/utils/configuration.h"
+#include "../../src/utils/enums.h"
+#include "../../src/utils/macros.h"
+#include "../../src/utils/settings.model.h"
 
 using namespace fakeit;
 

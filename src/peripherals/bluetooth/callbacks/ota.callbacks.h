@@ -1,7 +1,8 @@
 #pragma once
 
-#include "../../../utils/ota-updater/ota-updater.service.interface.h"
 #include "NimBLEDevice.h"
+
+class IOtaUpdaterService;
 
 class OtaRxCallbacks final : public NimBLECharacteristicCallbacks
 {

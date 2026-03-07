@@ -1,22 +1,29 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)
+
 #include <array>
 #include <bit>
+#include <cmath>
+#include <initializer_list>
+#include <type_traits>
 #include <utility>
 
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
 
 #include "../include/Arduino.h"
+#include "../include/ArduinoLog.h"
 #include "../include/NimBLEDevice.h"
 
 #include "../include/globals.h"
 
 #include "../../../src/peripherals/bluetooth//ble-services/settings.service.interface.h"
+#include "../../../src/peripherals/bluetooth/ble.enums.h"
 #include "../../../src/peripherals/bluetooth/callbacks/control-point.callbacks.h"
-#include "../../../src/peripherals/sd-card/sd-card.service.interface.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
+#include "../../../src/utils/configuration.h"
 #include "../../../src/utils/enums.h"
-#include "../../../src/utils/ota-updater/ota-updater.service.interface.h"
+#include "../../../src/utils/macros.h"
+#include "../../../src/utils/settings.model.h"
 
 using namespace fakeit;
 
@@ -510,9 +517,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             const auto expectedSprocketRadius = 0.01F;
 
             const auto flywheelInertia = std::bit_cast<unsigned int>(expectedFlywheelInertia);
-            const auto magicNumber = roundf(expectedMagicNumber * ISettingsBleService::magicNumberScale);
+            const auto magicNumber = std::roundf(expectedMagicNumber * ISettingsBleService::magicNumberScale);
             const auto mToCm = 100.0F;
-            const auto sprocketRadius = static_cast<unsigned short>(roundf(expectedSprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
+            const auto sprocketRadius = static_cast<unsigned short>(std::roundf(expectedSprocketRadius * ISettingsBleService::sprocketRadiusScale * mToCm));
 
             const NimBLEAttValue payload = {
                 std::to_underlying(SettingsOpCodes::SetMachineSettings),
@@ -771,12 +778,12 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             };
 
             constexpr auto expectedGoodnessOfFitThreshold = 0.968627453F;
-            const auto dragFactorLowerThreshold = static_cast<unsigned short>(roundf(RowerProfile::Defaults::lowerDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
-            const auto dragFactorUpperThreshold = static_cast<unsigned short>(roundf(RowerProfile::Defaults::upperDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
+            const auto dragFactorLowerThreshold = static_cast<unsigned short>(std::roundf(RowerProfile::Defaults::lowerDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
+            const auto dragFactorUpperThreshold = static_cast<unsigned short>(std::roundf(RowerProfile::Defaults::upperDragFactorThreshold * ISettingsBleService::dragFactorThresholdScale));
 
             const NimBLEAttValue payload = {
                 std::to_underlying(SettingsOpCodes::SetDragFactorSettings),
-                static_cast<unsigned char>(roundf(expectedGoodnessOfFitThreshold * ISettingsBleService::goodnessOfFitThresholdScale)),
+                static_cast<unsigned char>(std::roundf(expectedGoodnessOfFitThreshold * ISettingsBleService::goodnessOfFitThresholdScale)),
                 static_cast<unsigned char>(RowerProfile::Defaults::maxDragFactorRecoveryPeriod / ISettingsBleService::dragFactorRecoveryPeriodScale),
                 static_cast<unsigned char>(dragFactorLowerThreshold),
                 static_cast<unsigned char>(dragFactorLowerThreshold >> 8),
@@ -916,9 +923,9 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
             const auto impulseAndDetection = (std::to_underlying(RowerProfile::Defaults::strokeDetectionType) & 0x03) |
                                              ((RowerProfile::Defaults::impulseDataArrayLength & 0x1F) << 2U) |
                                              (static_cast<unsigned char>(std::is_same_v<Configurations::precision, double>) << 7U);
-            const auto poweredTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
-            const auto dragTorque = static_cast<short>(roundf(RowerProfile::Defaults::minimumDragTorque * ISettingsBleService::dragTorqueScale));
-            const auto recoverySlope = static_cast<short>(roundf(RowerProfile::Defaults::minimumRecoverySlope * ISettingsBleService::recoverySlopeScale));
+            const auto poweredTorque = static_cast<short>(std::roundf(RowerProfile::Defaults::minimumPoweredTorque * ISettingsBleService::poweredTorqueScale));
+            const auto dragTorque = static_cast<short>(std::roundf(RowerProfile::Defaults::minimumDragTorque * ISettingsBleService::dragTorqueScale));
+            const auto recoverySlope = static_cast<short>(std::roundf(RowerProfile::Defaults::minimumRecoverySlope * ISettingsBleService::recoverySlopeScale));
             const auto strokeTimes = (RowerProfile::Defaults::minimumRecoveryTime / ISettingsBleService::minimumStrokeTimesScale) | ((RowerProfile::Defaults::minimumDriveTime / ISettingsBleService::minimumStrokeTimesScale) << 12U);
 
             const NimBLEAttValue payload = {

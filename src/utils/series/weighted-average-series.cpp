@@ -1,6 +1,7 @@
-#include <algorithm>
-
 #include "./weighted-average-series.h"
+
+#include "../configuration.h"
+#include "./series.h"
 
 size_t WeightedAverageSeries::size() const
 {

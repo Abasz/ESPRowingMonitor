@@ -1,10 +1,9 @@
-#include <algorithm>
-
 #include "ArduinoLog.h"
 #include "NimBLEDevice.h"
 
-#include "../../../utils/configuration.h"
 #include "./connection-manager.callbacks.h"
+
+#include "../../../utils/configuration.h"
 
 void ConnectionManagerCallbacks::onConnect(NimBLEServer *pServer, NimBLEConnInfo &connInfo)
 {

@@ -3,6 +3,8 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#include <cstddef>
+
 #include "fakeit.hpp"
 
 #define UPDATE_ERROR_OK (0)

@@ -11,7 +11,6 @@
 
 #include "../../../../src/peripherals/bluetooth/ble-services/ota.service.h"
 #include "../../../../src/peripherals/bluetooth/ble.enums.h"
-#include "../../../../src/utils/configuration.h"
 #include "../../../../src/utils/ota-updater/ota-updater.service.interface.h"
 
 using namespace fakeit;

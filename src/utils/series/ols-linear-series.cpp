@@ -1,5 +1,8 @@
 #include "./ols-linear-series.h"
 
+#include "../configuration.h"
+#include "./series.h"
+
 void OLSLinearSeries::reset()
 {
     seriesX.reset();

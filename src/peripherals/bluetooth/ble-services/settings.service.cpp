@@ -1,13 +1,22 @@
 #include <array>
 #include <bit>
+#include <cmath>
+#include <type_traits>
 #include <utility>
 
 #include "ArduinoLog.h"
+#include "NimBLEDevice.h"
 
+#include "./settings.service.h"
+
+#include "../../../utils/EEPROM/EEPROM.service.interface.h"
 #include "../../../utils/configuration.h"
+#include "../../../utils/settings.model.h"
+#include "../../sd-card/sd-card.service.interface.h"
 #include "../ble-metrics.model.h"
 #include "../ble.enums.h"
-#include "./settings.service.h"
+#include "../callbacks/control-point.callbacks.h"
+#include "./settings.service.interface.h"
 
 SettingsBleService::SettingsBleService(ISdCardService &_sdCardService, IEEPROMService &_eepromService)
     : sdCardService(_sdCardService),

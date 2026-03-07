@@ -1,12 +1,16 @@
 #include <array>
+#include <cstdio>
 #include <string>
 
 #include "esp_check.h"
+#include "esp_err.h"
 #include "esp_mac.h"
 
 #include "Arduino.h"
 
 #include "globals.h"
+
+#include "./utils/configuration.h"
 
 Preferences preferences;
 

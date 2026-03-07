@@ -1,16 +1,25 @@
 #include <algorithm>
-#include <array>
 #include <cmath>
-#include <numeric>
-#include <ranges>
+#include <cstddef>
+#include <iterator>
 #include <string>
 
 #include "Arduino.h"
 #include "ArduinoLog.h"
 
-#include "globals.h"
-
 #include "./stroke.service.h"
+
+#include "../utils/configuration.h"
+#include "../utils/enums.h"
+#include "../utils/macros.h"
+#include "../utils/series/cyclic-error-filter.h"
+#include "../utils/series/ols-linear-series.h"
+#include "../utils/series/series.h"
+#include "../utils/series/ts-linear-series.h"
+#include "../utils/series/ts-quadratic-series.h"
+#include "../utils/series/weighted-average-series.h"
+#include "../utils/settings.model.h"
+#include "./stroke.model.h"
 
 using namespace std::string_literals;
 
@@ -408,9 +417,15 @@ void StrokeService::logNewStrokeData() const
         return;
     }
 
-    auto formatted = driveHandleForces | std::views::transform([](float force)
-                                                               { return std::to_string(force); }) |
-                     std::views::join_with(","s) | std::ranges::to<std::string>();
+    std::string formatted;
+    for (size_t i = 0; i < driveHandleForces.size(); ++i)
+    {
+        if (i != 0)
+        {
+            formatted += ',';
+        }
+        formatted += std::to_string(driveHandleForces[i]);
+    }
 
     string response = "[" + formatted + "]";
 

@@ -1,10 +1,16 @@
 #include <algorithm>
+#include <utility>
 
 #include "ArduinoLog.h"
 
 #include "globals.h"
 
 #include "./flywheel.service.h"
+
+#include "../utils/configuration.h"
+#include "../utils/macros.h"
+#include "../utils/settings.model.h"
+#include "./stroke.model.h"
 
 using std::minmax;
 

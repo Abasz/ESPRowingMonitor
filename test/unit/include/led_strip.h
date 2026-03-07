@@ -1,11 +1,12 @@
 // NOLINTBEGIN
 #pragma once
 
+#include <cstddef>
+
 #include "fakeit.hpp"
 
 #include "esp_err.h"
 
-struct led_strip_t;
 using led_strip_handle_t = struct led_strip_t *;
 
 struct led_strip_rmt_config_t

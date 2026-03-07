@@ -1,4 +1,7 @@
 // NOLINTBEGIN
+#include <array>
+#include <cstdint>
+
 #include "fakeit.hpp"
 
 static constexpr unsigned char labelLength = 17;

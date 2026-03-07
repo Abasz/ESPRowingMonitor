@@ -4,6 +4,7 @@
 #include <string_view>
 #include <utility>
 
+#include "soc/gpio_num.h"
 #include "soc/soc_caps.h"
 
 #if defined(UNIT_TEST)

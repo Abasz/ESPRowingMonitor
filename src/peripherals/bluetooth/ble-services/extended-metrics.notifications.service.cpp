@@ -1,15 +1,20 @@
 #include <array>
-#include <cstring>
-#include <numeric>
+#include <cmath>
+#include <cstddef>
+#include <iterator>
 #include <ranges>
 #include <span>
 #include <vector>
 
+#include "Arduino.h"
 #include "ArduinoLog.h"
+#include "NimBLEDevice.h"
 
-#include "../ble-metrics.model.h"
-#include "../ble.enums.h"
 #include "./extended-metrics.service.h"
+
+#include "../../../utils/configuration.h"
+#include "../ble-metrics.model.h"
+#include "../callbacks/subscription-manager.callbacks.h"
 
 using std::vector;
 

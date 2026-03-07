@@ -1,23 +1,20 @@
 #pragma once
 
-#include <array>
+#include <string>
 #include <vector>
 
-#include "NimBLEDevice.h"
-
-#include "../../rower/stroke.model.h"
-#include "../../utils/EEPROM/EEPROM.service.interface.h"
-#include "../../utils/ota-updater/ota-updater.service.interface.h"
-#include "../sd-card/sd-card.service.interface.h"
 #include "./ble-metrics.model.h"
-#include "./ble-services/base-metrics.service.interface.h"
-#include "./ble-services/battery.service.interface.h"
-#include "./ble-services/device-info.service.interface.h"
-#include "./ble-services/extended-metrics.service.interface.h"
-#include "./ble-services/ota.service.interface.h"
-#include "./ble-services/settings.service.interface.h"
 #include "./bluetooth.controller.interface.h"
-#include "./callbacks/connection-manager.callbacks.interface.h"
+
+class IBaseMetricsBleService;
+class IBatteryBleService;
+class IConnectionManagerCallbacks;
+class IDeviceInfoBleService;
+class IEEPROMService;
+class IExtendedMetricBleService;
+class IOtaBleService;
+class IOtaUpdaterService;
+class ISettingsBleService;
 
 using std::vector;
 

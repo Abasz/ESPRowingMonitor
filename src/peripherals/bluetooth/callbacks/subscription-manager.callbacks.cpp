@@ -1,9 +1,11 @@
 #include <algorithm>
+#include <vector>
 
 #include "NimBLEDevice.h"
 
-#include "../../../utils/enums.h"
 #include "./subscription-manager.callbacks.h"
+
+#include "../../../utils/configuration.h"
 
 SubscriptionManagerCallbacks::SubscriptionManagerCallbacks()
 {

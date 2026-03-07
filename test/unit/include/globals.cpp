@@ -1,3 +1,9 @@
+#include <array>
+#include <cstdio>
+
+#include <fakeit.hpp>
+
+#include "esp_err.h"
 #include "esp_mac.h"
 
 #include "ArduinoLog.h"

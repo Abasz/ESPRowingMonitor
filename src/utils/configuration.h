@@ -3,6 +3,8 @@
 #include <climits>
 #include <string>
 
+#include "soc/gpio_num.h"
+
 #include "Arduino.h"
 #include "ArduinoLog.h"
 

@@ -1,12 +1,19 @@
 #pragma once
 
+#include <algorithm>
+#include <vector>
+
+#include "Arduino.h"
+
 #include "../utils/configuration.h"
+#include "../utils/enums.h"
+#include "../utils/macros.h"
 #include "../utils/series/cyclic-error-filter.h"
 #include "../utils/series/ols-linear-series.h"
 #include "../utils/series/ts-linear-series.h"
 #include "../utils/series/ts-quadratic-series.h"
 #include "../utils/series/weighted-average-series.h"
-#include "./stroke.model.h"
+#include "../utils/settings.model.h"
 #include "./stroke.service.interface.h"
 
 class StrokeService final : public IStrokeService

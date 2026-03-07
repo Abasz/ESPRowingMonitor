@@ -1,12 +1,17 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, clang-analyzer-cplusplus.NewDeleteLeaks, clang-analyzer-cplusplus.NewDelete, clang-analyzer-core.CallAndMessage)
+#include <utility>
+
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
+
+#include "esp_err.h"
 
 #include "./include/Arduino.h"
 #include "./include/led_strip.h"
 
 #include "../../src/peripherals/led/led.service.h"
 #include "../../src/utils/configuration.h"
+#include "../../src/utils/enums.h"
 
 using namespace fakeit;
 

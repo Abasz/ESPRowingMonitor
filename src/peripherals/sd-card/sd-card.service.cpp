@@ -1,8 +1,11 @@
+#include <vector>
+
 #include "Arduino.h"
 #include "ArduinoLog.h"
 
-#include "../../utils/configuration.h"
 #include "./sd-card.service.h"
+
+#include "../../utils/configuration.h"
 
 SdCardService::SdCardService() : sdCardTaskParameters{
                                      .logFile = logFile,

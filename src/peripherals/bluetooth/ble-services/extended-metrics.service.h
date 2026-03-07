@@ -2,10 +2,13 @@
 
 #include <vector>
 
-#include "NimBLEDevice.h"
-
 #include "../callbacks/subscription-manager.callbacks.h"
 #include "./extended-metrics.service.interface.h"
+#include "../../../utils/configuration.h"
+
+class NimBLECharacteristic;
+class NimBLEServer;
+class NimBLEService;
 
 using std::vector;
 

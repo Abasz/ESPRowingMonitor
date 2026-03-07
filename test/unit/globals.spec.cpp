@@ -1,4 +1,6 @@
 // NOLINTBEGIN(cppcoreguidelines-avoid-do-while)
+#include <string>
+
 #include "catch2/catch_test_macros.hpp"
 
 #include "./include/globals.h"

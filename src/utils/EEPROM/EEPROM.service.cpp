@@ -1,11 +1,24 @@
+#include <cstdio>
 #include <limits>
+#include <string>
+#include <type_traits>
 #include <utility>
 
+#include "soc/gpio_num.h"
+
 #include "ArduinoLog.h"
+#include "Preferences.h"
 
 #include "globals.h"
 
 #include "./EEPROM.service.h"
+
+#include "../configuration.h"
+#include "../macros.h"
+#include "../settings.model.h"
+
+enum class BleServiceFlag : unsigned char;
+enum class StrokeDetectionType : unsigned char;
 
 EEPROMService::EEPROMService(Preferences &_preferences) : preferences(_preferences)
 {

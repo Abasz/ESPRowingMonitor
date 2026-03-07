@@ -1,7 +1,8 @@
 #include "NimBLEDevice.h"
 
-#include "../bluetooth.controller.h"
 #include "./ota.callbacks.h"
+
+#include "../../../utils/ota-updater/ota-updater.service.interface.h"
 
 OtaRxCallbacks::OtaRxCallbacks(IOtaUpdaterService &_otaService) : otaService(_otaService)
 {

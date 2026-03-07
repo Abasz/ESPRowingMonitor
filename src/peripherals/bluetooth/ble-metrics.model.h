@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string>
-
 #include "esp_err.h"
 
 #include "NimBLEDevice.h"

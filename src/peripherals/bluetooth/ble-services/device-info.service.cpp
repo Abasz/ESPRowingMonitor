@@ -1,10 +1,12 @@
 #include "ArduinoLog.h"
+#include "NimBLEDevice.h"
 
 #include "globals.h"
 
+#include "./device-info.service.h"
+
 #include "../../../utils/configuration.h"
 #include "../ble.enums.h"
-#include "./device-info.service.h"
 
 NimBLEService *DeviceInfoBleService::setup(NimBLEServer *const server) const
 {

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "./power-manager.controller.interface.h"
-#include "./power-manager.service.interface.h"
+
+class IPowerManagerService;
 
 class PowerManagerController final : public IPowerManagerController
 {
