@@ -43,18 +43,19 @@ Please note that the FTMS profile currently does not support the full range of o
 
 ### Custom BLE Services
 
-In addition to the implemented standard profiles it exposes certain custom profiles for additional metrics (fully supported by the official [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/)). These are:
+In addition to the implemented standard profiles, ESP Rowing Monitor exposes custom BLE services for additional metrics, settings management, and OTA updates. These are fully supported by the official [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/). The custom services are:
 
-1. Extended Metrics (metrics not included in the base profiles)
-2. Handle Forces recorded during the last drive
+1. Extended Metrics Service, which includes extended metrics, handle forces, and optional delta-time logging
+2. Settings Service for runtime-readable settings and runtime-configurable parameters when enabled
+3. Over-the-Air Update Service for wireless firmware updates
 
-Please see more details on their specifications and protocols under [Custom BLE Services](docs/custom-ble-services.md).
+Please see more details on their specifications and protocols under [Custom BLE Services](./custom-ble-services.md).
 
 ## Over-the-Air updates
 
-Version 6 introduced over-the-air bluetooth update protocol. The protocol is implemented in the WebGUI so installation can be done from there. This makes updates much easier as the device may not need to be removed. As well as allows potential auto update feature in future.
+Version 6 introduced an over-the-air Bluetooth update protocol. The protocol is implemented in the WebGUI so firmware updates can be performed from there. This makes updates much easier because the device does not need to be removed after the initial installation.
 
-More detailed on the specification of the protocol can be found in the [OTA protocol documentation](custom-ble-services.md#over-the-air-updater)
+More details on the specification of the protocol can be found in the [OTA protocol documentation](./custom-ble-services.md#over-the-air-updater).
 
 ## Logging
 

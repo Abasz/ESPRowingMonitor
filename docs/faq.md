@@ -1,6 +1,6 @@
 # ESP Rowing Monitor — Community FAQ (Enriched for LLM use)
 
-This FAQ consolidates community knowledge from GitHub discussions into dense, LLM-friendly answers. It complements the [official ESP Rowing Monitor documentation](./README.md) by capturing real-world user experiences, troubleshooting workflows, and hardware-specific insights that emerge from community discussions.
+This FAQ consolidates community knowledge from GitHub discussions into dense, LLM-friendly answers. It complements the [official ESP Rowing Monitor documentation](../README.md) by capturing real-world user experiences, troubleshooting workflows, and hardware-specific insights that emerge from community discussions.
 
 ## How to Use This FAQ
 
@@ -530,7 +530,7 @@ References:
 
 ## 11) Which ESP32 boards are supported?
 
-**Short answer:** Any ESP32 development board can work but specific board profiles exist for FireBeetle 2, Lolin S3 Mini, DevKit v1, and Waveshare ESP32-S3 Zero. Dual-core ESP32 modules are recommended for better performance.
+**Short answer:** Any ESP32 development board can work but specific board profiles exist for FireBeetle 2, FireBeetle 2 S3, Lolin S3 Mini, DevKit v1, Waveshare ESP32-S3 Zero, and ESP32-S3 Super Mini. Dual-core ESP32 modules are recommended for better performance.
 
 What / Why / How
 
@@ -601,7 +601,7 @@ References:
 
 What / Why / How
 
-- What: For battery-powered setups, the ESP32 enters deep sleep and wakes up when motion is detected by the sensor or a designated wakup pin.
+- What: For battery-powered setups, the ESP32 enters deep sleep and wakes up when motion is detected by the sensor or a designated wakeup pin.
 - Why: Hall sensors consume ~4mA which drains battery; reed switches consume no power (passive component).
 - How: Configure wakeup pin, wire sensor appropriately based on voltage requirements.
 

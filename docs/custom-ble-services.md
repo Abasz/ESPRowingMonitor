@@ -1,6 +1,6 @@
 # Custom BLE services
 
-In addition to the standard profiles, three custom BLE profiles/services are available that provide additional data for clients that implements them (e.g. currently the official [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/))
+In addition to the standard profiles, three custom BLE services are available that provide additional data for clients that implement them, for example the official [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/).
 
 1. Extended Metrics Service (UUID: a72a5762-803b-421d-a759-f0314153da97)
 2. Settings Service (UUID: 56892de1-7068-4b5a-acaa-473d97b02206)
@@ -69,7 +69,7 @@ This Service currently contains three characteristics:
 Settings (UUID: 54e15528-73b5-4905-9481-89e5184a3364)
 ```
 
-Uses Notify to broadcast and allow Read the current settings (which may be extended in the future) as an array of consecutive bytes. It notifies when a setting is changed.
+Uses Read and Notify to expose the current settings, and sends a Notify whenever a setting changes.
 
 Currently the Notify/Read includes the following data:
 
@@ -136,7 +136,7 @@ Byte 17 (unsigned char) is the [Drag Coefficients Array Length](./settings.md#dr
 Stroke Detection Settings (UUID: 5d9c04cd-dcec-4551-8169-8c81f14d9d9d)
 ```
 
-Uses Notify to broadcast and allow Read the current stroke phase detection settings (which may be extended in the future) as an array of consecutive bytes. It notifies when a stroke detection setting is changed.
+Uses Read and Notify to expose the current stroke phase detection settings, and sends a Notify whenever a stroke detection setting changes.
 
 Currently the Notify/Read includes the following data (11 bytes total):
 
@@ -180,6 +180,8 @@ Uses Indicate and allow Write to change the settings. The structure corresponds 
     SetSdCardLogging = 20U,
     SetMachineSettings = 21U,
     SetSensorSignalSettings = 22U,
+    SetDragFactorSettings = 23U,
+    SetStrokeDetectionSettings = 24U,
     RestartDevice = 31U,
 ```
 
@@ -189,13 +191,13 @@ Also a Notify is sent by the Settings characteristic including the new settings.
 
 Please note that the new BLE service structure is currently experimental and the API may be subject to change in the future.
 
-For an example of an implementation (in Javascript) please visit the [WebGUI page]((https://github.com/Abasz/ESPRowingMonitor-WebGUI/blob/master/src/common/services/ergometer/erg-settings.service.ts)).
+For an example of an implementation in JavaScript, please visit the [WebGUI page](https://github.com/Abasz/ESPRowingMonitor-WebGUI/blob/master/src/common/services/ergometer/erg-settings.service.ts).
 
 Please note that `SetMachineSettings`, `SetSensorSignalSettings`, `SetDragFactorSettings`, `SetStrokeDetectionSettings` OpCodes only available if firmware is compiled with [`ENABLE_RUNTIME_SETTINGS`](./settings.md#enable_runtime_settings) flag. Otherwise sending this OpCode it will return `UnsupportedOpCode`. Furthermore, device restart (e.g. sending Restart Device OpCode) is necessary for the new settings to take effect. The structure corresponds to bytes of the Settings Characteristic and Stroke Detection Settings Characteristic above as follows:
 
 - `SetMachineSettings` follows bytes 1-8 of Settings Characteristic
 - `SetSensorSignalSettings` follows bytes 9-10 of Settings Characteristic
-- `SetDragFactorSEttings` follows bytes 11-17 of Settings Characteristic
+- `SetDragFactorSettings` follows bytes 11-17 of Settings Characteristic
 - `SetStrokeDetectionSettings` follows the bytes 1-10 of Stroke Detection Settings Characteristic (11 bytes total)
 
 **Note:** The "Is Compiled With Double" bit (bit 7) in the Stroke Detection Settings is read-only and will be ignored when sent via the control point. Only bits 0-6 of byte 0 are used for `SetStrokeDetectionSettings`.

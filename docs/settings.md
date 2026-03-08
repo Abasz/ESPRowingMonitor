@@ -62,7 +62,7 @@ This settings enables logging deltaTime values to a connected SD Card.
 
 #### ENABLE_RUNTIME_SETTINGS
 
-Enables changing certain settings at runtime (without recompilation) via the Settings Service BLE endpoint which is then saved to flash on the device (currently support Flywheel inertia and Magic Constant). Note allowing dynamic settings change may have some immaterial performance hit (please see [Limitations](./limitation.md)).
+Enables changing supported settings at runtime without recompilation via the BLE Settings Service. The updated values are persisted in flash and currently cover machine settings, sensor signal settings, drag factor settings, and stroke phase detection settings. These values are loaded on startup, so a device restart is required before the new settings take full effect. Allowing runtime settings has a small performance cost because the compiler can no longer treat these values as compile-time constants. Please see [Limitations](./limitation.md#runtime-settings).
 
 Default: false
 
@@ -269,7 +269,7 @@ This setting determines how many consecutive impulses should be analyzed (used) 
 
 #### FLOATING_POINT_PRECISION
 
-This setting controls whether double or float precision should be used in the algorithm. This is important from a performance perspective, as using too many data points will increase loop execution time. Using 14 and a precision of double would require around 4ms to complete calculations. Hence impulses may be missed if they come in quicker than 4ms. For more detail please refer to the README's [Limitations](../README.md#limitations) section.
+This setting controls whether double or float precision should be used in the algorithm. This is important from a performance perspective, as using too many data points will increase loop execution time. Using 14 and a precision of double would require around 4ms to complete calculations. Hence impulses may be missed if they come in quicker than 4ms. For more detail please refer to the [Limitations](./limitation.md) section.
 
 Generally, this setting is controlled by the compiler automatically based on the value of the `IMPULSE_DATA_ARRAY_LENGTH` (below 15 it is set to double, while 15 and above set to float) but may be overwritten by uncommenting/adding `#define FLOATING_POINT_PRECISION PRECISION_DOUBLE)` in the rower profile file. Please note that overwriting is ignored if `IMPULSE_DATA_ARRAY_LENGTH` is 15 or above.
 
@@ -347,7 +347,7 @@ Once the input data is sufficiently cleaned up it is possible to replay a previo
 
 ### Running a simulation
 
-In order to run the simulation, the e2e test needs to be compiled. There is a cmake target to ease the compilation that needs to be run via the `build/build-e2e rowerProfileName-board-id` (or with `custom` as argument in case of using `custom.settings.h` file for settings). The compiled executable will be under `/build/test/e2e/e2e_test.out`. This file should receive the file path that contains the delta times as parameter (in a CSV format i.e. one number per line).
+In order to run the simulation, first configure the host-side build once with `cmake -S . -B build`. After that, compile the e2e test with `./build/test/e2e/build-e2e environment-name`, where `environment-name` is a PlatformIO environment such as `dynamic-lolinS3-mini` or `kayakFirstBlue-devkit-v1`. If you are using `custom.settings.h`, pass `custom`. The compiled executable is written to `./build/test/e2e/e2e_test.out`.
 
 To run a simulation use the below command:
 

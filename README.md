@@ -23,7 +23,7 @@ See [Custom BLE Services](docs/custom-ble-services.md#settings-service) for the 
 The `dragFactor` field in the Extended Metrics characteristic has been changed from 8-bit (1 byte) to 16-bit (2 bytes, unsigned short, Little Endian):
 
 - **Extended Metrics (UUID: 808a0d51-efae-4f0c-b2e0-48bc180d65c3)** now reports `dragFactor` as a 16-bit unsigned value rather than 8-bit.
-- Old clients that read a single byte will misinterpret values or parse the payload incorrectly if the actual value is above 256 (if its below everything should work in a backward compatible way).
+- Old clients that read a single byte will misinterpret values or parse the payload incorrectly if the actual value is above 255. If the value stays below 256, compatibility is effectively preserved.
 
 ## 📌 Table of Contents
 
@@ -91,7 +91,7 @@ ESP Rowing Monitor supports three standard BLE profiles that allows it to be con
 
 For further details how to set these up devices connected under Cycling Speed and Cadence profile or Power Meter profile please read the [features section](docs/features.md#bluetooth).
 
-In addition to the implemented standard profiles it exposes certain custom profiles for additional metrics (fully supported by the official [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/)). These are:
+In addition to the implemented standard profiles, ESP Rowing Monitor exposes custom BLE services for additional metrics and tooling, fully supported by the official [WebGUI](https://abasz.github.io/ESPRowingMonitor-WebGUI/). These are:
 
 1. Extended Metrics (metrics not included in the base profiles)
 2. Handle Forces recorded during the last drive
@@ -101,7 +101,7 @@ Please see more details on their specifications and protocols under [Custom BLE 
 
 ### Over-the-Air updates
 
-As of version 6 after the initial installation, an over-the-air Bluetooth update protocol is available. The protocol is implemented in the WebGUI so installation can be done from there.
+As of version 6, after the initial installation, an over-the-air Bluetooth update protocol is available. The protocol is implemented in the WebGUI so firmware updates can be performed from there.
 
 More details on the specification can be found in the [OTA protocol documentation](docs/custom-ble-services.md#over-the-air-updater)
 
@@ -111,7 +111,7 @@ It is possible to log deltaTimes (i.e. time between impulses) to an SD card (if 
 
 ## 📥 Installation
 
-Please see dedicated [installation page](docs/installation.md)
+Please see the dedicated [installation page](docs/installation.md). Release assets include precompiled firmware, the ESPTool desktop flasher, and the calibration helper desktop GUI.
 
 ## ⚙️ Settings
 
