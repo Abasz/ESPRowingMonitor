@@ -241,7 +241,6 @@ public:
     virtual NimBLECharacteristic *createCharacteristic(const unsigned short uuid, unsigned int properties) = 0;
     virtual NimBLECharacteristic *createCharacteristic(const std::string uuid, unsigned int properties) = 0;
     virtual NimBLEServer *getServer() = 0;
-    virtual bool start() = 0;
 };
 extern fakeit::Mock<NimBLEService> mockNimBLEService;
 

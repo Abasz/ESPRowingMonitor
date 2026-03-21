@@ -146,24 +146,24 @@ void BluetoothController::setupServices()
     Log.verboseln("Setting up BLE Services");
     auto *const server = NimBLEDevice::getServer();
 
-    baseMetricsBleService.setup(server, eepromService.getBleServiceFlag())->start();
+    baseMetricsBleService.setup(server, eepromService.getBleServiceFlag());
 
     if constexpr (Configurations::hasExtendedBleMetrics)
     {
-        extendedMetricsBleService.setup(server)->start();
+        extendedMetricsBleService.setup(server);
     }
 
     if constexpr (Configurations::batteryPinNumber != GPIO_NUM_NC)
     {
-        batteryBleService.setup(server)->start();
+        batteryBleService.setup(server);
     }
 
-    settingsBleService.setup(server)->start();
+    settingsBleService.setup(server);
 
-    otaBleService.setup(server)->start();
+    otaBleService.setup(server);
     otaService.begin(otaBleService.getOtaTx());
 
-    deviceInfoBleService.setup(server)->start();
+    deviceInfoBleService.setup(server);
 
     Log.verboseln("Starting BLE Server");
 

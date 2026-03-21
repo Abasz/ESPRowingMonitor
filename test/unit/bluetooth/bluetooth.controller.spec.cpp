@@ -85,8 +85,6 @@ TEST_CASE("BluetoothController", "[peripheral]")
     When(Method(mockExtendedMetricsBleService, calculateMtu)).AlwaysReturn(0);
     Fake(Method(mockExtendedMetricsBleService, broadcastDeltaTimes));
 
-    Fake(Method(mockNimBLEService, start));
-
     Fake(Method(mockNimBLEAdvertising, start));
     Fake(Method(mockNimBLEAdvertising, stop));
     Fake(Method(mockNimBLEAdvertising, setAppearance));
@@ -310,12 +308,10 @@ TEST_CASE("BluetoothController", "[peripheral]")
             Mock<NimBLEService> mockBatteryNimBLEService;
 
             When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockBatteryNimBLEService.get());
-            Fake(Method(mockBatteryNimBLEService, start));
 
             bluetoothController.setup();
 
             Verify(Method(mockSettingsBleService, setup).Using(Ne(nullptr)));
-            Verify(Method(mockBatteryNimBLEService, start)).Once();
         }
 
         SECTION("should setup base metrics service")
@@ -323,12 +319,10 @@ TEST_CASE("BluetoothController", "[peripheral]")
             Mock<NimBLEService> mockBaseMetricsNimBLEService;
 
             When(Method(mockBaseMetricsBleService, setup)).AlwaysReturn(&mockBaseMetricsNimBLEService.get());
-            Fake(Method(mockBaseMetricsNimBLEService, start));
 
             bluetoothController.setup();
 
             Verify(Method(mockBaseMetricsBleService, setup).Using(Ne(nullptr), serviceFlag));
-            Verify(Method(mockBaseMetricsNimBLEService, start)).Once();
         }
 
         SECTION("should setup extended BLE metrics service")
@@ -336,12 +330,10 @@ TEST_CASE("BluetoothController", "[peripheral]")
             Mock<NimBLEService> mockExtendedMetricsNimBLEService;
 
             When(Method(mockExtendedMetricsBleService, setup)).AlwaysReturn(&mockExtendedMetricsNimBLEService.get());
-            Fake(Method(mockExtendedMetricsNimBLEService, start));
 
             bluetoothController.setup();
 
             Verify(Method(mockExtendedMetricsBleService, setup)).Once();
-            Verify(Method(mockExtendedMetricsNimBLEService, start)).Once();
         }
 
         SECTION("should setup settings service")
@@ -349,12 +341,10 @@ TEST_CASE("BluetoothController", "[peripheral]")
             Mock<NimBLEService> mockSettingsNimBLEService;
 
             When(Method(mockSettingsBleService, setup)).AlwaysReturn(&mockSettingsNimBLEService.get());
-            Fake(Method(mockSettingsNimBLEService, start));
 
             bluetoothController.setup();
 
             Verify(Method(mockSettingsBleService, setup).Using(Ne(nullptr)));
-            Verify(Method(mockSettingsNimBLEService, start)).Once();
         }
 
         SECTION("should start OTA")
@@ -364,7 +354,6 @@ TEST_CASE("BluetoothController", "[peripheral]")
             Mock<NimBLECharacteristic> mockRxCharacteristic;
 
             When(Method(mockOtaBleService, setup)).AlwaysReturn(&mockOtaService.get());
-            Fake(Method(mockOtaService, start));
 
             bluetoothController.setup();
 
@@ -385,12 +374,10 @@ TEST_CASE("BluetoothController", "[peripheral]")
             Mock<NimBLEService> mockDeviceInfoNimBLEService;
 
             When(Method(mockDeviceInfoBleService, setup)).AlwaysReturn(&mockDeviceInfoNimBLEService.get());
-            Fake(Method(mockDeviceInfoNimBLEService, start));
 
             bluetoothController.setup();
 
             Verify(Method(mockDeviceInfoBleService, setup)).Once();
-            Verify(Method(mockDeviceInfoNimBLEService, start)).Once();
         }
 
         SECTION("should start server")

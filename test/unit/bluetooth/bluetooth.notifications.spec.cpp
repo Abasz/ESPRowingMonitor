@@ -63,8 +63,6 @@ TEST_CASE("BluetoothController", "[callbacks]")
     Fake(Method(mockNimBLEServer, setPower));
     Fake(Method(mockNimBLEServer, start));
 
-    Fake(Method(mockNimBLEService, start));
-
     Fake(Method(mockNimBLEAdvertising, start));
     Fake(Method(mockNimBLEAdvertising, setAppearance));
     Fake(Method(mockNimBLEAdvertising, addServiceUUID));
