@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔧 Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.13'
 
@@ -69,7 +69,7 @@ jobs:
           done
 
       - name: 📎 Upload firmware binaries
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ${{github.workspace}}/release_assets/*
           fail_on_unmatched_files: true
@@ -91,10 +91,10 @@ jobs:
 
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🔧 Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
@@ -261,7 +261,7 @@ jobs:
           tar -C calibration-helper/dist -czf calibration-helper-gui-macos-x64.tar.gz "calibration-helper-gui.app"
 
       - name: 📎 Upload executables to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             tools/esptool-gui-*
@@ -277,7 +277,7 @@ jobs:
     
     steps:
       - name: 🚀 Dispatch WebGUI Build
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: Abasz/ESPRowingMonitor-WebGUI

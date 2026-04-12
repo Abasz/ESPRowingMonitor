@@ -17,17 +17,21 @@ jobs:
 
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: 🔧 Install GCC 14
+      - name: 🔧 Install GCC 15
         run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt update
-          sudo apt install -y gcc-14 g++-14
+          sudo apt install -y gcc-15 g++-15
+
+      - name: 🔧 Set up CMake
+        run: pipx install "cmake~=4.1"
 
       - name: ⚙️ Configure CMake
         env:
-          CC: gcc-14
-          CXX: g++-14
+          CC: gcc-15
+          CXX: g++-15
         run: cmake -S . -B build
 
       - name: 🧪 Build & Run unit tests
