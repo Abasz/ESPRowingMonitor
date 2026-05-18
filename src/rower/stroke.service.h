@@ -16,6 +16,11 @@
 #include "../utils/settings.model.h"
 #include "./stroke.service.interface.h"
 
+namespace RowingDataModels
+{
+    struct FlywheelData;
+}
+
 class StrokeService final : public IStrokeService
 {
     // Machine settings
@@ -94,6 +99,14 @@ class StrokeService final : public IStrokeService
     void recoveryStart();
     void recoveryUpdate();
     void recoveryEnd();
+
+    void updateStrokeState(RowingDataModels::FlywheelData data);
+    void updatePhysics();
+
+    void applyImpulse();
+    void processDrive();
+    void processRecovery();
+    void processStopped();
 
     void logNewStrokeData() const;
 
