@@ -20,6 +20,23 @@
 
 using std::array;
 
+namespace
+{
+
+    [[nodiscard]] auto makeResponse(
+        const SettingsOpCodes opCode,
+        const unsigned char echoedOpCode,
+        const ResponseOpCodes result) noexcept -> array<unsigned char, 3U>
+    {
+        return {
+            std::to_underlying(opCode),
+            echoedOpCode,
+            std::to_underlying(result),
+        };
+    }
+
+}
+
 ControlPointCallbacks::ControlPointCallbacks(ISettingsBleService &_settingsBleService, IEEPROMService &_eepromService) : settingsBleService(_settingsBleService), eepromService(_eepromService)
 {
 }
@@ -33,12 +50,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     if (message.size() == 0)
     {
         Log.infoln("Invalid request, no Op Code");
-        array<unsigned char, 3U> errorResponse = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            static_cast<unsigned char>(0),
-            std::to_underlying(ResponseOpCodes::OperationFailed),
-        };
-        pCharacteristic->setValue(errorResponse);
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, 0U, ResponseOpCodes::OperationFailed));
         pCharacteristic->indicate();
 
         return;
@@ -52,17 +64,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     case std::to_underlying(SettingsOpCodes::SetLogLevel):
     {
         Log.infoln("Set LogLevel");
-
-        const auto response = processLogLevel(message);
-
-        array<unsigned char, 3U>
-            temp = {
-                std::to_underlying(SettingsOpCodes::ResponseCode),
-                message[0],
-                std::to_underlying(response),
-            };
-
-        pCharacteristic->setValue(temp);
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processLogLevel(message)));
     }
     break;
 
@@ -72,13 +74,7 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
 
         if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 2U))
         {
-            array<unsigned char, 3U> temp = {
-                std::to_underlying(SettingsOpCodes::ResponseCode),
-                message[0],
-                std::to_underlying(ResponseOpCodes::InvalidParameter),
-            };
-
-            pCharacteristic->setValue(temp);
+            pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], ResponseOpCodes::InvalidParameter));
 
             break;
         }
@@ -91,166 +87,49 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     case std::to_underlying(SettingsOpCodes::SetSdCardLogging):
     {
         Log.infoln("Change Sd Card Logging");
-
-        const auto response = processSdCardLogging(message);
-
-        array<unsigned char, 3U> temp = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            message[0],
-            std::to_underlying(response),
-        };
-
-        pCharacteristic->setValue(temp);
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processSdCardLogging(message)));
     }
     break;
 
     case std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging):
     {
         Log.infoln("Change deltaTime logging");
-
-        const auto response = processDeltaTimeLogging(message);
-
-        array<unsigned char, 3U> temp = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            message[0],
-            std::to_underlying(response),
-        };
-
-        pCharacteristic->setValue(temp);
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processDeltaTimeLogging(message)));
     }
     break;
 
     case std::to_underlying(SettingsOpCodes::SetMachineSettings):
     {
         Log.infoln("Change Machine Settings");
-
-        if constexpr (!Configurations::isRuntimeSettingsEnabled)
-        {
-            array<unsigned char, 3U> temp = {
-                std::to_underlying(SettingsOpCodes::ResponseCode),
-                message[0],
-                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
-            };
-
-            pCharacteristic->setValue(temp);
-
-            break;
-        }
-
-        const auto response = processMachineSettingsChange(message);
-
-        array<unsigned char, 3U> temp = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            message[0],
-            std::to_underlying(response),
-        };
-
-        pCharacteristic->setValue(temp);
-
-        break;
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processMachineSettingsChange(message)));
     }
+    break;
 
     case std::to_underlying(SettingsOpCodes::SetSensorSignalSettings):
     {
         Log.infoln("Change Sensor Signal Filter Settings");
-
-        if constexpr (!Configurations::isRuntimeSettingsEnabled)
-        {
-            array<unsigned char, 3U> temp = {
-                std::to_underlying(SettingsOpCodes::ResponseCode),
-                message[0],
-                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
-            };
-
-            pCharacteristic->setValue(temp);
-
-            break;
-        }
-
-        const auto response = processSensorSignalSettingsChange(message);
-
-        array<unsigned char, 3U> temp = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            message[0],
-            std::to_underlying(response),
-        };
-
-        pCharacteristic->setValue(temp);
-
-        break;
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processSensorSignalSettingsChange(message)));
     }
+    break;
 
     case std::to_underlying(SettingsOpCodes::SetDragFactorSettings):
     {
         Log.infoln("Change Drag Factor Settings");
-
-        if constexpr (!Configurations::isRuntimeSettingsEnabled)
-        {
-            array<unsigned char, 3U> temp = {
-                std::to_underlying(SettingsOpCodes::ResponseCode),
-                message[0],
-                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
-            };
-
-            pCharacteristic->setValue(temp);
-
-            break;
-        }
-
-        const auto response = processDragFactorSettingsChange(message);
-
-        array<unsigned char, 3U> temp = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            message[0],
-            std::to_underlying(response),
-        };
-
-        pCharacteristic->setValue(temp);
-
-        break;
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processDragFactorSettingsChange(message)));
     }
+    break;
 
     case std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings):
     {
         Log.infoln("Change Stroke Detection Settings");
-
-        if constexpr (!Configurations::isRuntimeSettingsEnabled)
-        {
-            array<unsigned char, 3U> temp = {
-                std::to_underlying(SettingsOpCodes::ResponseCode),
-                message[0],
-                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
-            };
-
-            pCharacteristic->setValue(temp);
-
-            break;
-        }
-
-        const auto response = processStrokeDetectionSettingsChange(message);
-
-        array<unsigned char, 3U> temp = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            message[0],
-            std::to_underlying(response),
-        };
-
-        pCharacteristic->setValue(temp);
-
-        break;
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processStrokeDetectionSettingsChange(message)));
     }
+    break;
 
     case std::to_underlying(SettingsOpCodes::RestartDevice):
     {
         Log.verboseln("Restarting device...");
-
-        array<unsigned char, 3U> temp = {
-            std::to_underlying(SettingsOpCodes::ResponseCode),
-            message[0],
-            std::to_underlying(ResponseOpCodes::Successful),
-        };
-
-        pCharacteristic->setValue(temp);
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], ResponseOpCodes::Successful));
         restartWithDelay(100);
     }
     break;
@@ -258,12 +137,11 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     default:
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);
-        array<unsigned char, 3U> response = {
-            eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? std::to_underlying(SettingsOpCodes::ResponseCodeFtms) : std::to_underlying(SettingsOpCodes::ResponseCode),
+        const auto isFtms = eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService;
+        pCharacteristic->setValue(makeResponse(
+            isFtms ? SettingsOpCodes::ResponseCodeFtms : SettingsOpCodes::ResponseCode,
             message[0],
-            std::to_underlying(eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode),
-        };
-        pCharacteristic->setValue(response);
+            isFtms ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode));
     }
     break;
     }
@@ -359,6 +237,11 @@ void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &messag
 
 ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLEAttValue &message)
 {
+    if constexpr (!Configurations::isRuntimeSettingsEnabled)
+    {
+        return ResponseOpCodes::UnsupportedOpCode;
+    }
+
     const auto opCodePayloadSize = 1U;
     if (message.size() != opCodePayloadSize + ISettingsBleService::machineSettingsPayloadSize)
     {
@@ -403,6 +286,11 @@ ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLE
 
 ResponseOpCodes ControlPointCallbacks::processSensorSignalSettingsChange(const NimBLEAttValue &message)
 {
+    if constexpr (!Configurations::isRuntimeSettingsEnabled)
+    {
+        return ResponseOpCodes::UnsupportedOpCode;
+    }
+
     const auto opCodePayloadSize = 1U;
     if (message.size() != opCodePayloadSize + ISettingsBleService::sensorSignalSettingsPayloadSize)
     {
@@ -436,6 +324,11 @@ ResponseOpCodes ControlPointCallbacks::processSensorSignalSettingsChange(const N
 
 ResponseOpCodes ControlPointCallbacks::processDragFactorSettingsChange(const NimBLEAttValue &message)
 {
+    if constexpr (!Configurations::isRuntimeSettingsEnabled)
+    {
+        return ResponseOpCodes::UnsupportedOpCode;
+    }
+
     const auto opCodePayloadSize = 1U;
     if (message.size() != opCodePayloadSize + ISettingsBleService::dragFactorSettingsPayloadSize)
     {
@@ -481,6 +374,11 @@ ResponseOpCodes ControlPointCallbacks::processDragFactorSettingsChange(const Nim
 
 ResponseOpCodes ControlPointCallbacks::processStrokeDetectionSettingsChange(const NimBLEAttValue &message)
 {
+    if constexpr (!Configurations::isRuntimeSettingsEnabled)
+    {
+        return ResponseOpCodes::UnsupportedOpCode;
+    }
+
     const auto opCodePayloadSize = 1U;
     if (message.size() != opCodePayloadSize + ISettingsBleService::strokeSettingsPayloadSize)
     {
