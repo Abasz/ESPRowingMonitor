@@ -203,7 +203,9 @@ public:
 
     virtual NimBLEAttValue getValue() = 0;
 
+    virtual void setValue(const unsigned int s) = 0;
     virtual void setValue(const unsigned short s) = 0;
+    virtual void setValue(const unsigned char s) = 0;
     virtual void setValue(const unsigned char *data, size_t length) = 0;
     virtual void setValue(const std::string s) = 0;
     virtual void setValue(const std::span<const std::byte> s) = 0;

@@ -3,7 +3,9 @@
 #include <array>
 #include <bit>
 #include <cmath>
+#include <functional>
 #include <initializer_list>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -16,7 +18,7 @@
 
 #include "../include/globals.h"
 
-#include "../../../src/peripherals/bluetooth//ble-services/settings.service.interface.h"
+#include "../../../src/peripherals/bluetooth/ble-services/settings.service.interface.h"
 #include "../../../src/peripherals/bluetooth/ble.enums.h"
 #include "../../../src/peripherals/bluetooth/callbacks/control-point.callbacks.h"
 #include "../../../src/utils/EEPROM/EEPROM.service.interface.h"
@@ -52,6 +54,7 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
     When(Method(mockEEPROMService, validateSensorSignalSettings)).AlwaysReturn(true);
     When(Method(mockEEPROMService, validateDragFactorSettings)).AlwaysReturn(true);
     When(Method(mockEEPROMService, validateStrokePhaseDetectionSettings)).AlwaysReturn(true);
+    When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::CscService});
 
     Fake(Method(mockSettingsBleService, broadcastSettings));
     Fake(Method(mockSettingsBleService, broadcastStrokeDetectionSettings));
@@ -78,14 +81,102 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
 
     SECTION("when unkown OpCode is sent")
     {
-        SECTION("and BleServiceFlag is not FtmsService indicate UnsupportedOpCode")
+        SECTION("and RequestControl OpCode is sent in FTMS mode should indicate ControlNotPermitted")
+        {
+            const auto ftmsStatusOpCode = std::to_underlying(SettingsOpCodes::RequestControlFtms);
+
+            std::array<unsigned char, 3U> controlNotPermittedResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCodeFtms),
+                static_cast<unsigned char>(ftmsStatusOpCode),
+                std::to_underlying(ResponseOpCodes::ControlNotPermitted),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({ftmsStatusOpCode});
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(controlNotPermittedResponse)))
+                .Once();
+        }
+
+        SECTION("and Reset OpCode is sent in FTMS mode should indicate ControlNotPermitted")
+        {
+            const auto ftmsResetOpCode = std::to_underlying(SettingsOpCodes::SetCumulativeValue);
+
+            std::array<unsigned char, 3U> controlNotPermittedResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCodeFtms),
+                static_cast<unsigned char>(ftmsResetOpCode),
+                std::to_underlying(ResponseOpCodes::ControlNotPermitted),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({ftmsResetOpCode});
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(controlNotPermittedResponse)))
+                .Once();
+        }
+
+        SECTION("and StartOrResume OpCode is sent in FTMS mode should indicate ControlNotPermitted")
+        {
+            const auto ftmsStartOrResumeOpCode = std::to_underlying(SettingsOpCodes::RequestChainLength);
+
+            std::array<unsigned char, 3U> controlNotPermittedResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCodeFtms),
+                static_cast<unsigned char>(ftmsStartOrResumeOpCode),
+                std::to_underlying(ResponseOpCodes::ControlNotPermitted),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({ftmsStartOrResumeOpCode});
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(controlNotPermittedResponse)))
+                .Once();
+        }
+
+        SECTION("and StopOrPause OpCode is sent in FTMS mode should indicate ControlNotPermitted")
+        {
+            const auto ftmsStopOrPauseOpCode = std::to_underlying(SettingsOpCodes::SetChainWeight);
+
+            std::array<unsigned char, 3U> controlNotPermittedResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCodeFtms),
+                static_cast<unsigned char>(ftmsStopOrPauseOpCode),
+                std::to_underlying(ResponseOpCodes::ControlNotPermitted),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({ftmsStopOrPauseOpCode});
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(controlNotPermittedResponse)))
+                .Once();
+        }
+
+        SECTION("and OpCode is outside FTMS range in FTMS mode should indicate UnsupportedOpCode")
         {
             const auto unsupportedOpCode = 60;
 
             std::array<unsigned char, 3U> unsupportedOperationFtmsResponse = {
                 std::to_underlying(SettingsOpCodes::ResponseCodeFtms),
                 static_cast<unsigned char>(unsupportedOpCode),
-                std::to_underlying(ResponseOpCodes::ControlNotPermitted),
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
             };
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
@@ -100,25 +191,47 @@ TEST_CASE("ControlPointCallbacks onWrite method should", "[callbacks]")
                 .Once();
         }
 
-        SECTION("and BleServiceFlag is FtmsService indicate ControlNotPermitted")
+        SECTION("and BleService is not FTMS should indicate UnsupportedOpCode")
         {
             const auto unsupportedOpCode = 60;
 
-            std::array<unsigned char, 3U> unsupportedOperationFtmsResponse = {
-                std::to_underlying(SettingsOpCodes::ResponseCodeFtms),
+            std::array<unsigned char, 3U> unsupportedOperationResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
                 static_cast<unsigned char>(unsupportedOpCode),
-                std::to_underlying(ResponseOpCodes::ControlNotPermitted),
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
             };
 
             When(Method(mockControlPointCharacteristic, getValue)).Return({unsupportedOpCode});
-            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::FtmsService});
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::CscService});
 
             controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
 
             Verify(Method(mockControlPointCharacteristic, getValue)).Once();
             Verify(Method(mockControlPointCharacteristic, indicate)).Once();
             Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
-                       .Using(Eq(unsupportedOperationFtmsResponse)))
+                       .Using(Eq(unsupportedOperationResponse)))
+                .Once();
+        }
+
+        SECTION("and FTMS-range opcode sent in non-FTMS mode should indicate UnsupportedOpCode")
+        {
+            const auto ftmsStartResumeOpCode = std::to_underlying(SettingsOpCodes::RequestChainLength);
+
+            std::array<unsigned char, 3U> unsupportedOperationResponse = {
+                std::to_underlying(SettingsOpCodes::ResponseCode),
+                static_cast<unsigned char>(ftmsStartResumeOpCode),
+                std::to_underlying(ResponseOpCodes::UnsupportedOpCode),
+            };
+
+            When(Method(mockControlPointCharacteristic, getValue)).Return({ftmsStartResumeOpCode});
+            When(Method(mockEEPROMService, getBleServiceFlag)).AlwaysReturn({BleServiceFlag::CscService});
+
+            controlPointCallback.onWrite(&mockControlPointCharacteristic.get(), mockConnectionInfo.get());
+
+            Verify(Method(mockControlPointCharacteristic, getValue)).Once();
+            Verify(Method(mockControlPointCharacteristic, indicate)).Once();
+            Verify(OverloadedMethod(mockControlPointCharacteristic, setValue, void(const std::array<unsigned char, 3U>))
+                       .Using(Eq(unsupportedOperationResponse)))
                 .Once();
         }
     }

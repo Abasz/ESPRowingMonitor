@@ -11,14 +11,15 @@ enum class BleSignalStrength : signed char
 
 enum class SettingsOpCodes : unsigned char
 {
-    SetCumulativeValue = 1U,
+    RequestControlFtms = 0U,
+    SetCumulativeValue = 1U, // Reset in FTMS
     UpdateSensorLocation = 2U,
     RequestSupportedSensorLocations = 3U,
     SetCrankLength = 4U,
     RequestCrankLength = 5U,
     SetChainLength = 6U,
-    RequestChainLength = 7U,
-    SetChainWeight = 8U,
+    RequestChainLength = 7U, // Start or Resume in FTMS
+    SetChainWeight = 8U,     // Stop or Pause in FTMS
     RequestChainWeight = 9U,
     SetSpanLength = 10U,
     RequestSpanLength = 11U,
@@ -255,10 +256,13 @@ public:
         FTMSMeasurementFeaturesFlags::TotalDistancePresent | FTMSMeasurementFeaturesFlags::InstantaneousPacePresent | FTMSMeasurementFeaturesFlags::InstantaneousPowerPresent | FTMSMeasurementFeaturesFlags::ResistanceLevelPresent;
     static constexpr unsigned int ftmsFeaturesFlag =
         FTMSFeaturesFlags::TotalDistanceSupported | FTMSFeaturesFlags::PaceSupported | FTMSFeaturesFlags::ResistanceLevelSupported | FTMSFeaturesFlags::PowerMeasurementSupported;
+    static constexpr unsigned char ftmsStatusStopped = 0x02U;
+    static constexpr unsigned char ftmsStatusStarted = 0x04U;
     static constexpr unsigned short ftmsSvcUuid = 0x1826;
     static constexpr unsigned short ftmsFeaturesUuid = 0x2ACC;
     static constexpr unsigned short rowerDataUuid = 0x2AD1;
     static constexpr unsigned short ftmsControlPointUuid = 0x2AD9;
+    static constexpr unsigned short ftmsStatusUuid = 0x2ADA;
 };
 
 class CommonBleFlags

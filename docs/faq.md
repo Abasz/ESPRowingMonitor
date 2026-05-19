@@ -667,7 +667,7 @@ References:
 
 ## 13) How do I connect ESP Rowing Monitor to fitness apps via Bluetooth?
 
-**Short answer:** ESP Rowing Monitor implements several standard BLE profiles including FTMS Rower (experimental), Cycling Power, and Cycling Speed/Cadence. Connect from apps like EXR, Kinomap, or use the official WebGUI.
+**Short answer:** ESP Rowing Monitor implements several standard BLE profiles including FTMS Rower, Cycling Power, and Cycling Speed/Cadence. Connect from apps like EXR, Kinomap, or use the official WebGUI.
 
 What / Why / How
 
@@ -679,7 +679,7 @@ Supported BLE profiles:
 
 1. **Cycling Power Meter (CPS)** — Default profile. Works with Garmin watches (cycling activity required).
 2. **Cycling Speed and Cadence (CSC)** — Alternative profile. Set wheel circumference to 10mm when pairing.
-3. **Fitness Machine (FTMS) Rower** — Experimental. Supports distance, pace, resistance, power. Limited control options.
+3. **Fitness Machine (FTMS) Rower** — Supports distance, pace, resistance, power. Limited control options.
 
 Tested apps and platforms:
 

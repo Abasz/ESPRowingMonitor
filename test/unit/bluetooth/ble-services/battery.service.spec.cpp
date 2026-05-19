@@ -21,6 +21,7 @@ TEST_CASE("BatteryBleService", "[ble-service]")
     When(OverloadedMethod(mockBatteryService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockBatteryCharacteristic.get());
 
     Fake(OverloadedMethod(mockBatteryCharacteristic, setValue, void(const unsigned short)));
+    Fake(OverloadedMethod(mockBatteryCharacteristic, setValue, void(const unsigned char)));
     Fake(Method(mockBatteryCharacteristic, notify));
 
     BatteryBleService batteryBleService;

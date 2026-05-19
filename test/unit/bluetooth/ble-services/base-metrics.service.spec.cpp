@@ -1,11 +1,16 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)
 #include <algorithm>
 #include <array>
+#include <climits>
 #include <cmath>
+#include <functional>
 #include <iterator>
+#include <string>
+#include <utility>
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/catch_tostring.hpp"
 #include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_vector.hpp"
 #include "fakeit.hpp"
@@ -37,7 +42,11 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
     When(OverloadedMethod(mockBaseMetricService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockBaseMetricsCharacteristic.get());
 
+    Fake(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const unsigned int)));
     Fake(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const unsigned short)));
+    Fake(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const unsigned char)));
+    Fake(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, 1U>)));
+    Fake(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, 8U>)));
     Fake(Method(mockBaseMetricsCharacteristic, setCallbacks));
     Fake(Method(mockControlPointCharacteristic, setCallbacks));
 
@@ -54,7 +63,8 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
             When(OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockCpsCharacteristic.get());
             When(OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(PSCSensorBleFlags::pscControlPointUuid, Any())).AlwaysReturn(&mockControlPointCharacteristic.get());
 
-            Fake(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned short)));
+            Fake(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned int)));
+            Fake(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned char)));
             Fake(Method(mockCpsCharacteristic, setCallbacks));
 
             SECTION("setup CPS service")
@@ -92,7 +102,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                     OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
                         .Using(PSCSensorBleFlags::pscFeatureUuid, expectedFlagsProperty))
                     .Once();
-                Verify(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned short)).Using(PSCSensorBleFlags::pscFeaturesFlag)).Once();
+                Verify(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned int)).Using(PSCSensorBleFlags::pscFeaturesFlag)).Once();
             }
 
             SECTION("setup CPS sensor location characteristic with correct parameters")
@@ -105,7 +115,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                     OverloadedMethod(mockCpsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
                         .Using(CommonBleFlags::sensorLocationUuid, expectedFlagsProperty))
                     .Once();
-                Verify(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned short)).Using(CommonBleFlags::sensorLocationFlag)).Once();
+                Verify(OverloadedMethod(mockCpsCharacteristic, setValue, void(const unsigned char)).Using(CommonBleFlags::sensorLocationFlag)).Once();
             }
 
             SECTION("setup CPS control point characteristic with correct parameters")
@@ -160,6 +170,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
             When(OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(CSCSensorBleFlags::cscControlPointUuid, Any())).AlwaysReturn(&mockControlPointCharacteristic.get());
 
             Fake(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned short)));
+            Fake(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned char)));
             Fake(Method(mockCscCharacteristic, setCallbacks));
 
             SECTION("setup CSC service")
@@ -210,7 +221,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                     OverloadedMethod(mockCscService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
                         .Using(CommonBleFlags::sensorLocationUuid, expectedFlagsProperty))
                     .Once();
-                Verify(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned short)).Using(CommonBleFlags::sensorLocationFlag)).Once();
+                Verify(OverloadedMethod(mockCscCharacteristic, setValue, void(const unsigned char)).Using(CommonBleFlags::sensorLocationFlag)).Once();
             }
 
             SECTION("setup CSC control point characteristic with correct parameters")
@@ -268,13 +279,18 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
         {
             Mock<NimBLEService> mockFtmsService;
             Mock<NimBLECharacteristic> mockFtmsCharacteristic;
+            Mock<NimBLECharacteristic> mockFtmsStatusCharacteristic;
 
             When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(FTMSSensorBleFlags::ftmsSvcUuid)).AlwaysReturn(&mockFtmsService.get());
             When(OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockFtmsCharacteristic.get());
             When(OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(FTMSSensorBleFlags::ftmsControlPointUuid, Any())).AlwaysReturn(&mockControlPointCharacteristic.get());
+            When(OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(FTMSSensorBleFlags::ftmsStatusUuid, Any())).AlwaysReturn(&mockFtmsStatusCharacteristic.get());
 
-            Fake(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const unsigned short)));
+            Fake(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const std::array<unsigned char, 8U>)));
             Fake(Method(mockFtmsCharacteristic, setCallbacks));
+            Fake(OverloadedMethod(mockFtmsStatusCharacteristic, setValue, void(const unsigned char)));
+            When(Method(mockFtmsStatusCharacteristic, getValue)).AlwaysReturn(NimBLEAttValue{static_cast<unsigned char>(0)});
+            Fake(Method(mockFtmsStatusCharacteristic, notify));
 
             SECTION("setup FTMS service")
             {
@@ -305,13 +321,20 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
             {
                 const unsigned int expectedFlagsProperty = NIMBLE_PROPERTY::READ;
 
+                const std::array<unsigned char, 8U> expectedFeaturesValue = {
+                    static_cast<unsigned char>(FTMSSensorBleFlags::ftmsFeaturesFlag),
+                    static_cast<unsigned char>(FTMSSensorBleFlags::ftmsFeaturesFlag >> 8U),
+                    static_cast<unsigned char>(FTMSSensorBleFlags::ftmsFeaturesFlag >> 16U),
+                    static_cast<unsigned char>(FTMSSensorBleFlags::ftmsFeaturesFlag >> 24U),
+                };
+
                 baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
 
                 Verify(
                     OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
                         .Using(FTMSSensorBleFlags::ftmsFeaturesUuid, expectedFlagsProperty))
                     .Once();
-                Verify(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const unsigned short)).Using(FTMSSensorBleFlags::ftmsFeaturesFlag)).Once();
+                Verify(OverloadedMethod(mockFtmsCharacteristic, setValue, void(const std::array<unsigned char, 8U>)).Using(Eq(expectedFeaturesValue))).Once();
             }
 
             SECTION("setup FTMS control point characteristic with correct parameters")
@@ -329,6 +352,21 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
                     .Once();
 
                 REQUIRE(mockControlPointCharacteristic.get().callbacks != nullptr);
+            }
+
+            SECTION("setup FTMS status characteristic with correct parameters")
+            {
+                const unsigned int expectedStatusProperty = NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY;
+
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+
+                Verify(
+                    OverloadedMethod(mockFtmsService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))
+                        .Using(FTMSSensorBleFlags::ftmsStatusUuid, expectedStatusProperty))
+                    .Once();
+                Verify(OverloadedMethod(mockFtmsStatusCharacteristic, setValue, void(const unsigned char))
+                           .Using(FTMSSensorBleFlags::ftmsStatusStopped))
+                    .Once();
             }
 
             SECTION("should return the created service NimBLEService")
@@ -405,6 +443,7 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
         Fake(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, 11U>)));
         Fake(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, 14U>)));
         Fake(Method(mockBaseMetricsCharacteristic, notify));
+        When(Method(mockBaseMetricsCharacteristic, getValue)).AlwaysReturn(NimBLEAttValue{static_cast<unsigned char>(0)});
 
         Fake(Method(mockArduino, xTaskCreatePinnedToCore));
         Fake(Method(mockArduino, vTaskDelete));
@@ -488,6 +527,18 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
         SECTION("notify FTMS with the correct binary data")
         {
+            Mock<NimBLEService> mockFtmsBroadcastService;
+            Mock<NimBLECharacteristic> mockFtmsBroadcastStatusCharacteristic;
+
+            When(OverloadedMethod(mockNimBLEServer, createService, NimBLEService * (const unsigned short)).Using(FTMSSensorBleFlags::ftmsSvcUuid)).AlwaysReturn(&mockFtmsBroadcastService.get());
+            When(OverloadedMethod(mockFtmsBroadcastService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int))).AlwaysReturn(&mockBaseMetricsCharacteristic.get());
+            When(OverloadedMethod(mockFtmsBroadcastService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(FTMSSensorBleFlags::ftmsControlPointUuid, Any())).AlwaysReturn(&mockControlPointCharacteristic.get());
+            When(OverloadedMethod(mockFtmsBroadcastService, createCharacteristic, NimBLECharacteristic * (const unsigned short, const unsigned int)).Using(FTMSSensorBleFlags::ftmsStatusUuid, Any())).AlwaysReturn(&mockFtmsBroadcastStatusCharacteristic.get());
+
+            Fake(OverloadedMethod(mockFtmsBroadcastStatusCharacteristic, setValue, void(const unsigned char)));
+            When(Method(mockFtmsBroadcastStatusCharacteristic, getValue)).AlwaysReturn(NimBLEAttValue{FTMSSensorBleFlags::ftmsStatusStarted});
+            Fake(Method(mockFtmsBroadcastStatusCharacteristic, notify));
+
             SECTION("when stroke rate is below UCHAR_MAX")
             {
                 const auto distance = static_cast<unsigned int>(std::lround(metrics.distance / 100U));
@@ -627,6 +678,48 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
 
                 Verify(OverloadedMethod(mockBaseMetricsCharacteristic, setValue, void(const std::array<unsigned char, length>)).Using(Eq(expectedData))).Once();
                 Verify(Method(mockBaseMetricsCharacteristic, notify)).Once();
+            }
+
+            SECTION("notify status as Started when in stopped state and distance is greater than zero")
+            {
+                When(Method(mockFtmsBroadcastStatusCharacteristic, getValue)).AlwaysReturn(NimBLEAttValue{FTMSSensorBleFlags::ftmsStatusStopped});
+
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+                baseMetricsBleService.broadcastBaseMetrics(metrics);
+
+                Verify(OverloadedMethod(mockFtmsBroadcastStatusCharacteristic, setValue, void(const unsigned char)).Using(Eq(FTMSSensorBleFlags::ftmsStatusStarted))).Once();
+                Verify(Method(mockFtmsBroadcastStatusCharacteristic, notify)).Once();
+            }
+
+            SECTION("do not notify status when already in started state")
+            {
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+                baseMetricsBleService.broadcastBaseMetrics(metrics);
+
+                Verify(Method(mockFtmsBroadcastStatusCharacteristic, notify)).Never();
+            }
+
+            SECTION("do not notify status when distance is zero")
+            {
+                BleMetricsModel::BleMetricsData metricsZeroDistance{
+                    .revTime = 1ULL,
+                    .previousRevTime = 1ULL,
+                    .distance = 0.0,
+                    .previousDistance = 0.0,
+                    .strokeTime = 1ULL,
+                    .previousStrokeTime = 0ULL,
+                    .strokeCount = 0,
+                    .previousStrokeCount = 0,
+                    .avgStrokePower = 0.0,
+                    .dragCoefficient = 0.0,
+                };
+
+                When(Method(mockFtmsBroadcastStatusCharacteristic, getValue)).AlwaysReturn(NimBLEAttValue{FTMSSensorBleFlags::ftmsStatusStopped});
+
+                baseMetricsBleService.setup(&mockNimBLEServer.get(), BleServiceFlag::FtmsService);
+                baseMetricsBleService.broadcastBaseMetrics(metricsZeroDistance);
+
+                Verify(Method(mockFtmsBroadcastStatusCharacteristic, notify)).Never();
             }
         }
 

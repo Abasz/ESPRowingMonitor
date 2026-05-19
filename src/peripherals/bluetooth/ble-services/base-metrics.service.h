@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "../ble-metrics.model.h"
 #include "../callbacks/control-point.callbacks.h"
 #include "../callbacks/subscription-manager.callbacks.h"
@@ -12,7 +10,6 @@ class ISettingsBleService;
 class NimBLECharacteristic;
 class NimBLEServer;
 class NimBLEService;
-enum class BleServiceFlag : unsigned char;
 
 class BaseMetricsBleService final : public IBaseMetricsBleService
 {
@@ -25,6 +22,8 @@ class BaseMetricsBleService final : public IBaseMetricsBleService
 
         BleMetricsModel::BleMetricsData data = {};
     } parameters;
+
+    NimBLECharacteristic *statusCharacteristic = nullptr;
 
     NimBLEService *setupCscServices(NimBLEServer *server);
     NimBLEService *setupPscServices(NimBLEServer *server);

@@ -54,6 +54,12 @@ void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetri
 {
     ASSERT_SETUP_CALLED(parameters.characteristic);
 
+    if (statusCharacteristic != nullptr && statusCharacteristic->getValue()[0] == FTMSSensorBleFlags::ftmsStatusStopped && data.distance > 0.0)
+    {
+        statusCharacteristic->setValue(FTMSSensorBleFlags::ftmsStatusStarted);
+        statusCharacteristic->notify();
+    }
+
     parameters.data = data;
 
     const auto coreStackSize = 2'528U;
@@ -244,9 +250,17 @@ NimBLEService *BaseMetricsBleService::setupFtmsServices(NimBLEServer *const serv
 
     ftmsService->createCharacteristic(FTMSSensorBleFlags::ftmsControlPointUuid, NIMBLE_PROPERTY::WRITE_NR | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&controlPointCallbacks);
 
+    statusCharacteristic = ftmsService->createCharacteristic(FTMSSensorBleFlags::ftmsStatusUuid, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::NOTIFY);
+    statusCharacteristic->setValue(FTMSSensorBleFlags::ftmsStatusStopped);
+    const array<unsigned char, 8U> featuresValue = {
+        static_cast<unsigned char>(FTMSSensorBleFlags::ftmsFeaturesFlag),
+        static_cast<unsigned char>(FTMSSensorBleFlags::ftmsFeaturesFlag >> 8U),
+        static_cast<unsigned char>(FTMSSensorBleFlags::ftmsFeaturesFlag >> 16U),
+        static_cast<unsigned char>(FTMSSensorBleFlags::ftmsFeaturesFlag >> 24U),
+    };
     ftmsService
         ->createCharacteristic(FTMSSensorBleFlags::ftmsFeaturesUuid, NIMBLE_PROPERTY::READ)
-        ->setValue(FTMSSensorBleFlags::ftmsFeaturesFlag);
+        ->setValue(featuresValue);
 
     return ftmsService;
 }

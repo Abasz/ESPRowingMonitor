@@ -34,12 +34,14 @@ All the standard BLE profiles are fully compliant with BLE standards, making the
 
 Please note that in order for Garmin watches to work with ESP Rowing Monitor, a cycling activity must be selected. Otherwise, due to limitations of Garmin, the watch will connect but will not use the sensor data for metrics.
 
-Please note that the FTMS profile currently does not support the full range of options (e.g. device control) and metrics. The supported metrics in addition to stroke and stroke rate are:
+Please note that the FTMS profile does not support the full range of options (e.g. device control) and metrics. The supported metrics in addition to stroke and stroke rate are:
 
 - Total distance
 - Pace
 - Resistance level
 - Power measurement;
+
+Extending the FTMS capabilities would require full redesign of the firmware with session management that is outside of the scope. Besides this aim of this firmware is to act as a pure data producer not to really track state.
 
 ### Custom BLE Services
 

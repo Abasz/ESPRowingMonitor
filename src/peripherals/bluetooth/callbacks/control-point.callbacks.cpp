@@ -58,8 +58,25 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
 
     Log.infoln("Op Code: %d; Length: %d", message[0], message.size());
 
+    const auto isFtms = eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService;
+
     switch (message[0])
     {
+
+    // The case values below are CPS (Cycling Power Service) op code names reused as numeric identifiers for FTMS.
+    case std::to_underlying(SettingsOpCodes::RequestControlFtms):
+    case std::to_underlying(SettingsOpCodes::SetCumulativeValue): // FTMS Reset
+    case std::to_underlying(SettingsOpCodes::RequestChainLength): // FTMS Start or Resume
+    case std::to_underlying(SettingsOpCodes::SetChainWeight):     // FTMS Stop or Pause
+    {
+        Log.infoln("%s Op Code: %d", isFtms ? "Control Not Permitted" : "Not Supported", message[0]);
+
+        pCharacteristic->setValue(makeResponse(
+            isFtms ? SettingsOpCodes::ResponseCodeFtms : SettingsOpCodes::ResponseCode,
+            message[0],
+            isFtms ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode));
+    }
+    break;
 
     case std::to_underlying(SettingsOpCodes::SetLogLevel):
     {
@@ -137,11 +154,10 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     default:
     {
         Log.infoln("Not Supported Op Code: %d", message[0]);
-        const auto isFtms = eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService;
         pCharacteristic->setValue(makeResponse(
             isFtms ? SettingsOpCodes::ResponseCodeFtms : SettingsOpCodes::ResponseCode,
             message[0],
-            isFtms ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode));
+            ResponseOpCodes::UnsupportedOpCode));
     }
     break;
     }
