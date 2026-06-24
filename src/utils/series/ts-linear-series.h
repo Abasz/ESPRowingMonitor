@@ -1,3 +1,4 @@
+// IWYU pragma: no_include <format>
 #pragma once
 
 #include <cstddef>

@@ -8,8 +8,6 @@
 class IEEPROMService;
 class ISdCardService;
 class NimBLECharacteristic;
-class NimBLEServer;
-class NimBLEService;
 
 class SettingsBleService final : public ISettingsBleService
 {

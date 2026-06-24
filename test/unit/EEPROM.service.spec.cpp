@@ -1,4 +1,5 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)
+#include <string>
 #include <type_traits>
 #include <utility>
 

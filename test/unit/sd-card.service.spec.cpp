@@ -1,5 +1,7 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, clang-analyzer-cplusplus.NewDeleteLeaks, clang-analyzer-cplusplus.NewDelete)
+#include <functional>
 #include <string>
+#include <vector>
 
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"

@@ -3,6 +3,7 @@
 #include <bit>
 #include <cmath>
 #include <cstring>
+#include <functional>
 #include <string>
 #include <type_traits>
 #include <utility>

@@ -3,8 +3,6 @@
 #include "./battery.service.interface.h"
 
 class NimBLECharacteristic;
-class NimBLEServer;
-class NimBLEService;
 
 class BatteryBleService final : public IBatteryBleService
 {

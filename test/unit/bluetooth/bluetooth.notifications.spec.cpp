@@ -1,4 +1,7 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+// IWYU pragma: no_include <format>
+// IWYU pragma: no_include <string>
+#include <functional>
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"

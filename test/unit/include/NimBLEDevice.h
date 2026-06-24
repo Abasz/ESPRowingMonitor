@@ -1,4 +1,5 @@
 // NOLINTBEGIN
+// IWYU pragma: no_include <format>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma once

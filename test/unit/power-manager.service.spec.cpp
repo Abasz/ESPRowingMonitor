@@ -1,4 +1,5 @@
 // NOLINTBEGIN(readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, clang-analyzer-cplusplus.NewDeleteLeaks, clang-analyzer-cplusplus.NewDelete)
+// IWYU pragma: no_include <string>
 #include <cmath>
 
 #include "catch2/catch_test_macros.hpp"

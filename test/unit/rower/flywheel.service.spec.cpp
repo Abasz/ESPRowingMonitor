@@ -1,4 +1,5 @@
 // NOLINTBEGIN(readability-magic-numbers,readability-function-cognitive-complexity,cppcoreguidelines-avoid-do-while, clang-analyzer-cplusplus.NewDelete, clang-analyzer-cplusplus.NewDeleteLeaks)
+// IWYU pragma: no_include <string>
 #include <array>
 #include <iterator>
 #include <numeric>

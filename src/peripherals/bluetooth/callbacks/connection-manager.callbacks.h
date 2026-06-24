@@ -2,9 +2,6 @@
 
 #include "./connection-manager.callbacks.interface.h"
 
-class NimBLEConnInfo;
-class NimBLEServer;
-
 class ConnectionManagerCallbacks final : public IConnectionManagerCallbacks
 {
     unsigned char connectionCount = 0;

@@ -1,14 +1,13 @@
+// IWYU pragma: no_include <format>
 #pragma once
 
 #include <vector>
 
+#include "../../../utils/configuration.h"
 #include "../callbacks/subscription-manager.callbacks.h"
 #include "./extended-metrics.service.interface.h"
-#include "../../../utils/configuration.h"
 
 class NimBLECharacteristic;
-class NimBLEServer;
-class NimBLEService;
 
 using std::vector;
 

@@ -1,6 +1,9 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+// IWYU pragma: no_include <format>
+// IWYU pragma: no_include <string>
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <initializer_list>
 #include <iterator>
 #include <span>
@@ -8,6 +11,7 @@
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/catch_tostring.hpp"
 #include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_container_properties.hpp"
 #include "catch2/matchers/catch_matchers_string.hpp"

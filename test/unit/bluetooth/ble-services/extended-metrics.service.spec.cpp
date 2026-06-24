@@ -1,10 +1,12 @@
 // NOLINTBEGIN(readability-magic-numbers, cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity, modernize-type-traits)
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <string>
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/catch_tostring.hpp"
 #include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_vector.hpp"
 #include "fakeit.hpp"

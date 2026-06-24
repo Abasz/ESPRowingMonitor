@@ -1,4 +1,5 @@
 // NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+// IWYU pragma: no_include <format>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 
@@ -7,6 +8,7 @@
 #include <cmath>
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <ranges>
 #include <span>
@@ -15,6 +17,7 @@
 
 #include "catch2/catch_message.hpp"
 #include "catch2/catch_test_macros.hpp"
+#include "catch2/catch_tostring.hpp"
 #include "catch2/matchers/catch_matchers.hpp"
 #include "catch2/matchers/catch_matchers_range_equals.hpp"
 #include "catch2/matchers/catch_matchers_vector.hpp"
