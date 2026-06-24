@@ -17,8 +17,6 @@
 #define MODEL_NUMBER TestModelNum
 #define SERIAL_NUMBER "TestSerial"
 
-#undef BAUD_RATE
-#define BAUD_RATE BaudRates::Baud1500000
 #define ENABLE_BLUETOOTH_DELTA_TIME_LOGGING true
 #define SUPPORT_SD_CARD_LOGGING true
 

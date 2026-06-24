@@ -101,7 +101,7 @@ std::string generateSerial()
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     snprintf(serial.data(), addressStringSize + 1,
              "%02X%02X%02X",
-             mac[3], mac[4], mac[5]);
+             mac.at(3), mac.at(4), mac.at(5));
 
     return serial;
 }

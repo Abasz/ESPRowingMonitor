@@ -1,6 +1,6 @@
 #include <array>
 #include <cstring>
-#include <iterator>
+#include <ranges>
 #include <string>
 #include <utility>
 
@@ -301,7 +301,7 @@ ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLE
     auto bytePosition = opCodePayloadSize;
 
     float flywheelInertia = 0.0F;
-    std::memcpy(&flywheelInertia, std::next(message.data(), bytePosition), ISettingsBleService::flywheelInertiaPayloadSize);
+    std::memcpy(&flywheelInertia, std::ranges::next(message.data(), bytePosition), ISettingsBleService::flywheelInertiaPayloadSize);
     bytePosition += ISettingsBleService::flywheelInertiaPayloadSize;
 
     // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)

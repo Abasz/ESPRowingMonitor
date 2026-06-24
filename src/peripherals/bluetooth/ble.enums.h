@@ -71,6 +71,8 @@ enum class OtaRequestOpCodes : unsigned char
 class SensorLocations
 {
 public:
+    SensorLocations() = delete;
+
     static constexpr unsigned char Other = 0U;
     static constexpr unsigned char TopOfShoe = 1U;
     static constexpr unsigned char InShoe = 2U;
@@ -93,6 +95,8 @@ public:
 class CSCFeaturesFlags
 {
 public:
+    CSCFeaturesFlags() = delete;
+
     static constexpr unsigned char WheelRevolutionDataSupported = (0x01 << 0U);
     static constexpr unsigned char CrankRevolutionDataSupported = (0x01 << 1U);
     static constexpr unsigned char MultipleSensorLocationSupported = (0x01 << 2U);
@@ -101,6 +105,8 @@ public:
 class LogSettingsFlags
 {
 public:
+    LogSettingsFlags() = delete;
+
     static constexpr unsigned char DeltaTimeLoggingNotSupported = (0x00 << 0U);
     static constexpr unsigned char DeltaTimeLoggingDisabled = (0x01 << 0U);
     static constexpr unsigned char DeltaTimeLoggingEnabled = (0x02 << 0U);
@@ -121,6 +127,8 @@ public:
 class PSCFeaturesFlags
 {
 public:
+    PSCFeaturesFlags() = delete;
+
     static constexpr unsigned int PedalPowerBalanceSupported = (0x01U << 0U);
     static constexpr unsigned int AccumulatedTorqueSupported = (0x01U << 1U);
     static constexpr unsigned int WheelRevolutionDataSupported = (0x01U << 2U);
@@ -152,6 +160,8 @@ public:
 class PSCMeasurementFeaturesFlags
 {
 public:
+    PSCMeasurementFeaturesFlags() = delete;
+
     static constexpr unsigned short PedalPowerBalancePresent = (0x01U << 0U);
     static constexpr unsigned short PedalPowerBalanceReference = (0x01U << 1U);
     static constexpr unsigned short AccumulatedTorquePresent = (0x01U << 2U);
@@ -172,6 +182,8 @@ public:
 class FTMSFeaturesFlags
 {
 public:
+    FTMSFeaturesFlags() = delete;
+
     static constexpr unsigned int AverageSpeedSupported = (0x01U << 0U);
     static constexpr unsigned int CadenceSupported = (0x01U << 1U);
     static constexpr unsigned int TotalDistanceSupported = (0x01U << 2U);
@@ -194,6 +206,8 @@ public:
 class FTMSMeasurementFeaturesFlags
 {
 public:
+    FTMSMeasurementFeaturesFlags() = delete;
+
     static constexpr unsigned short MoreDataPresent = (0x01U << 0U);
     static constexpr unsigned short AverageStrokeRatePresent = (0x01U << 1U);
     static constexpr unsigned short TotalDistancePresent = (0x01U << 2U);
@@ -212,6 +226,8 @@ public:
 class FTMSTypeField
 {
 public:
+    FTMSTypeField() = delete;
+
     static constexpr unsigned short TreadmillSupported = (0x01U << 0U);
     static constexpr unsigned short CrossTrainerSupported = (0x01U << 1U);
     static constexpr unsigned short StepClimberSupported = (0x01U << 2U);
@@ -223,6 +239,8 @@ public:
 class CSCSensorBleFlags
 {
 public:
+    CSCSensorBleFlags() = delete;
+
     static constexpr unsigned short cscFeaturesFlag = CSCFeaturesFlags::CrankRevolutionDataSupported |
                                                       CSCFeaturesFlags::WheelRevolutionDataSupported;
     static constexpr unsigned char cscMeasurementFeaturesFlag = cscFeaturesFlag;
@@ -236,6 +254,8 @@ public:
 class PSCSensorBleFlags
 {
 public:
+    PSCSensorBleFlags() = delete;
+
     static constexpr unsigned short pscMeasurementFeaturesFlag =
         PSCMeasurementFeaturesFlags::CrankRevolutionDataPresent |
         PSCMeasurementFeaturesFlags::WheelRevolutionDataPresent;
@@ -252,6 +272,8 @@ public:
 class FTMSSensorBleFlags
 {
 public:
+    FTMSSensorBleFlags() = delete;
+
     static constexpr unsigned short ftmsMeasurementFeaturesFlag =
         FTMSMeasurementFeaturesFlags::TotalDistancePresent | FTMSMeasurementFeaturesFlags::InstantaneousPacePresent | FTMSMeasurementFeaturesFlags::InstantaneousPowerPresent | FTMSMeasurementFeaturesFlags::ResistanceLevelPresent;
     static constexpr unsigned int ftmsFeaturesFlag =
@@ -268,6 +290,8 @@ public:
 class CommonBleFlags
 {
 public:
+    CommonBleFlags() = delete;
+
     static constexpr unsigned char sensorLocationFlag = SensorLocations::Other;
     static constexpr unsigned short sensorLocationUuid = 0x2A5D;
 

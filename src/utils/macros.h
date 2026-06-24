@@ -44,8 +44,17 @@ consteval std::array<char, 8> getCompileDate()
 
     const char zeroChar = 48;
     const char spaceChar = 32;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-    return {year[0], year[1], year[2], year[3], month[0], month[1], day[0] == spaceChar ? zeroChar : day[0], day[1]};
+
+    return {
+        year.at(0),
+        year.at(1),
+        year.at(2),
+        year.at(3),
+        month.at(0),
+        month.at(1),
+        day.at(0) == spaceChar ? zeroChar : day.at(0),
+        day.at(1),
+    };
 }
 
 consteval std::string_view extractClassName(const std::string_view className)

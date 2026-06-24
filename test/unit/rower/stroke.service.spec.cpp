@@ -331,11 +331,9 @@ TEST_CASE("StrokeService")
                 SECTION("force curves on new stroke (" + std::to_string(rowingMetrics.strokeCount) + ")")
                 {
                     INFO("deltaTime: " << deltaTime << ", stroke number: " << rowingMetrics.strokeCount);
-                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-                    CHECK_THAT(rowingMetrics.driveHandleForces, Catch::Matchers::RangeEquals(forceCurves[rowingMetrics.strokeCount - 1], [](float first, float second)
+                    CHECK_THAT(rowingMetrics.driveHandleForces, Catch::Matchers::RangeEquals(forceCurves.at(rowingMetrics.strokeCount - 1), [](float first, float second)
                                                                                              { return std::abs(first - second) < 0.00001F; }));
-                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-                    CHECK_THAT(rowingMetrics.dragCoefficient * 1e6, Catch::Matchers::WithinRel(dragFactors[rowingMetrics.strokeCount - 1], 0.0000001));
+                    CHECK_THAT(rowingMetrics.dragCoefficient * 1e6, Catch::Matchers::WithinRel(dragFactors.at(rowingMetrics.strokeCount - 1), 0.0000001));
                 }
             }
         }

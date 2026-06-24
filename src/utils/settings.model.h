@@ -6,6 +6,8 @@ namespace RowerProfile
 {
     struct Defaults
     {
+        Defaults() = delete;
+
         static constexpr unsigned char impulsesPerRevolution = IMPULSES_PER_REVOLUTION;
         static constexpr float flywheelInertia = FLYWHEEL_INERTIA;
         static constexpr float sprocketRadius = SPROCKET_RADIUS / 100.0F;

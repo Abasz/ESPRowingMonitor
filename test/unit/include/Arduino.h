@@ -176,7 +176,7 @@ public:
     virtual inline void updateBaudRate(unsigned long baud) {}
     virtual inline int available() { return 0; }
     virtual inline int availableForWrite() { return 0; }
-    inline void printf(const std::string __fmt, ...) {};
+    inline void printf(const std::string __fmt, ...) {}
     virtual inline void flush() {}
     inline operator bool()
     {

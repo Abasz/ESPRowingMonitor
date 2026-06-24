@@ -14,7 +14,7 @@ void setup()
     Serial.begin(std::to_underlying(Configurations::baudRate));
 
 #if ARDUINO_USB_CDC_ON_BOOT != 1
-    while (!Serial && !(bool)Serial.available())
+    while (!Serial && !static_cast<bool>(Serial.available()))
     {
     }
 #endif

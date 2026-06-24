@@ -2,6 +2,7 @@
 #include <array>
 #include <cmath>
 #include <iterator>
+#include <ranges>
 
 #include "driver/gpio.h"
 #include "driver/rtc_io.h"
@@ -95,7 +96,7 @@ unsigned char PowerManagerService::measureBattery() const
     }
 
     const unsigned char mid = Configurations::batteryLevelArrayLength / 2;
-    std::ranges::nth_element(begin(batteryLevels), std::next(begin(batteryLevels), mid + 1), end(batteryLevels));
+    std::ranges::nth_element(std::begin(batteryLevels), std::ranges::next(std::begin(batteryLevels), mid + 1), std::cend(batteryLevels));
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto midValue = batteryLevels[mid];
@@ -105,7 +106,7 @@ unsigned char PowerManagerService::measureBattery() const
         return std::lround(midValue);
     }
 
-    return std::lround((midValue + *std::ranges::max_element(cbegin(batteryLevels), std::next(cbegin(batteryLevels), mid))) / 2);
+    return std::lround((midValue + *std::ranges::max_element(std::cbegin(batteryLevels), std::ranges::next(std::cbegin(batteryLevels), mid))) / 2);
 }
 
 unsigned char PowerManagerService::setupBatteryMeasurement() const
@@ -121,7 +122,7 @@ unsigned char PowerManagerService::setupBatteryMeasurement() const
         delay(100);
     }
 
-    return std::lround((float)sum / (float)i);
+    return std::lround(static_cast<float>(sum) / static_cast<float>(i));
 }
 
 void PowerManagerService::printWakeupReason()

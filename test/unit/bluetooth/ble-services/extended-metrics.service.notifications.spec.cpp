@@ -265,7 +265,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
             Fake(
                 OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const std::span<const std::byte> data)).Matching([&results](const std::span<const std::byte> data)
                                                                                                                                  {
-                    results.emplace_back(data.begin(), data.end());
+                    results.emplace_back(std::cbegin(data), std::cend(data));
 
                     return true; }));
 
@@ -292,7 +292,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
             Fake(
                 OverloadedMethod(mockHandleForcesCharacteristic, setValue, void(const std::span<const std::byte> data)).Matching([&results](const std::span<const std::byte> data)
                                                                                                                                  {
-                        results.emplace_back(data.begin(), data.end());
+                        results.emplace_back(std::cbegin(data), std::cend(data));
                         return true; }));
 
             extendedMetricBleService.broadcastHandleForces(expectedBigHandleForces);
@@ -314,7 +314,7 @@ TEST_CASE("ExtendedMetricBleService broadcast", "[ble-service]")
                 const auto beginOffset = expectedChunkSize * index;
                 auto view = expectedBigHandleForces | std::views::drop(beginOffset) | std::views::take(numOfFloats);
 
-                const auto current = std::vector<float>(view.begin(), view.end());
+                const auto current = std::vector<float>(std::cbegin(view), std::cend(view));
 
                 INFO("Current notify: " << index + 1U);
                 REQUIRE_THAT(current, Catch::Matchers::RangeEquals(parsedHandleForces, [](float first, float second)

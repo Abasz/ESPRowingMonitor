@@ -46,7 +46,7 @@ Configurations::precision OLSLinearSeries::slope() const
         return 0.0;
     }
 
-    return ((Configurations::precision)seriesXSize * seriesXY.sum() - seriesXSum * seriesY.sum()) / ((Configurations::precision)seriesXSize * seriesXSquare.sum() - seriesXSum * seriesXSum);
+    return (static_cast<Configurations::precision>(seriesXSize) * seriesXY.sum() - seriesXSum * seriesY.sum()) / (static_cast<Configurations::precision>(seriesXSize) * seriesXSquare.sum() - seriesXSum * seriesXSum);
 }
 
 Configurations::precision OLSLinearSeries::intercept() const
@@ -58,7 +58,7 @@ Configurations::precision OLSLinearSeries::intercept() const
         return 0.0;
     }
 
-    return (seriesY.sum() - (slope() * seriesX.sum())) / (Configurations::precision)seriesXSize;
+    return (seriesY.sum() - (slope() * seriesX.sum())) / static_cast<Configurations::precision>(seriesXSize);
 }
 
 Configurations::precision OLSLinearSeries::goodnessOfFit() const
@@ -76,10 +76,10 @@ Configurations::precision OLSLinearSeries::goodnessOfFit() const
     const auto seriesXYSum = seriesXY.sum();
     const auto seriesYSquareSum = seriesYSquare.sum();
 
-    const auto slope = ((Configurations::precision)seriesXSize * seriesXYSum - seriesXSum * seriesYSum) / ((Configurations::precision)seriesXSize * seriesXSquare.sum() - seriesXSum * seriesXSum);
-    const auto intercept = (seriesYSum - (slope * seriesXSum)) / (Configurations::precision)seriesXSize;
+    const auto slope = (static_cast<Configurations::precision>(seriesXSize) * seriesXYSum - seriesXSum * seriesYSum) / (static_cast<Configurations::precision>(seriesXSize) * seriesXSquare.sum() - seriesXSum * seriesXSum);
+    const auto intercept = (seriesYSum - (slope * seriesXSum)) / static_cast<Configurations::precision>(seriesXSize);
     const auto sse = seriesYSquareSum - (intercept * seriesYSum) - (slope * seriesXYSum);
-    const auto sst = seriesYSquareSum - (seriesYSum * seriesYSum) / (Configurations::precision)seriesXSize;
+    const auto sst = seriesYSquareSum - (seriesYSum * seriesYSum) / static_cast<Configurations::precision>(seriesXSize);
     return 1 - (sse / sst);
 }
 

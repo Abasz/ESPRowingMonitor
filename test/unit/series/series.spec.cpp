@@ -207,7 +207,7 @@ TEST_CASE("Series")
 
             SECTION("should use default allocator (i.e. double) when new capacity would be below maxCapacity")
             {
-                const auto initialCapacity = (unsigned int)series.capacity();
+                const auto initialCapacity = static_cast<unsigned int>(series.capacity());
                 for (auto i = 0U; i < initialCapacity + 1; ++i)
                 {
                     series.push(0.1);

@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <iterator>
+#include <ranges>
 
 #include "./cyclic-error-filter.h"
 
@@ -36,7 +37,7 @@ Configurations::precision CyclicErrorFilter::SlotErrorTracker::median() const
     std::array<Configurations::precision, bufferSize> sorted(buffer);
 
     const auto mid = count / 2;
-    std::ranges::nth_element(begin(sorted), std::next(begin(sorted), mid), std::next(begin(sorted), count));
+    std::ranges::nth_element(std::begin(sorted), std::ranges::next(std::begin(sorted), mid), std::ranges::next(std::cbegin(sorted), count));
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto midValue = sorted[mid];
@@ -46,7 +47,7 @@ Configurations::precision CyclicErrorFilter::SlotErrorTracker::median() const
         return midValue;
     }
 
-    return (midValue + *std::ranges::max_element(begin(sorted), std::next(begin(sorted), mid))) / 2;
+    return (midValue + *std::ranges::max_element(std::cbegin(sorted), std::ranges::next(std::cbegin(sorted), mid))) / 2;
 }
 
 Configurations::precision CyclicErrorFilter::SlotErrorTracker::meanSign() const

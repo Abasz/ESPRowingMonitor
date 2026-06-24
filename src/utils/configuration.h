@@ -17,6 +17,8 @@ class Configurations
     static constexpr std::array<char, 8> firmwareDateData = getCompileDate();
 
 public:
+    Configurations() = delete;
+
     using precision = PRECISION;
 
     static constexpr unsigned char maxConnectionCount = 2;

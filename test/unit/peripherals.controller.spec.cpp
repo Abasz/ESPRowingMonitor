@@ -308,8 +308,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
                     peripheralsController.updateData({});
                     REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::SizeIs(1));
-                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-                    REQUIRE_THAT(resultDeltaTimes[0], Catch::Matchers::IsEmpty());
+                    REQUIRE_THAT(resultDeltaTimes.front(), Catch::Matchers::IsEmpty());
                 }
             }
         }

@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
 #include <iterator>
+#include <ranges>
 #include <string>
 #include <utility>
 
@@ -166,7 +166,7 @@ void StrokeService::driveStart()
 
     driveHandleForces.clear();
 
-    if (torqueBeforeFlank > (Configurations::precision)0)
+    if (torqueBeforeFlank > static_cast<Configurations::precision>(0))
     {
         driveHandleForces.push_back(static_cast<float>(torqueBeforeFlank) / machineSettings.sprocketRadius);
     }
@@ -446,16 +446,9 @@ void StrokeService::logNewStrokeData() const
         return;
     }
 
-    std::string formatted;
-    for (size_t i = 0; i < driveHandleForces.size(); ++i)
-    {
-        if (i != 0)
-        {
-            formatted += ',';
-        }
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-        formatted += std::to_string(driveHandleForces[i]);
-    }
+    auto formatted = driveHandleForces | std::views::transform([](float force)
+                                                               { return std::to_string(force); }) |
+                     std::views::join_with(","s) | std::ranges::to<std::string>();
 
     std::string response = "[" + formatted + "]";
 

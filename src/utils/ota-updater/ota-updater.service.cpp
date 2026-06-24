@@ -1,4 +1,5 @@
 #include <array>
+#include <cstring>
 #include <iterator>
 #include <span>
 #include <string>
@@ -91,8 +92,8 @@ void OtaUpdaterService::handleBegin(const span<const unsigned char> &payload)
         return;
     }
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
-    const unsigned int firmwareLength = payload[0] | payload[1] << 8 | payload[2] << 16 | payload[3] << 24;
+    unsigned int firmwareLength{};
+    std::memcpy(&firmwareLength, payload.data(), sizeof(firmwareLength));
 
     Log.infoln("Begin OTA firmware update (size: %d)", firmwareLength);
 

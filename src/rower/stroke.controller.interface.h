@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../utils/configuration.h"
 #include "./stroke.model.h"
 

@@ -323,7 +323,7 @@ TEST_CASE("BluetoothController", "[callbacks]")
             }
 
             REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::SizeIs(1));
-            REQUIRE_THAT(resultDeltaTimes[0], Catch::Matchers::SizeIs(i));
+            REQUIRE_THAT(resultDeltaTimes.front(), Catch::Matchers::SizeIs(i));
         }
 
         SECTION("reset lastDeltaTimesBroadcastTime after flushing deltaTimes via bluetooth")

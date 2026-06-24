@@ -81,7 +81,7 @@ TEST_CASE("FlywheelService", "[rower]")
                 .rawImpulseCount = static_cast<unsigned long>(deltaTimes.size()),
                 .deltaTime = deltaTimes.back(),
                 .totalTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
-                .totalAngularDisplacement = (2 * PI) / RowerProfile::Defaults::impulsesPerRevolution * (double)deltaTimes.size(),
+                .totalAngularDisplacement = (2 * PI) / RowerProfile::Defaults::impulsesPerRevolution * static_cast<double>(deltaTimes.size()),
                 .cleanImpulseTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
                 .rawImpulseTime = std::accumulate(cbegin(deltaTimes), cend(deltaTimes), 0UL),
             };
