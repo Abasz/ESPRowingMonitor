@@ -39,27 +39,30 @@ void OtaUpdaterService::onData(const NimBLEAttValue &data, const unsigned short 
         return;
     }
 
-    Log.verboseln("OTA onData request code: %d", data[0]);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto requestCode = OtaRequestOpCodes{data[0]};
 
-    switch (data[0])
+    Log.verboseln("OTA onData request code: %d", std::to_underlying(requestCode));
+
+    switch (requestCode)
     {
-    case std::to_underlying(OtaRequestOpCodes::Begin):
+    case OtaRequestOpCodes::Begin:
     {
         setMtu(newMtu);
         handleBegin(span<const unsigned char>(data.data(), data.size()).subspan(1));
     }
     break;
-    case std::to_underlying(OtaRequestOpCodes::Package):
+    case OtaRequestOpCodes::Package:
     {
         handlePackage(span<const unsigned char>(data.data(), data.size()).subspan(1));
     }
     break;
-    case std::to_underlying(OtaRequestOpCodes::End):
+    case OtaRequestOpCodes::End:
     {
         handleEnd(span<const unsigned char>(data.data(), data.size()).subspan(1));
     }
     break;
-    case std::to_underlying(OtaRequestOpCodes::Abort):
+    case OtaRequestOpCodes::Abort:
         terminateUpload();
         send(std::to_underlying(OtaResponseOpCodes::Ok));
         break;
@@ -88,6 +91,7 @@ void OtaUpdaterService::handleBegin(const span<const unsigned char> &payload)
         return;
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const unsigned int firmwareLength = payload[0] | payload[1] << 8 | payload[2] << 16 | payload[3] << 24;
 
     Log.infoln("Begin OTA firmware update (size: %d)", firmwareLength);
@@ -197,8 +201,10 @@ void OtaUpdaterService::handleEnd(const span<const unsigned char> &payload)
 
     for (unsigned char byte : payload)
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         md5Hex += hexChars[byte >> 4];
         md5Hex += hexChars[byte & 0x0F];
+        // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     }
 
     Log.verboseln("OTA setting MD5 hash to %s", md5Hex.c_str());

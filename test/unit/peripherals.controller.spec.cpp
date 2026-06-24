@@ -1,4 +1,4 @@
-// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)
+// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 #include <vector>
 
 #include "catch2/catch_test_macros.hpp"
@@ -304,6 +304,7 @@ TEST_CASE("PeripheralController", "[peripheral]")
 
                     peripheralsController.updateData({});
                     REQUIRE_THAT(resultDeltaTimes, Catch::Matchers::SizeIs(1));
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
                     REQUIRE_THAT(resultDeltaTimes[0], Catch::Matchers::IsEmpty());
                 }
             }
@@ -386,4 +387,4 @@ TEST_CASE("PeripheralController", "[peripheral]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)
+// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)

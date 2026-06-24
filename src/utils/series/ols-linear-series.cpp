@@ -23,12 +23,12 @@ void OLSLinearSeries::push(const Configurations::precision pointX, const Configu
 
 Configurations::precision OLSLinearSeries::yAtSeriesBegin() const
 {
-    return seriesY[0];
+    return seriesY.front();
 }
 
 Configurations::precision OLSLinearSeries::xAtSeriesBegin() const
 {
-    return seriesX[0];
+    return seriesX.front();
 }
 
 Configurations::precision OLSLinearSeries::xAtSeriesEnd() const

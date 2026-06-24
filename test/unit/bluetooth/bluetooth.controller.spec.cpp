@@ -1,4 +1,4 @@
-// NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity)
+// NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 #include <string>
 #include <utility>
 #include <vector>
@@ -449,4 +449,4 @@ TEST_CASE("BluetoothController", "[peripheral]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers,cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity)
+// NOLINTEND(readability-magic-numbers,cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)

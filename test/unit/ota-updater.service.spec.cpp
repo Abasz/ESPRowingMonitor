@@ -1,4 +1,4 @@
-// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)
+// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 #include <algorithm>
 #include <cstddef>
 #include <initializer_list>
@@ -590,4 +590,4 @@ TEST_CASE("OtaUpdaterService", "[ota]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)
+// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)

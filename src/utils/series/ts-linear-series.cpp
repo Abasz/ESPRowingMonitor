@@ -12,21 +12,24 @@ using std::vector;
 
 Configurations::precision TSLinearSeries::calculateSlope(const unsigned char pointOne, const unsigned char pointTwo) const
 {
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto seriesXPointOne = seriesX[pointOne];
     const auto seriesXPointTwo = seriesX[pointTwo];
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 
     if (pointOne == pointTwo || seriesXPointOne == seriesXPointTwo)
     {
         return 0.0;
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     return (seriesY[pointTwo] - seriesY[pointOne]) /
            (seriesXPointTwo - seriesXPointOne);
 }
 
 Configurations::precision TSLinearSeries::yAtSeriesBegin() const
 {
-    return seriesY[0];
+    return seriesY.front();
 }
 
 Configurations::precision TSLinearSeries::xAtSeriesEnd() const
@@ -67,6 +70,7 @@ Configurations::precision TSLinearSeries::coefficientB()
         auto i = 0U;
         while (i < seriesXSize)
         {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
             intercepts.push((seriesY[i] - (a * seriesX[i])));
             ++i;
         }
@@ -97,11 +101,14 @@ Configurations::precision TSLinearSeries::median() const
 
     std::ranges::nth_element(flattened, begin(flattened) + mid);
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto midValue = flattened[mid];
+
     if ((flattenedSize & 1) != 0)
     {
-        return flattened[mid];
+        return midValue;
     }
-    return (flattened[mid] + *std::ranges::max_element(cbegin(flattened), cbegin(flattened) + mid)) / 2;
+    return (midValue + *std::ranges::max_element(cbegin(flattened), cbegin(flattened) + mid)) / 2;
 }
 
 void TSLinearSeries::push(const Configurations::precision pointX, const Configurations::precision pointY)
@@ -129,6 +136,7 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
         while (i < seriesXPoints)
         {
             const auto result = calculateSlope(i, slopesSize);
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
             slopes[i].push_back(result);
             ++i;
         }
@@ -138,6 +146,7 @@ void TSLinearSeries::push(const Configurations::precision pointX, const Configur
     slopes.emplace_back();
     if (maxSeriesLength > 0)
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         slopes[slopes.size() - 1].reserve(maxSeriesLength - 2);
     }
 }

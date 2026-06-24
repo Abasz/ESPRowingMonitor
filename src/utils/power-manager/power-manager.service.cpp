@@ -97,12 +97,15 @@ unsigned char PowerManagerService::measureBattery() const
     const unsigned char mid = Configurations::batteryLevelArrayLength / 2;
     std::ranges::nth_element(begin(batteryLevels), std::next(begin(batteryLevels), mid + 1), end(batteryLevels));
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto midValue = batteryLevels[mid];
+
     if constexpr (isOdd(batteryLevels.size()))
     {
-        return std::lround(batteryLevels[mid]);
+        return std::lround(midValue);
     }
 
-    return std::lround((batteryLevels[mid] + *std::ranges::max_element(cbegin(batteryLevels), std::next(cbegin(batteryLevels), mid))) / 2);
+    return std::lround((midValue + *std::ranges::max_element(cbegin(batteryLevels), std::next(cbegin(batteryLevels), mid))) / 2);
 }
 
 unsigned char PowerManagerService::setupBatteryMeasurement() const

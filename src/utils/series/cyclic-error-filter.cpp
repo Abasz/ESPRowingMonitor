@@ -11,7 +11,7 @@
 
 void CyclicErrorFilter::SlotErrorTracker::push(const Configurations::precision deviation)
 {
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto oldValue = buffer[head];
     if (count == bufferSize)
     {
@@ -22,7 +22,7 @@ void CyclicErrorFilter::SlotErrorTracker::push(const Configurations::precision d
     // NOLINTNEXTLINE(cppcoreguidelines-narrowing-conversions)
     signSum += static_cast<signed char>(deviation > 0) - static_cast<signed char>(deviation < 0);
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     buffer[head] = deviation;
     head = (head + 1) % bufferSize;
     if (count < bufferSize)
@@ -38,14 +38,15 @@ Configurations::precision CyclicErrorFilter::SlotErrorTracker::median() const
     const auto mid = count / 2;
     std::ranges::nth_element(begin(sorted), std::next(begin(sorted), mid), std::next(begin(sorted), count));
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto midValue = sorted[mid];
+
     if ((count & 1) != 0)
     {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-        return sorted[mid];
+        return midValue;
     }
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-    return (sorted[mid] + *std::ranges::max_element(begin(sorted), std::next(begin(sorted), mid))) / 2;
+    return (midValue + *std::ranges::max_element(begin(sorted), std::next(begin(sorted), mid))) / 2;
 }
 
 Configurations::precision CyclicErrorFilter::SlotErrorTracker::meanSign() const
@@ -93,6 +94,7 @@ const Series &CyclicErrorFilter::cleanSeries() const
 void CyclicErrorFilter::applyFilter(const unsigned long position, const Configurations::precision rawValue)
 {
     raw.push(rawValue);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     clean.push(rawValue * filterConfig[position % numberOfSlots] * weightCorrection);
 }
 
@@ -112,6 +114,7 @@ void CyclicErrorFilter::recordRawDatapoint(const unsigned long relativePosition,
         return;
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto cleanValue = rawValue * filterConfig[relativePosition % numberOfSlots] * weightCorrection;
 
     rawOlsSeries.push((rawOlsSeries.size() > 0 ? rawOlsSeries.xAtSeriesEnd() : 0) + rawValue, rawValue);
@@ -132,7 +135,9 @@ void CyclicErrorFilter::processNextRawDatapoint()
         return;
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto perfectCurrentDt = regressionSlope * static_cast<Configurations::precision>(recordedAbsolutePosition[cursor]) + regressionIntercept;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     updateFilter(recordedRelativePosition[cursor], recordedRawValue[cursor], perfectCurrentDt);
     cursor++;
 }
@@ -188,9 +193,11 @@ void CyclicErrorFilter::reset()
 
     for (unsigned char i = 0; i < numberOfSlots; i++)
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         filterArray[i].reset();
         filterConfig[i] = 1;
         slotErrorTrackers[i].reset();
+        // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     }
 }
 
@@ -201,12 +208,15 @@ void CyclicErrorFilter::updateFilter(const unsigned long position, const Configu
 
     // Clamp correctionFactor to reasonable range around current average
     const auto absoluteMaxDeviation = 0.02;
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto minCorrectionFactor = filterConfig[slot] * (1.0 - absoluteMaxDeviation);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto maxCorrectionFactor = filterConfig[slot] * (1.0 + absoluteMaxDeviation);
     const auto clampedCorrectionFactor = std::clamp(correctionFactor, minCorrectionFactor, maxCorrectionFactor);
 
     const auto weightCorrectedCorrectionFactor = ((clampedCorrectionFactor - 1) * aggressiveness) + 1;
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto signedDev = (clampedCorrectionFactor - filterConfig[slot]) / filterConfig[slot];
     slotErrorTrackers[slot].push(signedDev);
 
@@ -218,6 +228,7 @@ void CyclicErrorFilter::updateFilter(const unsigned long position, const Configu
     filterSum -= filterConfig[slot];
     filterConfig[slot] = filterArray[slot].average();
     filterSum += filterConfig[slot];
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 
     if (!isStabilized())
     {

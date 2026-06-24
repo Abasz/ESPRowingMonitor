@@ -54,6 +54,7 @@ void BaseMetricsBleService::broadcastBaseMetrics(const BleMetricsModel::BleMetri
 {
     ASSERT_SETUP_CALLED(parameters.characteristic);
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     if (statusCharacteristic != nullptr && statusCharacteristic->getValue()[0] == FTMSSensorBleFlags::ftmsStatusStopped && data.distance > 0.0)
     {
         statusCharacteristic->setValue(FTMSSensorBleFlags::ftmsStatusStarted);

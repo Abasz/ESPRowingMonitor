@@ -322,13 +322,17 @@ void StrokeService::updateStrokeState(const RowingDataModels::FlywheelData data)
     unsigned char i = 0;
     while (i < angularVelocitySize)
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         angularVelocityMatrix[i].push(angularDistances.firstDerivativeAtPosition(i), angularGoodnessOfFit);
         angularAccelerationMatrix[i].push(angularDistances.secondDerivativeAtPosition(i), angularGoodnessOfFit);
+        // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         ++i;
     }
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     currentAngularVelocity = angularVelocityMatrix[0].average();
     currentAngularAcceleration = angularAccelerationMatrix[0].average();
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 }
 
 void StrokeService::updatePhysics()
@@ -449,6 +453,7 @@ void StrokeService::logNewStrokeData() const
         {
             formatted += ',';
         }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         formatted += std::to_string(driveHandleForces[i]);
     }
 

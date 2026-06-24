@@ -25,12 +25,12 @@ namespace
 
     [[nodiscard]] auto makeResponse(
         const SettingsOpCodes opCode,
-        const unsigned char echoedOpCode,
+        const SettingsOpCodes echoedOpCode,
         const ResponseOpCodes result) noexcept -> array<unsigned char, 3U>
     {
         return {
             std::to_underlying(opCode),
-            echoedOpCode,
+            std::to_underlying(echoedOpCode),
             std::to_underlying(result),
         };
     }
@@ -50,48 +50,52 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
     if (message.size() == 0)
     {
         Log.infoln("Invalid request, no Op Code");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, 0U, ResponseOpCodes::OperationFailed));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, SettingsOpCodes{0U}, ResponseOpCodes::OperationFailed));
         pCharacteristic->indicate();
 
         return;
     }
 
-    Log.infoln("Op Code: %d; Length: %d", message[0], message.size());
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto opCode = SettingsOpCodes{message[0]};
+
+    Log.infoln("Op Code: %d; Length: %d", std::to_underlying(opCode), message.size());
 
     const auto isFtms = eepromService.getBleServiceFlag() == BleServiceFlag::FtmsService;
 
-    switch (message[0])
+    switch (opCode)
     {
 
     // The case values below are CPS (Cycling Power Service) op code names reused as numeric identifiers for FTMS.
-    case std::to_underlying(SettingsOpCodes::RequestControlFtms):
-    case std::to_underlying(SettingsOpCodes::SetCumulativeValue): // FTMS Reset
-    case std::to_underlying(SettingsOpCodes::RequestChainLength): // FTMS Start or Resume
-    case std::to_underlying(SettingsOpCodes::SetChainWeight):     // FTMS Stop or Pause
+    case SettingsOpCodes::RequestControlFtms:
+    case SettingsOpCodes::SetCumulativeValue: // FTMS Reset
+    case SettingsOpCodes::RequestChainLength: // FTMS Start or Resume
+    case SettingsOpCodes::SetChainWeight:     // FTMS Stop or Pause
     {
-        Log.infoln("%s Op Code: %d", isFtms ? "Control Not Permitted" : "Not Supported", message[0]);
+        Log.infoln("%s Op Code: %d", isFtms ? "Control Not Permitted" : "Not Supported", std::to_underlying(opCode));
 
         pCharacteristic->setValue(makeResponse(
             isFtms ? SettingsOpCodes::ResponseCodeFtms : SettingsOpCodes::ResponseCode,
-            message[0],
+            opCode,
             isFtms ? ResponseOpCodes::ControlNotPermitted : ResponseOpCodes::UnsupportedOpCode));
     }
     break;
 
-    case std::to_underlying(SettingsOpCodes::SetLogLevel):
+    case SettingsOpCodes::SetLogLevel:
     {
         Log.infoln("Set LogLevel");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processLogLevel(message)));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, processLogLevel(message)));
     }
     break;
 
-    case std::to_underlying(SettingsOpCodes::ChangeBleService):
+    case SettingsOpCodes::ChangeBleService:
     {
         Log.infoln("Change BLE Service");
 
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 2U))
         {
-            pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], ResponseOpCodes::InvalidParameter));
+            pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, ResponseOpCodes::InvalidParameter));
 
             break;
         }
@@ -101,62 +105,62 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
         return;
     }
 
-    case std::to_underlying(SettingsOpCodes::SetSdCardLogging):
+    case SettingsOpCodes::SetSdCardLogging:
     {
         Log.infoln("Change Sd Card Logging");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processSdCardLogging(message)));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, processSdCardLogging(message)));
     }
     break;
 
-    case std::to_underlying(SettingsOpCodes::SetDeltaTimeLogging):
+    case SettingsOpCodes::SetDeltaTimeLogging:
     {
         Log.infoln("Change deltaTime logging");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processDeltaTimeLogging(message)));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, processDeltaTimeLogging(message)));
     }
     break;
 
-    case std::to_underlying(SettingsOpCodes::SetMachineSettings):
+    case SettingsOpCodes::SetMachineSettings:
     {
         Log.infoln("Change Machine Settings");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processMachineSettingsChange(message)));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, processMachineSettingsChange(message)));
     }
     break;
 
-    case std::to_underlying(SettingsOpCodes::SetSensorSignalSettings):
+    case SettingsOpCodes::SetSensorSignalSettings:
     {
         Log.infoln("Change Sensor Signal Filter Settings");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processSensorSignalSettingsChange(message)));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, processSensorSignalSettingsChange(message)));
     }
     break;
 
-    case std::to_underlying(SettingsOpCodes::SetDragFactorSettings):
+    case SettingsOpCodes::SetDragFactorSettings:
     {
         Log.infoln("Change Drag Factor Settings");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processDragFactorSettingsChange(message)));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, processDragFactorSettingsChange(message)));
     }
     break;
 
-    case std::to_underlying(SettingsOpCodes::SetStrokeDetectionSettings):
+    case SettingsOpCodes::SetStrokeDetectionSettings:
     {
         Log.infoln("Change Stroke Detection Settings");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], processStrokeDetectionSettingsChange(message)));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, processStrokeDetectionSettingsChange(message)));
     }
     break;
 
-    case std::to_underlying(SettingsOpCodes::RestartDevice):
+    case SettingsOpCodes::RestartDevice:
     {
         Log.verboseln("Restarting device...");
-        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, message[0], ResponseOpCodes::Successful));
+        pCharacteristic->setValue(makeResponse(SettingsOpCodes::ResponseCode, opCode, ResponseOpCodes::Successful));
         restartWithDelay(100);
     }
     break;
 
     default:
     {
-        Log.infoln("Not Supported Op Code: %d", message[0]);
+        Log.infoln("Not Supported Op Code: %d", std::to_underlying(opCode));
         pCharacteristic->setValue(makeResponse(
             isFtms ? SettingsOpCodes::ResponseCodeFtms : SettingsOpCodes::ResponseCode,
-            message[0],
+            opCode,
             ResponseOpCodes::UnsupportedOpCode));
     }
     break;
@@ -168,13 +172,20 @@ void ControlPointCallbacks::onWrite(NimBLECharacteristic *const pCharacteristic,
 
 ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &message)
 {
-    if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 6U))
+    if (message.size() != 2)
     {
         return ResponseOpCodes::InvalidParameter;
     }
 
-    Log.infoln("New LogLevel: %d", message[1]);
-    eepromService.setLogLevel(ArduinoLogLevel{message[1]});
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto logLevel = message[1];
+    if (!isInBounds(static_cast<unsigned int>(logLevel), 0U, 6U))
+    {
+        return ResponseOpCodes::InvalidParameter;
+    }
+
+    Log.infoln("New LogLevel: %d", logLevel);
+    eepromService.setLogLevel(ArduinoLogLevel{logLevel});
 
     settingsBleService.broadcastSettings();
 
@@ -183,14 +194,23 @@ ResponseOpCodes ControlPointCallbacks::processLogLevel(const NimBLEAttValue &mes
 
 ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue &message)
 {
-    if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 1U))
+    if (message.size() != 2)
     {
-        Log.infoln("Invalid OP command for setting SD Card deltaTime logging, this should be a bool: %d", message[1]);
+        Log.infoln("Invalid OP command for setting SD Card logging, missing parameter (size: %d)", message.size());
 
         return ResponseOpCodes::InvalidParameter;
     }
 
-    const auto shouldEnable = static_cast<bool>(message[1]);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto value = static_cast<unsigned int>(message[1]);
+    if (!isInBounds(value, 0U, 1U))
+    {
+        Log.infoln("Invalid OP command for setting SD Card logging, this should be a bool: %d", value);
+
+        return ResponseOpCodes::InvalidParameter;
+    }
+
+    const auto shouldEnable = static_cast<bool>(value);
     Log.infoln("%s SdCard logging", shouldEnable ? "Enable" : "Disable");
     eepromService.setLogToSdCard(shouldEnable);
 
@@ -201,14 +221,23 @@ ResponseOpCodes ControlPointCallbacks::processSdCardLogging(const NimBLEAttValue
 
 ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttValue &message)
 {
-    if (message.size() != 2 || !isInBounds(static_cast<unsigned int>(message[1]), 0U, 1U))
+    if (message.size() != 2)
     {
-        Log.infoln("Invalid OP command for setting deltaTime logging, this should be a bool: %d", message[1]);
+        Log.infoln("Invalid OP command for setting deltaTime logging, missing parameter (size: %d)", message.size());
 
         return ResponseOpCodes::InvalidParameter;
     }
 
-    const auto shouldEnable = static_cast<bool>(message[1]);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto value = static_cast<unsigned int>(message[1]);
+    if (!isInBounds(value, 0U, 1U))
+    {
+        Log.infoln("Invalid OP command for setting deltaTime logging, this should be a bool: %d", value);
+
+        return ResponseOpCodes::InvalidParameter;
+    }
+
+    const auto shouldEnable = static_cast<bool>(value);
 
     Log.infoln("%s deltaTime logging", shouldEnable ? "Enable" : "Disable");
     eepromService.setLogToBluetooth(shouldEnable);
@@ -220,8 +249,11 @@ ResponseOpCodes ControlPointCallbacks::processDeltaTimeLogging(const NimBLEAttVa
 
 void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &message, NimBLECharacteristic *const pCharacteristic)
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto newServiceFlag = BleServiceFlag{message[1]};
+
     std::string flagString;
-    switch (BleServiceFlag{message[1]})
+    switch (newServiceFlag)
     {
     case BleServiceFlag::CpsService:
         flagString = "CPS";
@@ -237,9 +269,10 @@ void ControlPointCallbacks::processBleServiceChange(const NimBLEAttValue &messag
     }
 
     Log.infoln("New BLE Service: %s", flagString.c_str());
-    eepromService.setBleServiceFlag(BleServiceFlag{message[1]});
+    eepromService.setBleServiceFlag(newServiceFlag);
     array<unsigned char, 3U> temp = {
         std::to_underlying(SettingsOpCodes::ResponseCode),
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         message[0],
         std::to_underlying(ResponseOpCodes::Successful)};
     pCharacteristic->setValue(temp);
@@ -271,6 +304,7 @@ ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLE
     std::memcpy(&flywheelInertia, std::next(message.data(), bytePosition), ISettingsBleService::flywheelInertiaPayloadSize);
     bytePosition += ISettingsBleService::flywheelInertiaPayloadSize;
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const float magicNumber = static_cast<float>(message[bytePosition]) / ISettingsBleService::magicNumberScale;
     bytePosition += ISettingsBleService::magicNumberPayloadSize;
 
@@ -280,6 +314,7 @@ ResponseOpCodes ControlPointCallbacks::processMachineSettingsChange(const NimBLE
     const auto mToCm = 100.0F;
     const float sprocketRadius = static_cast<float>(message[bytePosition] | message[bytePosition + 1] << 8) /
                                  ISettingsBleService::sprocketRadiusScale / mToCm;
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 
     const RowerProfile::MachineSettings newMachineSettings{
         .impulsesPerRevolution = impulsesPerRevolution,
@@ -316,9 +351,11 @@ ResponseOpCodes ControlPointCallbacks::processSensorSignalSettingsChange(const N
     }
     auto bytePosition = opCodePayloadSize;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const unsigned short rotationDebounce = message[bytePosition] * static_cast<unsigned short>(ISettingsBleService::debounceTimeScale);
     bytePosition += ISettingsBleService::rotationDebouncePayloadSize;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto rowingStoppedThresholdPeriod = message[bytePosition] * static_cast<unsigned int>(ISettingsBleService::rowingStoppedThresholdScale);
 
     const RowerProfile::SensorSignalSettings newSensorSignalSettings{
@@ -354,6 +391,7 @@ ResponseOpCodes ControlPointCallbacks::processDragFactorSettingsChange(const Nim
     }
     auto bytePosition = opCodePayloadSize;
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto goodnessOfFitThreshold = static_cast<float>(message[bytePosition]) / ISettingsBleService::goodnessOfFitThresholdScale;
     bytePosition += ISettingsBleService::goodnessOfFitPayloadSize;
 
@@ -367,6 +405,7 @@ ResponseOpCodes ControlPointCallbacks::processDragFactorSettingsChange(const Nim
     bytePosition += ISettingsBleService::upperDragFactorPayloadSize;
 
     const unsigned char dragCoefficientsArrayLength = message[bytePosition];
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 
     const RowerProfile::DragFactorSettings newDragFactorSettings{
         .goodnessOfFitThreshold = goodnessOfFitThreshold,
@@ -404,6 +443,7 @@ ResponseOpCodes ControlPointCallbacks::processStrokeDetectionSettingsChange(cons
     }
     auto bytePosition = opCodePayloadSize;
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const unsigned char impulseAndDetection = message[bytePosition];
     const auto strokeDetectionType = static_cast<StrokeDetectionType>(impulseAndDetection & 0x03);
     const unsigned char impulseDataArrayLength = (impulseAndDetection >> 2U) & 0x1F;
@@ -424,6 +464,7 @@ ResponseOpCodes ControlPointCallbacks::processStrokeDetectionSettingsChange(cons
     bytePosition += ISettingsBleService::minimumStrokeTimesPayloadSize;
 
     const auto driveHandleForcesMaxCapacity = message[bytePosition];
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 
     const RowerProfile::StrokePhaseDetectionSettings newStrokeDetectionSettings{
         .strokeDetectionType = strokeDetectionType,

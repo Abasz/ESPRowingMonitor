@@ -9,12 +9,13 @@ using std::vector;
 
 const Configurations::precision &Series::operator[](size_t index) const
 {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     return seriesArray[index];
 };
 
 Configurations::precision Series::front() const
 {
-    return seriesArray[0];
+    return seriesArray.front();
 }
 
 Configurations::precision Series::back() const
@@ -54,12 +55,15 @@ Configurations::precision Series::median() const
     vector<Configurations::precision> sortedArray(seriesArray);
     std::ranges::nth_element(begin(sortedArray), begin(sortedArray) + mid, end(sortedArray));
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto midValue = sortedArray[mid];
+
     if ((seriesArraySize & 1) != 0)
     {
-        return sortedArray[mid];
+        return midValue;
     }
 
-    return (sortedArray[mid] + *std::ranges::max_element(begin(sortedArray), begin(sortedArray) + mid)) / 2;
+    return (midValue + *std::ranges::max_element(begin(sortedArray), begin(sortedArray) + mid)) / 2;
 }
 
 void Series::push(const Configurations::precision value)
@@ -67,7 +71,7 @@ void Series::push(const Configurations::precision value)
     if (maxSeriesLength > 0 && seriesArray.size() >= maxSeriesLength)
     {
         // The maximum of the array has been reached, we have to create room by removing the first value from the array
-        seriesSum -= seriesArray[0];
+        seriesSum -= seriesArray.front();
         seriesArray.erase(begin(seriesArray));
     }
 

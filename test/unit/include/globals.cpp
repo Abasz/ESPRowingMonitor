@@ -48,6 +48,7 @@ std::string generateSerial()
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     snprintf(serial.data(), addressStringSize + 1,
              "%02X%02X%02X",
+             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
              mac[3], mac[4], mac[5]);
 
     return serial;

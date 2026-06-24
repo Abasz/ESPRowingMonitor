@@ -18,6 +18,7 @@ Configurations::precision TSQuadraticSeries::firstDerivativeAtPosition(const uns
         return 0;
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     return a * 2 * seriesX[position] + b;
 }
 
@@ -60,6 +61,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     seriesA.emplace_back();
     if (maxSeriesAInnerLength > 0)
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         seriesA[seriesA.size() - 1].reserve(maxSeriesAInnerLength);
     }
 
@@ -73,6 +75,7 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
         const auto seriesXIndexLength = seriesXSize - 1;
         while (j < seriesXIndexLength)
         {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
             seriesA[i].push_back(calculateA(i, j, seriesXIndexLength));
             j++;
         }
@@ -84,10 +87,12 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
     i = 0;
     while (i < seriesXSize)
     {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         const auto seriesXPointI = seriesX[i];
 
         linearResidue.push(
             seriesXPointI,
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
             seriesY[i] - a * (seriesXPointI * seriesXPointI));
         ++i;
     }
@@ -97,15 +102,18 @@ void TSQuadraticSeries::push(const Configurations::precision pointX, const Confi
 
 Configurations::precision TSQuadraticSeries::calculateA(const unsigned char pointOne, const unsigned char pointTwo, const unsigned char pointThree) const
 {
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto xPointOne = seriesX[pointOne];
     const auto xPointTwo = seriesX[pointTwo];
     const auto xPointThree = seriesX[pointThree];
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 
     if (xPointOne == xPointTwo || xPointOne == xPointThree || xPointTwo == xPointThree)
     {
         return 0.0;
     }
 
+    // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
     const auto yPointThree = seriesY[pointThree];
     const auto yPointTwo = seriesY[pointTwo];
 
@@ -113,6 +121,7 @@ Configurations::precision TSQuadraticSeries::calculateA(const unsigned char poin
             seriesY[pointOne] * (xPointTwo - xPointThree) +
             (xPointThree * yPointTwo - xPointTwo * yPointThree)) /
            ((xPointOne - xPointTwo) * (xPointOne - xPointThree) * (xPointTwo - xPointThree));
+    // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 }
 
 Configurations::precision TSQuadraticSeries::seriesAMedian() const
@@ -130,12 +139,15 @@ Configurations::precision TSQuadraticSeries::seriesAMedian() const
 
     std::ranges::nth_element(flattened, begin(flattened) + mid);
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
+    const auto midValue = flattened[mid];
+
     if ((flattenedSize & 1) != 0)
     {
-        return flattened[mid];
+        return midValue;
     }
 
-    return (flattened[mid] + *std::ranges::max_element(cbegin(flattened), cbegin(flattened) + mid)) / 2;
+    return (midValue + *std::ranges::max_element(cbegin(flattened), cbegin(flattened) + mid)) / 2;
 }
 
 // This function returns the R^2 as a goodness of fit indicator
@@ -155,8 +167,10 @@ Configurations::precision TSQuadraticSeries::goodnessOfFit() const
     auto i = 0U;
     while (i < seriesXSize)
     {
+        // NOLINTBEGIN(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
         const auto seriesYI = seriesY[i];
         const auto projectedX = projectX(seriesX[i]);
+        // NOLINTEND(cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 
         const auto seriesYProjectedXDiff = seriesYI - projectedX;
         const auto seriesYIAverageYDiff = seriesYI - averageY;
