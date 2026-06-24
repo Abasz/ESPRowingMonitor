@@ -239,11 +239,11 @@ TEST_CASE("BluetoothController", "[peripheral]")
 
     SECTION("setup method")
     {
-        auto cpsDeviceName = Configurations::deviceName;
+        auto cpsDeviceName = std::string{Configurations::deviceName};
         cpsDeviceName.append(" (CPS)");
-        auto cscDeviceName = Configurations::deviceName;
+        auto cscDeviceName = std::string{Configurations::deviceName};
         cscDeviceName.append(" (CSC)");
-        auto ftmsDeviceName = Configurations::deviceName;
+        auto ftmsDeviceName = std::string{Configurations::deviceName};
         ftmsDeviceName.append(" (FTMS)");
 
         SECTION("should initialize BLE with correct device name")

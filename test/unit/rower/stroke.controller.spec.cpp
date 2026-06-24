@@ -1,5 +1,3 @@
-#include <vector>
-
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
 
@@ -12,13 +10,6 @@
 #include "../../../src/utils/settings.model.h"
 
 using namespace fakeit;
-
-const std::vector<unsigned long> deltaTimes = {
-    RowerProfile::Defaults::rotationDebounceTimeMin + 2000,
-    RowerProfile::Defaults::rotationDebounceTimeMin + 1000,
-    RowerProfile::Defaults::rotationDebounceTimeMin + 500,
-    RowerProfile::Defaults::rotationDebounceTimeMin + 100,
-};
 
 TEST_CASE("StrokeController", "[rower]")
 {

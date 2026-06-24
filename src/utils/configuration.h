@@ -1,7 +1,6 @@
 #pragma once
 
 #include <climits>
-#include <string>
 
 #include "soc/gpio_num.h"
 
@@ -13,10 +12,10 @@
 #include "./macros.h"
 #include "./settings.model.h"
 
-using std::string;
-
 class Configurations
 {
+    static constexpr std::array<char, 8> firmwareDateData = getCompileDate();
+
 public:
     using precision = PRECISION;
 
@@ -38,12 +37,11 @@ public:
 
     static constexpr bool addBleServiceStringToName = ADD_BLE_SERVICE_TO_DEVICE_NAME;
     static constexpr bool enableSerialInDeviceName = ADD_SERIAL_TO_DEVICE_NAME;
-    inline static const string deviceName = TOSTRING(DEVICE_NAME);
-    inline static const string modelNumber = TOSTRING(MODEL_NUMBER);
-    // NOLINTNEXTLINE(readability-redundant-string-init)
-    inline static const string serialNumber = SERIAL_NUMBER;
-    inline static const string firmwareVersion = string(getCompileDate().data(), getCompileDate().size());
-    inline static const string hardwareRevision = string(getHardwareRevision());
+    static constexpr std::string_view deviceName = TOSTRING(DEVICE_NAME);
+    static constexpr std::string_view modelNumber = TOSTRING(MODEL_NUMBER);
+    static constexpr std::string_view serialNumber = SERIAL_NUMBER;
+    static constexpr std::string_view firmwareVersion{firmwareDateData.data(), firmwareDateData.size()};
+    static constexpr std::string_view hardwareRevision = getHardwareRevision();
 
     // Hardware settings
     static constexpr BaudRates baudRate = BAUD_RATE;

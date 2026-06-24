@@ -457,7 +457,7 @@ void StrokeService::logNewStrokeData() const
         formatted += std::to_string(driveHandleForces[i]);
     }
 
-    string response = "[" + formatted + "]";
+    std::string response = "[" + formatted + "]";
 
     Log.infoln("handleForces: %s", response.c_str());
 }

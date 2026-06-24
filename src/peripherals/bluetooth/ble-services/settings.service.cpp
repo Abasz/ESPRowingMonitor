@@ -1,6 +1,7 @@
 #include <array>
 #include <bit>
 #include <cmath>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -28,14 +29,14 @@ SettingsBleService::SettingsBleService(ISdCardService &_sdCardService, IEEPROMSe
 NimBLEService *SettingsBleService::setup(NimBLEServer *const server)
 {
     Log.traceln("Setting up Settings Service");
-    auto *const settingsService = server->createService(CommonBleFlags::settingsServiceUuid);
-    settingsCharacteristic = settingsService->createCharacteristic(CommonBleFlags::settingsUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
-    strokeSettingsCharacteristic = settingsService->createCharacteristic(CommonBleFlags::strokeDetectionSettingsUuid, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    auto *const settingsService = server->createService(std::string{CommonBleFlags::settingsServiceUuid});
+    settingsCharacteristic = settingsService->createCharacteristic(std::string{CommonBleFlags::settingsUuid}, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
+    strokeSettingsCharacteristic = settingsService->createCharacteristic(std::string{CommonBleFlags::strokeDetectionSettingsUuid}, NIMBLE_PROPERTY::NOTIFY | NIMBLE_PROPERTY::READ);
 
     settingsCharacteristic->setValue(getSettings());
     strokeSettingsCharacteristic->setValue(getStrokeDetectionSettings());
 
-    settingsService->createCharacteristic(CommonBleFlags::settingsControlPointUuid, WRITE_NR | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&callbacks);
+    settingsService->createCharacteristic(std::string{CommonBleFlags::settingsControlPointUuid}, WRITE_NR | NIMBLE_PROPERTY::INDICATE)->setCallbacks(&callbacks);
 
     return settingsService;
 }

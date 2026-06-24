@@ -1,7 +1,7 @@
 // NOLINTBEGIN(readability-magic-numbers,readability-function-cognitive-complexity,cppcoreguidelines-avoid-do-while, clang-analyzer-cplusplus.NewDelete, clang-analyzer-cplusplus.NewDeleteLeaks)
+#include <array>
 #include <iterator>
 #include <numeric>
-#include <vector>
 
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
@@ -17,7 +17,7 @@
 
 using namespace fakeit;
 
-const std::vector<unsigned long> deltaTimes = {
+const std::array<unsigned long, 4> deltaTimes = {
     RowerProfile::Defaults::rotationDebounceTimeMin + 2000,
     RowerProfile::Defaults::rotationDebounceTimeMin + 1000,
     RowerProfile::Defaults::rotationDebounceTimeMin + 500,

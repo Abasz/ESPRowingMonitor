@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iterator>
 #include <numeric>
+#include <string>
 #include <vector>
 
 #include "ArduinoLog.h"
@@ -16,14 +17,14 @@ using std::vector;
 NimBLEService *ExtendedMetricBleService::setup(NimBLEServer *const server)
 {
     Log.infoln("Setting up Extended Metrics Services");
-    auto *const extendedMetricsService = server->createService(CommonBleFlags::extendedMetricsServiceUuid);
+    auto *const extendedMetricsService = server->createService(std::string{CommonBleFlags::extendedMetricsServiceUuid});
 
-    handleForcesParams.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::handleForcesUuid, NIMBLE_PROPERTY::NOTIFY);
+    handleForcesParams.characteristic = extendedMetricsService->createCharacteristic(std::string{CommonBleFlags::handleForcesUuid}, NIMBLE_PROPERTY::NOTIFY);
     handleForcesParams.characteristic->setCallbacks(&handleForcesParams.callbacks);
-    deltaTimesParams.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::deltaTimesUuid, NIMBLE_PROPERTY::NOTIFY);
+    deltaTimesParams.characteristic = extendedMetricsService->createCharacteristic(std::string{CommonBleFlags::deltaTimesUuid}, NIMBLE_PROPERTY::NOTIFY);
     deltaTimesParams.characteristic->setCallbacks(&deltaTimesParams.callbacks);
 
-    extendedMetricsParams.characteristic = extendedMetricsService->createCharacteristic(CommonBleFlags::extendedMetricsUuid, NIMBLE_PROPERTY::NOTIFY);
+    extendedMetricsParams.characteristic = extendedMetricsService->createCharacteristic(std::string{CommonBleFlags::extendedMetricsUuid}, NIMBLE_PROPERTY::NOTIFY);
     extendedMetricsParams.characteristic->setCallbacks(&extendedMetricsParams.callbacks);
 
     return extendedMetricsService;

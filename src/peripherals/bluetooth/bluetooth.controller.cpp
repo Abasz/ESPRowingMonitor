@@ -90,11 +90,11 @@ void BluetoothController::setupBleDevice()
 {
     Log.verboseln("Initializing BLE device");
 
-    auto deviceName = Configurations::deviceName;
+    auto deviceName = std::string{Configurations::deviceName};
 
     if constexpr (Configurations::enableSerialInDeviceName)
     {
-        const auto serial = Configurations::serialNumber.empty() ? generateSerial() : Configurations::serialNumber;
+        const auto serial = Configurations::serialNumber.empty() ? generateSerial() : std::string{Configurations::serialNumber};
 
         deviceName.append("-");
         deviceName.append(serial);
