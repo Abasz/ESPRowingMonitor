@@ -11,7 +11,7 @@
             "name": "C++ Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/e2e_test.out",
+            "program": "${workspaceFolder}/build/test/e2e/e2e_test.out",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",

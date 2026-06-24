@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28)
+cmake_minimum_required(VERSION 4.0...4.3)
 
 project(
   ESP-Rowing-Monitor
@@ -20,7 +20,14 @@ endif()
 # Build Configuration
 # =============================================================================
 
-set(CMAKE_CXX_STANDARD 23)
+# Select the highest C++ standard the compiler supports, up to C++26.
+foreach(cpp_std IN ITEMS 26 23)
+  if("cxx_std_${cpp_std}" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+    set(CMAKE_CXX_STANDARD ${cpp_std})
+    break()
+  endif()
+endforeach()
+message(STATUS "Using C++${CMAKE_CXX_STANDARD}")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -66,7 +73,7 @@ include(FetchContent)
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.14.0
+  GIT_TAG v3.15.1
   FIND_PACKAGE_ARGS)
 
 FetchContent_Declare(

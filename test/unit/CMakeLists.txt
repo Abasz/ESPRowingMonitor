@@ -1,5 +1,21 @@
-find_program(CLANG_TIDY_EXE NAMES clang-tidy clang-tidy-21 clang-tidy-20
-                                  clang-tidy-19 clang-tidy-18 REQUIRED)
+find_program(CLANG_TIDY_EXE NAMES clang-tidy clang-tidy-22 clang-tidy-21
+                                  clang-tidy-20 REQUIRED)
+
+# Fall back the lint target to C++23 when the project uses C++26 but the found
+# clang-tidy is version 21 or older, determined from its versioned filename.
+set(LINT_CXX_STANDARD ${CMAKE_CXX_STANDARD})
+if(CMAKE_CXX_STANDARD GREATER_EQUAL 26)
+  get_filename_component(clang_tidy_name "${CLANG_TIDY_EXE}" NAME)
+  if(clang_tidy_name MATCHES "^clang-tidy-([0-9]+)$")
+    if(CMAKE_MATCH_1 LESS 22)
+      set(LINT_CXX_STANDARD 23)
+      message(
+        STATUS
+          "clang-tidy ${CMAKE_MATCH_1} found; lint target falls back to C++23")
+    endif()
+  endif()
+  unset(clang_tidy_name)
+endif()
 find_program(IWYU_PATH NAMES include-what-you-use iwyu)
 
 # =============================================================================
@@ -72,6 +88,7 @@ set_target_properties(
   unit-test-lint
   PROPERTIES OUTPUT_NAME "test-lint"
              SUFFIX ".out"
+             CXX_STANDARD ${LINT_CXX_STANDARD}
              CXX_CLANG_TIDY "${CLANG_TIDY_EXE}"
              LINT_SCRIPTS_DIR "${CMAKE_CURRENT_BINARY_DIR}"
              CXX_INCLUDE_WHAT_YOU_USE "${IWYU_PATH}"
