@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, cppcoreguidelines-avoid-do-while)
 // IWYU pragma: no_include <string>
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
@@ -64,4 +63,3 @@ TEST_CASE("ConnectionManagerCallbacks", "[callbacks]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, cppcoreguidelines-avoid-do-while)

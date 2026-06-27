@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -770,4 +769,3 @@ TEST_CASE("EEPROMService", "[utils]")
 #endif
     }
 }
-// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)

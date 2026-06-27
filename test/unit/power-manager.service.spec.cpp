@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, clang-analyzer-cplusplus.NewDeleteLeaks, clang-analyzer-cplusplus.NewDelete)
 // IWYU pragma: no_include <string>
 #include <cmath>
 
@@ -140,4 +139,3 @@ TEST_CASE("PowerManagerService", "[utils]")
         }
     }
 }
-// NOLINTEND(readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, clang-analyzer-cplusplus.NewDeleteLeaks, clang-analyzer-cplusplus.NewDelete)

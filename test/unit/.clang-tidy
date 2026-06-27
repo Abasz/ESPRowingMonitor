@@ -1,0 +1,20 @@
+---
+# Checks intentionally disabled for all unit test spec files.
+# Test specs use literal expected values (magic numbers), exercise
+# Catch2 which internally uses do-while macros, and contain large
+# test-case functions that naturally exceed readability thresholds.
+InheritParentConfig: true
+Checks: >-
+  -readability-magic-numbers,
+  -readability-function-cognitive-complexity,
+  -readability-function-size,
+  -bugprone-throwing-static-initialization,
+  -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-macro-to-enum,
+  -cppcoreguidelines-avoid-do-while,
+  -modernize-type-traits,
+  -cppcoreguidelines-pro-bounds-avoid-unchecked-container-access,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-cplusplus.NewDelete,
+  -clang-analyzer-core.CallAndMessage,
+  -clang-analyzer-optin.core.EnumCastOutOfRange

@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers,readability-function-cognitive-complexity,cppcoreguidelines-avoid-do-while)
 #include <cmath>
 #include <cstddef>
 #include <fstream>
@@ -348,4 +347,3 @@ TEST_CASE("StrokeService")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers,readability-function-cognitive-complexity,cppcoreguidelines-avoid-do-while)

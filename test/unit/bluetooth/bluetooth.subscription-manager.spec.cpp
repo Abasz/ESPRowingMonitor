@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, cppcoreguidelines-avoid-do-while)
 // IWYU pragma: no_include <string>
 // IWYU pragma: no_include <vector>
 #include "catch2/catch_test_macros.hpp"
@@ -33,4 +32,3 @@ TEST_CASE("SubscriptionManagerCallbacks onSubscribed method", "[callbacks]")
         REQUIRE(chunkedNotifyMetricCallback.getClientIds().empty());
     }
 }
-// NOLINTEND(readability-magic-numbers, cppcoreguidelines-avoid-do-while)

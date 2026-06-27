@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity, modernize-type-traits)
 #include <algorithm>
 #include <functional>
 #include <iterator>
@@ -216,4 +215,3 @@ TEST_CASE("ExtendedMetricBleService", "[ble-service]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity, modernize-type-traits)

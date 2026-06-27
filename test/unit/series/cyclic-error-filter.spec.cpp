@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, readability-function-size, cppcoreguidelines-avoid-do-while, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access, clang-analyzer-optin.core.EnumCastOutOfRange)
 #include <initializer_list>
 
 #include "catch2/catch_test_macros.hpp"
@@ -1064,4 +1063,3 @@ TEST_CASE("CyclicErrorFilter")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, readability-function-size, cppcoreguidelines-avoid-do-while, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access, clang-analyzer-optin.core.EnumCastOutOfRange)

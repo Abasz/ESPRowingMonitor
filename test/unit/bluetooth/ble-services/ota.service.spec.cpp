@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)
 #include <string>
 
 #include "catch2/catch_test_macros.hpp"
@@ -91,4 +90,3 @@ TEST_CASE("OtaBleService", "[ble-service]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)

@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 // IWYU pragma: no_include <format>
 #include <functional>
 #include <string>
@@ -452,4 +451,3 @@ TEST_CASE("BluetoothController", "[peripheral]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers,cppcoreguidelines-avoid-do-while,readability-function-cognitive-complexity, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)

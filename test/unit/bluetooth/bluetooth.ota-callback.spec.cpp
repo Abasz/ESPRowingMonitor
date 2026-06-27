@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-avoid-do-while)
 // IWYU pragma: no_include <format>
 #include <functional>
 #include <iterator>
@@ -69,4 +68,3 @@ TEST_CASE("OtaRxCallbacks onWrite method should", "[ota]")
         REQUIRE_THAT(resultValue, Catch::Matchers::Equals(expectedVector));
     }
 }
-// NOLINTEND(readability-magic-numbers,cppcoreguidelines-avoid-do-while)

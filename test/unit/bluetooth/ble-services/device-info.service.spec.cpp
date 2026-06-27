@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, modernize-type-traits)
 #include <string>
 
 #include "catch2/catch_test_macros.hpp"
@@ -111,4 +110,3 @@ TEST_CASE("DeviceInfoBleService", "[ble-service]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, modernize-type-traits)

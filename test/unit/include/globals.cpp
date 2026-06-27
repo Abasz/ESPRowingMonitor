@@ -1,4 +1,3 @@
-// NOLINTBEGIN(bugprone-throwing-static-initialization)
 #include <array>
 #include <cstdio>
 
@@ -53,4 +52,3 @@ std::string generateSerial()
 
     return serial;
 }
-// NOLINTEND(bugprone-throwing-static-initialization)

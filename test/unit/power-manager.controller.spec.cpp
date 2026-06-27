@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)
 // IWYU pragma: no_include <string>
 #include "catch2/catch_test_macros.hpp"
 #include "fakeit.hpp"
@@ -139,4 +138,3 @@ TEST_CASE("PowerManagerController", "[utils]")
         REQUIRE(powerManagerController.getPreviousBatteryLevel() == batteryLevelInitial);
     }
 }
-// NOLINTEND(readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while)

@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -733,4 +732,3 @@ TEST_CASE("BaseMetricsBleService", "[ble-service]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits)

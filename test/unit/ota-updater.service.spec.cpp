@@ -1,4 +1,3 @@
-// NOLINTBEGIN(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)
 // IWYU pragma: no_include <format>
 // IWYU pragma: no_include <string>
 #include <algorithm>
@@ -594,4 +593,3 @@ TEST_CASE("OtaUpdaterService", "[ota]")
         }
     }
 }
-// NOLINTEND(readability-magic-numbers, readability-function-cognitive-complexity, cppcoreguidelines-avoid-do-while, modernize-type-traits, cppcoreguidelines-pro-bounds-avoid-unchecked-container-access)

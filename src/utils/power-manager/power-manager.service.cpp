@@ -84,7 +84,6 @@ void PowerManagerService::goToSleep() const
 unsigned char PowerManagerService::measureBattery() const
 {
     std::array<float, Configurations::batteryLevelArrayLength> batteryLevels{};
-    batteryLevels.fill(0);
 
     for (auto &batteryLevel : batteryLevels)
     {
