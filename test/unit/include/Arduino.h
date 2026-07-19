@@ -19,6 +19,7 @@ using TaskHandle_t = void *;
 using voidFuncPtr = void (*)(void);
 
 struct hw_timer_t;
+enum esp_mac_type_t : unsigned char;
 
 #define FALLING 0x02
 #define INPUT 0x01
@@ -71,6 +72,7 @@ public:
                                                TaskHandle_t *const pvCreatedTask,
                                                const BaseType_t xCoreID) = 0;
     virtual void vTaskDelete(TaskHandle_t xTaskToDelete) = 0;
+    virtual int esp_read_mac(unsigned char *mac, esp_mac_type_t type) = 0;
 };
 
 extern fakeit::Mock<MockArduino> mockArduino;
