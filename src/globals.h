@@ -25,8 +25,6 @@
 #include "./utils/power-manager/power-manager.controller.h"
 #include "./utils/power-manager/power-manager.service.h"
 
-static unsigned long lastUpdateTime = 0UL;
-
 static constexpr unsigned long msecsPerSec = 1'000'000;
 static constexpr unsigned long secsPerMin = 60;
 static constexpr unsigned long secsPerHour = 3'600;

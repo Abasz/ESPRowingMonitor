@@ -1,13 +1,32 @@
+// IWYU pragma: no_include "peripherals/peripherals.controller.interface.h"
+// IWYU pragma: no_include "rower/stroke.controller.interface.h"
+// IWYU pragma: no_include "utils/EEPROM/EEPROM.service.interface.h"
+// IWYU pragma: no_include "utils/ota-updater/ota-updater.service.interface.h"
+// IWYU pragma: no_include "utils/power-manager/power-manager.controller.interface.h"
+
+#include <array>
 #include <utility>
 
 #include "esp_ota_ops.h"
+#include "soc/gpio_num.h"
 
 #include "Arduino.h"
 #include "ArduinoLog.h"
 
-#include "globals.h"
+#if defined(UNIT_TEST)
+    #include "../test/unit/include/main.globals.h"
+#else
+    #include "globals.h"
 
-#include "./test.array.h"
+    #include "./test.array.h"
+#endif
+
+#include "./utils/configuration.h"
+
+namespace
+{
+    unsigned long lastUpdateTime = 0UL;
+}
 
 void setup()
 {

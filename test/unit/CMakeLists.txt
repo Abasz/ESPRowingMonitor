@@ -34,6 +34,8 @@ set(UNIT_TEST_SOURCES ${UNIT_TEST_MOCKS} ${UNIT_TEST_SPECS})
 # Helper for configuring different unit test targets
 # =============================================================================
 function(configure_unit_test_target target_name)
+  target_sources(${target_name} PRIVATE ${CMAKE_SOURCE_DIR}/src/main.cpp)
+
   target_include_directories(${target_name}
                              PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
