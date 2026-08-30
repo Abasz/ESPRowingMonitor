@@ -109,4 +109,5 @@ test/calibration/**/output/*
 !src/profiles/kayakFirst.rower-profile.h
 !src/profiles/kayakFirstBlue.rower-profile.h
 !src/profiles/oldDanube.rower-profile.h
+!src/profiles/oldDanubeCompact.rower-profile.h
 !src/profiles/kettlerStroker.rower-profile.h
