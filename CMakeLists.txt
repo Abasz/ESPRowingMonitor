@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 4.0...4.3)
 
 project(
   ESP-Rowing-Monitor
-  VERSION 7.1.0
+  VERSION 7.2.0
   DESCRIPTION "ESP32-based rowing machine monitor"
   HOMEPAGE_URL "https://github.com/Abasz/ESPRowingMonitor"
   LANGUAGES CXX)
@@ -73,7 +73,7 @@ include(FetchContent)
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.15.1
+  GIT_TAG v3.16.0
   FIND_PACKAGE_ARGS)
 
 FetchContent_Declare(
